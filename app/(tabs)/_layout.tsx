@@ -1,33 +1,95 @@
 import { Tabs } from 'expo-router';
-import React from 'react';
-
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Ionicons } from '@expo/vector-icons';
+import { useAuth } from '../../contexts/AuthContext';
+import { useEffect } from 'react';
+import { router } from 'expo-router';
+import { View, ActivityIndicator } from 'react-native';
+import HeaderDropdown from '../../components/HeaderDropdown';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const { user, isLoading } = useAuth();
+
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.replace('/(auth)/login');
+    }
+  }, [user, isLoading]);
+
+  if (isLoading) {
+    return (
+      <View className="flex-1 justify-center items-center bg-white">
+        <ActivityIndicator size="large" color="#2563eb" />
+      </View>
+    );
+  }
+
+  if (!user) {
+    return null; // Will redirect to login
+  }
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
+        tabBarActiveTintColor: '#2563eb',
+        tabBarInactiveTintColor: '#6b7280',
+        tabBarStyle: {
+          backgroundColor: '#ffffff',
+          borderTopColor: '#e5e7eb',
+          borderTopWidth: 1,
+        },
+        headerStyle: {
+          backgroundColor: '#2563eb',
+        },
+        headerTintColor: '#fff',
+        headerTitleStyle: {
+          fontWeight: 'bold',
+        },
+        headerRight: () => <HeaderDropdown />,
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="home" size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="services"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: 'Services',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="car" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="booking"
+        options={{
+          title: 'Booking',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="calendar" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="products"
+        options={{
+          title: 'Products',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="bag" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="vehicles"
+        options={{
+          title: 'Vehicles',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="car-sport" size={size} color={color} />
+          ),
         }}
       />
     </Tabs>
