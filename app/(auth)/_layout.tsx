@@ -9,7 +9,12 @@ export default function AuthLayout() {
 
   useEffect(() => {
     if (!isLoading && user) {
-      router.replace('/(tabs)');
+      const role = user.role?.toLowerCase();
+      if (role === 'mechanic' || role === 'employee' || role === 'admin') {
+        router.replace('/(employee)');
+      } else {
+        router.replace('/(tabs)');
+      }
     }
   }, [user, isLoading]);
 

@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Image, TextInput, Modal, ScrollView, SafeAreaView, Dimensions, Alert } from 'react-native';
-import { apiService, Vehicle } from '../../services/api';
+import { apiService, api, Vehicle } from '../../services/api';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import RazorpayCheckout from 'react-native-razorpay';
 
 const { width } = Dimensions.get('window');
 const COLUMN_WIDTH = (width - 48) / 2;
@@ -72,14 +73,93 @@ export default function VehiclesScreen() {
     return numericPart ? parseFloat(numericPart).toLocaleString('en-IN') : '0.00';
   };
 
-  const handleBookNow = (vehicle: Vehicle) => {
-    // In React Native, Razorpay integration typically requires react-native-razorpay
-    // or an intent redirection. For now we just simulate the loading block logic.
-    setBookingInProgress(vehicle.id);
-    setTimeout(() => {
-      Alert.alert("Booking Options", "Booking functionality is currently active via Native Payment Gateways. Contacting backend...");
-      setBookingInProgress(null);
-    }, 1500);
+  const handleBookNow = async (vehicle: Vehicle) => {
+    try {
+      setBookingInProgress(vehicle.id);
+      
+      const v = vehicle as any;
+      const advanceAmount = Number(v.advance_amount_paid || 5000);
+      const amountPaise = Math.round(advanceAmount * 100);
+
+      const options = {
+        description: `Advance Payment for ${v.brand || 'Vehicle'} ${vehicle.model}`,
+        image: 'https://cars.qtechx.com/logo.png',
+        currency: 'INR',
+        key: 'NTAIBAhGSQ97reBaqnII6R70',
+        amount: amountPaise,
+        name: 'Car Store Booking',
+        theme: {color: '#0EA5E9'},
+        prefill: {
+          email: 'user@example.com',
+          contact: '9999999999',
+          name: 'Guest User'
+        }
+      };
+
+      if (!RazorpayCheckout || !RazorpayCheckout.open) {
+         Alert.alert(
+           "Action Required",
+           "Razorpay requires a native build ('npx expo run:android'). Simulating a successful booking for testing in Expo Go."
+         );
+         const bookingData = {
+           uid: "GUEST_APP",
+           customerName: "Guest", 
+           customerPhone: "9999999999",
+           customerEmail: "user@example.com",
+           vehicleId: vehicle.id,
+           vehicleName: `${v.brand || ''} ${vehicle.model || ''}`,
+           vehicleType: v.type || "Vehicle",
+           paymentMethod: "ONLINE_RAZORPAY_MOCK",
+           paymentStatus: "Paid",
+           paymentId: "pay_mock_" + Math.floor(Math.random() * 1000000),
+           status: "Booked",
+           advanceAmount: advanceAmount,
+           pickupAddress: `Vehicle Pickup at ${v.city || 'Store'}, ${v.pincode || ''}`
+         };
+         
+         await api.post("/vehicle-bookings", bookingData);
+         Alert.alert("Success", "Simulated Booking completed!");
+         setSelectedVehicle(null);
+         fetchVehicles();
+         setBookingInProgress(null);
+         return;
+      }
+
+      const paymentData = await RazorpayCheckout.open(options);
+      
+      if (paymentData.razorpay_payment_id) {
+         // Create Booking tracking directly on backend
+         const bookingData = {
+           uid: "GUEST_APP", // or user id if authenticated
+           customerName: "Guest", 
+           customerPhone: "9999999999",
+           customerEmail: "user@example.com",
+           vehicleId: vehicle.id,
+           vehicleName: `${v.brand || ''} ${vehicle.model || ''}`,
+           vehicleType: v.type || "Vehicle",
+           paymentMethod: "ONLINE_RAZORPAY",
+           paymentStatus: "Paid",
+           paymentId: paymentData.razorpay_payment_id,
+           status: "Booked",
+           advanceAmount: advanceAmount,
+           pickupAddress: `Vehicle Pickup at ${v.city || 'Store'}, ${v.pincode || ''}`
+         };
+         
+         await api.post("/vehicle-bookings", bookingData);
+         Alert.alert("Success", `Vehicle Booking successful! Options Paid! ID: ${paymentData.razorpay_payment_id}`);
+         setSelectedVehicle(null);
+         fetchVehicles(); // Refresh listings to mark it as sold out
+      }
+    } catch (error: any) {
+       console.error("Payment error:", error);
+       if (error.code !== 0 && error.code !== "0") {
+          Alert.alert("Payment Error", error.description || "Failed to process payment.");
+       } else {
+          Alert.alert("Payment Cancelled", "You have cancelled the Razorpay payment.");
+       }
+    } finally {
+       setBookingInProgress(null);
+    }
   };
 
   const renderVehicleItem = ({ item }: { item: Vehicle }) => {
@@ -321,7 +401,7 @@ export default function VehiclesScreen() {
                             </View>
                          </TouchableOpacity>
                          
-                         {imageList.length > 1 && (
+                         {imageList.length > 1 ? (
                             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                                {imageList.map((img, idx) => (
                                  <TouchableOpacity 
@@ -333,7 +413,7 @@ export default function VehiclesScreen() {
                                  </TouchableOpacity>
                                ))}
                             </ScrollView>
-                         )}
+                         ) : null}
                       </View>
                     )}
 
@@ -347,7 +427,7 @@ export default function VehiclesScreen() {
                           <View>
                              <Text className="text-gray-300 text-[10px] uppercase tracking-wider mb-1">Expected Price</Text>
                              <Text className="text-3xl font-bold text-[#7dd3fc]">₹{formatPrice(v.expected_price || selectedVehicle.price)}</Text>
-                             {v.negotiable && <Text className="text-amber-400 text-[9px] mt-1 font-semibold">Negotiable Price</Text>}
+                             {v.negotiable ? <Text className="text-amber-400 text-[9px] mt-1 font-semibold">Negotiable Price</Text> : null}
                           </View>
                           <View className="items-end">
                              <Text className="text-gray-300 text-[9px] uppercase tracking-wider mb-1">Advance Booking</Text>

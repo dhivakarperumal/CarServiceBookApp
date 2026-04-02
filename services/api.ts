@@ -3,7 +3,7 @@ import axios from 'axios';
 const API_BASE_URL = 'https://cars.qtechx.com/api';
 
 // Create axios instance with base configuration
-const api = axios.create({
+export const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
   headers: {

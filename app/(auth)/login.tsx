@@ -31,8 +31,15 @@ export default function LoginScreen() {
     }
     setLoading(true);
     try {
-      await login(identifier, password);
-      router.replace('/(tabs)');
+      const userData = await login(identifier, password);
+      
+      // Determine dashboard based on role
+      const roleStr = userData?.role?.toLowerCase() || '';
+      if (roleStr === 'mechanic' || roleStr === 'employee' || roleStr === 'admin') {
+        router.replace('/(employee)');
+      } else {
+        router.replace('/(tabs)');
+      }
     } catch (error: any) {
       const msg = error.response?.data?.message || error.message || 'Login failed';
       Alert.alert('Login Failed', msg);

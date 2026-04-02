@@ -24,6 +24,9 @@ export default function RootLayout() {
         {/* Auth Screens */}
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
 
+        {/* Employee Dashboard */}
+        <Stack.Screen name="(employee)" options={{ headerShown: false }} />
+
         {/* Other Screens */}
         <Stack.Screen name="home" options={{ title: "Home" }} />
       </Stack>

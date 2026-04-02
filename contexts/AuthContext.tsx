@@ -15,7 +15,7 @@ interface AuthContextType {
   user: User | null;
   token: string | null;
   isLoading: boolean;
-  login: (identifier: string, password: string) => Promise<void>;
+  login: (identifier: string, password: string) => Promise<User>;
   register: (userData: any) => Promise<void>;
   logout: () => Promise<void>;
   isAuthenticated: boolean;
@@ -70,6 +70,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       // Set token in axios headers
       apiService.setAuthToken(authToken);
+      
+      return userData;
 
     } catch (error) {
       throw error;

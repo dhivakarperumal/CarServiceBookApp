@@ -10,8 +10,15 @@ export default function TabLayout() {
   const { user, isLoading } = useAuth();
 
   useEffect(() => {
-    if (!isLoading && !user) {
-      router.replace('/(auth)/login');
+    if (!isLoading) {
+      if (!user) {
+        router.replace('/(auth)/login');
+      } else {
+        const role = user.role?.toLowerCase();
+        if (role === 'mechanic' || role === 'employee' || role === 'admin') {
+          router.replace('/(employee)');
+        }
+      }
     }
   }, [user, isLoading]);
 
