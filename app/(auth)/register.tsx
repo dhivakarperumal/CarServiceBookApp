@@ -1,22 +1,20 @@
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  View,
+  ActivityIndicator,
+  Alert,
+  Image,
   Text,
   TextInput,
   TouchableOpacity,
-  Alert,
-  ActivityIndicator,
-  StyleSheet,
-  Image,
-  Platform,
-  KeyboardAvoidingView,
+  View
 } from 'react-native';
-import { router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../contexts/AuthContext';
+import { COLORS } from '../../theme/colors';
 
 export default function RegisterScreen() {
   const [username, setUsername] = useState('');
@@ -31,33 +29,25 @@ export default function RegisterScreen() {
 
   const { register } = useAuth();
 
+  const isValidEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
   const handleRegister = async () => {
     if (loading) return;
 
-    if (!username.trim()) {
-      Alert.alert('Username Required', 'Please enter your username');
-      return;
-    }
+    if (!username.trim()) return Alert.alert('Username Required', 'Please enter your username');
     if (!email.trim()) {
-      Alert.alert('Email Required', 'Please enter your email');
-      return;
+      return Alert.alert('Email Required', 'Please enter your email');
     }
-    if (!mobile.trim()) {
-      Alert.alert('Mobile Required', 'Please enter your mobile number');
-      return;
+
+    if (!isValidEmail(email)) {
+      return Alert.alert('Invalid Email', 'Please enter a valid email address');
     }
-    if (mobile.length !== 10) {
-      Alert.alert('Invalid Mobile', 'Enter a valid 10 digit mobile number');
-      return;
-    }
-    if (password.length < 6) {
-      Alert.alert('Weak Password', 'Password must be at least 6 characters');
-      return;
-    }
-    if (password !== confirmPassword) {
-      Alert.alert('Password Mismatch', 'Passwords do not match');
-      return;
-    }
+    if (!mobile.trim()) return Alert.alert('Mobile Required', 'Please enter your mobile number');
+    if (mobile.length !== 10) return Alert.alert('Invalid Mobile', 'Enter a valid 10 digit mobile number');
+    if (password.length < 6) return Alert.alert('Weak Password', 'Password must be at least 6 characters');
+    if (password !== confirmPassword) return Alert.alert('Password Mismatch', 'Passwords do not match');
 
     setLoading(true);
     try {
@@ -66,11 +56,7 @@ export default function RegisterScreen() {
       Alert.alert('Account Created', 'Your account was created successfully');
       router.replace('/(tabs)');
     } catch (error: any) {
-      const msg =
-        error.response?.data?.message ||
-        error.response?.data ||
-        error.message ||
-        'Something went wrong';
+      const msg = error.response?.data?.message || error.message || 'Something went wrong';
       Alert.alert('Register Failed', String(msg));
     } finally {
       setLoading(false);
@@ -78,211 +64,142 @@ export default function RegisterScreen() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#0B1120' }}>
+    <SafeAreaView className="flex-1 bg-background">
 
-      {/* LOGO — fixed above scroll */}
-      <View style={styles.logoContainer}>
+      {/* Logo */}
+      <View className="items-center pt-5 mb-6">
         <Image
           source={require('../../assets/images/logo_no_bg.png')}
-          style={styles.logo}
+          className="w-[110px] h-[110px] mb-2"
           resizeMode="contain"
         />
-        <Text style={styles.title}>Create Account</Text>
-        <Text style={styles.subtitle}>Register to access car service features</Text>
+        <Text className="text-2xl font-bold text-text-primary mt-1">
+          Create Account
+        </Text>
+        <Text className="text-sm text-text-secondary mt-1 text-center">
+          Register to access car service features
+        </Text>
       </View>
 
-      {/* SCROLLABLE FIELDS */}
+      {/* FORM */}
       <KeyboardAwareScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={styles.scrollContainer}
+        className="flex-1"
+        contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 120 }}
         enableOnAndroid
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
+
         {/* Username */}
-        <View style={styles.inputWrapper}>
-          <Ionicons name="person-outline" size={20} color="#94A3B8" />
+        <View className="flex-row items-center bg-card rounded-2xl px-4 py-4 mb-4">
+          <Ionicons name="person-outline" size={20} color={COLORS.textSecondary} />
           <TextInput
             placeholder="Username"
-            placeholderTextColor="#64748B"
+            placeholderTextColor={COLORS.textMuted}
             value={username}
             onChangeText={setUsername}
-            style={styles.input}
-            autoCapitalize="none"
+            className="flex-1 text-text-primary ml-3"
           />
         </View>
 
         {/* Mobile */}
-        <View style={styles.inputWrapper}>
-          <Ionicons name="call-outline" size={20} color="#94A3B8" />
+        <View className="flex-row items-center bg-card rounded-2xl px-4 py-4 mb-4">
+          <Ionicons name="call-outline" size={20} color={COLORS.textSecondary} />
           <TextInput
             placeholder="Mobile Number"
-            placeholderTextColor="#64748B"
+            placeholderTextColor={COLORS.textMuted}
             value={mobile}
             onChangeText={(t) => setMobile(t.replace(/[^0-9]/g, ''))}
             keyboardType="numeric"
             maxLength={10}
-            style={styles.input}
+            className="flex-1 text-text-primary ml-3"
           />
         </View>
 
         {/* Email */}
-        <View style={styles.inputWrapper}>
-          <Ionicons name="mail-outline" size={20} color="#94A3B8" />
+        <View className="flex-row items-center bg-card rounded-2xl px-4 py-4 mb-4">
+          <Ionicons name="mail-outline" size={20} color={COLORS.textSecondary} />
           <TextInput
             placeholder="Email"
-            placeholderTextColor="#64748B"
+            placeholderTextColor={COLORS.textMuted}
             value={email}
             onChangeText={setEmail}
-            autoCapitalize="none"
-            keyboardType="email-address"
-            style={styles.input}
+            className="flex-1 text-text-primary ml-3"
           />
         </View>
 
         {/* Password */}
-        <View style={styles.inputWrapper}>
-          <Ionicons name="lock-closed-outline" size={20} color="#94A3B8" />
+        <View className="flex-row items-center bg-card rounded-2xl px-4 py-4 mb-4">
+          <Ionicons name="lock-closed-outline" size={20} color={COLORS.textSecondary} />
           <TextInput
             placeholder="Password"
-            placeholderTextColor="#64748B"
+            placeholderTextColor={COLORS.textMuted}
             secureTextEntry={secure}
             value={password}
             onChangeText={setPassword}
-            style={styles.input}
+            className="flex-1 text-text-primary ml-3"
           />
           <TouchableOpacity onPress={() => setSecure(!secure)}>
-            <Ionicons
-              name={secure ? 'eye-off-outline' : 'eye-outline'}
-              size={20}
-              color="#94A3B8"
-            />
+            <Ionicons name={secure ? 'eye-off-outline' : 'eye-outline'} size={20} color={COLORS.textSecondary} />
           </TouchableOpacity>
         </View>
 
         {/* Confirm Password */}
-        <View style={styles.inputWrapper}>
-          <Ionicons name="lock-closed-outline" size={20} color="#94A3B8" />
+        <View className="flex-row items-center bg-card rounded-2xl px-4 py-4 mb-4">
+          <Ionicons name="lock-closed-outline" size={20} color={COLORS.textSecondary} />
           <TextInput
             placeholder="Confirm Password"
-            placeholderTextColor="#64748B"
+            placeholderTextColor={COLORS.textMuted}
             secureTextEntry={secureConfirm}
             value={confirmPassword}
             onChangeText={setConfirmPassword}
-            style={styles.input}
+            className="flex-1 text-text-primary ml-3"
           />
           <TouchableOpacity onPress={() => setSecureConfirm(!secureConfirm)}>
-            <Ionicons
-              name={secureConfirm ? 'eye-off-outline' : 'eye-outline'}
-              size={20}
-              color="#94A3B8"
-            />
+            <Ionicons name={secureConfirm ? 'eye-off-outline' : 'eye-outline'} size={20} color={COLORS.textSecondary} />
           </TouchableOpacity>
         </View>
-      </KeyboardAwareScrollView>
 
-      {/* FIXED BOTTOM — button + login link */}
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-        <View style={styles.bottomContainer}>
-          <TouchableOpacity onPress={handleRegister} disabled={loading} activeOpacity={0.8}>
-            <LinearGradient
-              colors={['#0EA5E9', '#2563EB']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.gradientButton}
-            >
-              {loading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <>
-                  <Ionicons name="person-add-outline" size={20} color="#fff" />
-                  <Text style={styles.gradientButtonText}>Register</Text>
-                </>
-              )}
-            </LinearGradient>
+        {/* BUTTON */}
+        <View className="items-center mt-6 mb-8">
+          <TouchableOpacity
+            onPress={handleRegister}
+            disabled={loading}
+            activeOpacity={0.8}
+            className="w-52"
+          >
+            {/* ✅ Wrapper controls border radius */}
+            <View className="rounded-full overflow-hidden">
+
+              <LinearGradient
+                colors={[COLORS.primary, COLORS.primaryDark]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                className="flex-row w-full py-4 justify-center items-center"
+              >
+                {loading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <>
+                    <Ionicons name="person-add-outline" size={20} color="#fff" />
+                    <Text className="text-text-primary font-bold text-base ml-2">
+                      Register
+                    </Text>
+                  </>
+                )}
+              </LinearGradient>
+
+            </View>
           </TouchableOpacity>
 
-          <Text style={styles.loginRedirect}>
+          <Text className="text-center text-text-secondary mt-5 text-sm">
             Already have an account?{' '}
-            <Text style={{ color: '#06B6D4' }} onPress={() => router.push('/(auth)/login')}>
+            <Text className="text-accent" onPress={() => router.push('/(auth)/login')}>
               Login
             </Text>
           </Text>
         </View>
-      </KeyboardAvoidingView>
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  logoContainer: {
-    alignItems: 'center',
-    paddingTop: 20,
-    marginBottom: 24,
-  },
-  logo: {
-    width: 110,
-    height: 110,
-    marginBottom: 10,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    marginTop: 6,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: '#94A3B8',
-    marginTop: 6,
-    textAlign: 'center',
-  },
-  scrollContainer: {
-    paddingHorizontal: 24,
-    paddingBottom: 10,
-  },
-  inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#111827',
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 15,
-    marginBottom: 16,
-  },
-  input: {
-    flex: 1,
-    color: '#FFFFFF',
-    marginLeft: 10,
-    fontSize: 15,
-  },
-  bottomContainer: {
-    paddingHorizontal: 24,
-    paddingBottom: 10,
-    backgroundColor: '#0B1120',
-  },
-  gradientButton: {
-    flexDirection: 'row',
-    paddingVertical: 14,
-    paddingHorizontal: 40,
-    borderRadius: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
-    alignSelf: 'center',
-    marginTop: 16,
-  },
-  gradientButtonText: {
-    color: '#FFFFFF',
-    fontWeight: '700',
-    fontSize: 16,
-    marginLeft: 8,
-    letterSpacing: 0.5,
-  },
-  loginRedirect: {
-    textAlign: 'center',
-    color: '#94A3B8',
-    marginTop: 20,
-    marginBottom: 10,
-    fontSize: 14,
-  },
-});

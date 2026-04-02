@@ -118,7 +118,7 @@ export default function LoginScreen() {
               <>
                 <Ionicons name="log-in-outline" size={20} color="#fff" />
                 <Text className="text-text-primary font-bold text-base ml-2 tracking-wide">
-                  Sign In
+                  Login
                 </Text>
               </>
             )}
