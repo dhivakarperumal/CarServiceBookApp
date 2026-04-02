@@ -4,11 +4,13 @@ import { useState } from "react";
 import { Image, Modal, Pressable, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../contexts/AuthContext";
+import { useCart } from "../contexts/CartContext";
 import { COLORS } from "../theme/colors";
 
 export default function Header() {
   const router = useRouter();
   const { user, logout, isLoading } = useAuth();
+  const { totalItems: cartCount } = useCart();
   const [menuOpen, setMenuOpen] = useState(false);
 
   // 🔥 LOGOUT
@@ -35,9 +37,23 @@ export default function Header() {
           <View className="flex-row items-center gap-3">
 
             {/* CART */}
-            <TouchableOpacity>
-              <Ionicons name="cart-outline" size={22} color={COLORS.primary} />
-            </TouchableOpacity>
+            <View className="relative">
+              <TouchableOpacity
+                onPress={() => router.push("/cart")}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="cart-outline" size={22} color={COLORS.primary} />
+              </TouchableOpacity>
+
+              {/* 🔥 BADGE */}
+              {cartCount > 0 && (
+                <View className="absolute -top-2 -right-2 bg-red-500 rounded-full px-1.5 min-w-[16px] h-[16px] items-center justify-center">
+                  <Text className="text-[10px] text-white font-bold">
+                    {cartCount}
+                  </Text>
+                </View>
+              )}
+            </View>
 
             {/* NOTIFICATION */}
             <TouchableOpacity>
