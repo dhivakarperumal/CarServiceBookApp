@@ -103,8 +103,7 @@ export default function ServicesScreen() {
     >
       <View className="absolute inset-0 bg-black/80" />
       <View className="flex-1 p-5">
-        <Text className="text-white text-2xl font-bold mb-1">Car Services</Text>
-        <Text className="text-[#94A3B8] text-[13px] mb-5">Premium maintenance & repair</Text>
+    
 
         <FlatList
           data={services}
