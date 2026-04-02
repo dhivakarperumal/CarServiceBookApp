@@ -1,19 +1,19 @@
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  View,
+  ActivityIndicator,
+  Alert,
+  Image,
   Text,
   TextInput,
   TouchableOpacity,
-  Alert,
-  ActivityIndicator,
-  StyleSheet,
-  Image,
+  View,
 } from 'react-native';
-import { router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { useAuth } from '../../contexts/AuthContext';
+import { COLORS } from '../../theme/colors';
 
 export default function LoginScreen() {
   const [identifier, setIdentifier] = useState('');
@@ -43,53 +43,57 @@ export default function LoginScreen() {
 
   return (
     <KeyboardAwareScrollView
-      style={{ flex: 1, backgroundColor: '#0B1120' }}
-      contentContainerStyle={styles.container}
+      className="flex-1 bg-background"
+      contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', paddingHorizontal: 24 }}
       enableOnAndroid={true}
       extraScrollHeight={20}
       keyboardShouldPersistTaps="handled"
     >
       {/* Logo */}
-      <View style={styles.logoContainer}>
+      <View className="items-center mb-10">
         <Image
           source={require('../../assets/images/logo_no_bg.png')}
-          style={styles.logo}
+          className="w-[120px] h-[120px] mb-3"
           resizeMode="contain"
         />
-        <Text style={styles.title}>Car Service Login</Text>
-        <Text style={styles.subtitle}>Sign in to manage services & bookings</Text>
+        <Text className="text-2xl font-bold text-text-primary">
+          Car Service Login
+        </Text>
+        <Text className="text-sm text-text-secondary mt-1 text-center">
+          Sign in to manage services & bookings
+        </Text>
       </View>
 
       {/* Email / Username */}
-      <View style={styles.inputWrapper}>
-        <Ionicons name="mail-outline" size={20} color="#94A3B8" />
+      <View className="flex-row items-center bg-card rounded-2xl px-4 py-4 mb-5">
+        <Ionicons name="mail-outline" size={20} color={COLORS.textSecondary} />
         <TextInput
           placeholder="Email or Username"
-          placeholderTextColor="#64748B"
+          placeholderTextColor={COLORS.textMuted}
           value={identifier}
           onChangeText={setIdentifier}
-          style={styles.input}
+          className="flex-1 text-text-primary ml-3 text-[15px]"
           autoCapitalize="none"
           keyboardType="email-address"
         />
       </View>
 
       {/* Password */}
-      <View style={styles.inputWrapper}>
-        <Ionicons name="lock-closed-outline" size={20} color="#94A3B8" />
+      <View className="flex-row items-center bg-card rounded-2xl px-4 py-4 mb-5">
+        <Ionicons name="lock-closed-outline" size={20} color={COLORS.textSecondary} />
         <TextInput
           placeholder="Password"
-          placeholderTextColor="#64748B"
+          placeholderTextColor={COLORS.textMuted}
           value={password}
           onChangeText={setPassword}
           secureTextEntry={secure}
-          style={styles.input}
+          className="flex-1 text-text-primary ml-3 text-[15px]"
         />
         <TouchableOpacity onPress={() => setSecure(!secure)}>
           <Ionicons
             name={secure ? 'eye-off-outline' : 'eye-outline'}
             size={20}
-            color="#94A3B8"
+            color={COLORS.textSecondary}
           />
         </TouchableOpacity>
       </View>
@@ -99,99 +103,37 @@ export default function LoginScreen() {
         onPress={handleLogin}
         disabled={loading}
         activeOpacity={0.8}
-        style={{ marginTop: 10 }}
+        className="mt-3 items-center"
       >
-        <LinearGradient
-          colors={['#0EA5E9', '#2563EB']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.gradientButton}
-        >
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <>
-              <Ionicons name="log-in-outline" size={20} color="#fff" />
-              <Text style={styles.gradientButtonText}>Sign In</Text>
-            </>
-          )}
-        </LinearGradient>
+        <View className="rounded-full overflow-hidden">
+          <LinearGradient
+            colors={[COLORS.primary, COLORS.primaryDark]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            className="flex-row py-4 px-10 justify-center items-center"
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <>
+                <Ionicons name="log-in-outline" size={20} color="#fff" />
+                <Text className="text-text-primary font-bold text-base ml-2 tracking-wide">
+                  Sign In
+                </Text>
+              </>
+            )}
+          </LinearGradient>
+        </View>
       </TouchableOpacity>
 
       {/* Register */}
       <Text
         onPress={() => router.push('/(auth)/register')}
-        style={styles.registerText}
+        className="text-center text-text-secondary mt-6 text-sm"
       >
         Don't have an account?{' '}
-        <Text style={{ color: '#06B6D4' }}>Register</Text>
+        <Text className="text-accent">Register</Text>
       </Text>
     </KeyboardAwareScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 24,
-  },
-  logoContainer: {
-    alignItems: 'center',
-    marginBottom: 40,
-  },
-  logo: {
-    width: 120,
-    height: 120,
-    marginBottom: 12,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  subtitle: {
-    fontSize: 14,
-    color: '#94A3B8',
-    marginTop: 6,
-    textAlign: 'center',
-  },
-  inputWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#111827',
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 15,
-    marginBottom: 18,
-  },
-  input: {
-    flex: 1,
-    color: '#FFFFFF',
-    marginLeft: 10,
-    fontSize: 15,
-  },
-  gradientButton: {
-    flexDirection: 'row',
-    paddingVertical: 14,
-    paddingHorizontal: 40,
-    borderRadius: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
-    alignSelf: 'center',
-    marginTop: 10,
-  },
-  gradientButtonText: {
-    color: '#FFFFFF',
-    fontWeight: '700',
-    fontSize: 16,
-    marginLeft: 8,
-    letterSpacing: 0.5,
-  },
-  registerText: {
-    textAlign: 'center',
-    color: '#94A3B8',
-    marginTop: 24,
-    fontSize: 14,
-  },
-});
