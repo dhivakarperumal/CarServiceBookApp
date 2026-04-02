@@ -3,6 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { View, ActivityIndicator } from 'react-native';
 import HeaderDropdown from '../../components/HeaderDropdown';
+import CartIcon from '../../components/CartIcon';
 
 export default function TabLayout() {
   const { user, isLoading } = useAuth();
@@ -43,7 +44,12 @@ export default function TabLayout() {
         headerTitleStyle: {
           fontWeight: 'bold',
         },
-        headerRight: () => <HeaderDropdown />,
+        headerRight: () => (
+          <View className="flex-row items-center">
+            <CartIcon />
+            <HeaderDropdown />
+          </View>
+        ),
       }}
     >
       <Tabs.Screen

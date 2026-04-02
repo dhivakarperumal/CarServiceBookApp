@@ -1,13 +1,17 @@
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { AuthProvider } from "../contexts/AuthContext";
+import { CartProvider } from "../contexts/CartContext";
+import { FavoriteProvider } from "../contexts/FavoriteContext";
 
 import './global.css';
 
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <Stack
+      <CartProvider>
+        <FavoriteProvider>
+          <Stack
         screenOptions={{
           headerStyle: {
             backgroundColor: "#2563eb",
@@ -37,6 +41,8 @@ export default function RootLayout() {
       </Stack>
 
       <StatusBar style="light" />
+        </FavoriteProvider>
+      </CartProvider>
     </AuthProvider>
   );
 }

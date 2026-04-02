@@ -13,6 +13,10 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { apiService } from '../../services/api';
 import { COLORS } from '../../theme/colors';
+import { useCart } from '../../contexts/CartContext';
+import { useFavorites } from '../../contexts/FavoriteContext';
+import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
 const { width } = Dimensions.get('window');
 
@@ -39,6 +43,8 @@ interface ApiProduct {
 export default function ProductsScreen() {
   const [products, setProducts] = useState<ApiProduct[]>([]);
   const [loading, setLoading] = useState(true);
+  const { addToCart } = useCart();
+  const { toggleFavorite, isFavorite } = useFavorites();
 
   useEffect(() => {
     fetchProducts();
@@ -86,56 +92,69 @@ export default function ProductsScreen() {
     const offerPercent = parseFloat(item.offer || '0');
 
     return (
-      <View className="w-[48%] bg-[#111827] rounded-[18px] p-2.5 mb-5 border border-[#0EA5E9]/20">
-        {/* Image + Badge */}
-        <View className="relative mb-2.5">
-          {imageUri ? (
-            <Image source={{ uri: imageUri }} className="w-full h-[110px] rounded-xl" resizeMode="cover" />
-          ) : (
-            <View className="w-full h-[110px] rounded-xl bg-[#1F2937]" />
-          )}
-          {offerPercent > 0 && (
-            <View className="absolute top-1.5 left-1.5 bg-[#0EA5E9] px-2 py-1 rounded-full">
-              <Text className="text-white text-[9px] font-bold tracking-[0.5px]">{offerPercent}% OFF</Text>
-            </View>
-          )}
+      <TouchableOpacity
+        className="w-[48%] mb-5"
+        onPress={() => router.push(`/product/${item.slug}`)}
+        activeOpacity={0.9}
+      >
+        <View className="bg-[#111827] rounded-[18px] p-2.5 border border-[#0EA5E9]/20">
+          {/* Image + Badge */}
+          <View className="relative mb-2.5">
+            {imageUri ? (
+              <Image source={{ uri: imageUri }} className="w-full h-[110px] rounded-xl" resizeMode="cover" />
+            ) : (
+              <View className="w-full h-[110px] rounded-xl bg-[#1F2937]" />
+            )}
+            {offerPercent > 0 && (
+              <View className="absolute top-1.5 left-1.5 bg-[#0EA5E9] px-2 py-1 rounded-full">
+                <Text className="text-white text-[9px] font-bold tracking-[0.5px]">{offerPercent}% OFF</Text>
+              </View>
+            )}
+            <TouchableOpacity
+              className="absolute top-1.5 right-1.5 bg-black/40 p-1.5 rounded-full"
+              onPress={() => toggleFavorite(item.docId)}
+            >
+              <Ionicons
+                name={isFavorite(item.docId) ? "heart" : "heart-outline"}
+                size={16}
+                color={isFavorite(item.docId) ? "#ef4444" : "#fff"}
+              />
+            </TouchableOpacity>
+          </View>
+
+          {/* Name */}
+          <Text className="text-white text-[13px] font-bold mb-1" numberOfLines={1}>{item.name}</Text>
+
+          {/* Brand & Rating */}
+          <View className="flex-row justify-between items-center mb-1">
+            {item.brand ? <Text className="text-[#94A3B8] text-[11px]">{item.brand}</Text> : <Text />}
+            {item.rating && parseFloat(item.rating) > 0 ? (
+              <Text className="text-[#FBBF24] text-[11px]">⭐ {item.rating}</Text>
+            ) : null}
+          </View>
+
+          {/* Price row */}
+          <View className="flex-row items-center mb-2">
+            <Text className="text-[#0EA5E9] text-sm font-bold mr-1.5">₹ {formatPrice(item.offerPrice)}</Text>
+            {offerPercent > 0 && (
+              <Text className="text-[#64748B] text-[11px] line-through">₹ {formatPrice(item.mrp)}</Text>
+            )}
+          </View>
+
+          {/* Button */}
+          <View className="rounded-full overflow-hidden w-[90%] self-center mt-0.5">
+            <LinearGradient
+              colors={[COLORS.primary, COLORS.primaryDark]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={{ borderRadius: 25 }}
+              className="py-1.5 justify-center items-center"
+            >
+              <Text className="text-white font-bold text-xs tracking-[0.5px]">View Details</Text>
+            </LinearGradient>
+          </View>
         </View>
-
-        {/* Name */}
-        <Text className="text-white text-[13px] font-bold mb-1" numberOfLines={1}>{item.name}</Text>
-
-        {/* Brand & Rating */}
-        <View className="flex-row justify-between items-center mb-1">
-          {item.brand ? <Text className="text-[#94A3B8] text-[11px]">{item.brand}</Text> : <Text />}
-          {item.rating && parseFloat(item.rating) > 0 ? (
-            <Text className="text-[#FBBF24] text-[11px]">⭐ {item.rating}</Text>
-          ) : null}
-        </View>
-
-        {/* Price row */}
-        <View className="flex-row items-center mb-2">
-          <Text className="text-[#0EA5E9] text-sm font-bold mr-1.5">₹ {formatPrice(item.offerPrice)}</Text>
-          {offerPercent > 0 && (
-            <Text className="text-[#64748B] text-[11px] line-through">₹ {formatPrice(item.mrp)}</Text>
-          )}
-        </View>
-
-        {/* Button */}
-        <TouchableOpacity
-          onPress={() => Alert.alert('Purchase', `Added ${item.name} to cart!`)}
-          activeOpacity={0.8}
-        >
-          <LinearGradient
-            colors={[COLORS.primary, COLORS.primaryDark]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={{ borderRadius: 25 }}
-            className="self-center w-[90%] py-1.5 justify-center items-center mt-0.5 overflow-hidden"
-          >
-            <Text className="text-white font-bold text-xs tracking-[0.5px]">Add to Cart</Text>
-          </LinearGradient>
-        </TouchableOpacity>
-      </View>
+      </TouchableOpacity>
     );
   };
 

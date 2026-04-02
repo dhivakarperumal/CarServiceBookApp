@@ -118,9 +118,39 @@ export const apiService = {
     try {
       const response = await api.get(`/products/${id}`);
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching product:', error);
       throw error;
+    }
+  },
+
+  getProductBySlug: async (slug: string): Promise<any> => {
+    try {
+      const response = await api.get(`/products/slug/${slug}`);
+      return response.data;
+    } catch (error) {
+      console.warn(`Error fetching product by slug ${slug}, trying fallback...`, error);
+      // Fallback: try to fetch all products and find matching slug
+      try {
+        const response = await api.get('/products');
+        const products = Array.isArray(response.data) ? response.data : [];
+        const match = products.find((p: any) => p.slug === slug);
+        if (match) return match;
+        throw new Error('Product not found in fallback');
+      } catch (fallbackError) {
+        console.error('Initial slug fetch and fallback both failed:', fallbackError);
+        throw fallbackError;
+      }
+    }
+  },
+
+  getReviews: async (productId: number): Promise<any[]> => {
+    try {
+      const response = await api.get(`/reviews?productId=${productId}`);
+      return Array.isArray(response.data) ? response.data : [];
+    } catch (error) {
+      console.error('Error fetching reviews:', error);
+      return [];
     }
   },
 
@@ -150,7 +180,7 @@ export const apiService = {
     try {
       const response = await api.get('/bookings');
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching bookings:', error);
       throw error;
     }
@@ -180,7 +210,7 @@ export const apiService = {
       console.log('Login response:', response.data);
 
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error logging in:', error);
       console.error('Error details:', error.response?.data);
       throw error;
