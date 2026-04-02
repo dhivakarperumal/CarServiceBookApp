@@ -149,6 +149,45 @@ export default function HomeScreen({ navigation }) {
     }
   };
 
+  const handleApproveSpare = async (serviceId, partId, status) => {
+    try {
+      setApprovingPartId(partId);
+
+      // TODO: Make API call to update spare part status
+      // Example: await apiService.updateSparePartStatus(serviceId, partId, status);
+
+      console.log(`Spare part ${partId} status changed to ${status}`);
+
+      // Update local state
+      setSpareParts((prev) =>
+        prev.map((service) => {
+          if (service.serviceId !== serviceId) return service;
+          return {
+            ...service,
+            parts: service.parts.map((part) =>
+              part.id === partId ? { ...part, status } : part
+            ),
+          };
+        })
+      );
+
+      // Update booking if it's selected
+      if (selectedBooking && selectedBooking.id === serviceId) {
+        setSelectedBooking((prev) => ({
+          ...prev,
+          spareParts: (prev.spareParts || []).map((part) =>
+            part.id === partId ? { ...part, status } : part
+          ),
+        }));
+      }
+
+    } catch (error) {
+      console.error('Error updating spare part:', error);
+    } finally {
+      setApprovingPartId(null);
+    }
+  };
+
   useEffect(() => {
     Animated.loop(
       Animated.sequence([
@@ -361,338 +400,211 @@ export default function HomeScreen({ navigation }) {
   }, []);
 
   return (
-    <ScrollView className="flex-1 bg-background" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
+    <ScrollView
+      className="flex-1 bg-background"
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{
+        paddingBottom: 120,
+        paddingTop: 10,
+      }}
+    >
 
-      {/* PREMIUM WELCOME BANNER */}
-      <LinearGradient
-        colors={GRADIENT}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        className="rounded-3xl p-6 mx-5 mt-5 mb-10 items-center"
-      >
-        <Text className="text-textLight text-sm font-medium text-center pb-2.5">
-          Welcome Back
-          {username ? (
-            <Text className="text-white font-bold text-lg">, {username}</Text>
-          ) : null}
-          {" 👋"}
-        </Text>
-
-        <Text className="text-white text-3xl font-black mt-1.5 text-center">
-          Premium Car Care Service
-        </Text>
-
-        <Text className="text-textLighter text-sm mt-1.5 text-center">
-          Book trusted mechanics at your doorstep
-        </Text>
-
-        <TouchableOpacity
-          className="flex-row items-center bg-white px-5 py-3 rounded-full mt-6"
-          onPress={() => router.push("/(tabs)/booking")}
-        >
-          <Ionicons name="car-outline" size={18} color={COLORS.primary} />
-          <Text className="text-primary font-bold ml-2">Book Now</Text>
-        </TouchableOpacity>
-      </LinearGradient>
-
-      {/* MY VEHICLES */}
-      {myVehicles.length > 0 && (
-        <>
-          <View className="flex-row items-center mt-10 mb-6">
-            <View className="w-1 h-5 bg-white rounded mr-2.5" />
-            <Ionicons
-              name="car-sport-outline"
-              size={18}
-              color={COLORS.primary}
-              style={{ marginRight: 6 }}
-            />
-            <Text className="text-primary text-lg font-black tracking-wide">
-              My Vehicles
-            </Text>
-          </View>
-
-          <View className="mb-5">
-            {myVehicles.map((vehicle) => (
-              <TouchableOpacity
-                key={vehicle.id}
-                className="bg-card rounded-3xl p-6 mx-5 mb-6 border border-primary/10"
-                activeOpacity={0.85}
-                onPress={() => setSelectedVehicle(vehicle)}
-              >
-
-                {/* Top Row */}
-                <View className="flex-row items-center">
-                  <View className="bg-primary/10 p-2.5 rounded-xl">
-                    <FontAwesome5 name="motorcycle" size={18} color={COLORS.primary} />
-                  </View>
-
-                  <View className="flex-1 ml-3">
-                    <Text className="text-white text-base font-bold">
-                      {vehicle.brand} {vehicle.model}
-                    </Text>
-                    <Text className="text-textSecondary text-xs mt-1">
-                      {vehicle.vehicleType} • {vehicle.vehicleNumber}
-                    </Text>
-                  </View>
-
-                  <View className="bg-warning px-2.5 py-1.5 rounded-xl">
-                    <Text className="text-white text-xs font-bold">
-                      {vehicle.addVehicleStatus}
-                    </Text>
-                  </View>
-                </View>
-
-                {/* Divider */}
-                <View className="h-px bg-white/5 my-4" />
-
-                {/* Bottom Row */}
-                <View className="flex-row justify-between items-center">
-                  <Text className="text-gray-500 text-xs">
-                    ID: {vehicle.addVehicleId}
-                  </Text>
-
-                  <Text className="text-textSecondary text-xs">
-                    {vehicle.serviceStatus}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-          {selectedVehicle && (
-            <VehicleDetailModal
-              vehicle={selectedVehicle}
-              onClose={() => setSelectedVehicle(null)}
-            />
-          )}
-        </>
-      )}
-
-      {/* ACTIVE BOOKING */}
-      {allBookings
-        .filter(
-          (booking) =>
-            !booking?.vehicleNumber ||
-            !booking?.vehicleType
-        )
-        .length > 0 && (
-          <>
-            <View className="flex-row items-center mt-10 mb-6">
-              <View className="w-1 h-5 bg-white rounded mr-2.5" />
-              <Text className="text-primary text-lg font-black tracking-wide">
-                My Bookings
-              </Text>
-            </View>
-
-            <View className="mb-5">
-              {allBookings
-                .filter(
-                  (booking) =>
-                    !booking?.vehicleNumber ||
-                    !booking?.vehicleType
-                )
-                .map((booking) => (
-                  <TouchableOpacity
-                    key={booking.id}
-                    className="bg-card rounded-3xl p-6 mx-5 mb-4 border border-primary/10"
-                    onPress={() => setSelectedBooking(booking)}
-                    activeOpacity={0.85}
-                  >
-                    {/* Top Row */}
-                    <View className="flex-row items-center">
-                      <View className="bg-primary/10 p-2.5 rounded-xl">
-                        <FontAwesome5 name="car" size={18} color={COLORS.primary} />
-                      </View>
-
-                      <View className="flex-1 ml-3">
-                        <Text className="text-white text-base font-bold">
-                          {booking.brand} {booking.model}
-                        </Text>
-                        <Text className="text-textSecondary text-xs mt-1">
-                          {booking.issue}
-                        </Text>
-                      </View>
-
-                      <View className="px-2.5 py-1.5 rounded-xl justify-center items-center min-h-2.5 max-h-5" style={{ backgroundColor: getStatusColor(booking.normalizedStatus) }}>
-                        <Text className="text-white text-xs font-bold">
-                          {STATUS_LABELS[booking.normalizedStatus]}
-                        </Text>
-                      </View>
-                    </View>
-
-                    {/* Divider */}
-                    <View className="h-px bg-white/5 my-4" />
-
-                    {/* Bottom Row */}
-                    <View className="flex-row justify-between items-center">
-                      <Text className="text-gray-500 text-xs">
-                        ID: {booking.bookingId}
-                      </Text>
-
-                      <View className="flex-row items-center">
-                        <Text className="text-primary text-xs font-semibold mr-1">
-                          Tap to view details
-                        </Text>
-                        <Ionicons name="chevron-forward" size={16} color={COLORS.primary} />
-                      </View>
-                    </View>
-                  </TouchableOpacity>
-                ))}
-            </View>
-
-            {selectedBooking && (
-              <BookingDetailModal
-                booking={selectedBooking}
-                onClose={() => setSelectedBooking(null)}
-              />
-            )}
-          </>
-        )}
-
-      {/* WHY CHOOSE US */}
-      <View className="flex-row items-center mt-10 mb-6">
-        <View className="w-1 h-5 bg-white rounded mr-2.5" />
-        <Text className="text-primary text-lg font-black tracking-wide">
-          Why Choose Us
-        </Text>
-      </View>
-
-      <Animated.FlatList
-        ref={whyListRef}
-        data={extendedWhyData}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        keyExtractor={(_, index) => index.toString()}
-        renderItem={({ item }) => (
-          <View className="bg-card rounded-3xl p-4 mr-3 border border-primary/10" style={{ width: CARD_WIDTH }}>
-            <View className="bg-primary/10 p-4 rounded-2xl self-start mb-3">
-              {item.icon}
-            </View>
-            <Text className="text-white text-sm font-bold">
-              {item.title}
-            </Text>
-            <Text className="text-gray-400 text-xs mt-1.5">
-              {item.subtitle}
-            </Text>
-          </View>
-        )}
-        contentContainerStyle={{}}
-        snapToInterval={CARD_WIDTH + CARD_MARGIN}
-        decelerationRate="fast"
-      />
-
-      {/* customer reviews */}
-      <View className="flex-row items-center mt-10 mb-6">
-        <View className="w-1 h-5 bg-white rounded mr-2.5" />
-        <Ionicons name="star-outline" size={18} color={COLORS.primary} className="mr-1.5" />
-        <Text className="text-primary text-lg font-black tracking-wide">
-          Customer Reviews
-        </Text>
-      </View>
-
-      <Animated.FlatList
-        ref={reviewListRef}
-        data={extendedReviews}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        keyExtractor={(_, index) => index.toString()}
-        renderItem={({ item }) => (
-          <View className="bg-card rounded-3xl p-4 border border-primary/10" style={{ width: REVIEW_CARD_WIDTH }}>
-            {/* Profile Row */}
-            <View className="flex-row items-center mb-3">
-              <View className="w-12 h-12 rounded-2xl bg-primary/10 items-center justify-center overflow-hidden">
-                {item.image ? (
-                  <Image
-                    source={{ uri: item.image }}
-                    className="w-full h-full"
-                  />
-                ) : (
-                  <Ionicons name="person" size={20} color={COLORS.primary} />
-                )}
-              </View>
-
-              <View className="ml-3">
-                <Text className="text-white text-sm font-bold">
-                  {item.name}
-                </Text>
-
-                <View className="flex-row mt-1">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Ionicons
-                      key={star}
-                      name={star <= item.rating ? "star" : "star-outline"}
-                      size={14}
-                      color={COLORS.rating}
-                    />
-                  ))}
-                </View>
-              </View>
-            </View>
-
-            <Text className="text-gray-400 text-xs leading-4">
-              "{item.message}"
-            </Text>
-          </View>
-        )}
-        contentContainerStyle={{}}
-        decelerationRate="fast"
-      />
-
-
-      {/* CONTACT US */}
-      <View className="flex-row items-center mt-10 mb-6">
-        <View className="w-1 h-5 bg-white rounded mr-2.5" />
-        <Ionicons name="call-outline" size={18} color={COLORS.primary} className="mr-1.5" />
-        <Text className="text-primary text-lg font-black tracking-wide">
-          Contact Us
-        </Text>
-      </View>
-
-      <View className="bg-card rounded-3xl p-6 mx-5 mb-5 border border-primary/10">
-
-        {/* Phone */}
-        <View className="flex-row items-center mb-3">
-          <Ionicons name="call" size={18} color={COLORS.primary} />
-          <Text className="text-white text-sm ml-3">
-            +91 98765 43210
-          </Text>
-        </View>
-
-        {/* Email */}
-        <View className="flex-row items-center mb-3">
-          <Ionicons name="mail" size={18} color={COLORS.primary} />
-          <Text className="text-white text-sm ml-3">
-            support@carservice.com
-          </Text>
-        </View>
-
-        {/* Address */}
-        <View className="flex-row items-center">
-          <Ionicons name="location" size={18} color={COLORS.primary} />
-          <Text className="text-white text-sm ml-3">
-            No. 24, Anna Nagar, Chennai, Tamil Nadu
-          </Text>
-        </View>
-
-      </View>
-
-      {/* Map */}
-      <TouchableOpacity
-        activeOpacity={0.8}
-        onPress={() =>
-          Linking.openURL(
-            "https://maps.app.goo.gl/kv7qjVpYMpcXuzx17"
-          )
-        }
-      >
+      {/* ================= BANNER ================= */}
+      <View className="mx-5 mt-4 mb-8">
         <LinearGradient
           colors={GRADIENT}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          className="flex-row py-3.5 px-6 rounded-full mx-5 self-center items-center justify-center mt-4"
+          style={{ borderRadius: 24 }}
+          className="p-6 items-center overflow-hidden"
         >
-          <Ionicons name="navigate" size={18} color={COLORS.white} />
-          <Text className="text-white font-bold text-base ml-2 tracking-wide">
+
+          <Text className="text-white text-sm text-center">
+            Welcome Back
+            {username && (
+              <Text className="text-white font-bold text-base">
+                , {username}
+              </Text>
+            )} 👋
+          </Text>
+
+          <Text className="text-white text-2xl font-extrabold text-center mt-3">
+            Premium Car Care Service
+          </Text>
+
+          <Text className="text-white/80 text-sm text-center mt-2">
+            Book trusted mechanics at your doorstep
+          </Text>
+
+          <TouchableOpacity
+            onPress={() => router.push("/(tabs)/booking")}
+            className="mt-6 bg-white px-6 py-3 rounded-full flex-row items-center"
+          >
+            <Ionicons name="car-outline" size={18} color={COLORS.primary} />
+            <Text className="text-primary font-bold ml-2">
+              Book Now
+            </Text>
+          </TouchableOpacity>
+
+        </LinearGradient>
+      </View>
+
+
+      {/* ================= WHY CHOOSE US ================= */}
+      <View className="px-5 mb-6">
+        <View className="flex-row items-center mb-4">
+          <View className="w-1 h-5 bg-white rounded mr-2" />
+          <Text className="text-primary text-lg font-bold">
+            Why Choose Us
+          </Text>
+        </View>
+
+        <Animated.FlatList
+          ref={whyListRef}
+          data={extendedWhyData}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          keyExtractor={(_, index) => index.toString()}
+          contentContainerStyle={{ paddingRight: 20 }}
+          renderItem={({ item }) => (
+            <View
+              style={{ width: CARD_WIDTH, borderRadius: 20 }}
+              className="bg-card p-5 mr-4 border border-primary/10 overflow-hidden"
+            >
+              <View className="bg-primary/10 p-3 rounded-xl self-start mb-3">
+                {item.icon}
+              </View>
+
+              <Text className="text-white font-bold text-sm">
+                {item.title}
+              </Text>
+
+              <Text className="text-gray-400 text-xs mt-1">
+                {item.subtitle}
+              </Text>
+            </View>
+          )}
+        />
+      </View>
+
+
+      {/* ================= CUSTOMER REVIEWS ================= */}
+      <View className="px-5 mb-6">
+        <View className="flex-row items-center mb-4">
+          <View className="w-1 h-5 bg-white rounded mr-2" />
+          <Ionicons name="star-outline" size={18} color={COLORS.primary} />
+          <Text className="text-primary text-lg font-bold ml-2">
+            Customer Reviews
+          </Text>
+        </View>
+
+        <Animated.FlatList
+          ref={reviewListRef}
+          data={extendedReviews}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          keyExtractor={(_, index) => index.toString()}
+          renderItem={({ item }) => (
+            <View
+              style={{
+                width: width - 40,
+                borderRadius: 20,
+              }}
+              className="bg-card p-5 border border-primary/10 overflow-hidden mr-4"
+            >
+
+              <View className="flex-row items-center mb-3">
+                <View className="w-12 h-12 rounded-xl bg-primary/10 items-center justify-center overflow-hidden">
+                  {item.image ? (
+                    <Image source={{ uri: item.image }} className="w-full h-full" />
+                  ) : (
+                    <Ionicons name="person" size={20} color={COLORS.primary} />
+                  )}
+                </View>
+
+                <View className="ml-3">
+                  <Text className="text-white font-bold">
+                    {item.name}
+                  </Text>
+
+                  <View className="flex-row mt-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Ionicons
+                        key={star}
+                        name={star <= item.rating ? "star" : "star-outline"}
+                        size={14}
+                        color={COLORS.rating}
+                      />
+                    ))}
+                  </View>
+                </View>
+              </View>
+
+              <Text className="text-gray-400 text-xs">
+                "{item.message}"
+              </Text>
+
+            </View>
+          )}
+        />
+      </View>
+
+
+      {/* ================= CONTACT ================= */}
+      <View className="px-5 mb-6">
+        <View className="flex-row items-center mb-4">
+          <View className="w-1 h-5 bg-white rounded mr-2" />
+          <Ionicons name="call-outline" size={18} color={COLORS.primary} />
+          <Text className="text-primary text-lg font-bold ml-2">
+            Contact Us
+          </Text>
+        </View>
+
+        <View
+          style={{ borderRadius: 20 }}
+          className="bg-card p-5 border border-primary/10 overflow-hidden"
+        >
+
+          <View className="flex-row items-center mb-3">
+            <Ionicons name="call" size={18} color={COLORS.primary} />
+            <Text className="text-white ml-3">
+              +91 98765 43210
+            </Text>
+          </View>
+
+          <View className="flex-row items-center mb-3">
+            <Ionicons name="mail" size={18} color={COLORS.primary} />
+            <Text className="text-white ml-3">
+              support@carservice.com
+            </Text>
+          </View>
+
+          <View className="flex-row items-center">
+            <Ionicons name="location" size={18} color={COLORS.primary} />
+            <Text className="text-white ml-3">
+              No. 24, Anna Nagar, Chennai
+            </Text>
+          </View>
+
+        </View>
+      </View>
+
+
+      {/* ================= BUTTON ================= */}
+      <TouchableOpacity
+        onPress={() =>
+          Linking.openURL("https://maps.app.goo.gl/kv7qjVpYMpcXuzx17")
+        }
+        className="mx-5 mt-2"
+      >
+        <LinearGradient
+          colors={GRADIENT}
+          style={{ borderRadius: 30 }}
+          className="py-4 items-center justify-center flex-row overflow-hidden"
+        >
+          <Ionicons name="navigate" size={18} color="#fff" />
+          <Text className="text-white font-bold ml-2">
             Get Directions
           </Text>
         </LinearGradient>
@@ -793,14 +705,12 @@ function BookingDetailModal({ booking, onClose }) {
                       className="flex-row items-center flex-1"
                     >
                       <View
-                        className={`w-7.5 h-7.5 rounded-[7.5px] justify-center items-center z-10 ${
-                          isCompleted ? 'bg-sky' : 'bg-gray-800'
-                        }`}
+                        className={`w-7.5 h-7.5 rounded-[7.5px] justify-center items-center z-10 ${isCompleted ? 'bg-sky' : 'bg-gray-800'
+                          }`}
                       >
                         <Text
-                          className={`font-bold text-xs ${
-                            isCompleted ? 'text-black' : 'text-gray-400'
-                          }`}
+                          className={`font-bold text-xs ${isCompleted ? 'text-black' : 'text-gray-400'
+                            }`}
                         >
                           {index + 1}
                         </Text>
@@ -808,9 +718,8 @@ function BookingDetailModal({ booking, onClose }) {
 
                       {index !== STATUS_FLOW.length - 1 && (
                         <View
-                          className={`flex-1 h-1 ${
-                            index < currentIndex ? 'bg-sky' : 'bg-gray-700'
-                          }`}
+                          className={`flex-1 h-1 ${index < currentIndex ? 'bg-sky' : 'bg-gray-700'
+                            }`}
                         />
                       )}
                     </View>
@@ -840,9 +749,8 @@ function BookingDetailModal({ booking, onClose }) {
                   return (
                     <View key={status} className="flex-row items-center mb-2">
                       <Text
-                        className={`text-xs ${
-                          isCurrent ? 'text-sky font-bold' : 'text-slate-300'
-                        }`}
+                        className={`text-xs ${isCurrent ? 'text-sky font-bold' : 'text-slate-300'
+                          }`}
                       >
                         {index + 1} - {STATUS_LABELS[status]}
                       </Text>
@@ -886,7 +794,7 @@ function VehicleDetailModal({ vehicle, onClose }) {
       // TODO: Make API call to update booking status
       // You'll need to add an updateBooking endpoint to api.ts
       // Example: await apiService.updateBooking(vehicle.id, { issuesDetails: updatedIssues });
-      
+
       console.log("Issue status updated locally. Sync with API when endpoint is available.");
 
     } catch (error) {
@@ -1091,9 +999,8 @@ function VehicleDetailModal({ vehicle, onClose }) {
                         <TouchableOpacity
                           disabled={actionLoadingIndex === index}
                           onPress={() => handleIssueUpdate(index, "approved")}
-                          className={`bg-success py-2 px-4.5 rounded-xl mr-2.5 ${
-                            actionLoadingIndex === index ? 'opacity-60' : ''
-                          }`}
+                          className={`bg-success py-2 px-4.5 rounded-xl mr-2.5 ${actionLoadingIndex === index ? 'opacity-60' : ''
+                            }`}
                         >
                           {actionLoadingIndex === index ? (
                             <ActivityIndicator color={COLORS.white} size="small" />
@@ -1110,9 +1017,8 @@ function VehicleDetailModal({ vehicle, onClose }) {
                             setSelectedIssueIndex(index);
                             setRejectModalVisible(true);
                           }}
-                          className={`bg-error py-2 px-4.5 rounded-xl ${
-                            actionLoadingIndex === index ? 'opacity-60' : ''
-                          }`}
+                          className={`bg-error py-2 px-4.5 rounded-xl ${actionLoadingIndex === index ? 'opacity-60' : ''
+                            }`}
                         >
                           <Text className="text-white font-semibold">
                             Reject
@@ -1162,14 +1068,12 @@ function VehicleDetailModal({ vehicle, onClose }) {
                       className="flex-row items-center flex-1"
                     >
                       <View
-                        className={`w-7.5 h-7.5 rounded-[7.5px] justify-center items-center z-10 ${
-                          isCompleted ? 'bg-sky' : 'bg-gray-800'
-                        }`}
+                        className={`w-7.5 h-7.5 rounded-[7.5px] justify-center items-center z-10 ${isCompleted ? 'bg-sky' : 'bg-gray-800'
+                          }`}
                       >
                         <Text
-                          className={`font-bold text-xs ${
-                            isCompleted ? 'text-black' : 'text-gray-400'
-                          }`}
+                          className={`font-bold text-xs ${isCompleted ? 'text-black' : 'text-gray-400'
+                            }`}
                         >
                           {index + 1}
                         </Text>
@@ -1177,9 +1081,8 @@ function VehicleDetailModal({ vehicle, onClose }) {
 
                       {index !== STATUS_FLOW.length - 1 && (
                         <View
-                          className={`flex-1 h-1 ${
-                            index < currentIndex ? 'bg-sky' : 'bg-gray-700'
-                          }`}
+                          className={`flex-1 h-1 ${index < currentIndex ? 'bg-sky' : 'bg-gray-700'
+                            }`}
                         />
                       )}
                     </View>
@@ -1207,9 +1110,8 @@ function VehicleDetailModal({ vehicle, onClose }) {
                   return (
                     <View key={status} className="flex-row items-center mb-2">
                       <Text
-                        className={`text-xs ${
-                          isCurrent ? 'text-sky font-bold' : 'text-slate-300'
-                        }`}
+                        className={`text-xs ${isCurrent ? 'text-sky font-bold' : 'text-slate-300'
+                          }`}
                       >
                         {index + 1} - {STATUS_LABELS[status]}
                       </Text>

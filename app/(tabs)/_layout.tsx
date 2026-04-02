@@ -1,97 +1,97 @@
-import { Tabs } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { useAuth } from '../../contexts/AuthContext';
-import { useEffect } from 'react';
-import { router } from 'expo-router';
-import { View, ActivityIndicator } from 'react-native';
-import HeaderDropdown from '../../components/HeaderDropdown';
+import { Tabs } from "expo-router";
+import { FontAwesome } from "@expo/vector-icons";
+import Header from "../../components/Header";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { COLORS } from "../../theme/colors";
 
 export default function TabLayout() {
-  const { user, isLoading } = useAuth();
-
-  useEffect(() => {
-    if (!isLoading && !user) {
-      router.replace('/(auth)/login');
-    }
-  }, [user, isLoading]);
-
-  if (isLoading) {
-    return (
-      <View className="flex-1 justify-center items-center bg-white">
-        <ActivityIndicator size="large" color="#2563eb" />
-      </View>
-    );
-  }
-
-  if (!user) {
-    return null; // Will redirect to login
-  }
+  const insets = useSafeAreaInsets();
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#2563eb',
-        tabBarInactiveTintColor: '#6b7280',
+        // 🔥 CUSTOM HEADER
+        header: () => <Header />,
+
+        // 🔥 COLORS
+        tabBarActiveTintColor: COLORS.primary,
+        tabBarInactiveTintColor: COLORS.textMuted,
+
+        // 🔥 TAB BAR STYLE
         tabBarStyle: {
-          backgroundColor: '#ffffff',
-          borderTopColor: '#e5e7eb',
+          backgroundColor: COLORS.card,
           borderTopWidth: 1,
+          borderTopColor: COLORS.gray800,
+          height: 60 + insets.bottom,
+          paddingBottom: insets.bottom,
+          paddingTop: 6,
         },
-        headerStyle: {
-          backgroundColor: '#2563eb',
+
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: "600",
         },
-        headerTintColor: '#fff',
-        headerTitleStyle: {
-          fontWeight: 'bold',
-        },
-        headerRight: () => <HeaderDropdown />,
       }}
     >
+
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" size={size} color={color} />
+          title: "Home",
+          tabBarIcon: ({ color }) => (
+            <FontAwesome name="home" color={color} size={20} />
           ),
         }}
       />
+
       <Tabs.Screen
         name="services"
         options={{
-          title: 'Services',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="car" size={size} color={color} />
+          title: "Services",
+          tabBarIcon: ({ color }) => (
+            <FontAwesome name="wrench" color={color} size={20} />
           ),
         }}
       />
+
       <Tabs.Screen
         name="booking"
         options={{
-          title: 'Booking',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="calendar" size={size} color={color} />
+          title: "Booking",
+          tabBarIcon: ({ color }) => (
+            <FontAwesome name="calendar" color={color} size={20} />
           ),
         }}
       />
+
       <Tabs.Screen
         name="products"
         options={{
-          title: 'Products',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="bag" size={size} color={color} />
+          title: "Products",
+          tabBarIcon: ({ color }) => (
+            <FontAwesome name="shopping-cart" color={color} size={20} />
           ),
         }}
       />
+
       <Tabs.Screen
         name="vehicles"
         options={{
-          title: 'Vehicles',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="car-sport" size={size} color={color} />
+          title: "Vehicles",
+          tabBarIcon: ({ color }) => (
+            <FontAwesome name="car" color={color} size={20} />
           ),
         }}
       />
+
+      {/* Hidden */}
+      <Tabs.Screen
+        name="profile"
+        options={{
+          href: null,
+        }}
+      />
+
     </Tabs>
   );
 }
