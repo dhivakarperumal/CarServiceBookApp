@@ -1,27 +1,10 @@
-import { Tabs } from 'expo-router';
+import { Tabs, Redirect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { View, ActivityIndicator } from 'react-native';
 import { useAuth } from '../../contexts/AuthContext';
-import { useEffect } from 'react';
-import { router } from 'expo-router';
 
 export default function AdminLayout() {
   const { user, isLoading } = useAuth();
-
-  useEffect(() => {
-    if (!isLoading) {
-      if (!user) {
-        router.replace('/(auth)/login');
-      } else {
-        const role = user.role?.toLowerCase();
-        if (role === 'mechanic' || role === 'employee') {
-          router.replace('/(employee)/staff');
-        } else if (role !== 'admin') {
-          router.replace('/(tabs)/home');
-        }
-      }
-    }
-  }, [user, isLoading]);
 
   if (isLoading) {
     return (
@@ -31,12 +14,15 @@ export default function AdminLayout() {
     );
   }
 
-  if (!user || user.role?.toLowerCase() !== 'admin') {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0f172a' }}>
-        <ActivityIndicator size="large" color="#0EA5E9" />
-      </View>
-    );
+  if (!user) {
+    return <Redirect href="/(auth)/login" />;
+  }
+
+  const role = user.role?.toLowerCase();
+  if (role === 'mechanic' || role === 'employee') {
+    return <Redirect href="/(employee)/staff" />;
+  } else if (role !== 'admin') {
+    return <Redirect href="/(tabs)/home" />;
   }
 
   return (
