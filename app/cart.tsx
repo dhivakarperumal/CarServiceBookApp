@@ -26,8 +26,24 @@ export default function CartScreen() {
   const renderCartItem = ({ item }: { item: CartItem }) => {
     const getImgUri = (img: string | null) => {
       if (!img) return 'https://via.placeholder.com/100';
-      if (img.startsWith('http')) return img;
-      return `https://cars.qtechx.com/${img}`;
+      
+      // Handle the case where img is actually a stringified array
+      let imgPath = img;
+      if (typeof img === 'string' && img.startsWith('[')) {
+        try {
+          const parsed = JSON.parse(img);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            imgPath = parsed[0];
+          }
+        } catch (e) {
+          // ignore
+        }
+      }
+      
+      if (imgPath.startsWith('data:')) return imgPath;
+      if (imgPath.startsWith('http')) return imgPath;
+      const path = imgPath.startsWith('/') ? imgPath.substring(1) : imgPath;
+      return `https://cars.qtechx.com/${path}`;
     };
 
     return (

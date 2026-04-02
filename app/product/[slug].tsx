@@ -59,14 +59,26 @@ export default function ProductDetailsScreen() {
   };
 
   const productImages = useMemo(() => {
-    if (Array.isArray(product?.images) && product.images.length > 0) return product.images;
+    let imgs = product?.images;
+    if (typeof imgs === 'string') {
+      try {
+        imgs = JSON.parse(imgs);
+      } catch (e) {
+        imgs = [imgs];
+      }
+    }
+    if (Array.isArray(imgs) && imgs.length > 0) return imgs;
     if (product?.thumbnail) return [product.thumbnail];
     return ['https://via.placeholder.com/600x400?text=No+Image+Available'];
   }, [product]);
 
   const getImgUri = (img: string) => {
+    if (!img) return 'https://via.placeholder.com/600x400?text=No+Image+Available';
+    if (img.startsWith('data:')) return img;
     if (img.startsWith('http')) return img;
-    return `https://cars.qtechx.com/${img}`;
+    // Handle leading slash
+    const path = img.startsWith('/') ? img.substring(1) : img;
+    return `https://cars.qtechx.com/${path}`;
   };
 
   const handleAddToCart = () => {
