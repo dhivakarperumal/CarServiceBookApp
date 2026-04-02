@@ -127,7 +127,7 @@ export const apiService = {
   // Vehicles
   getVehicles: async (): Promise<Vehicle[]> => {
     try {
-      const response = await api.get('/vehicles');
+      const response = await api.get('/bikes');
       return response.data;
     } catch (error) {
       console.error('Error fetching vehicles:', error);
@@ -137,7 +137,7 @@ export const apiService = {
 
   getVehicleById: async (id: number): Promise<Vehicle> => {
     try {
-      const response = await api.get(`/vehicles/${id}`);
+      const response = await api.get(`/bikes/${id}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching vehicle:', error);
