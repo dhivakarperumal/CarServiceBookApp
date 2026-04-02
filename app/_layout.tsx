@@ -18,6 +18,9 @@ export default function RootLayout() {
           },
         }}
       >
+        {/* Initial Redirect */}
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+
         {/* Tabs (Main App) */}
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
 
@@ -27,8 +30,10 @@ export default function RootLayout() {
         {/* Employee Dashboard */}
         <Stack.Screen name="(employee)" options={{ headerShown: false }} />
 
+        {/* Admin Dashboard */}
+        <Stack.Screen name="(admin)" options={{ headerShown: false }} />
+
         {/* Other Screens */}
-        <Stack.Screen name="home" options={{ title: "Home" }} />
       </Stack>
 
       <StatusBar style="light" />

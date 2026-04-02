@@ -35,11 +35,7 @@ export default function LoginScreen() {
       
       // Determine dashboard based on role
       const roleStr = userData?.role?.toLowerCase() || '';
-      if (roleStr === 'mechanic' || roleStr === 'employee' || roleStr === 'admin') {
-        router.replace('/(employee)');
-      } else {
-        router.replace('/(tabs)');
-      }
+      console.log('Login successful, role:', roleStr);
     } catch (error: any) {
       const msg = error.response?.data?.message || error.message || 'Login failed';
       Alert.alert('Login Failed', msg);

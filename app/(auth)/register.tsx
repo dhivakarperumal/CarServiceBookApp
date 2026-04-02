@@ -54,7 +54,6 @@ export default function RegisterScreen() {
       const isAdmin = adminCode === 'ADMIN123DENTAL';
       await register({ username, email, mobile, password, role: isAdmin ? 'admin' : 'user' });
       Alert.alert('Account Created', 'Your account was created successfully');
-      router.replace('/(tabs)');
     } catch (error: any) {
       const msg = error.response?.data?.message || error.message || 'Something went wrong';
       Alert.alert('Register Failed', String(msg));

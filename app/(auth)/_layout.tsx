@@ -10,24 +10,22 @@ export default function AuthLayout() {
   useEffect(() => {
     if (!isLoading && user) {
       const role = user.role?.toLowerCase();
-      if (role === 'mechanic' || role === 'employee' || role === 'admin') {
-        router.replace('/(employee)');
+      if (role === 'admin') {
+        router.replace('/(admin)/dashboard');
+      } else if (role === 'mechanic' || role === 'employee') {
+        router.replace('/(employee)/staff');
       } else {
-        router.replace('/(tabs)');
+        router.replace('/(tabs)/home');
       }
     }
   }, [user, isLoading]);
 
-  if (isLoading) {
+  if (isLoading || user) {
     return (
-      <View className="flex-1 justify-center items-center bg-white">
-        <ActivityIndicator size="large" color="#2563eb" />
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0f172a' }}>
+        <ActivityIndicator size="large" color="#0EA5E9" />
       </View>
     );
-  }
-
-  if (user) {
-    return null; // Will redirect to tabs
   }
 
   return (

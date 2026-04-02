@@ -15,8 +15,10 @@ export default function TabLayout() {
         router.replace('/(auth)/login');
       } else {
         const role = user.role?.toLowerCase();
-        if (role === 'mechanic' || role === 'employee' || role === 'admin') {
-          router.replace('/(employee)');
+        if (role === 'admin') {
+          router.replace('/(admin)/dashboard');
+        } else if (role === 'mechanic' || role === 'employee') {
+          router.replace('/(employee)/staff');
         }
       }
     }
@@ -30,8 +32,12 @@ export default function TabLayout() {
     );
   }
 
-  if (!user) {
-    return null; // Will redirect to login
+  if (!user || user.role?.toLowerCase() === 'admin' || user.role?.toLowerCase() === 'mechanic' || user.role?.toLowerCase() === 'employee') {
+    return (
+      <View className="flex-1 justify-center items-center bg-white">
+        <ActivityIndicator size="large" color="#2563eb" />
+      </View>
+    );
   }
 
   return (
@@ -55,11 +61,20 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
-        name="index"
+        name="home"
         options={{
-          title: 'Home',
+          title: 'Dashboard',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" size={size} color={color} />
+            <Ionicons name="apps" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="booking"
+        options={{
+          title: 'Bookings',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="calendar" size={size} color={color} />
           ),
         }}
       />
@@ -69,15 +84,6 @@ export default function TabLayout() {
           title: 'Services',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="car" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="booking"
-        options={{
-          title: 'Booking',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="calendar" size={size} color={color} />
           ),
         }}
       />
@@ -96,6 +102,15 @@ export default function TabLayout() {
           title: 'Vehicles',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="car-sport" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Profile',
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="person" size={size} color={color} />
           ),
         }}
       />

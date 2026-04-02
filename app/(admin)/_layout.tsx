@@ -5,7 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useEffect } from 'react';
 import { router } from 'expo-router';
 
-export default function EmployeeAdminLayout() {
+export default function AdminLayout() {
   const { user, isLoading } = useAuth();
 
   useEffect(() => {
@@ -14,7 +14,9 @@ export default function EmployeeAdminLayout() {
         router.replace('/(auth)/login');
       } else {
         const role = user.role?.toLowerCase();
-        if (role !== 'mechanic' && role !== 'employee' && role !== 'admin') {
+        if (role === 'mechanic' || role === 'employee') {
+          router.replace('/(employee)/staff');
+        } else if (role !== 'admin') {
           router.replace('/(tabs)/home');
         }
       }
@@ -23,15 +25,15 @@ export default function EmployeeAdminLayout() {
 
   if (isLoading) {
     return (
-      <View className="flex-1 justify-center items-center bg-[#0f172a]">
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0f172a' }}>
         <ActivityIndicator size="large" color="#0EA5E9" />
       </View>
     );
   }
 
-  if (!user || (user.role?.toLowerCase() !== 'mechanic' && user.role?.toLowerCase() !== 'employee' && user.role?.toLowerCase() !== 'admin')) {
+  if (!user || user.role?.toLowerCase() !== 'admin') {
     return (
-      <View className="flex-1 justify-center items-center bg-[#0f172a]">
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0f172a' }}>
         <ActivityIndicator size="large" color="#0EA5E9" />
       </View>
     );
@@ -51,34 +53,51 @@ export default function EmployeeAdminLayout() {
           backgroundColor: '#0f172a',
         },
         headerTintColor: '#fff',
+        headerTitleStyle: {
+          fontWeight: 'bold',
+        },
       }}
     >
       <Tabs.Screen
-        name="staff"
+        name="dashboard"
         options={{
-          title: 'Dashboard',
+          title: 'Admin',
           tabBarIcon: ({ color, size }) => <Ionicons name="apps" size={size} color={color} />
         }}
       />
       <Tabs.Screen
-        name="assigned"
+        name="bookings"
         options={{
-          title: 'Assigned',
-          tabBarIcon: ({ color, size }) => <Ionicons name="clipboard" size={size} color={color} />
+          title: 'Bookings',
+          tabBarIcon: ({ color, size }) => <Ionicons name="calendar" size={size} color={color} />
         }}
       />
       <Tabs.Screen
-        name="servicecenter"
+        name="services"
         options={{
-          title: 'Center',
+          title: 'Services',
           tabBarIcon: ({ color, size }) => <Ionicons name="build" size={size} color={color} />
         }}
       />
       <Tabs.Screen
-        name="billing"
+        name="products"
         options={{
-          title: 'Billing',
-          tabBarIcon: ({ color, size }) => <Ionicons name="receipt" size={size} color={color} />
+          title: 'Products',
+          tabBarIcon: ({ color, size }) => <Ionicons name="cart" size={size} color={color} />
+        }}
+      />
+      <Tabs.Screen
+        name="vehicles"
+        options={{
+          title: 'Vehicles',
+          tabBarIcon: ({ color, size }) => <Ionicons name="car-sport" size={size} color={color} />
+        }}
+      />
+      <Tabs.Screen
+        name="users"
+        options={{
+          title: 'Users',
+          tabBarIcon: ({ color, size }) => <Ionicons name="people" size={size} color={color} />
         }}
       />
       <Tabs.Screen
