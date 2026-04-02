@@ -140,18 +140,7 @@ export default function RegisterScreen() {
           />
         </View>
 
-        {/* Admin Code */}
-        <View style={styles.inputWrapper}>
-          <Ionicons name="shield-checkmark-outline" size={20} color="#94A3B8" />
-          <TextInput
-            placeholder="Admin Code (optional)"
-            placeholderTextColor="#64748B"
-            value={adminCode}
-            onChangeText={setAdminCode}
-            style={styles.input}
-          />
-        </View>
-
+       
         {/* Password */}
         <View style={styles.inputWrapper}>
           <Ionicons name="lock-closed-outline" size={20} color="#94A3B8" />
