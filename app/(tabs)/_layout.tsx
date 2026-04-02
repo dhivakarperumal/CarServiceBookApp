@@ -1,9 +1,9 @@
-import { Tabs, Redirect } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { useAuth } from "../../contexts/AuthContext";
-import { View, ActivityIndicator } from "react-native";
+import { Redirect, Tabs } from "expo-router";
+import { ActivityIndicator, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Header from "../../components/Header";
+import { useAuth } from "../../contexts/AuthContext";
 import { COLORS } from "../../theme/colors";
 
 export default function TabLayout() {
