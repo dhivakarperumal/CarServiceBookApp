@@ -7,12 +7,12 @@ import {
   ActivityIndicator,
   Alert,
   Image,
-  StyleSheet,
   Dimensions,
   ImageBackground,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { apiService } from '../../services/api';
+import { COLORS } from '../../theme/colors';
 
 const { width } = Dimensions.get('window');
 
@@ -32,7 +32,7 @@ interface ApiProduct {
   isActive: number;
   rating: string;
   variants: any[];
-  images: string[]; // base64 or URL strings
+  images: string[];
   category?: string;
 }
 
@@ -61,11 +61,8 @@ export default function ProductsScreen() {
     if (!images || images.length === 0) return null;
     const img = images[0];
     if (!img) return null;
-    // Already a data URI (base64)
     if (img.startsWith('data:')) return img;
-    // Full URL
     if (img.startsWith('http')) return img;
-    // Relative path
     return `https://cars.qtechx.com/${img}`;
   };
 
@@ -77,9 +74,9 @@ export default function ProductsScreen() {
 
   if (loading) {
     return (
-      <View style={styles.loaderContainer}>
-        <ActivityIndicator size="large" color="#0EA5E9" />
-        <Text style={styles.loaderText}>Loading products...</Text>
+      <View className="flex-1 justify-center items-center bg-[#0B1120]">
+        <ActivityIndicator size="large" color={COLORS.primary} />
+        <Text className="text-[#94A3B8] mt-3 text-sm">Loading products...</Text>
       </View>
     );
   }
@@ -89,37 +86,37 @@ export default function ProductsScreen() {
     const offerPercent = parseFloat(item.offer || '0');
 
     return (
-      <View style={styles.card}>
+      <View className="w-[48%] bg-[#111827] rounded-[18px] p-2.5 mb-5 border border-[#0EA5E9]/20">
         {/* Image + Badge */}
-        <View style={styles.imageContainer}>
+        <View className="relative mb-2.5">
           {imageUri ? (
-            <Image source={{ uri: imageUri }} style={styles.image} resizeMode="cover" />
+            <Image source={{ uri: imageUri }} className="w-full h-[110px] rounded-xl" resizeMode="cover" />
           ) : (
-            <View style={styles.imagePlaceholder} />
+            <View className="w-full h-[110px] rounded-xl bg-[#1F2937]" />
           )}
           {offerPercent > 0 && (
-            <View style={styles.offerBadge}>
-              <Text style={styles.offerBadgeText}>{offerPercent}% OFF</Text>
+            <View className="absolute top-1.5 left-1.5 bg-[#0EA5E9] px-2 py-1 rounded-full">
+              <Text className="text-white text-[9px] font-bold tracking-[0.5px]">{offerPercent}% OFF</Text>
             </View>
           )}
         </View>
 
         {/* Name */}
-        <Text style={styles.name} numberOfLines={1}>{item.name}</Text>
+        <Text className="text-white text-[13px] font-bold mb-1" numberOfLines={1}>{item.name}</Text>
 
         {/* Brand & Rating */}
-        <View style={styles.brandRatingRow}>
-          {item.brand ? <Text style={styles.brand}>{item.brand}</Text> : <Text />}
+        <View className="flex-row justify-between items-center mb-1">
+          {item.brand ? <Text className="text-[#94A3B8] text-[11px]">{item.brand}</Text> : <Text />}
           {item.rating && parseFloat(item.rating) > 0 ? (
-            <Text style={styles.rating}>⭐ {item.rating}</Text>
+            <Text className="text-[#FBBF24] text-[11px]">⭐ {item.rating}</Text>
           ) : null}
         </View>
 
         {/* Price row */}
-        <View style={styles.priceRow}>
-          <Text style={styles.offerPrice}>₹ {formatPrice(item.offerPrice)}</Text>
+        <View className="flex-row items-center mb-2">
+          <Text className="text-[#0EA5E9] text-sm font-bold mr-1.5">₹ {formatPrice(item.offerPrice)}</Text>
           {offerPercent > 0 && (
-            <Text style={styles.mrp}>₹ {formatPrice(item.mrp)}</Text>
+            <Text className="text-[#64748B] text-[11px] line-through">₹ {formatPrice(item.mrp)}</Text>
           )}
         </View>
 
@@ -129,12 +126,13 @@ export default function ProductsScreen() {
           activeOpacity={0.8}
         >
           <LinearGradient
-            colors={['#0EA5E9', '#2563EB']}
+            colors={[COLORS.primary, COLORS.primaryDark]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
-            style={styles.gradientButton}
+            style={{ borderRadius: 25 }}
+            className="self-center w-[90%] py-1.5 justify-center items-center mt-0.5 overflow-hidden"
           >
-            <Text style={styles.gradientButtonText}>Add to Cart</Text>
+            <Text className="text-white font-bold text-xs tracking-[0.5px]">Add to Cart</Text>
           </LinearGradient>
         </TouchableOpacity>
       </View>
@@ -146,13 +144,11 @@ export default function ProductsScreen() {
       source={{
         uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQfAJ3Ai3tu58SWAJ2mK_EhozE-OIgQXcLXNg&s',
       }}
-      style={{ flex: 1 }}
+      className="flex-1"
     >
-      <View style={styles.overlay} />
-      <View style={styles.container}>
-        <Text style={styles.title}>Car Products</Text>
-        <Text style={styles.subtitle}>Premium parts & accessories</Text>
-
+      <View className="absolute inset-0 bg-black/80" />
+      <View className="flex-1 p-5">
+       
         <FlatList
           data={products}
           keyExtractor={(item) => String(item.docId)}
@@ -162,8 +158,8 @@ export default function ProductsScreen() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 40 }}
           ListEmptyComponent={() => (
-            <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>No products available at the moment</Text>
+            <View className="flex-1 items-center pt-15">
+              <Text className="text-[#94A3B8] text-sm">No products available at the moment</Text>
             </View>
           )}
         />
@@ -171,136 +167,3 @@ export default function ProductsScreen() {
     </ImageBackground>
   );
 }
-
-const styles = StyleSheet.create({
-  loaderContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#0B1120',
-  },
-  loaderText: {
-    color: '#94A3B8',
-    marginTop: 12,
-    fontSize: 14,
-  },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.82)',
-  },
-  container: {
-    flex: 1,
-    padding: 20,
-  },
-  title: {
-    color: '#FFFFFF',
-    fontSize: 24,
-    fontWeight: '700',
-    marginBottom: 2,
-  },
-  subtitle: {
-    color: '#94A3B8',
-    fontSize: 13,
-    marginBottom: 20,
-  },
-  /* ── card ── */
-  card: {
-    width: '48%',
-    backgroundColor: '#111827',
-    borderRadius: 18,
-    padding: 10,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(14,165,233,0.2)',
-  },
-  imageContainer: {
-    position: 'relative',
-    marginBottom: 10,
-  },
-  image: {
-    width: '100%',
-    height: 110,
-    borderRadius: 12,
-  },
-  imagePlaceholder: {
-    width: '100%',
-    height: 110,
-    borderRadius: 12,
-    backgroundColor: '#1F2937',
-  },
-  offerBadge: {
-    position: 'absolute',
-    top: 6,
-    left: 6,
-    backgroundColor: '#0EA5E9',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 20,
-  },
-  offerBadgeText: {
-    color: '#FFFFFF',
-    fontSize: 9,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-  },
-  name: {
-    color: '#FFFFFF',
-    fontSize: 13,
-    fontWeight: '700',
-    marginBottom: 4,
-  },
-  brandRatingRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  brand: {
-    color: '#94A3B8',
-    fontSize: 11,
-  },
-  rating: {
-    color: '#FBBF24',
-    fontSize: 11,
-  },
-  priceRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  offerPrice: {
-    color: '#0EA5E9',
-    fontSize: 14,
-    fontWeight: '700',
-    marginRight: 6,
-  },
-  mrp: {
-    color: '#64748B',
-    fontSize: 11,
-    textDecorationLine: 'line-through',
-  },
-  gradientButton: {
-    alignSelf: 'center',
-    width: '90%',
-    paddingVertical: 7,
-    borderRadius: 25,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 2,
-  },
-  gradientButtonText: {
-    color: '#FFFFFF',
-    fontWeight: '700',
-    fontSize: 12,
-    letterSpacing: 0.5,
-  },
-  emptyContainer: {
-    flex: 1,
-    alignItems: 'center',
-    paddingTop: 60,
-  },
-  emptyText: {
-    color: '#94A3B8',
-    fontSize: 14,
-  },
-});
