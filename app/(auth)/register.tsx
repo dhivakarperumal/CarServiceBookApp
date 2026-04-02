@@ -140,7 +140,6 @@ export default function RegisterScreen() {
           />
         </View>
 
-       
         {/* Password */}
         <View style={styles.inputWrapper}>
           <Ionicons name="lock-closed-outline" size={20} color="#94A3B8" />
