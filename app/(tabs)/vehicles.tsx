@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Alert, Image, Dimensions } from 'react-native';
 import { apiService, Vehicle } from '../../services/api';
+
+const { width } = Dimensions.get('window');
+const COLUMN_WIDTH = (width - 48) / 2;
 
 export default function VehiclesScreen() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
@@ -27,6 +30,60 @@ export default function VehiclesScreen() {
     Alert.alert('Vehicle Details', `More info about ${vehicleName} coming soon!`);
   };
 
+  const getVehicleImage = (imageString: string | undefined) => {
+    if (!imageString) return 'https://via.placeholder.com/150?text=🚗';
+
+    try {
+      if (imageString.startsWith('[') && imageString.endsWith(']')) {
+        const images = JSON.parse(imageString);
+        if (Array.isArray(images) && images.length > 0) {
+          const img = images[0];
+          return img.startsWith('http') ? img : `https://cars.qtechx.com/${img}`;
+        }
+      }
+      return imageString.startsWith('http') ? imageString : `https://cars.qtechx.com/${imageString}`;
+    } catch (e) {
+      return imageString.startsWith('http') ? imageString : `https://cars.qtechx.com/${imageString}`;
+    }
+  };
+
+  const formatPrice = (price: any) => {
+    if (typeof price !== 'string' && typeof price !== 'number') return '0.00';
+    const priceStr = String(price);
+    const numericPart = priceStr.replace(/[^0-9.]/g, '');
+    return numericPart ? parseFloat(numericPart).toLocaleString() : '0.00';
+  };
+
+  const renderVehicleItem = ({ item }: { item: Vehicle }) => (
+    <TouchableOpacity 
+      className="bg-white rounded-xl mb-4 shadow-sm border border-gray-100 overflow-hidden" 
+      style={{ width: COLUMN_WIDTH, margin: 6 }}
+      onPress={() => handleViewDetails(item.name)}
+    >
+      <Image
+        source={{ uri: getVehicleImage(item.image) }}
+        className="w-full h-40 bg-gray-100"
+        resizeMode="cover"
+      />
+      <View className="p-3">
+        <Text className="text-sm font-semibold text-gray-800 mb-1" numberOfLines={1}>
+          {item.name}
+        </Text>
+        <Text className="text-gray-500 text-[11px] mb-2 leading-4">
+          Year: {item.year}
+        </Text>
+        <View className="flex-row justify-between items-center mt-1">
+          <Text className="text-green-600 font-bold text-sm">
+            ${formatPrice(item.price)}
+          </Text>
+          <View className="bg-blue-50 px-2 py-1 rounded">
+            <Text className="text-blue-600 text-[10px] font-bold">Details</Text>
+          </View>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+
   if (loading) {
     return (
       <View className="flex-1 bg-white justify-center items-center">
@@ -37,57 +94,38 @@ export default function VehiclesScreen() {
   }
 
   return (
-    <ScrollView className="flex-1 bg-white">
-      <View className="p-6">
-        <Text className="text-2xl font-bold text-gray-800 mb-6">
-          Available Vehicles
-        </Text>
-
-        <Text className="text-gray-600 mb-6">
-          Browse our selection of quality vehicles
-        </Text>
-
-        {vehicles.length === 0 ? (
-          <Text className="text-gray-600 text-center">No vehicles available</Text>
-        ) : (
-          vehicles.map((vehicle) => (
-            <TouchableOpacity
-              key={vehicle.id}
-              className="bg-gray-50 p-4 rounded-lg mb-4 border border-gray-200"
-              onPress={() => handleViewDetails(vehicle.name)}
-            >
-              <View className="flex-row items-center">
-                <Text className="text-4xl mr-4">
-                  {vehicle.image || '🚗'}
-                </Text>
-                <View className="flex-1">
-                  <Text className="text-lg font-semibold text-gray-800 mb-1">
-                    {vehicle.name}
-                  </Text>
-                  <Text className="text-gray-600 mb-1">
-                    Year: {vehicle.year}
-                  </Text>
-                  <Text className="text-green-600 font-bold text-lg">
-                    {vehicle.price}
-                  </Text>
-                </View>
-                <TouchableOpacity
-                  className="bg-blue-600 px-4 py-2 rounded-lg"
-                  onPress={() => handleViewDetails(vehicle.name)}
-                >
-                  <Text className="text-white font-semibold">Details</Text>
-                </TouchableOpacity>
-              </View>
-            </TouchableOpacity>
-          ))
+    <View className="flex-1 bg-gray-50">
+      <FlatList
+        data={vehicles}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={renderVehicleItem}
+        numColumns={2}
+        contentContainerStyle={{ padding: 12 }}
+        ListHeaderComponent={() => (
+          <View className="px-3 py-4">
+            <Text className="text-2xl font-bold text-gray-800">
+              Available Vehicles
+            </Text>
+            <Text className="text-gray-500 mt-1">
+              Browse our selection of quality vehicles
+            </Text>
+          </View>
         )}
-
-        <View className="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-          <Text className="text-yellow-800 font-semibold text-center">
-            Financing available - Apply now!
-          </Text>
-        </View>
-      </View>
-    </ScrollView>
+        ListEmptyComponent={() => (
+          <View className="flex-1 items-center justify-center pt-20">
+            <Text className="text-gray-400">No vehicles available</Text>
+          </View>
+        )}
+        ListFooterComponent={() => (
+          <View className="p-4 mb-6">
+            <View className="bg-yellow-50 p-4 rounded-xl border border-yellow-100">
+              <Text className="text-yellow-800 font-semibold text-center text-sm">
+                Financing available - Apply now!
+              </Text>
+            </View>
+          </View>
+        )}
+      />
+    </View>
   );
-}
+}
