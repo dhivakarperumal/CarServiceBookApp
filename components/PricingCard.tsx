@@ -2,6 +2,8 @@ import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
+import { GRADIENT } from "../theme/colors";
 
 type PricingPackage = {
     id: number;
@@ -57,15 +59,22 @@ const PricingCard: React.FC<Props> = ({ pkg }) => {
                 ))}
             </View>
 
-            {/* ✅ BUTTON */}
             <TouchableOpacity
-                className="bg-primary py-2 rounded-xl items-center"
-                activeOpacity={0.8}
                 onPress={() => router.push("/booking")}
+                activeOpacity={0.8}
+                className="rounded-full overflow-hidden w-[90%] self-center"
             >
-                <Text className="text-white font-bold text-sm">
-                    Choose Plan
-                </Text>
+                <LinearGradient
+                    colors={GRADIENT} 
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={{ borderRadius: 25 }}
+                    className="py-2 items-center justify-center"
+                >
+                    <Text className="text-white font-bold text-sm tracking-[0.5px]">
+                        Choose Plan
+                    </Text>
+                </LinearGradient>
             </TouchableOpacity>
         </View>
     );
