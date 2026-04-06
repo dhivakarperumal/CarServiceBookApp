@@ -3,6 +3,7 @@ import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, Image, TextI
 import { apiService, api, Vehicle } from '../../services/api';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+// @ts-ignore
 import RazorpayCheckout from 'react-native-razorpay';
 
 const { width } = Dimensions.get('window');
