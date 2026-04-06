@@ -76,6 +76,14 @@ export default function EmployeeAdminLayout() {
         }}
       />
       <Tabs.Screen
+        name="add-parts"
+        options={{
+          href: null,
+          title: 'Add Parts',
+          headerShown: false
+        }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{
           title: 'Profile',
