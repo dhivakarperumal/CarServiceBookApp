@@ -6,7 +6,7 @@ import { COLORS } from '../../theme/colors';
 import { LinearGradient } from 'expo-linear-gradient';
 
 export default function ServiceDetailsScreen() {
-  const { id } = useLocalSearchParams();
+  const { id, name } = useLocalSearchParams();
   const router = useRouter();
   const [service, setService] = useState<Service | null>(null);
   const [loading, setLoading] = useState(true);
@@ -16,6 +16,13 @@ export default function ServiceDetailsScreen() {
       fetchServiceDetails();
     }
   }, [id]);
+
+  useEffect(() => {
+    if (service?.name) {
+      router.setParams({ title: service.name });
+    }
+  }, [service]);
+
 
   const fetchServiceDetails = async () => {
     try {
@@ -53,7 +60,7 @@ export default function ServiceDetailsScreen() {
       <View className="flex-1 justify-center items-center bg-[#0B1120]">
         <Text className="text-[#94A3B8] mb-4">Service not found.</Text>
         <TouchableOpacity onPress={() => router.back()} className="px-6 py-2 bg-[#1F2937] rounded-full">
-            <Text className="text-white font-bold">Go Back</Text>
+          <Text className="text-white font-bold">Go Back</Text>
         </TouchableOpacity>
       </View>
     );
@@ -68,35 +75,35 @@ export default function ServiceDetailsScreen() {
     >
       <View className="absolute inset-0 bg-black/85" />
       <ScrollView className="flex-1" contentContainerStyle={{ padding: 20, paddingBottom: 60 }}>
-        
+
         {/* Back Button */}
         <TouchableOpacity onPress={() => router.back()} className="mb-6 self-start bg-[#1F2937] px-4 py-2 rounded-full flex-row items-center border border-gray-700">
-            <Text className="text-white text-xs font-bold tracking-[0.5px]">← Back</Text>
+          <Text className="text-white text-xs font-bold tracking-[0.5px]">← Back</Text>
         </TouchableOpacity>
 
         {imageUri && (
           <View className="w-full h-[220px] mb-6 rounded-2xl overflow-hidden shadow-2xl border border-[#0EA5E9]/20">
-             <Image source={{ uri: imageUri }} className="w-full h-full" resizeMode="cover" />
+            <Image source={{ uri: imageUri }} className="w-full h-full" resizeMode="cover" />
           </View>
         )}
 
         <Text className="text-white text-3xl font-bold mb-2">
           {service.name}
         </Text>
-        
+
         {service.price ? (
-           <Text className="text-[#0EA5E9] text-2xl font-bold mb-6">
-             {service.price}
-           </Text>
+          <Text className="text-[#0EA5E9] text-2xl font-bold mb-6">
+            {service.price}
+          </Text>
         ) : (
-            <Text className="text-[#64748B] italic text-lg mb-6">Price on request</Text>
+          <Text className="text-[#64748B] italic text-lg mb-6">Price on request</Text>
         )}
 
         <View className="bg-[#111827]/80 p-5 rounded-[20px] border border-[#1F2937] mb-6">
-            <Text className="text-white font-semibold text-lg mb-3 border-b border-[#1F2937] pb-2">About this Service</Text>
-            <Text className="text-[#94A3B8] text-[15px] leading-7">
+          <Text className="text-white font-semibold text-lg mb-3 border-b border-[#1F2937] pb-2">About this Service</Text>
+          <Text className="text-[#94A3B8] text-[15px] leading-7">
             {service.description || "No detailed description available for this service."}
-            </Text>
+          </Text>
         </View>
 
         {/* <TouchableOpacity

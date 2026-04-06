@@ -12,35 +12,42 @@ export default function RootLayout() {
       <CartProvider>
         <FavoriteProvider>
           <Stack
-        screenOptions={{
-          headerStyle: {
-            backgroundColor: "#2563eb",
-          },
-          headerTintColor: "#fff",
-          headerTitleStyle: {
-            fontWeight: "bold",
-          },
-        }}
-      >
-        {/* Initial Redirect */}
-        <Stack.Screen name="index" options={{ headerShown: false }} />
+            screenOptions={{
+              headerStyle: {
+                backgroundColor: "#2563eb",
+              },
+              headerTintColor: "#fff",
+              headerTitleStyle: {
+                fontWeight: "bold",
+              },
+            }}
+          >
+            {/* Initial Redirect */}
+            <Stack.Screen name="index" options={{ headerShown: false }} />
 
-        {/* Tabs (Main App) */}
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            {/* Tabs (Main App) */}
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
 
-        {/* Auth Screens */}
-        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+            {/* Auth Screens */}
+            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
 
-        {/* Employee Dashboard */}
-        <Stack.Screen name="(employee)" options={{ headerShown: false }} />
+            {/* Employee Dashboard */}
+            <Stack.Screen name="(employee)" options={{ headerShown: false }} />
 
-        {/* Admin Dashboard */}
-        <Stack.Screen name="(admin)" options={{ headerShown: false }} />
+            {/* Admin Dashboard */}
+            <Stack.Screen name="(admin)" options={{ headerShown: false }} />
 
-        {/* Other Screens */}
-      </Stack>
+            <Stack.Screen
+              name="service/[id]"
+              options={({ route }) => ({
+                title: route.params?.title || "Service Details",
+              })}
+            />
 
-      <StatusBar style="light" />
+            {/* Other Screens */}
+          </Stack>
+
+          <StatusBar style="light" />
         </FavoriteProvider>
       </CartProvider>
     </AuthProvider>
