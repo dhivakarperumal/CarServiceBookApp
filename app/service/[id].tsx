@@ -99,7 +99,7 @@ export default function ServiceDetailsScreen() {
             </Text>
         </View>
 
-        <TouchableOpacity
+        {/* <TouchableOpacity
           onPress={() => Alert.alert('Booking', 'Booking flow coming soon!')}
           activeOpacity={0.8}
           className="rounded-full overflow-hidden w-full mt-2"
@@ -113,7 +113,7 @@ export default function ServiceDetailsScreen() {
           >
             <Text className="text-white font-bold text-[15px] tracking-[1px]">Book Service Now</Text>
           </LinearGradient>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </ScrollView>
     </ImageBackground>
   );
