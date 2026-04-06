@@ -144,20 +144,20 @@ export default function EmployeeDashboard() {
 
   const getStatusStyles = (status: string) => {
     switch (status) {
-      case "Pending": return { bg: "bg-yellow-100", text: "text-yellow-700" };
-      case "Processing": return { bg: "bg-orange-100", text: "text-orange-700" };
-      case "Assigned": return { bg: "bg-blue-100", text: "text-blue-700" };
-      case "Service Going on": return { bg: "bg-indigo-100", text: "text-indigo-700" };
-      case "Bill Pending": return { bg: "bg-purple-100", text: "text-purple-700" };
-      case "Bill Completed": return { bg: "bg-cyan-100", text: "text-cyan-700" };
+      case "Pending": return { bg: "bg-yellow-600", text: "text-black" };
+      case "Processing": return { bg: "bg-orange-600", text: "text-white" };
+      case "Assigned": return { bg: "bg-blue-600", text: "text-white" };
+      case "Service Going on": return { bg: "bg-indigo-600", text: "text-white" };
+      case "Bill Pending": return { bg: "bg-purple-600", text: "text-white" };
+      case "Bill Completed": return { bg: "bg-cyan-600", text: "text-white" };
       case "Service Completed": 
-      case "Completed": return { bg: "bg-green-100", text: "text-green-700" };
-      default: return { bg: "bg-gray-100", text: "text-gray-700" };
+      case "Completed": return { bg: "bg-emerald-600", text: "text-white" };
+      default: return { bg: "bg-slate-700", text: "text-slate-300" };
     }
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <SafeAreaView className="flex-1 bg-slate-900">
       <ScrollView className="flex-1 p-5 pb-20">
         <View className="flex-row items-center justify-between mb-8">
           <View className="flex-row items-center flex-1 pr-4">
@@ -165,46 +165,46 @@ export default function EmployeeDashboard() {
               <Ionicons name="person" size={24} color="white" />
             </View>
             <View>
-              <Text className="text-xl font-bold text-gray-800">
+              <Text className="text-xl font-bold text-white">
                 Hello, {userProfile?.username?.split(" ")[0] || "Technician"}!
               </Text>
-              <Text className="text-gray-500 font-medium capitalize text-xs">
-                {userProfile?.role || "Staff"} • Workspace
+              <Text className="text-slate-400 font-medium capitalize text-xs">
+                {userProfile?.role || "Staff"} • Workshop
               </Text>
             </View>
           </View>
-          <TouchableOpacity className="p-2 bg-white rounded-xl border border-gray-200">
-            <Ionicons name="calendar-outline" size={20} color="#374151" />
+          <TouchableOpacity className="p-2 bg-slate-800 rounded-xl border border-slate-700">
+            <Ionicons name="calendar-outline" size={20} color="#94a3b8" />
           </TouchableOpacity>
         </View>
 
         {/* Quick Stats */}
         <View className="flex-row justify-between mb-8 space-x-2">
-          <View className="flex-1 bg-white p-4 rounded-2xl border border-gray-100 mx-1">
-            <Ionicons name="time-outline" size={24} color="#2563eb" className="mb-2" />
-            <Text className="text-xs text-gray-500 font-medium mt-1">Pending</Text>
-            <Text className="text-xl font-bold text-gray-800">{stats.pending}</Text>
+          <View className="flex-1 bg-slate-800 p-4 rounded-2xl border border-slate-700 mx-1">
+            <Ionicons name="time-outline" size={24} color="#3b82f6" />
+            <Text className="text-xs text-slate-400 font-medium mt-1">Pending</Text>
+            <Text className="text-xl font-bold text-white">{stats.pending}</Text>
           </View>
-          <View className="flex-1 bg-white p-4 rounded-2xl border border-gray-100 mx-1">
-            <Ionicons name="construct-outline" size={24} color="#4f46e5" className="mb-2" />
-            <Text className="text-xs text-gray-500 font-medium mt-1">In Progress</Text>
-            <Text className="text-xl font-bold text-gray-800">{stats.inProgress}</Text>
+          <View className="flex-1 bg-slate-800 p-4 rounded-2xl border border-slate-700 mx-1">
+            <Ionicons name="construct-outline" size={24} color="#6366f1" />
+            <Text className="text-xs text-slate-400 font-medium mt-1">In Progress</Text>
+            <Text className="text-xl font-bold text-white">{stats.inProgress}</Text>
           </View>
-          <View className="flex-1 bg-white p-4 rounded-2xl border border-gray-100 mx-1">
-            <Ionicons name="checkmark-circle-outline" size={24} color="#16a34a" className="mb-2" />
-            <Text className="text-xs text-gray-500 font-medium mt-1">Completed</Text>
-            <Text className="text-xl font-bold text-gray-800">{stats.completed}</Text>
+          <View className="flex-1 bg-slate-800 p-4 rounded-2xl border border-slate-700 mx-1">
+            <Ionicons name="checkmark-circle-outline" size={24} color="#10b981" />
+            <Text className="text-xs text-slate-400 font-medium mt-1">Completed</Text>
+            <Text className="text-xl font-bold text-white">{stats.completed}</Text>
           </View>
         </View>
 
         {/* My Tasks */}
         <View className="flex-row items-center justify-between mb-4 mt-2">
           <View className="flex-row items-center">
-            <Ionicons name="clipboard-outline" size={20} color="#2563eb" />
-            <Text className="text-lg font-black text-gray-900 ml-2">Assigned Tasks</Text>
+            <Ionicons name="clipboard-outline" size={20} color="#3b82f6" />
+            <Text className="text-lg font-black text-white ml-2">Assigned Tasks</Text>
           </View>
           <TouchableOpacity onPress={() => router.push("/(employee)/assigned" as any)}>
-            <Text className="text-xs font-black uppercase text-blue-600">View All</Text>
+            <Text className="text-xs font-black uppercase text-sky-500">View All</Text>
           </TouchableOpacity>
         </View>
 
@@ -220,43 +220,40 @@ export default function EmployeeDashboard() {
             {myTasks.map((task, idx) => {
               const statusStyle = getStatusStyles(task.status);
               return (
-                <View key={task.id || idx} className="bg-white p-4 rounded-2xl border border-gray-100 mb-3">
-                  <View className="flex-row justify-between mb-2">
-                    <View>
-                      <Text className="font-bold text-gray-800 text-base">{task.brand} {task.model}</Text>
-                      <Text className="text-xs text-gray-500">{task.vehicleNumber || "No Plate"} • {task.name}</Text>
+                <View key={task.id || idx} className="bg-slate-800 p-5 rounded-3xl border border-slate-700 mb-4">
+                  <View className="flex-row justify-between mb-4">
+                    <View className="flex-1">
+                      <Text className="font-black text-white text-base">{task.brand} {task.model}</Text>
+                      <Text className="text-xs text-slate-400 mt-1">{task.vehicleNumber || "No Plate"} • {task.name}</Text>
                     </View>
-                    <View className={`${statusStyle.bg} px-2 flex items-center justify-center rounded-md self-start py-1`}>
-                      <Text className={`${statusStyle.text} text-[10px] font-bold`}>{task.status}</Text>
+                    <View className={`${statusStyle.bg} px-3 py-1 rounded-full self-start`}>
+                      <Text className={`${statusStyle.text} text-[8px] font-black uppercase tracking-widest`}>{task.status}</Text>
                     </View>
                   </View>
                   
-                  <View className="flex-row mt-2 pt-3 border-t border-gray-50 space-x-2">
+                  <View className="flex-row pt-4 border-t border-slate-700/50 space-x-2">
                     {(task.status === "Assigned" || task.status === "Pending" || task.status === "Approved" || task.status === "Processing") && (
                       <TouchableOpacity 
                         onPress={() => updateServiceStatus(task, "Service Going on")}
-                        className="bg-blue-600 px-3 py-2 rounded-lg flex-1 items-center mx-1"
+                        className="bg-blue-600 px-4 py-2.5 rounded-xl flex-1 items-center mx-1"
                       >
-                        <Text className="text-white text-xs font-bold uppercase">Start</Text>
+                        <Text className="text-white text-[10px] font-black uppercase tracking-widest">Start Job</Text>
                       </TouchableOpacity>
                     )}
                     {(task.status === "Service Going on" || task.status === "Waiting for Spare") && (
                       <TouchableOpacity 
                         onPress={() => updateServiceStatus(task, "Service Completed")}
-                        className="bg-green-600 px-3 py-2 rounded-lg flex-1 items-center mx-1"
+                        className="bg-emerald-600 px-4 py-2.5 rounded-xl flex-1 items-center mx-1"
                       >
-                        <Text className="text-white text-xs font-bold uppercase">Done</Text>
+                        <Text className="text-white text-[10px] font-black uppercase tracking-widest">Complete</Text>
                       </TouchableOpacity>
                     )}
-                    
-                    {!(task.status === "Completed" || task.status === "Service Completed" || task.status === "Cancelled") && (
-                      <TouchableOpacity 
-                        onPress={() => router.push(`/(employee)/servicecenter?id=${task.id}` as any)}
-                        className="bg-slate-800 px-3 py-2 rounded-lg flex-1 items-center mx-1"
-                      >
-                        <Text className="text-white text-xs font-bold uppercase">Manage</Text>
-                      </TouchableOpacity>
-                    )}
+                    <TouchableOpacity 
+                      onPress={() => router.push(`/(employee)/servicecenter?id=${task.id}` as any)}
+                      className="bg-slate-700 px-4 py-2.5 rounded-xl flex-1 items-center mx-1"
+                    >
+                      <Text className="text-white text-[10px] font-black uppercase tracking-widest">Board</Text>
+                    </TouchableOpacity>
                   </View>
                 </View>
               );
@@ -265,25 +262,25 @@ export default function EmployeeDashboard() {
         )}
 
         {/* Quick Tools */}
-        <Text className="font-bold text-gray-800 mb-4 text-sm uppercase tracking-wider mt-4">Quick Tools</Text>
+        <Text className="font-black text-slate-500 mb-4 text-[10px] uppercase tracking-widest mt-4 ml-1">Operations Hub</Text>
         <TouchableOpacity 
           onPress={() => router.push("/(employee)/servicecenter" as any)}
-          className="flex-row items-center p-4 bg-white rounded-xl border border-gray-100 mb-3"
+          className="flex-row items-center p-5 bg-slate-800 rounded-3xl border border-slate-700 mb-3"
         >
-          <View className="p-2 bg-orange-50 rounded-lg mr-3">
-            <Ionicons name="construct" size={20} color="#ea580c" />
+          <View className="p-2 bg-orange-600 rounded-xl mr-3">
+            <Ionicons name="construct" size={20} color="white" />
           </View>
-          <Text className="text-gray-700 font-medium">New Service Entry</Text>
+          <Text className="text-white font-bold">Service Board</Text>
         </TouchableOpacity>
 
         <TouchableOpacity 
-          onPress={() => router.push("/(employee)/billing" as any)}
-          className="flex-row items-center p-4 bg-white rounded-xl border border-gray-100 mb-3"
+          onPress={() => router.push("/(employee)/add-parts" as any)}
+          className="flex-row items-center p-5 bg-slate-800 rounded-3xl border border-slate-700 mb-3"
         >
-          <View className="p-2 bg-purple-50 rounded-lg mr-3">
-            <Ionicons name="clipboard" size={20} color="#9333ea" />
+          <View className="p-2 bg-emerald-600 rounded-xl mr-3">
+            <Ionicons name="cart" size={20} color="white" />
           </View>
-          <Text className="text-gray-700 font-medium">Add Service Parts</Text>
+          <Text className="text-white font-bold">Add Service Parts</Text>
         </TouchableOpacity>
 
         <TouchableOpacity 
@@ -291,24 +288,24 @@ export default function EmployeeDashboard() {
              await logout();
              router.replace('/(auth)/login');
           }}
-          className="flex-row items-center p-4 bg-white rounded-xl border border-gray-100 mt-2 mb-10"
+          className="flex-row items-center p-5 bg-slate-800 rounded-3xl border border-slate-700 mt-2 mb-10"
         >
-          <View className="p-2 bg-red-50 rounded-lg mr-3">
-            <Ionicons name="log-out" size={20} color="#dc2626" />
+          <View className="p-2 bg-red-600 rounded-xl mr-3">
+            <Ionicons name="log-out" size={20} color="white" />
           </View>
-          <Text className="text-red-600 font-medium">Logout Account</Text>
+          <Text className="text-red-500 font-bold">Logout Account</Text>
         </TouchableOpacity>
       </ScrollView>
 
       {/* Attendance Modal */}
       <Modal visible={showAttendanceModal} transparent={true} animationType="fade">
-        <View className="flex-1 bg-black/40 justify-center items-center p-4">
-          <View className="bg-white w-full max-w-sm rounded-[32px] p-8 items-center shadow-2xl">
-            <View className="w-20 h-20 bg-blue-100 rounded-full items-center justify-center mb-6">
-              <Ionicons name="time" size={36} color="#2563eb" />
+        <View className="flex-1 bg-black justify-center items-center p-6">
+          <View className="bg-slate-800 w-full rounded-[32px] p-8 items-center border border-slate-700">
+            <View className="w-20 h-20 bg-blue-600 rounded-3xl items-center justify-center mb-6">
+              <Ionicons name="time" size={36} color="white" />
             </View>
-            <Text className="text-2xl font-black text-slate-900 mb-2">Mark Attendance</Text>
-            <Text className="text-slate-500 text-center font-medium mb-8">
+            <Text className="text-2xl font-black text-white mb-2 text-center">Mark Attendance</Text>
+            <Text className="text-slate-400 text-center font-medium mb-8 leading-5">
               Good morning! Please mark your attendance with GPS location to begin your workday.
             </Text>
             

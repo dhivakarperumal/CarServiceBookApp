@@ -347,7 +347,12 @@ export default function ServiceCenter() {
                       <View className={`px-3 py-1 rounded-full border ${getStatusColor(item.serviceStatus || "Booked")}`}>
                         <Text className="text-[10px] font-black uppercase tracking-widest">{item.serviceStatus || "Booked"}</Text>
                       </View>
-                      <Text className="text-[10px] font-black text-slate-500 uppercase tracking-widest">ID: {item.bookingId || `SER-${item.id}`}</Text>
+                      <View className="flex-row items-center gap-3">
+                         <Text className="text-[10px] font-black text-slate-500 uppercase tracking-widest">ID: {item.bookingId || `SER-${item.id}`}</Text>
+                         <TouchableOpacity onPress={() => router.push({ pathname: "/(employee)/service-details", params: { id: item.id } })}>
+                            <Ionicons name="eye" size={16} color="#64748b" />
+                         </TouchableOpacity>
+                      </View>
                    </View>
 
                    <View className="mb-4">
