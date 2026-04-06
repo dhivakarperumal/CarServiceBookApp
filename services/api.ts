@@ -104,13 +104,14 @@ export const apiService = {
   },
 
   // Products
-  getProducts: async (): Promise<Product[]> => {
+  getProducts: async (category?: string): Promise<any[]> => {
     try {
-      const response = await api.get('/products');
-      return response.data;
+      const endpoint = category ? `/products?category=${category}` : '/products';
+      const response = await api.get(endpoint);
+      return Array.isArray(response.data) ? response.data : [];
     } catch (error) {
       console.error('Error fetching products:', error);
-      throw error;
+      return [];
     }
   },
 
@@ -183,6 +184,56 @@ export const apiService = {
     } catch (error) {
       console.error('Error fetching vehicle:', error);
       throw error;
+    }
+  },
+
+  getStaff: async (): Promise<any[]> => {
+    try {
+      const response = await api.get('/staff');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching staff:', error);
+      return [];
+    }
+  },
+
+  getOrders: async (): Promise<any[]> => {
+    try {
+      const response = await api.get('/orders');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      return [];
+    }
+  },
+
+  getBillings: async (): Promise<any[]> => {
+    try {
+      const response = await api.get('/billings');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching billings:', error);
+      return [];
+    }
+  },
+
+  getInventory: async (): Promise<any[]> => {
+    try {
+      const response = await api.get('/inventory');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching inventory:', error);
+      return [];
+    }
+  },
+
+  getVehicleBookings: async (): Promise<any[]> => {
+    try {
+      const response = await api.get('/vehicle-bookings');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching vehicle bookings:', error);
+      return [];
     }
   },
 
