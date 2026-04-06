@@ -85,7 +85,7 @@ export default function VehiclesScreen() {
         description: `Advance Payment for ${v.brand || 'Vehicle'} ${vehicle.model}`,
         image: 'https://cars.qtechx.com/logo.png',
         currency: 'INR',
-        key: 'NTAIBAhGSQ97reBaqnII6R70',
+        key: 'rzp_test_SGj8n5SyKSE10b',
         amount: amountPaise,
         name: 'Car Store Booking',
         theme: {color: '#0EA5E9'},
