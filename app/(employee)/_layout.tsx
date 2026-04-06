@@ -68,6 +68,14 @@ export default function EmployeeAdminLayout() {
         }}
       />
       <Tabs.Screen
+        name="add-billing"
+        options={{
+          href: null,
+          title: 'New Bill',
+          headerShown: false
+        }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{
           title: 'Profile',
