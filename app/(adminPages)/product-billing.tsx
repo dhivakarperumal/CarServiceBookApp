@@ -43,6 +43,7 @@ const ProductBilling = () => {
   /* UI MODALS */
   const [productPickerVisible, setProductPickerVisible] = useState(false);
   const [variantPickerVisible, setVariantPickerVisible] = useState(false);
+  const [orderTypePickerVisible, setOrderTypePickerVisible] = useState(false);
   const [billingSuccessVisible, setBillingSuccessVisible] = useState(false);
   const [lastOrderDetails, setLastOrderDetails] = useState<any>(null);
 
@@ -141,10 +142,20 @@ const ProductBilling = () => {
         await apiService.updateProductStock(product.docId || product.id, { variants: updatedVariants, totalStock });
       }
 
-      /* 2. Create Order */
+      /* 2. Create Order Manifest with redundant data for high-fidelity persistence */
       const orderData = {
         orderId,
+        // Flat keys for backend flexibility
+        customerName: isOnline ? shipping.name : customer.name,
+        customerPhone: isOnline ? shipping.phone : customer.phone,
+        customerMobile: isOnline ? shipping.phone : customer.phone,
+        mobile: isOnline ? shipping.phone : customer.phone,
+        phone: isOnline ? shipping.phone : customer.phone,
+        
+        // Structured Logistics data
         customer: isOnline ? shipping : customer,
+        shipping: isOnline ? shipping : null,
+        
         orderType,
         items: cart,
         total: grandTotal,
@@ -205,24 +216,31 @@ const ProductBilling = () => {
              <Text className="text-sky-500 text-[10px] font-black uppercase tracking-[2px]">ShopFloor & Logistics Invoice System</Text>
           </View>
 
-          {/* ORDER TYPE SELECTOR */}
-          <View className="flex-row bg-slate-900 p-1 rounded-2xl border border-slate-800 mb-6">
-             <TouchableOpacity 
-               onPress={() => setOrderType("shop")}
-               className={`flex-1 py-3 items-center rounded-xl ${orderType === "shop" ? 'bg-slate-800 border border-slate-700 shadow-lg' : ''}`}
-             >
-                <Text className={`${orderType === "shop" ? 'text-white' : 'text-slate-500'} font-black text-[10px] uppercase`}>Walk-in (Shop)</Text>
-             </TouchableOpacity>
-             <TouchableOpacity 
-               onPress={() => setOrderType("online")}
-               className={`flex-1 py-3 items-center rounded-xl ${orderType === "online" ? 'bg-slate-800 border border-slate-700 shadow-lg' : ''}`}
-             >
-                <Text className={`${orderType === "online" ? 'text-white' : 'text-slate-500'} font-black text-[10px] uppercase`}>Digital (Online)</Text>
-             </TouchableOpacity>
-          </View>
+          {/* ORDER TYPE SELECTOR - CONVERTED TO SELECT */}
+          <TouchableOpacity 
+            onPress={() => setOrderTypePickerVisible(true)}
+            className="bg-slate-900 border border-slate-800 rounded-3xl p-5 mb-6 flex-row justify-between items-center shadow-xl"
+          >
+             <View className="flex-row items-center gap-4">
+                <View className="w-10 h-10 bg-slate-950 rounded-2xl items-center justify-center border border-slate-800">
+                   <Ionicons 
+                     name={orderType === "shop" ? "storefront-outline" : "globe-outline"} 
+                     size={18} 
+                     color="#0ea5e9" 
+                   />
+                </View>
+                <View>
+                   <Text className="text-white font-black text-xs uppercase tracking-tighter">
+                      {orderType === "shop" ? "Walk-in (Shop Order)" : "Digital (Online Order)"}
+                   </Text>
+                   <Text className="text-slate-500 text-[8px] font-black uppercase tracking-widest mt-0.5">Order Type Logic</Text>
+                </View>
+             </View>
+             <Ionicons name="chevron-down" size={16} color="#1e293b" />
+          </TouchableOpacity>
 
           {/* CUSTOMER / SHIPPING DETAILS */}
-          <View className="bg-slate-900 border border-slate-800 rounded-[32px] p-6 shadow-2xl mb-6">
+          <View className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl mb-6">
              <Text className="text-gray-500 text-[10px] font-black uppercase tracking-widest mb-4 ml-2">Acquisition Logistics</Text>
              
              {orderType === "shop" ? (
@@ -292,7 +310,7 @@ const ProductBilling = () => {
           </View>
 
           {/* PRODUCT ADDITION SECTION */}
-          <View className="bg-slate-900 border border-slate-800 rounded-[32px] p-6 shadow-2xl mb-8">
+          <View className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl mb-8">
              <Text className="text-gray-500 text-[10px] font-black uppercase tracking-widest mb-4 ml-2">Manifest Entry</Text>
              
              <TouchableOpacity 
@@ -342,7 +360,7 @@ const ProductBilling = () => {
           <View className="mb-10">
              <Text className="text-sky-500 text-[10px] font-black uppercase tracking-widest mb-4 px-2">Order Manifest</Text>
              {cart.length === 0 ? (
-               <View className="bg-slate-900/30 border border-slate-800 border-dashed rounded-[32px] p-10 items-center">
+               <View className="bg-slate-900/30 border border-slate-800 border-dashed rounded-3xl p-10 items-center">
                   <Ionicons name="cart-outline" size={32} color="#1e293b" />
                   <Text className="text-slate-700 font-black text-[9px] uppercase mt-4">Transaction is currently empty</Text>
                </View>
@@ -378,7 +396,7 @@ const ProductBilling = () => {
          <TouchableOpacity 
            onPress={handleSaveBill}
            disabled={submitting}
-           className={`bg-white py-5 rounded-[24px] items-center flex-row justify-center gap-3 shadow-2xl shadow-sky-900 ${submitting ? 'opacity-50' : ''}`}
+           className={`bg-white py-5 rounded-3xl items-center flex-row justify-center gap-3 shadow-2xl ${submitting ? 'opacity-50' : ''}`}
          >
             {submitting ? <ActivityIndicator color="#020617" /> : (
               <>
@@ -392,7 +410,7 @@ const ProductBilling = () => {
       {/* PRODUCT PICKER */}
       <Modal visible={productPickerVisible} animationType="slide" transparent>
          <View className="flex-1 bg-black/80">
-            <View className="mt-20 flex-1 bg-slate-900 rounded-t-[40px] border-t border-white/10 p-6">
+            <View className="mt-20 flex-1 bg-slate-900 rounded-t-3xl border-t border-white/10 p-6">
                <View className="flex-row justify-between items-center mb-8">
                   <Text className="text-white font-black text-xl uppercase">Manifest Lookup</Text>
                   <TouchableOpacity onPress={() => setProductPickerVisible(false)}>
@@ -426,7 +444,7 @@ const ProductBilling = () => {
       {/* VARIANT PICKER */}
       <Modal visible={variantPickerVisible} animationType="slide" transparent>
          <View className="flex-1 bg-black/80">
-            <View className="mt-40 flex-1 bg-slate-900 rounded-t-[40px] border-t border-white/10 p-6">
+            <View className="mt-40 flex-1 bg-slate-900 rounded-t-3xl border-t border-white/10 p-6">
                <View className="flex-row justify-between items-center mb-8">
                   <Text className="text-white font-black text-xl uppercase">Specifications</Text>
                   <TouchableOpacity onPress={() => setVariantPickerVisible(false)}>
@@ -456,10 +474,50 @@ const ProductBilling = () => {
          </View>
       </Modal>
 
+      {/* ORDER TYPE PICKER */}
+      <Modal visible={orderTypePickerVisible} animationType="slide" transparent>
+         <View className="flex-1 bg-black/80">
+            <View className="mt-60 flex-1 bg-slate-900 rounded-t-3xl border-t border-white/10 p-8">
+               <View className="flex-row justify-between items-center mb-8">
+                  <Text className="text-white font-black text-xl uppercase">Order Manifest Logic</Text>
+                  <TouchableOpacity onPress={() => setOrderTypePickerVisible(false)}>
+                     <Ionicons name="close-circle" size={32} color="#1e293b" />
+                  </TouchableOpacity>
+               </View>
+               
+               <TouchableOpacity 
+                 onPress={() => { setOrderType("shop"); setOrderTypePickerVisible(false); }}
+                 className={`flex-row items-center gap-4 p-5 rounded-3xl mb-4 border ${orderType === "shop" ? 'bg-sky-500/20 border-sky-500' : 'bg-slate-950 border-slate-800'}`}
+               >
+                  <View className={`w-12 h-12 rounded-2xl items-center justify-center ${orderType === "shop" ? 'bg-sky-500' : 'bg-slate-900'}`}>
+                     <Ionicons name="storefront-outline" size={24} color={orderType === "shop" ? "white" : "#475569"} />
+                  </View>
+                  <View>
+                     <Text className="text-white font-black text-sm uppercase">Shop Order (Walk-in)</Text>
+                     <Text className="text-slate-500 text-[8px] font-black uppercase">Standard storefront transaction</Text>
+                  </View>
+               </TouchableOpacity>
+
+               <TouchableOpacity 
+                 onPress={() => { setOrderType("online"); setOrderTypePickerVisible(false); }}
+                 className={`flex-row items-center gap-4 p-5 rounded-3xl border ${orderType === "online" ? 'bg-sky-500/20 border-sky-500' : 'bg-slate-950 border-slate-800'}`}
+               >
+                  <View className={`w-12 h-12 rounded-2xl items-center justify-center ${orderType === "online" ? 'bg-sky-500' : 'bg-slate-900'}`}>
+                     <Ionicons name="globe-outline" size={24} color={orderType === "online" ? "white" : "#475569"} />
+                  </View>
+                  <View>
+                     <Text className="text-white font-black text-sm uppercase">Digital Order (Online)</Text>
+                     <Text className="text-slate-500 text-[8px] font-black uppercase">Home delivery logistics required</Text>
+                  </View>
+               </TouchableOpacity>
+            </View>
+         </View>
+      </Modal>
+
       {/* SUCCESS / INVOICE MODAL */}
       <Modal visible={billingSuccessVisible} transparent animationType="fade">
          <View className="flex-1 bg-black/90 items-center justify-center p-6">
-            <View className="bg-white w-full rounded-[40px] p-8">
+            <View className="bg-white w-full rounded-3xl p-8">
                <View className="items-center mb-6">
                   <View className="w-16 h-16 bg-emerald-100 rounded-full items-center justify-center mb-4">
                      <Ionicons name="checkmark-done" size={32} color="#10b981" />
@@ -485,7 +543,7 @@ const ProductBilling = () => {
 
                <TouchableOpacity 
                  onPress={() => setBillingSuccessVisible(false)}
-                 className="bg-slate-950 py-5 rounded-[24px] items-center"
+                 className="bg-slate-950 py-5 rounded-3xl items-center"
                >
                   <Text className="text-white font-black text-xs uppercase tracking-widest">Acknowledge & Close</Text>
                </TouchableOpacity>
