@@ -3,7 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, TextInput, ActivityIndicator,
 import { api } from '../../services/api';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as Location from 'expo-location';
 
 const BOOKING_STATUS = { BOOKED: "Booked" };
@@ -301,7 +301,7 @@ const AppointmentForm = ({ currentUser, router }: any) => {
         estimatedCost, 
         yearOfManufacture: formData.yearOfManufacture ? parseInt(formData.yearOfManufacture) : null,
         currentMileage: formData.currentMileage ? parseInt(formData.currentMileage) : null,
-        status: BOOKING_STATUS.BOOKED, // Using standard status
+        status: "Appointment Booked", // Match requested status
         
         // Map fields for common booking endpoint compatibility
         vehicleNumber: formData.registrationNumber,
@@ -362,6 +362,16 @@ const AppointmentForm = ({ currentUser, router }: any) => {
 
   return (
     <View className="bg-white/5 rounded-3xl p-6 border border-teal-400/20  mb-8">
+      <View className="flex-row justify-between items-center mb-6">
+        <Text className="text-teal-400 text-lg font-black uppercase tracking-wider">Service Spec</Text>
+        {estimatedCost > 0 && (
+          <View className="bg-teal-500/10 border border-teal-500/20 px-4 py-2 rounded-2xl items-end">
+            <Text className="text-[8px] font-black text-teal-500 uppercase tracking-widest leading-none mb-1">Estimate</Text>
+            <Text className="text-xl font-black text-white leading-none">₹{estimatedCost}</Text>
+          </View>
+        )}
+      </View>
+
       <SectionTitle icon="🧾" title="Customer Details" />
       <CustomInput label="Full Name" value={formData.name} onChangeText={(val: string) => handleChange('name', val)} required error={errors.name} />
       <CustomInput label="Mobile Number" value={formData.phone} onChangeText={(val: string) => handleChange('phone', val)} keyboardType="phone-pad" required error={errors.phone} />
@@ -444,32 +454,48 @@ const AppointmentForm = ({ currentUser, router }: any) => {
 };
 
 export default function BookingScreen() {
+  const { tab } = useLocalSearchParams();
   const [activeTab, setActiveTab] = useState<'booking' | 'appointment'>('booking');
   const { user: currentUser } = useAuth();
   const router = useRouter();
+
+  useEffect(() => {
+    if (tab === 'appointment') {
+      setActiveTab('appointment');
+    } else if (tab === 'booking') {
+      setActiveTab('booking');
+    }
+  }, [tab]);
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1 bg-black">
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         <View className="px-5 pt-8 pb-32">
           
-          <Text className="text-2xl font-black text-white mb-6 tracking-wide">
-            {activeTab === 'booking' ? 'Service Booking' : 'Appointments'}
-          </Text>
+          <View className="flex-row items-center justify-between mb-6">
+            <View>
+              <Text className="text-2xl font-black text-white tracking-tight">
+                {activeTab === 'booking' ? 'Quick Booking' : 'Schedule Appt'}
+              </Text>
+              <Text className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-0.5">
+                {activeTab === 'booking' ? 'On-demand service' : 'Advanced inventory plan'}
+              </Text>
+            </View>
+          </View>
 
           {/* Toggle Buttons */}
-          <View className="flex-row mb-8 bg-white/10 p-2 rounded-xl border border-white/5">
+          <View className="flex-row mb-8 bg-slate-800 p-1 rounded-2xl border border-slate-700">
             <TouchableOpacity 
-              className={`flex-1 py-3 rounded-lg items-center ${activeTab === 'booking' ? 'bg-sky-400 ' : ''}`}
+              className={`flex-1 py-3 rounded-xl items-center ${activeTab === 'booking' ? 'bg-slate-700 shadow-sm shadow-black/20' : ''}`}
               onPress={() => setActiveTab('booking')}
             >
-              <Text className={`font-bold tracking-wide ${activeTab === 'booking' ? 'text-white' : 'text-gray-400'}`}>BOOKING</Text>
+              <Text className={`text-[10px] font-black tracking-widest ${activeTab === 'booking' ? 'text-white' : 'text-slate-500'}`}>BOOKING</Text>
             </TouchableOpacity>
             <TouchableOpacity 
-              className={`flex-1 py-3 rounded-lg items-center ${activeTab === 'appointment' ? 'bg-teal-500 ' : ''}`}
+              className={`flex-1 py-3 rounded-xl items-center ${activeTab === 'appointment' ? 'bg-slate-700 shadow-sm shadow-black/20' : ''}`}
               onPress={() => setActiveTab('appointment')}
             >
-              <Text className={`font-bold tracking-wide ${activeTab === 'appointment' ? 'text-white' : 'text-gray-400'}`}>APPOINTMENT</Text>
+              <Text className={`text-[10px] font-black tracking-widest ${activeTab === 'appointment' ? 'text-white' : 'text-slate-500'}`}>APPOINTMENT</Text>
             </TouchableOpacity>
           </View>
 

@@ -340,18 +340,18 @@ export default function AddBillingScreen() {
                     </View>
                  </View>
 
-                 <TouchableOpacity
+                  <TouchableOpacity
                     onPress={handleGenerateBill}
                     disabled={submitting}
-                    className={`w-full py-5 rounded-[1.5rem] items-center flex-row justify-center gap-3 ${submitting ? 'bg-sky-500/50' : 'bg-sky-500 shadow-xl shadow-sky-500/20'}`}
-                 >
+                    className={`w-full py-5 rounded-3xl items-center flex-row justify-center gap-3 ${submitting ? 'bg-slate-700' : 'bg-sky-500'}`}
+                  >
                     {submitting ? <ActivityIndicator color="white" /> : (
                       <>
                         <Ionicons name="receipt" size={20} color="white" />
                         <Text className="text-white font-black uppercase tracking-widest">Generate Final Invoice</Text>
                       </>
                     )}
-                 </TouchableOpacity>
+                  </TouchableOpacity>
               </View>
             </View>
           )}

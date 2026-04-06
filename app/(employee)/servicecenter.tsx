@@ -259,8 +259,8 @@ export default function ServiceCenter() {
              onPress={() => router.push("/(employee)/add-billing" as any)}
              className="bg-sky-500 rounded-xl px-4 py-2.5 flex-row items-center gap-1"
            >
-              <Ionicons name="add" size={18} color="white" />
-              <Text className="text-white font-black text-xs">NEW INVOICE</Text>
+              <Ionicons name="receipt-outline" size={16} color="white" />
+              <Text className="text-white font-black text-[10px] uppercase">New Invoice</Text>
            </TouchableOpacity>
         </View>
 
