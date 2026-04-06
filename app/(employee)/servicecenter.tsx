@@ -126,10 +126,6 @@ export default function ServiceCenter() {
       if (subTab === "assigned") {
         if (!s.assignedEmployeeId) return false;
         if (isMechanic && (s.assignedEmployeeName || "").toLowerCase() !== mechanicName.toLowerCase()) return false;
-        
-        // Status Filter: Only show active jobs
-        const validStatuses = ["Processing", "Waiting for Spare"];
-        if (!validStatuses.includes(s.serviceStatus || "")) return false;
       } else {
         if (s.assignedEmployeeId) return false;
       }
@@ -288,13 +284,27 @@ export default function ServiceCenter() {
              onPress={() => setMainTab("booked")}
              className={`flex-1 py-3 items-center rounded-xl ${mainTab === "booked" ? 'bg-slate-700' : ''}`}
            >
-              <Text className={`font-black text-[10px] uppercase tracking-widest ${mainTab === "booked" ? 'text-white' : 'text-gray-500'}`}>Appointment</Text>
+              <Text className={`font-black text-[10px] uppercase tracking-widest ${mainTab === "booked" ? 'text-white' : 'text-gray-500'}`}>
+                Appointment ({services.filter(s => 
+                  !s.addVehicle && 
+                  (isMechanic ? (
+                    (s.assignedEmployeeName || "").toLowerCase() === (userProfile?.username || "").toLowerCase()
+                  ) : true)
+                ).length})
+              </Text>
            </TouchableOpacity>
            <TouchableOpacity 
              onPress={() => setMainTab("addVehicle")}
              className={`flex-1 py-3 items-center rounded-xl ${mainTab === "addVehicle" ? 'bg-slate-700' : ''}`}
            >
-              <Text className={`font-black text-[10px] uppercase tracking-widest ${mainTab === "addVehicle" ? 'text-white' : 'text-gray-500'}`}>Direct Visit</Text>
+              <Text className={`font-black text-[10px] uppercase tracking-widest ${mainTab === "addVehicle" ? 'text-white' : 'text-gray-500'}`}>
+                Direct Visit ({services.filter(s => 
+                  !!s.addVehicle && 
+                  (isMechanic ? (
+                    (s.assignedEmployeeName || "").toLowerCase() === (userProfile?.username || "").toLowerCase()
+                  ) : true)
+                ).length})
+              </Text>
            </TouchableOpacity>
         </View>
       </View>
@@ -307,7 +317,7 @@ export default function ServiceCenter() {
               className={`px-6 py-2 rounded-full border ${subTab === "assigned" ? 'bg-sky-500 border-sky-400' : 'bg-slate-800 border-slate-700'}`}
             >
                <Text className={`text-[10px] font-black uppercase tracking-widest ${subTab === "assigned" ? 'text-white' : 'text-gray-500'}`}>
-                 My Tasks ({services.filter(s => (s.serviceStatus === "Processing" || s.serviceStatus === "Waiting for Spare") && s.assignedEmployeeId && (isMechanic ? (s.assignedEmployeeName || "").toLowerCase() === (userProfile?.username || "").toLowerCase() : true)).length})
+                 My Tasks ({services.filter(s => s.assignedEmployeeId && (isMechanic ? (s.assignedEmployeeName || "").toLowerCase() === (userProfile?.username || "").toLowerCase() : true)).length})
                </Text>
             </TouchableOpacity>
             {!isMechanic && (
@@ -438,12 +448,14 @@ export default function ServiceCenter() {
                               </View>
                            </TouchableOpacity>
 
-                           <TouchableOpacity 
-                             onPress={() => router.push({ pathname: "/(employee)/add-parts", params: { serviceId: item.id } })}
-                             className="bg-emerald-600 p-4 px-6 rounded-2xl items-center justify-center"
-                           >
-                              <Ionicons name="cart" size={20} color="white" />
-                           </TouchableOpacity>
+                           {(item.serviceStatus === "Processing" || item.serviceStatus === "Waiting for Spare") && (
+                             <TouchableOpacity 
+                               onPress={() => router.push({ pathname: "/(employee)/add-parts", params: { serviceId: item.id } })}
+                               className="bg-emerald-600 p-4 px-6 rounded-2xl items-center justify-center"
+                             >
+                                <Ionicons name="cart" size={20} color="white" />
+                             </TouchableOpacity>
+                           )}
 
                            <TouchableOpacity 
                              onPress={() => router.push({ pathname: "/(employee)/billing", params: { serviceId: item.id } })}
