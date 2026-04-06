@@ -248,6 +248,14 @@ export default function EmployeeDashboard() {
                         <Text className="text-white text-[10px] font-black uppercase tracking-widest">Complete</Text>
                       </TouchableOpacity>
                     )}
+                    {(task.status === "Processing" || task.status === "Waiting for Spare") && (
+                      <TouchableOpacity 
+                        onPress={() => router.push({ pathname: "/(employee)/add-parts", params: { serviceId: task.id } } as any)}
+                        className="bg-emerald-700/50 border border-emerald-500/20 px-3 py-2.5 rounded-xl items-center mx-1"
+                      >
+                        <Ionicons name="cart-outline" size={12} color="#10b981" />
+                      </TouchableOpacity>
+                    )}
                     <TouchableOpacity 
                       onPress={() => router.push(`/(employee)/servicecenter?id=${task.id}` as any)}
                       className="bg-slate-700 px-4 py-2.5 rounded-xl flex-1 items-center mx-1"

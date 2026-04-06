@@ -454,67 +454,24 @@ const AppointmentForm = ({ currentUser, router }: any) => {
 };
 
 export default function BookingScreen() {
-  const { tab } = useLocalSearchParams();
-  const [activeTab, setActiveTab] = useState<'booking' | 'appointment'>('booking');
   const { user: currentUser } = useAuth();
   const router = useRouter();
-
-  useEffect(() => {
-    if (tab === 'appointment') {
-      setActiveTab('appointment');
-    } else if (tab === 'booking') {
-      setActiveTab('booking');
-    }
-  }, [tab]);
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1 bg-black">
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         <View className="px-5 pt-8 pb-32">
           
-          <View className="flex-row items-center justify-between mb-6">
-            <View>
-              <Text className="text-2xl font-black text-white tracking-tight">
-                {activeTab === 'booking' ? 'Quick Booking' : 'Schedule Appt'}
-              </Text>
-              <Text className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-0.5">
-                {activeTab === 'booking' ? 'On-demand service' : 'Advanced inventory plan'}
-              </Text>
-            </View>
+          <View className="mb-6">
+            <Text className="text-2xl font-black text-white tracking-tight">Quick Service Booking</Text>
+            <Text className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-0.5">On-demand service request</Text>
           </View>
 
-          {/* Toggle Buttons */}
-          <View className="flex-row mb-8 bg-slate-800 p-1 rounded-2xl border border-slate-700">
-            <TouchableOpacity 
-              className={`flex-1 py-3 rounded-xl items-center ${activeTab === 'booking' ? 'bg-slate-700 shadow-sm shadow-black/20' : ''}`}
-              onPress={() => setActiveTab('booking')}
-            >
-              <Text className={`text-[10px] font-black tracking-widest ${activeTab === 'booking' ? 'text-white' : 'text-slate-500'}`}>BOOKING</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              className={`flex-1 py-3 rounded-xl items-center ${activeTab === 'appointment' ? 'bg-slate-700 shadow-sm shadow-black/20' : ''}`}
-              onPress={() => setActiveTab('appointment')}
-            >
-              <Text className={`text-[10px] font-black tracking-widest ${activeTab === 'appointment' ? 'text-white' : 'text-slate-500'}`}>APPOINTMENT</Text>
-            </TouchableOpacity>
-          </View>
-
-          {activeTab === 'booking' ? (
-             <BookingForm currentUser={currentUser} router={router} />
-          ) : (
-             <AppointmentForm currentUser={currentUser} router={router} />
-          )}
+          <BookingForm currentUser={currentUser} router={router} />
 
         </View>
       </ScrollView>
 
-      {/* Floating Action Button */}
-      <TouchableOpacity 
-        className="absolute bottom-6 right-6 w-14 h-14 bg-sky-400 rounded-full items-center justify-center   border border-white/20"
-        onPress={() => Alert.alert('Add', `Create new ${activeTab}`)}
-      >
-        <Ionicons name="add" size={30} color="white" />
-      </TouchableOpacity>
     </KeyboardAvoidingView>
   );
 }
