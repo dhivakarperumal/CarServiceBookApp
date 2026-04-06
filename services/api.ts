@@ -66,6 +66,7 @@ export interface Booking {
 
 // API functions
 export const apiService = {
+  api,
   // Test API connection
   testConnection: async () => {
     try {

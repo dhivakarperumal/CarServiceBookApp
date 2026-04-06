@@ -17,14 +17,8 @@ export default function AdminSettings() {
             <View className="gap-6">
 
 
-               <Section label="Application Control">
-                  <SettingItem
-                     icon="hammer-outline"
-                     title="Maintenance Mode"
-                     value={maintenanceMode}
-                     onValueChange={setMaintenanceMode}
-                     subtitle="Temporarily disable user bookings"
-                  />
+               <Section >
+              
 
                   <TouchableOpacity
                      onPress={() => router.push('/(adminPages)/stock-details' as any)}
@@ -43,12 +37,28 @@ export default function AdminSettings() {
                         <Ionicons name="chevron-forward" size={16} color="#475569" />
                      </View>
                   </TouchableOpacity>
+
+                  <TouchableOpacity
+                     onPress={() => router.push('/(adminPages)/product-billing' as any)}
+                     className="flex-row items-center justify-between p-5 bg-slate-900 border border-slate-800 rounded-[24px] mt-4 shadow-2xl"
+                  >
+                     <View className="flex-row items-center gap-4 flex-1">
+                        <View className="w-12 h-12 bg-sky-950 rounded-2xl items-center justify-center border border-sky-900">
+                           <Ionicons name="receipt-outline" size={24} color="#0ea5e9" />
+                        </View>
+                        <View>
+                           <Text className="text-white font-black text-sm uppercase tracking-tighter">Product Billing</Text>
+                           <Text className="text-gray-500 text-[8px] font-black uppercase tracking-widest mt-1">Generate Invoices & Bills</Text>
+                        </View>
+                     </View>
+                     <View className="bg-slate-800 p-2 rounded-full">
+                        <Ionicons name="chevron-forward" size={16} color="#475569" />
+                     </View>
+                  </TouchableOpacity>
                </Section>
 
              
-               <TouchableOpacity className="bg-red-500/10 border border-red-500/20 p-5 rounded-3xl mt-4 items-center">
-                  <Text className="text-red-500 font-black text-xs uppercase tracking-widest">Wipe Local Cache</Text>
-               </TouchableOpacity>
+              
             </View>
          </ScrollView>
       </SafeAreaView>
