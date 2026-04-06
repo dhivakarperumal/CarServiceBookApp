@@ -207,6 +207,33 @@ export const apiService = {
     }
   },
 
+  createAppointment: async (appointmentData: any): Promise<any> => {
+    // List of potential endpoints to try in order
+    const endpoints = [
+      '/appointments',
+      '/appointments/create',
+      '/bookings/appointment',
+      '/bookings/create',
+      '/bookings',
+    ];
+
+    let lastError: any = null;
+    for (const endpoint of endpoints) {
+      try {
+        console.log(`Trying appointment submission to: ${endpoint}`);
+        const response = await api.post(endpoint, appointmentData);
+        return response.data;
+      } catch (err: any) {
+        lastError = err;
+        console.warn(`${endpoint} failed with status ${err.response?.status}`);
+        // If it's a validation error (400), don't try other endpoints, it's a data issue
+        if (err.response?.status === 400) break;
+      }
+    }
+    
+    throw lastError;
+  },
+
   // User authentication (if needed)
   login: async (identifier: string, password: string) => {
     try {

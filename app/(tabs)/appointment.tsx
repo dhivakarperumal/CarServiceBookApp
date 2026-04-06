@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from "react";
 import { View, Text, SafeAreaView, ScrollView, TouchableOpacity, TextInput, ActivityIndicator, Alert, Modal, KeyboardAvoidingView, Platform, Switch } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from "expo-router";
-import { api } from "../../services/api";
+import { api, apiService } from "../../services/api";
 import { useAuth } from "../../contexts/AuthContext";
 import * as Location from 'expo-location';
 
@@ -126,7 +126,9 @@ export default function AppointmentScreen() {
 
   const [errors, setErrors] = useState<any>({});
   const [locationQuery, setLocationQuery] = useState("");
+  const [locationResults, setLocationResults] = useState<any[]>([]);
   const [coords, setCoords] = useState({ lat: null as any, lng: null as any });
+  const searchTimeoutRef = useRef<any>(null);
 
   useEffect(() => {
     if (user) {
@@ -139,6 +141,39 @@ export default function AppointmentScreen() {
     }
   }, [user]);
 
+  const searchLocation = async (query: string) => {
+    setLocationQuery(query);
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    if (!query || query.length < 3) { setLocationResults([]); return; }
+    
+    searchTimeoutRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&addressdetails=1&limit=5`, { 
+          headers: { 'User-Agent': 'CarServiceBookApp/1.0' }
+        });
+        if (!res.ok) throw new Error("Search service busy");
+        const data = await res.json();
+        setLocationResults(data);
+      } catch (e: any) { 
+        console.warn("Search failed", e.message); 
+      }
+    }, 600);
+  };
+
+  const handleSelectLocation = (p: any) => {
+    const city = p.address?.city || p.address?.town || p.address?.village || "";
+    const pincode = p.address?.postcode || "";
+    setFormData(prev => ({
+      ...prev,
+      location: p.display_name,
+      city,
+      pincode
+    }));
+    setLocationQuery(p.display_name);
+    setCoords({ lat: p.lat, lng: p.lon });
+    setLocationResults([]);
+  };
+
   const estimatedCost = useMemo(() => {
     let cost = SERVICE_PRICES[formData.serviceType] || 0;
     if (formData.emergencyService) cost += 500;
@@ -150,9 +185,15 @@ export default function AppointmentScreen() {
     setLocationLoading(true);
     try {
       let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') return;
+      if (status !== 'granted') {
+        Alert.alert("Permission", "Location permission denied");
+        return;
+      }
       let loc = await Location.getCurrentPositionAsync({});
-      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${loc.coords.latitude}&lon=${loc.coords.longitude}`);
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${loc.coords.latitude}&lon=${loc.coords.longitude}`, {
+        headers: { 'User-Agent': 'CarServiceBookApp/1.0' }
+      });
+      if (!res.ok) throw new Error("Location service unavailable");
       const data = await res.json();
       setFormData(prev => ({
         ...prev,
@@ -162,8 +203,9 @@ export default function AppointmentScreen() {
       }));
       setLocationQuery(data.display_name);
       setCoords({ lat: loc.coords.latitude, lng: loc.coords.longitude });
-    } catch (e) {
-      console.log(e);
+    } catch (e: any) {
+      console.log("Location fetch error:", e.message);
+      Alert.alert("Error", "Could not fetch address. Please enter manually.");
     } finally {
       setLocationLoading(false);
     }
@@ -178,42 +220,41 @@ export default function AppointmentScreen() {
     try {
       setSubmitting(true);
       const bookingId = `AP${Math.floor(100000 + Math.random() * 900000)}`;
-      const payload = {
+      
+      const appointmentData = {
         ...formData,
         bookingId,
         uid: user?.id || user?.uid || (user as any)?._id,
-        latitude: coords.lat,
-        longitude: coords.lng,
-        estimatedCost,
-        status: "Appointment Booked",
-        // Map fields for common booking endpoint compatibility
+        latitude: coords.lat || null,
+        longitude: coords.lng || null,
+        estimatedCost: estimatedCost || 0,
+        yearOfManufacture: formData.yearOfManufacture ? parseInt(formData.yearOfManufacture) : null,
+        currentMileage: formData.currentMileage ? parseInt(formData.currentMileage) : null,
+        status: APPOINTMENT_STATUS.BOOKED,
+        
+        // Extended Mapping for Backend Filtering (Fix for 'store booking' issue)
+        customer_name: formData.name,
+        name: formData.name,
+        mobile: formData.phone,
+        phone: formData.phone,
         vehicleNumber: formData.registrationNumber,
+        vehicle_number: formData.registrationNumber,
         issue: formData.serviceType || formData.otherIssue || "General Service",
-        vehicleType: formData.vehicleType ? formData.vehicleType.toLowerCase() : 'car'
+        vehicleType: formData.vehicleType ? formData.vehicleType.toLowerCase() : 'car',
+        addVehicle: false,
+        bookingType: "Appointment",
+        is_appointment: true
       };
 
-      console.log("Submitting Appointment Data:", payload);
+      console.log("Submitting Appointment Data via createAppointment:", appointmentData);
+      
+      await apiService.createAppointment(appointmentData);
 
-      // Try multiple potential endpoints just like in booking.tsx
-      await api.post("/appointments", payload)
-        .catch((err) => {
-          console.warn("/appointments failed, trying /bookings/appointment");
-          return api.post("/bookings/appointment", payload);
-        })
-        .catch((err) => {
-          console.warn("/bookings/appointment failed, trying /bookings");
-          return api.post("/bookings", payload);
-        })
-        .catch((err) => {
-          console.warn("/bookings failed, trying /bookings/create");
-          return api.post("/bookings/create", payload);
-        });
-
-      Alert.alert("Success", "Appointment Scheduled Successfully!");
+      Alert.alert("Success", "Service Appointment Scheduled Successfully!");
       router.replace("/(tabs)/home");
     } catch (err: any) {
-      console.error("Booking Error Full:", err);
-      const errorMsg = err.response?.data?.message || err.message || "Booking failed.";
+      console.error("Appointment Submission Error:", err);
+      const errorMsg = err.response?.data?.message || err.message || "Failed to schedule appointment.";
       Alert.alert("Error", errorMsg);
     } finally {
       setSubmitting(false);
@@ -253,21 +294,34 @@ export default function AppointmentScreen() {
             <View className="mb-4">
                <Text className="mb-1.5 text-[10px] uppercase font-black text-slate-500 tracking-[1px] ml-1">Search Location</Text>
                <View className="relative">
-                 <TextInput
-                   value={locationQuery}
-                   onChangeText={setLocationQuery}
-                   placeholder="Search area..."
-                   placeholderTextColor="#475569"
-                   className="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-5 py-4 text-white font-bold"
-                 />
-                 <TouchableOpacity 
-                   onPress={handleUseLocation}
-                   disabled={locationLoading}
-                   className="absolute right-3 top-3.5"
-                 >
-                   {locationLoading ? <ActivityIndicator size="small" color="#0EA5E9" /> : <Ionicons name="locate-outline" size={24} color="#0EA5E9" />}
-                 </TouchableOpacity>
+                  <TextInput
+                    value={locationQuery}
+                    onChangeText={searchLocation}
+                    placeholder="Search area..."
+                    placeholderTextColor="#475569"
+                    className="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-5 py-4 text-white font-bold"
+                  />
+                  <TouchableOpacity 
+                    onPress={handleUseLocation}
+                    disabled={locationLoading}
+                    className="absolute right-3 top-3.5"
+                  >
+                    {locationLoading ? <ActivityIndicator size="small" color="#0EA5E9" /> : <Ionicons name="locate-outline" size={24} color="#0EA5E9" />}
+                  </TouchableOpacity>
                </View>
+               {locationResults.length > 0 && (
+                  <View className="mt-2 rounded-2xl bg-slate-900 border border-white/10 overflow-hidden">
+                    {locationResults.map((p, idx) => (
+                      <TouchableOpacity 
+                        key={p.place_id || idx} 
+                        onPress={() => handleSelectLocation(p)}
+                        className="px-5 py-4 border-b border-white/5"
+                      >
+                        <Text className="text-gray-400 text-xs">{p.display_name}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
             </View>
 
             <View className="flex-row gap-4">
