@@ -84,6 +84,14 @@ export default function EmployeeAdminLayout() {
         }}
       />
       <Tabs.Screen
+        name="service-details"
+        options={{
+          href: null,
+          title: 'Details',
+          headerShown: false
+        }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{
           title: 'Profile',

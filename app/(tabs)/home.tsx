@@ -479,15 +479,27 @@ export default function HomeScreen({ navigation }) {
             Book trusted mechanics at your doorstep
           </Text>
 
-          <TouchableOpacity
-            onPress={() => router.push("/(tabs)/booking")}
-            className="mt-6 bg-white px-6 py-3 rounded-full flex-row items-center"
-          >
-            <Ionicons name="car-outline" size={18} color={COLORS.primary} />
-            <Text className="text-primary font-bold ml-2">
-              Book Now
-            </Text>
-          </TouchableOpacity>
+          <View className="flex-row gap-3 mt-6">
+            <TouchableOpacity
+              onPress={() => router.push("/(tabs)/booking")}
+              className="bg-white px-5 py-3 rounded-2xl flex-1 flex-row items-center justify-center"
+            >
+              <Ionicons name="flash-outline" size={18} color={COLORS.primary} />
+              <Text className="text-primary font-black ml-2 uppercase text-[10px] tracking-widest">
+                Quick Service
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => router.push("/(tabs)/appointment")}
+              className="bg-black/20 border border-white/20 px-5 py-3 rounded-2xl flex-1 flex-row items-center justify-center"
+            >
+              <Ionicons name="calendar-outline" size={18} color="white" />
+              <Text className="text-white font-black ml-2 uppercase text-[10px] tracking-widest">
+                Appointment
+              </Text>
+            </TouchableOpacity>
+          </View>
 
         </LinearGradient>
       </View>

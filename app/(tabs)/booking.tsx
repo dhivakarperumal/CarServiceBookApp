@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, TextInput, ActivityIndicator, Alert, Modal, KeyboardAvoidingView, Platform, Switch } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { api } from '../../services/api';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as Location from 'expo-location';
 
 const BOOKING_STATUS = { BOOKED: "Booked" };
@@ -81,8 +82,9 @@ const SectionTitle = ({ icon, title }: { icon: string, title: string }) => (
 
 const BookingForm = ({ currentUser, router }: any) => {
   const [vehicleType, setVehicleType] = useState('car');
-  const [formData, setFormData] = useState({ name: "", phone: "", email: "", altPhone: "", brand: "", model: "", issue: "", otherIssue: "", vehicleNumber: "", address: "", location: "" });
+  const [formData, setFormData] = useState({ name: "", phone: "", email: "", altPhone: "", brand: "", model: "", issue: "", otherIssue: "", vehicleNumber: "", address: "", location: "", preferredDate: new Date().toISOString().split('T')[0] });
   const [submitting, setSubmitting] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [locationQuery, setLocationQuery] = useState("");
   const [locationResults, setLocationResults] = useState<any[]>([]);
   const [coords, setCoords] = useState({ lat: null as any, lng: null as any });
@@ -146,7 +148,7 @@ const BookingForm = ({ currentUser, router }: any) => {
       const bookingId = `BS${Math.floor(100000 + Math.random() * 900000)}`;
       await api.post("/bookings/create", { ...formData, bookingId, uid: currentUser.id || currentUser.uid || currentUser._id, vehicleType, latitude: coords.lat, longitude: coords.lng, status: BOOKING_STATUS.BOOKED });
       Alert.alert("Success", "Your service booking was successful!");
-      setFormData({ name: currentUser.username || currentUser.name || "", email: currentUser.email || "", phone: currentUser.mobile || "", altPhone: "", brand: "", model: "", issue: "", otherIssue: "", vehicleNumber: "", address: "", location: "" });
+      setFormData({ name: currentUser.username || currentUser.name || "", email: currentUser.email || "", phone: currentUser.mobile || "", altPhone: "", brand: "", model: "", issue: "", otherIssue: "", vehicleNumber: "", address: "", location: "", preferredDate: new Date().toISOString().split('T')[0] });
       setLocationQuery(""); setCoords({ lat: null, lng: null });
     } catch (error) { Alert.alert("Error", "Booking failed."); } finally { setSubmitting(false); }
   };
@@ -215,6 +217,7 @@ const AppointmentForm = ({ currentUser, router }: any) => {
   });
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [estimatedCost, setEstimatedCost] = useState(0);
   const [errors, setErrors] = useState<any>({});
 
@@ -301,7 +304,7 @@ const AppointmentForm = ({ currentUser, router }: any) => {
         estimatedCost, 
         yearOfManufacture: formData.yearOfManufacture ? parseInt(formData.yearOfManufacture) : null,
         currentMileage: formData.currentMileage ? parseInt(formData.currentMileage) : null,
-        status: BOOKING_STATUS.BOOKED, // Using standard status
+        status: "Appointment Booked", // Match requested status
         
         // Map fields for common booking endpoint compatibility
         vehicleNumber: formData.registrationNumber,
@@ -362,6 +365,16 @@ const AppointmentForm = ({ currentUser, router }: any) => {
 
   return (
     <View className="bg-white/5 rounded-3xl p-6 border border-teal-400/20  mb-8">
+      <View className="flex-row justify-between items-center mb-6">
+        <Text className="text-teal-400 text-lg font-black uppercase tracking-wider">Service Spec</Text>
+        {estimatedCost > 0 && (
+          <View className="bg-teal-500/10 border border-teal-500/20 px-4 py-2 rounded-2xl items-end">
+            <Text className="text-[8px] font-black text-teal-500 uppercase tracking-widest leading-none mb-1">Estimate</Text>
+            <Text className="text-xl font-black text-white leading-none">₹{estimatedCost}</Text>
+          </View>
+        )}
+      </View>
+
       <SectionTitle icon="🧾" title="Customer Details" />
       <CustomInput label="Full Name" value={formData.name} onChangeText={(val: string) => handleChange('name', val)} required error={errors.name} />
       <CustomInput label="Mobile Number" value={formData.phone} onChangeText={(val: string) => handleChange('phone', val)} keyboardType="phone-pad" required error={errors.phone} />
@@ -417,7 +430,31 @@ const AppointmentForm = ({ currentUser, router }: any) => {
       <CustomInput label="Additional Notes" value={formData.notes} onChangeText={(val: string) => handleChange('notes', val)} multiline numberOfLines={2} placeholder="Optional instructions..." />
 
       <SectionTitle icon="📅" title="Appointment Scheduling" />
-      <CustomInput label="Preferred Date" value={formData.preferredDate} onChangeText={(val: string) => handleChange('preferredDate', val)} placeholder="YYYY-MM-DD" required error={errors.preferredDate} />
+      <View className="mb-4">
+        <Text className="mb-2 text-sm text-gray-300 font-medium ml-1">Preferred Date *</Text>
+        <TouchableOpacity 
+           onPress={() => setShowDatePicker(true)}
+           className={`w-full bg-white/10 rounded-xl border px-5 py-4 flex-row justify-between items-center ${errors.preferredDate ? 'border-red-400' : 'border-white/20'}`}
+        >
+          <Text className="text-white">{formData.preferredDate || "Select Date"}</Text>
+          <Ionicons name="calendar-outline" size={20} color="#9ca3af" />
+        </TouchableOpacity>
+        {showDatePicker && (
+          <DateTimePicker
+            value={formData.preferredDate ? new Date(formData.preferredDate) : new Date()}
+            mode="date"
+            display="default"
+            minimumDate={new Date()}
+            onChange={(event, selectedDate) => {
+              setShowDatePicker(false);
+              if (selectedDate) {
+                setFormData({ ...formData, preferredDate: selectedDate.toISOString().split('T')[0] });
+              }
+            }}
+          />
+        )}
+        {errors.preferredDate && <Text className="mt-1 text-xs text-red-500 ml-1">{errors.preferredDate}</Text>}
+      </View>
       <CustomSelect label="Time Slot" value={formData.preferredTimeSlot} onSelect={(val: string) => handleChange('preferredTimeSlot', val)} options={["Morning (9AM–12PM)", "Afternoon (12PM–4PM)", "Evening (4PM–7PM)"]} required />
 
       <SectionTitle icon="💳" title="Payment & Offers" />
@@ -444,7 +481,6 @@ const AppointmentForm = ({ currentUser, router }: any) => {
 };
 
 export default function BookingScreen() {
-  const [activeTab, setActiveTab] = useState<'booking' | 'appointment'>('booking');
   const { user: currentUser } = useAuth();
   const router = useRouter();
 
@@ -453,42 +489,16 @@ export default function BookingScreen() {
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         <View className="px-5 pt-8 pb-32">
           
-          <Text className="text-2xl font-black text-white mb-6 tracking-wide">
-            {activeTab === 'booking' ? 'Service Booking' : 'Appointments'}
-          </Text>
-
-          {/* Toggle Buttons */}
-          <View className="flex-row mb-8 bg-white/10 p-2 rounded-xl border border-white/5">
-            <TouchableOpacity 
-              className={`flex-1 py-3 rounded-lg items-center ${activeTab === 'booking' ? 'bg-sky-400 ' : ''}`}
-              onPress={() => setActiveTab('booking')}
-            >
-              <Text className={`font-bold tracking-wide ${activeTab === 'booking' ? 'text-white' : 'text-gray-400'}`}>BOOKING</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              className={`flex-1 py-3 rounded-lg items-center ${activeTab === 'appointment' ? 'bg-teal-500 ' : ''}`}
-              onPress={() => setActiveTab('appointment')}
-            >
-              <Text className={`font-bold tracking-wide ${activeTab === 'appointment' ? 'text-white' : 'text-gray-400'}`}>APPOINTMENT</Text>
-            </TouchableOpacity>
+          <View className="mb-6">
+            <Text className="text-2xl font-black text-white tracking-tight">Quick Service Booking</Text>
+            <Text className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-0.5">On-demand service request</Text>
           </View>
 
-          {activeTab === 'booking' ? (
-             <BookingForm currentUser={currentUser} router={router} />
-          ) : (
-             <AppointmentForm currentUser={currentUser} router={router} />
-          )}
+          <BookingForm currentUser={currentUser} router={router} />
 
         </View>
       </ScrollView>
 
-      {/* Floating Action Button */}
-      <TouchableOpacity 
-        className="absolute bottom-6 right-6 w-14 h-14 bg-sky-400 rounded-full items-center justify-center   border border-white/20"
-        onPress={() => Alert.alert('Add', `Create new ${activeTab}`)}
-      >
-        <Ionicons name="add" size={30} color="white" />
-      </TouchableOpacity>
     </KeyboardAvoidingView>
   );
 }

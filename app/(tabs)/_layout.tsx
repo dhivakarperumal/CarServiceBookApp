@@ -89,6 +89,17 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
+        name="appointment"
+        options={{
+          title: "Appt",
+          href: null,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="calendar-number-outline" size={size} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
         name="products"
         options={{
           title: "Products",
