@@ -148,17 +148,18 @@ export default function AssignedHistory() {
     <SafeAreaView className="flex-1 bg-background">
       <ScrollView className="flex-1 p-5" showsVerticalScrollIndicator={false}>
         {/* HEADER */}
-        <View className="bg-card p-6 rounded-3xl border border-card mb-6 shadow-2xl backdrop-blur-md">
+        <View className="bg-card/90 p-6 rounded-3xl border border-card mb-6 shadow-xl backdrop-blur-lg">
           {/* Header */}
           <View className="flex-row items-center gap-4 mb-6">
-            <View className="w-14 h-14 bg-primary/20 rounded-2xl items-center justify-center border border-primary/20 shadow-lg">
+            <View className="w-14 h-14 bg-gradient-to-br from-primary/30 to-primary/10 rounded-2xl items-center justify-center border border-primary/20 shadow-md">
               <Ionicons name="time" size={26} color="#0EA5E9" />
             </View>
 
-            <View>
+            <View className="flex-1">
               <Text className="text-[22px] font-extrabold tracking-tight text-text-primary">
                 Job History
               </Text>
+
               <Text className="text-xs font-medium mt-1 text-text-secondary">
                 Assigned service logs
               </Text>
@@ -168,31 +169,35 @@ export default function AssignedHistory() {
           {/* Stats */}
           <View className="flex-row gap-4">
             {/* Total Tasks */}
-            <View className="flex-1 px-5 py-4 rounded-2xl border border-primary/20 shadow-lg bg-primary/10">
+            <View className="flex-1 px-5 py-4 rounded-2xl border border-primary/20 shadow-md bg-gradient-to-br from-primary/15 to-primary/5">
               <View className="flex-row items-center justify-between mb-2">
                 <Text className="text-[10px] font-bold uppercase tracking-widest text-primary">
                   Total Tasks
                 </Text>
+
                 <Ionicons name="list-outline" size={16} color="#0EA5E9" />
               </View>
-              <Text className="text-[26px] font-black text-primary">
+
+              <Text className="text-[28px] font-black text-primary">
                 {services.length}
               </Text>
             </View>
 
             {/* Jobs Done */}
-            <View className="flex-1 px-5 py-4 rounded-2xl border border-success/20 shadow-lg bg-success/10">
+            <View className="flex-1 px-5 py-4 rounded-2xl border border-success/20 shadow-md bg-gradient-to-br from-success/15 to-success/5">
               <View className="flex-row items-center justify-between mb-2">
                 <Text className="text-[10px] font-bold uppercase tracking-widest text-success">
                   Jobs Done
                 </Text>
+
                 <Ionicons
                   name="checkmark-done-outline"
                   size={16}
                   color="#10B981"
                 />
               </View>
-              <Text className="text-[26px] font-black text-success">
+
+              <Text className="text-[28px] font-black text-success">
                 {
                   services.filter((s: any) =>
                     ["Service Completed", "Completed"].includes(
@@ -206,52 +211,58 @@ export default function AssignedHistory() {
         </View>
 
         {/* FILTERS */}
-        <View className="space-y-3 mb-6">
-          <View className="relative">
+        <View className="space-y-5 mb-6">
+          {/* Search Bar */}
+          <View className="relative mb-3">
             <View className="absolute left-4 top-4 z-10">
               <Ionicons name="search" size={20} color="#64748B" />
             </View>
+
             <TextInput
               placeholder="Search by vehicle, ID, customer..."
               placeholderTextColor="#64748B"
               value={search}
               onChangeText={setSearch}
-              className="w-full pl-12 pr-4 py-4 border border-card bg-card rounded-2xl text-text-primary font-bold"
+              className="w-full pl-12 pr-4 py-4 border border-slate-700 bg-slate-800/80 rounded-2xl text-text-primary font-bold shadow-lg"
             />
           </View>
 
+          {/* Filters */}
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            className="flex-row gap-2"
+            className="mt-2"
+            contentContainerStyle={{ paddingHorizontal: 2 }}
           >
-            {[
-              "all",
-              "Assigned",
-              "Service Going on",
-              "Bill Pending",
-              "Service Completed",
-            ].map((f) => (
-              <TouchableOpacity
-                key={f}
-                onPress={() => setFilterStatus(f)}
-                className={`px-5 py-2.5 rounded-xl border ${
-                  filterStatus === f
-                    ? "bg-primary border-primary"
-                    : "bg-card border-card"
-                }`}
-              >
-                <Text
-                  className={`text-[10px] font-black uppercase tracking-widest ${
+            <View className="flex-row items-center gap-3">
+              {[
+                "all",
+                "Assigned",
+                "Service Going on",
+                "Bill Pending",
+                "Service Completed",
+              ].map((f) => (
+                <TouchableOpacity
+                  key={f}
+                  onPress={() => setFilterStatus(f)}
+                  className={`px-5 py-3 rounded-2xl border shadow-sm ${
                     filterStatus === f
-                      ? "text-text-primary"
-                      : "text-text-secondary"
+                      ? "bg-primary border-primary"
+                      : "bg-slate-800 border-slate-700"
                   }`}
                 >
-                  {f === "all" ? "Any Status" : f}
-                </Text>
-              </TouchableOpacity>
-            ))}
+                  <Text
+                    className={`text-[10px] font-black uppercase tracking-widest ${
+                      filterStatus === f
+                        ? "text-text-primary"
+                        : "text-text-secondary"
+                    }`}
+                  >
+                    {f === "all" ? "Any Status" : f}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </ScrollView>
         </View>
 
