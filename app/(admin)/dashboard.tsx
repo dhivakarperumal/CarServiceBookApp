@@ -10,20 +10,20 @@ const QuickAction = ({ title, icon, color, onPress }: any) => (
     onPress={onPress}
     className="w-[31%] mb-4 items-center"
   >
-    <View className={`${color} w-14 h-14 rounded-3xl items-center justify-center shadow-lg shadow-black/20`}>
+    <View className={`${color} w-14 h-14 rounded-3xl items-center justify-center shadow-lg shadow-black`}>
       <Text className="text-2xl">{icon}</Text>
     </View>
-    <Text className="text-gray-400 text-[9px] font-black uppercase text-center mt-2 tracking-tighter leading-[10px]">{title}</Text>
+    <Text className="text-gray-400 text-[9px] font-black uppercase text-center mt-2 tracking-tighter">{title}</Text>
   </TouchableOpacity>
 );
 
 const StatCard = ({ title, value, gradient, isSmall = false }: any) => (
-  <View className={`${isSmall ? 'w-[48%]' : 'w-full'} mb-4 rounded-3xl overflow-hidden shadow-2xl shadow-black/40`}>
+  <View className={`${isSmall ? 'w-[48%]' : 'w-full'} mb-4 rounded-3xl overflow-hidden shadow-2xl shadow-black`}>
     <LinearGradient colors={gradient} start={{x:0, y:0}} end={{x:1, y:1}} className="p-5">
-      <Text className="text-white/70 text-[9px] font-black uppercase tracking-widest">{title}</Text>
+      <Text className="text-white opacity-70 text-[9px] font-black uppercase tracking-widest">{title}</Text>
       <Text className="text-white text-2xl font-black mt-1">{value || '0'}</Text>
       <View className="flex-row items-center justify-between mt-3">
-        <Text className="text-white/60 text-[8px] font-bold">vs last week</Text>
+        <Text className="text-white opacity-60 text-[8px] font-bold">vs last week</Text>
         <Ionicons name="trending-up" size={14} color="rgba(255,255,255,0.6)" />
       </View>
     </LinearGradient>
@@ -124,7 +124,7 @@ export default function AdminDashboard() {
    
           {/* QUICK ACTIONS */}
           <View className="mb-8">
-            <Text className="text-white/40 text-[10px] font-black uppercase tracking-[2px] mb-4">Quick Access</Text>
+            <Text className="text-white opacity-40 text-[10px] font-black uppercase tracking-widest mb-4">Quick Access</Text>
             <View className="flex-row flex-wrap justify-between">
               <QuickAction title="Add Vehicle" icon="🚗" color="bg-sky-500" onPress={() => router.push('/(adminPages)/vehicles' as any)} />
               <QuickAction title="Add Booking" icon="📅" color="bg-indigo-500" onPress={() => router.push('/(adminPages)/add-booking' as any)} />
@@ -161,7 +161,7 @@ export default function AdminDashboard() {
           </View>
 
           {/* CHART 1: BOOKING DISTRIBUTION (MULTI-BAR) */}
-          <View className="bg-slate-900 border border-white/5 rounded-3xl p-6 mb-8 shadow-2xl">
+          <View className="bg-slate-900 border border-slate-800 rounded-3xl p-6 mb-8 shadow-2xl">
              <View className="mb-6">
                 <Text className="text-white font-black text-xs uppercase tracking-widest">Booking Distribution</Text>
                 <Text className="text-sky-500 text-[8px] font-black uppercase mt-1">Multi-Status Weekly Performance</Text>
@@ -203,21 +203,21 @@ export default function AdminDashboard() {
           </View>
 
           {/* CHART 2: FINANCIAL PERFORMANCE (MONTHLY) */}
-          <View className="bg-slate-900 border border-white/5 rounded-3xl p-6 mb-8 shadow-2xl">
+          <View className="bg-slate-900 border border-slate-800 rounded-3xl p-6 mb-8 shadow-2xl">
              <View className="mb-6">
                 <Text className="text-white font-black text-xs uppercase tracking-widest">Financial Performance</Text>
                 <Text className="text-emerald-500 text-[8px] font-black uppercase mt-1">Monthly Revenue Trend (INR)</Text>
              </View>
 
-             <View className="flex-row justify-between items-end h-40 px-1 border-b border-white/10 pb-2">
+             <View className="flex-row justify-between items-end h-40 px-1 border-b border-slate-800 pb-2">
                 {['Jan','Feb','Mar','Apr','May','Jun'].map((month, i) => {
                    const h = 30 + (i * 15);
                    return (
                     <View key={i} className="items-center flex-1">
-                        <View style={{ height: h }} className="w-4 bg-emerald-500/20 border-t-2 border-emerald-500 rounded-t-lg items-center justify-start pt-1">
+                        <View style={{ height: h }} className="w-4 bg-emerald-900 border-t-2 border-emerald-500 rounded-t-lg items-center justify-start pt-1">
                            <View className="w-1 h-1 rounded-full bg-emerald-400" />
                         </View>
-                        <Text className="text-white/30 text-[8px] font-black mt-2 uppercase">{month}</Text>
+                        <Text className="text-white opacity-30 text-[8px] font-black mt-2 uppercase">{month}</Text>
                     </View>
                    );
                 })}
@@ -225,18 +225,18 @@ export default function AdminDashboard() {
           </View>
 
           {/* CHART 3: BOOKINGS BY CAR MODEL */}
-          <View className="bg-slate-900 border border-white/5 rounded-3xl p-6 mb-8 shadow-2xl">
+          <View className="bg-slate-900 border border-slate-800 rounded-3xl p-6 mb-8 shadow-2xl">
              <View className="mb-8">
                 <Text className="text-white font-black text-xs uppercase tracking-widest">Market Distribution</Text>
-                <Text className="text-sky-500 text-[8px] font-black uppercase mt-1">Bookings by Vehicle Brand</Text>
+                <Text className="text-sky-500 text-xs font-black uppercase mt-1">Bookings by Vehicle Brand</Text>
              </View>
 
              <View className="flex-row items-center gap-6">
                 {/* Total Counter Circle */}
-                <View className="w-32 h-32 rounded-full bg-slate-800 border-4 border-sky-500/20 items-center justify-center relative overflow-hidden">
-                    <View className="absolute inset-0 bg-sky-500/5 rotate-45" />
+                 <View className="w-32 h-32 rounded-full bg-slate-800 border-4 border-sky-900 items-center justify-center relative overflow-hidden">
+                    <View className="absolute inset-0 bg-sky-950 rotate-45" />
                     <Text className="text-white text-3xl font-black">{stats.todayBookings + recentBookings.length}</Text>
-                    <Text className="text-gray-500 text-[8px] font-black uppercase tracking-tighter">Total Active</Text>
+                    <Text className="text-gray-500 text-xs font-black uppercase tracking-tighter">Total Active</Text>
                 </View>
 
                 {/* Legend & Stats List */}
@@ -251,11 +251,11 @@ export default function AdminDashboard() {
                         <View className="flex-row justify-between items-center mb-1">
                            <View className="flex-row items-center gap-2">
                               <View className={`w-2 h-2 rounded-full ${brand.color}`} />
-                              <Text className="text-white text-[10px] font-black">{brand.name}</Text>
+                              <Text className="text-white text-xs font-black">{brand.name}</Text>
                            </View>
-                           <Text className="text-gray-500 text-[9px] font-bold">{brand.p}%</Text>
+                           <Text className="text-gray-500 text-xs font-bold">{brand.p}%</Text>
                         </View>
-                        <View className="h-1 bg-white/5 w-full rounded-full overflow-hidden">
+                         <View className="h-1 bg-slate-950 w-full rounded-full overflow-hidden">
                            <View style={{ width: `${brand.p}%` }} className={`h-full ${brand.color}`} />
                         </View>
                      </View>
@@ -268,24 +268,24 @@ export default function AdminDashboard() {
           <View className="mb-10">
             <View className="flex-row justify-between items-center mb-6">
               <Text className="text-white font-black text-xs uppercase tracking-widest">Recent Bookings</Text>
-              <TouchableOpacity 
+               <TouchableOpacity 
                onPress={() => router.push('/(adminPages)/add-booking' as any)}
-               className="bg-sky-500 px-4 py-2 rounded-full shadow-lg shadow-sky-500/20"
+               className="bg-sky-500 px-4 py-2 rounded-full shadow-lg"
             >
-                <Text className="text-white text-[10px] font-black uppercase">New Booking</Text>
+                <Text className="text-white text-xs font-black uppercase">New Booking</Text>
               </TouchableOpacity>
             </View>
 
             <View className="gap-3">
               {recentBookings.length === 0 ? (
-                <View className="bg-slate-900/50 p-6 rounded-2xl border border-white/5 border-dashed items-center">
-                  <Text className="text-gray-500 text-[10px] font-bold">No recent activities found.</Text>
+                <View className="bg-slate-900 p-6 rounded-2xl border border-slate-800 border-dashed items-center">
+                  <Text className="text-gray-500 text-xs font-bold">No recent activities found.</Text>
                 </View>
               ) : (
-                recentBookings.map((b, i) => (
-                  <TouchableOpacity key={i} className="bg-slate-900 border border-white/5 p-4 rounded-2xl flex-row justify-between items-center shadow-sm">
+                 recentBookings.map((b, i) => (
+                  <TouchableOpacity key={i} className="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex-row justify-between items-center shadow-sm">
                     <View className="flex-row items-center gap-3">
-                      <View className="w-10 h-10 rounded-full bg-slate-800 items-center justify-center border border-white/5 shadow-inner">
+                      <View className="w-10 h-10 rounded-full bg-slate-800 items-center justify-center border border-slate-800 shadow-inner">
                         <Text className="text-white font-black">{(b.name || "C")[0]}</Text>
                       </View>
                       <View>
@@ -309,16 +309,16 @@ export default function AdminDashboard() {
               </TouchableOpacity>
             </View>
 
-            <View className="bg-slate-910 rounded-3xl overflow-hidden border border-white/5 shadow-2xl">
-                <View className="bg-white/5 flex-row p-3">
-                    <Text className="flex-1 text-white/40 text-[8px] font-black uppercase">Item</Text>
+            <View className="bg-slate-900 rounded-3xl overflow-hidden border border-slate-800 shadow-2xl">
+                <View className="bg-slate-800 flex-row p-3">
+                    <Text className="flex-1 text-white opacity-40 text-[8px] font-black uppercase">Item</Text>
                     <Text className="w-12 text-center text-white/40 text-[8px] font-black uppercase">Stock</Text>
                     <Text className="w-12 text-center text-white/40 text-[8px] font-black uppercase">Min</Text>
                 </View>
-                <View className="p-1">
+                    <View className="p-1">
                    {stats.inventory && stats.inventory.length > 0 ? (
                       stats.inventory.slice(0, 5).map((item: any, i: number) => (
-                        <View key={i} className="flex-row p-3 border-b border-white/5 items-center">
+                        <View key={i} className="flex-row p-3 border-b border-slate-800 items-center">
                             <Text className="flex-1 text-white text-[10px] font-bold">{item.name || item.partName || 'Spare Part'}</Text>
                             <Text className={`w-12 text-center font-black text-[10px] ${item.stockQty <= (item.minStock || 0) ? 'text-red-500' : 'text-white'}`}>{item.stockQty || item.quantity || 0}</Text>
                             <Text className="w-12 text-center text-gray-500 font-black text-[10px]">{item.minStock || 0}</Text>

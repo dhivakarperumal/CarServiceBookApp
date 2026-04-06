@@ -13,7 +13,7 @@ import {
   Switch
 } from "react-native";
 import { api } from "../../services/api";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { useRouter, useLocalSearchParams, Stack } from "expo-router";
 import { Ionicons, MaterialIcons, FontAwesome } from "@expo/vector-icons";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import * as ImagePicker from 'expo-image-picker';
@@ -28,7 +28,7 @@ const Label = ({ children, required }: any) => (
 const StyledInput = ({ ...props }: any) => (
   <TextInput
     placeholderTextColor="#475569"
-    className="bg-slate-900 border border-white/5 rounded-2xl px-5 py-4 text-white font-bold text-xs mb-4"
+    className="bg-slate-900 border border-slate-800 rounded-2xl px-5 py-4 text-white font-bold text-xs mb-4"
     {...props}
   />
 );
@@ -261,28 +261,26 @@ const AdminAddProduct = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-slate-950">
+      <Stack.Screen 
+        options={{
+          headerShown: true,
+          title: editData ? "Update Product" : "Add Products",
+          headerTitleStyle: { color: 'white', fontWeight: '900', fontSize: 16 },
+          headerStyle: { backgroundColor: '#020617' },
+          headerTintColor: 'white',
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => router.back()} className="ml-2 w-8 h-8 items-center justify-center">
+               <Ionicons name="arrow-back" size={20} color="white" />
+            </TouchableOpacity>
+          )
+        }} 
+      />
       <KeyboardAwareScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         <View className="p-6">
-          {/* HEADER */}
-          <View className="flex-row items-center gap-4 mb-8">
-            <TouchableOpacity 
-              onPress={() => router.back()} 
-              className="w-10 h-10 rounded-full bg-slate-900 border border-white/5 items-center justify-center"
-            >
-              <Ionicons name="arrow-back" size={20} color="white" />
-            </TouchableOpacity>
-            <View>
-              <Text className="text-white text-2xl font-black uppercase tracking-tighter">
-                {editData ? "Update Product" : "Add Product"}
-              </Text>
-              <Text className="text-sky-500 text-[10px] font-black uppercase tracking-widest">
-                Vehicle Spare Parts & Components
-              </Text>
-            </View>
-          </View>
+          {/* REMOVED PREVIOUS CUSTOM HEADER */}
 
           {/* FORM CONTAINER */}
-          <View className="bg-slate-900/50 p-6 rounded-[32px] border border-white/5 shadow-2xl mb-12">
+          <View className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl mb-12">
             
             {/* BASIC INFO */}
             <Label required>Product Name</Label>
@@ -305,7 +303,7 @@ const AdminAddProduct = () => {
                   <TouchableOpacity 
                      key={cat}
                      onPress={() => setProduct({...product, category: cat})}
-                     className={`px-4 py-2 rounded-xl border ${product.category === cat ? 'bg-sky-500 border-sky-400' : 'bg-slate-900 border-white/5'}`}
+                     className={`px-4 py-2 rounded-xl border ${product.category === cat ? 'bg-sky-500 border-sky-400' : 'bg-slate-900 border-slate-800'}`}
                   >
                      <Text className={`${product.category === cat ? 'text-white' : 'text-slate-500'} text-[10px] font-black uppercase tracking-tighter`}>{cat}</Text>
                   </TouchableOpacity>
@@ -349,7 +347,7 @@ const AdminAddProduct = () => {
             <View className="flex-row gap-4">
               <View className="flex-1">
                 <Label>Final Price (₹)</Label>
-                <View className="bg-slate-800/50 rounded-2xl px-5 py-4 mb-4 border border-white/5">
+                <View className="bg-slate-800 rounded-2xl px-5 py-4 mb-4 border border-slate-700">
                    <Text className="text-sky-400 font-bold text-xs">{product.offerPrice || "0.00"}</Text>
                 </View>
               </View>
@@ -369,13 +367,13 @@ const AdminAddProduct = () => {
             {/* VARIANTS */}
             <View className="flex-row justify-between items-center mb-4">
               <Label>Product Variants</Label>
-              <TouchableOpacity onPress={addVariant} className="bg-sky-500/10 px-3 py-1.5 rounded-xl border border-sky-500/20">
+              <TouchableOpacity onPress={addVariant} className="bg-sky-950 px-3 py-1.5 rounded-xl border border-sky-500">
                 <Text className="text-sky-500 text-[10px] font-black uppercase">+ Add</Text>
               </TouchableOpacity>
             </View>
 
             {variants.map((v, i) => (
-              <View key={i} className="bg-slate-950/50 p-4 rounded-2xl border border-white/5 mb-4 relative">
+              <View key={i} className="bg-slate-950 p-4 rounded-2xl border border-slate-800 mb-4 relative">
                 {variants.length > 1 && (
                   <TouchableOpacity 
                     onPress={() => removeVariant(i)}
@@ -388,7 +386,7 @@ const AdminAddProduct = () => {
                   <View className="flex-1">
                     <Text className="text-gray-600 text-[8px] font-black uppercase mb-1 ml-1">SKU</Text>
                     <TextInput 
-                      className="bg-slate-900 border border-white/5 rounded-xl px-3 py-2 text-white text-[10px] font-bold"
+                      className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-white text-[10px] font-bold"
                       value={v.sku}
                       onChangeText={(val) => handleVariantChange(i, 'sku', val)}
                       placeholder="SKU001"
@@ -398,7 +396,7 @@ const AdminAddProduct = () => {
                   <View className="flex-1">
                     <Text className="text-gray-600 text-[8px] font-black uppercase mb-1 ml-1">Stock</Text>
                     <TextInput 
-                      className="bg-slate-900 border border-white/5 rounded-xl px-3 py-2 text-white text-[10px] font-bold"
+                      className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-white text-[10px] font-bold"
                       value={v.stock}
                       keyboardType="numeric"
                       onChangeText={(val) => handleVariantChange(i, 'stock', val)}
@@ -411,7 +409,7 @@ const AdminAddProduct = () => {
                   <View className="flex-1">
                     <Text className="text-gray-600 text-[8px] font-black uppercase mb-1 ml-1">Position</Text>
                     <TextInput 
-                      className="bg-slate-900 border border-white/5 rounded-xl px-3 py-2 text-white text-[10px] font-bold"
+                      className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-white text-[10px] font-bold"
                       value={v.position}
                       onChangeText={(val) => handleVariantChange(i, 'position', val)}
                       placeholder="Front Left"
@@ -421,7 +419,7 @@ const AdminAddProduct = () => {
                   <View className="flex-1">
                     <Text className="text-gray-600 text-[8px] font-black uppercase mb-1 ml-1">Material</Text>
                     <TextInput 
-                      className="bg-slate-900 border border-white/5 rounded-xl px-3 py-2 text-white text-[10px] font-bold"
+                      className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-white text-[10px] font-bold"
                       value={v.material}
                       onChangeText={(val) => handleVariantChange(i, 'material', val)}
                       placeholder="Ceramic"
@@ -437,14 +435,14 @@ const AdminAddProduct = () => {
             {/* IMAGES */}
             <View className="flex-row justify-between items-center mb-4">
               <Label>Product Gallery</Label>
-              <TouchableOpacity onPress={pickImage} className="bg-amber-500/10 px-3 py-1.5 rounded-xl border border-amber-500/20">
+              <TouchableOpacity onPress={pickImage} className="bg-amber-950 px-3 py-1.5 rounded-xl border border-amber-500">
                 <Text className="text-amber-500 text-[10px] font-black uppercase">Upload Images</Text>
               </TouchableOpacity>
             </View>
 
             <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row mb-6">
               {images.length === 0 ? (
-                <View className="w-32 h-32 bg-slate-950 rounded-2xl border border-white/5 border-dashed items-center justify-center">
+                <View className="w-32 h-32 bg-slate-950 rounded-2xl border border-slate-800 border-dashed items-center justify-center">
                   <MaterialIcons name="image" size={24} color="#1e293b" />
                   <Text className="text-gray-700 text-[8px] font-black uppercase mt-2">No Images</Text>
                 </View>
@@ -460,8 +458,8 @@ const AdminAddProduct = () => {
                     </TouchableOpacity>
                     {thumbnail !== img && (
                       <TouchableOpacity 
-                        onPress={() => setThumbnail(img)}
-                        className="absolute bottom-2 left-2 bg-slate-900/80 px-2 py-1 rounded-lg border border-white/10"
+                         onPress={() => setThumbnail(img)}
+                         className="absolute bottom-2 left-2 bg-slate-900 px-2 py-1 rounded-lg border border-slate-700"
                       >
                         <Text className="text-white text-[7px] font-black uppercase">Set Main</Text>
                       </TouchableOpacity>
@@ -479,7 +477,7 @@ const AdminAddProduct = () => {
             <View className="h-px bg-white/5 my-6" />
 
             {/* ADDITIONAL OPTIONS */}
-            <View className="bg-slate-950/30 p-4 rounded-3xl border border-white/5 mb-6">
+            <View className="bg-slate-950 p-4 rounded-3xl border border-slate-800 mb-6">
                <View className="flex-row justify-between items-center mb-4">
                   <Text className="text-white text-[10px] font-black uppercase">Warranty Policy</Text>
                   <Switch 

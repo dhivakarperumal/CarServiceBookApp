@@ -56,9 +56,9 @@ export default function AdminUsers() {
   });
 
   const renderUserItem = ({ item }: { item: any }) => (
-    <TouchableOpacity className="bg-slate-900 border border-white/5 rounded-[32px] p-6 mb-4 shadow-2xl relative overflow-hidden">
+    <TouchableOpacity className="bg-slate-900 border border-slate-800 rounded-3xl p-6 mb-4 shadow-2xl relative overflow-hidden">
        {/* Background Accent */}
-       <View className="absolute -top-10 -right-10 w-24 h-24 bg-white/5 rounded-full" />
+       <View className="absolute -top-10 -right-10 w-24 h-24 bg-slate-800 rounded-full" />
        
        <View className="flex-row items-center gap-4">
           <View className="w-14 h-14 rounded-3xl bg-slate-800 items-center justify-center border border-white/10 shadow-inner">
@@ -71,7 +71,7 @@ export default function AdminUsers() {
                   {item.username || item.name || "Anonymous User"}
                 </Text>
                 {item.role === 'admin' && (
-                  <View className="bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
+                  <View className="bg-amber-950 px-2 py-0.5 rounded-full border border-amber-900">
                      <Text className="text-amber-500 text-[7px] font-black uppercase">Admin</Text>
                   </View>
                 )}
@@ -99,7 +99,7 @@ export default function AdminUsers() {
              </View>
           </View>
           
-          <View className="bg-sky-500/10 px-3 py-1.5 rounded-xl border border-sky-500/20">
+          <View className="bg-sky-950 px-3 py-1.5 rounded-xl border border-sky-900">
              <Text className="text-sky-500 text-[8px] font-black uppercase">Details →</Text>
           </View>
        </View>
@@ -115,7 +115,7 @@ export default function AdminUsers() {
               <Text className="text-white font-black text-2xl uppercase tracking-tighter">User Directory</Text>
               <Text className="text-slate-500 text-[10px] font-black uppercase tracking-widest mt-1">Platform Account Management</Text>
            </View>
-           <TouchableOpacity className="p-3 bg-white/5 rounded-full border border-white/5 shadow-2xl">
+           <TouchableOpacity className="p-3 bg-slate-900 rounded-full border border-slate-800 shadow-2xl">
               <Ionicons name="filter" size={20} color="#0ea5e9" />
            </TouchableOpacity>
         </View>
@@ -138,7 +138,7 @@ export default function AdminUsers() {
                 <TouchableOpacity 
                    key={f}
                    onPress={() => setFilter(f)}
-                   className={`px-4 py-2 rounded-full border ${filter === f ? 'bg-sky-500 border-sky-400 shadow-lg shadow-sky-500/20' : 'bg-slate-900 border-white/5'}`}
+                   className={`px-4 py-2 rounded-full border ${filter === f ? 'bg-sky-500 border-sky-400 shadow-lg shadow-sky-900' : 'bg-slate-900 border-slate-800'}`}
                 >
                    <Text className={`${filter === f ? 'text-white' : 'text-slate-500'} text-[9px] font-black uppercase tracking-tighter`}>{f}</Text>
                 </TouchableOpacity>
@@ -170,6 +170,15 @@ export default function AdminUsers() {
           />
         )}
       </View>
+
+      {/* FLOATING ACTION BUTTON */}
+      <TouchableOpacity 
+        onPress={() => router.push("/(adminPages)/staff")} // Using staff as a proxy for adding if needed, or just a FAB
+        className="absolute bottom-8 right-8 w-14 h-14 bg-sky-500 rounded-full items-center justify-center shadow-2xl shadow-sky-900"
+        style={{ elevation: 10 }}
+      >
+        <Ionicons name="add" size={32} color="white" />
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }

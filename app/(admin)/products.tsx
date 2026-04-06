@@ -15,7 +15,7 @@ import {
   Platform
 } from "react-native";
 import { api } from "../../services/api";
-import { useRouter } from "expo-router";
+import { useRouter, Stack } from "expo-router";
 import { Ionicons, FontAwesome, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -125,7 +125,7 @@ const AllProducts = () => {
     
     if (view === "list") {
       return (
-        <View className="bg-slate-900/50 border border-white/5 rounded-3xl p-4 mb-4 flex-row items-center shadow-sm">
+        <View className="bg-slate-900 border border-slate-800 rounded-3xl p-4 mb-4 flex-row items-center shadow-sm">
           <View className="relative">
             <Image 
               source={{ uri: imageUrl || "https://via.placeholder.com/150?text=No+Image" }} 
@@ -133,7 +133,7 @@ const AllProducts = () => {
               resizeMode="cover"
             />
             {item.isFeatured && (
-              <View className="absolute -top-1 -left-1 bg-amber-500 w-4 h-4 rounded-full items-center justify-center border border-slate-900">
+              <View className="absolute -top-1 -left-1 bg-amber-500 w-4 h-4 rounded-full items-center justify-center border border-slate-950">
                 <FontAwesome name="star" size={8} color="white" />
               </View>
             )}
@@ -157,7 +157,7 @@ const AllProducts = () => {
           <View className="items-end gap-2">
             <TouchableOpacity 
               onPress={() => toggleStatus(item)}
-              className={`${item.isActive ? 'bg-emerald-500/10' : 'bg-red-500/10'} px-2 py-1 rounded-full border ${item.isActive ? 'border-emerald-500/20' : 'border-red-500/20'}`}
+              className={`${item.isActive ? 'bg-emerald-950' : 'bg-red-950'} px-2 py-1 rounded-full border ${item.isActive ? 'border-emerald-500' : 'border-red-500'}`}
             >
               <Text className={`${item.isActive ? 'text-emerald-500' : 'text-red-500'} text-[8px] font-black uppercase`}>
                 {item.isActive ? "Active" : "Inactive"}
@@ -178,7 +178,7 @@ const AllProducts = () => {
     }
 
     return (
-      <View style={{ width: COLUMN_WIDTH }} className="bg-slate-900/50 border border-white/5 rounded-3xl p-3 mb-4 shadow-sm m-1">
+      <View style={{ width: COLUMN_WIDTH }} className="bg-slate-900 border border-slate-800 rounded-3xl p-3 mb-4 shadow-sm m-1">
         <View className="relative">
           <Image 
             source={{ uri: imageUrl || "https://via.placeholder.com/400x300?text=Product+Image" }} 
@@ -229,24 +229,26 @@ const AllProducts = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-slate-950">
+      <Stack.Screen 
+        options={{
+          headerShown: true,
+          title: "Products Inventory",
+          headerTitleStyle: { color: 'white', fontWeight: '900', fontSize: 16 },
+          headerStyle: { backgroundColor: '#020617' },
+          headerTintColor: 'white',
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => router.back()} className="ml-2 w-8 h-8 items-center justify-center">
+               <Ionicons name="arrow-back" size={20} color="white" />
+            </TouchableOpacity>
+          )
+        }} 
+      />
       <View className="p-4 flex-1">
-        {/* HEADER */}
-        <View className="flex-row justify-between items-center mb-6">
-          <View>
-            <Text className="text-white text-2xl font-black uppercase tracking-tighter">Inventory</Text>
-            <Text className="text-sky-500 text-[10px] font-black uppercase tracking-widest">Global Product Catalog</Text>
-          </View>
-          <TouchableOpacity 
-            onPress={() => router.push("/(adminPages)/add-products")}
-            className="w-12 h-12 bg-sky-500 rounded-3xl items-center justify-center shadow-lg shadow-sky-500/20"
-          >
-            <Ionicons name="add" size={24} color="white" />
-          </TouchableOpacity>
-        </View>
+        {/* REMOVED PREVIOUS CUSTOM HEADER */}
 
         {/* SEARCH & FILTERS */}
         <View className="mb-6">
-          <View className="flex-row items-center bg-slate-900 border border-white/5 rounded-2xl px-4 py-2 mb-4">
+          <View className="flex-row items-center bg-slate-900 border border-slate-800 rounded-2xl px-4 py-2 mb-4">
             <Ionicons name="search" size={18} color="#64748b" />
             <TextInput 
               placeholder="Search components, parts, products..."
@@ -271,7 +273,7 @@ const AllProducts = () => {
               <TouchableOpacity 
                 key={f.id}
                 onPress={() => { setFilter(f.id); setPage(1); }}
-                className={`mr-2 px-4 py-2 rounded-full border ${filter === f.id ? 'bg-sky-500 border-sky-400' : 'bg-slate-900 border-white/5'}`}
+                className={`mr-2 px-4 py-2 rounded-full border ${filter === f.id ? 'bg-sky-500 border-sky-400' : 'bg-slate-900 border-slate-800'}`}
               >
                 <Text className={`${filter === f.id ? 'text-white' : 'text-gray-500'} text-[10px] font-black uppercase tracking-tighter`}>
                   {f.label}
@@ -284,16 +286,16 @@ const AllProducts = () => {
              <Text className="text-gray-600 text-[10px] font-black uppercase">
                Showing {filteredProducts.length} Results
              </Text>
-             <View className="flex-row bg-slate-900 rounded-xl p-1 border border-white/5">
+             <View className="flex-row bg-slate-900 rounded-xl p-1 border border-slate-800">
                 <TouchableOpacity 
                   onPress={() => setView("list")}
-                  className={`px-3 py-1.5 rounded-lg ${view === "list" ? 'bg-slate-800 shadow-sm' : ''}`}
+                  className={`px-3 py-1.5 rounded-lg ${view === "list" ? 'bg-slate-800' : ''}`}
                 >
                   <MaterialIcons name="format-list-bulleted" size={14} color={view === "list" ? "white" : "#64748b"} />
                 </TouchableOpacity>
                 <TouchableOpacity 
                   onPress={() => setView("grid")}
-                  className={`px-3 py-1.5 rounded-lg ${view === "grid" ? 'bg-slate-800 shadow-sm' : ''}`}
+                  className={`px-3 py-1.5 rounded-lg ${view === "grid" ? 'bg-slate-800' : ''}`}
                 >
                   <MaterialIcons name="grid-view" size={14} color={view === "grid" ? "white" : "#64748b"} />
                 </TouchableOpacity>
@@ -355,6 +357,15 @@ const AllProducts = () => {
           />
         )}
       </View>
+
+      {/* FLOATING ACTION BUTTON */}
+      <TouchableOpacity 
+        onPress={() => router.push("/(adminPages)/add-products")}
+        className="absolute bottom-8 right-8 w-14 h-14 bg-sky-500 rounded-full items-center justify-center shadow-2xl shadow-sky-500/50"
+        style={{ elevation: 10 }}
+      >
+        <Ionicons name="add" size={32} color="white" />
+      </TouchableOpacity>
     </SafeAreaView>
   );
 };

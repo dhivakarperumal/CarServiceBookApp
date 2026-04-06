@@ -54,14 +54,10 @@ export default function AdminStaff() {
       <View className="p-4 border-b border-white/5 bg-slate-950">
          <View className="flex-row justify-between items-center mb-4">
             <Text className="text-white font-black text-xl uppercase tracking-tighter">Team Management</Text>
-            <TouchableOpacity 
-               className="bg-violet-500 px-4 py-2 rounded-full shadow-lg shadow-violet-500/20"
-            >
-               <Text className="text-white font-black text-[10px] uppercase">+ Add Member</Text>
-            </TouchableOpacity>
+            {/* REMOVED INLINE ADD MEMBER BUTTON - REPLACED BY FAB */}
          </View>
 
-         <View className="flex-row items-center bg-slate-900 rounded-2xl px-4 h-12 border border-white/5">
+         <View className="flex-row items-center bg-slate-900 rounded-2xl px-4 h-12 border border-slate-800">
             <Ionicons name="search" size={18} color="#475569" />
             <TextInput 
                placeholder="Search technicians, roles..."
@@ -85,13 +81,13 @@ export default function AdminStaff() {
              </View>
            ) : (
              filtered.map((s, i) => (
-                <View key={i} className="w-[48%] bg-slate-900 border border-white/5 rounded-3xl p-5 mb-4 shadow-2xl overflow-hidden">
-                   <View className="absolute top-0 right-0 w-12 h-12 bg-white/5 rounded-bl-3xl items-center justify-center">
-                      <Ionicons name="shield-checkmark" size={14} color={s.role === 'Admin' ? '#8b5cf6' : '#94a3b8'} />
-                   </View>
-                   <View className="w-12 h-12 rounded-full bg-slate-800 items-center justify-center border border-white/5 mb-3">
-                      <Text className="text-white font-black text-lg">{(s.name || s.username || "S")[0].toUpperCase()}</Text>
-                   </View>
+                 <View key={i} className="w-[48%] bg-slate-900 border border-slate-800 rounded-3xl p-5 mb-4 shadow-2xl overflow-hidden">
+                    <View className="absolute top-0 right-0 w-12 h-12 bg-slate-800 rounded-bl-3xl items-center justify-center">
+                       <Ionicons name="shield-checkmark" size={14} color={s.role === 'Admin' ? '#8b5cf6' : '#94a3b8'} />
+                    </View>
+                    <View className="w-12 h-12 rounded-full bg-slate-800 items-center justify-center border border-slate-700 mb-3">
+                       <Text className="text-white font-black text-lg">{(s.name || s.username || "S")[0].toUpperCase()}</Text>
+                    </View>
                    <Text className="text-white font-black text-sm tracking-tighter">{s.name || s.username}</Text>
                    <Text className="text-violet-400 font-black text-[8px] uppercase tracking-widest mt-1">{s.role || 'Staff'}</Text>
                    
@@ -106,6 +102,15 @@ export default function AdminStaff() {
         </View>
         <View className="h-20" />
       </ScrollView>
+
+      {/* FLOATING ACTION BUTTON */}
+      <TouchableOpacity 
+        onPress={() => Alert.alert("Coming Soon", "Add Member functionality is under development.")}
+        className="absolute bottom-8 right-8 w-14 h-14 bg-violet-600 rounded-full items-center justify-center shadow-2xl shadow-black"
+        style={{ elevation: 10 }}
+      >
+        <Ionicons name="add" size={32} color="white" />
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
