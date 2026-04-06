@@ -217,7 +217,7 @@ export default function AddBillingScreen() {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          <View className="flex-row items-center gap-4 mb-8">
+          <View className="flex-row items-center gap-4 mt-8 mb-8">
             <TouchableOpacity
               onPress={() => router.back()}
               className="p-3 bg-card rounded-2xl border border-card"

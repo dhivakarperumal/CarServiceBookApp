@@ -192,38 +192,52 @@ export default function EmployeeBilling() {
         </View>
 
         {/* FILTERS */}
-        <View className="space-y-3 mb-6">
-          <View className="relative">
+        <View className="space-y-5 mb-6">
+          {/* Search Bar */}
+          <View className="relative mb-3">
             <View className="absolute left-4 top-4 z-10">
-              <Ionicons name="search" size={20} color="#64748b" />
+              <Ionicons name="search" size={20} color="#64748B" />
             </View>
+
             <TextInput
               placeholder="Search invoice, customer..."
-              placeholderTextColor="#64748b"
+              placeholderTextColor="#64748B"
               value={search}
               onChangeText={setSearch}
-              className="w-full pl-12 pr-4 py-4 bg-card border border-card rounded-2xl text-text-primary font-bold"
+              className="w-full pl-12 pr-4 py-4 border border-slate-700 bg-slate-800/80 rounded-2xl text-text-primary font-bold shadow-lg"
             />
           </View>
 
+          {/* Filters */}
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            className="flex-row gap-2"
+            className="mt-2"
+            contentContainerStyle={{ paddingHorizontal: 2 }}
           >
-            {["all", "paid", "pending", "partial"].map((f) => (
-              <TouchableOpacity
-                key={f}
-                onPress={() => setStatusFilter(f)}
-                className={`px-6 py-2 rounded-xl border ${statusFilter === f ? "bg-primary border-primary" : "bg-card border-card"}`}
-              >
-                <Text
-                  className={`text-xs font-black uppercase tracking-widest ${statusFilter === f ? "text-text-primary" : "text-text-secondary"}`}
+            <View className="flex-row items-center gap-3">
+              {["all", "paid", "pending", "partial"].map((f) => (
+                <TouchableOpacity
+                  key={f}
+                  onPress={() => setStatusFilter(f)}
+                  className={`px-5 py-3 rounded-2xl border shadow-sm ${
+                    statusFilter === f
+                      ? "bg-primary border-primary"
+                      : "bg-slate-800 border-slate-700"
+                  }`}
                 >
-                  {f}
-                </Text>
-              </TouchableOpacity>
-            ))}
+                  <Text
+                    className={`text-[10px] font-black uppercase tracking-widest ${
+                      statusFilter === f
+                        ? "text-text-primary"
+                        : "text-text-secondary"
+                    }`}
+                  >
+                    {f}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </ScrollView>
         </View>
 
@@ -244,55 +258,68 @@ export default function EmployeeBilling() {
             {filteredBills.map((bill) => (
               <View
                 key={bill.id}
-                className="bg-card rounded-3xl border border-card p-6 mb-4"
+                className="bg-card/90 rounded-3xl border border-card p-6 mb-5 shadow-xl backdrop-blur-lg"
               >
-                <View className="flex-row justify-between items-start mb-4">
+                {/* Header */}
+                <View className="flex-row justify-between items-start mb-5">
                   <StatusBadge status={bill.paymentStatus} />
+
                   <Text className="text-[10px] font-black text-text-muted uppercase tracking-widest">
                     INV: {bill.invoiceNo}
                   </Text>
                 </View>
 
-                <View className="mb-4">
+                {/* Customer Info */}
+                <View className="mb-5">
                   <Text className="text-xl font-black text-text-primary leading-tight">
                     {bill.customerName}
                   </Text>
+
                   <Text className="text-sm font-black text-primary mt-1 uppercase tracking-wider">
                     {bill.carNumber || "SERVICE JOB"}
                   </Text>
+
                   <Text className="text-[10px] text-text-muted font-bold uppercase mt-1 tracking-widest">
                     Job ID: {bill.bookingId}
                   </Text>
                 </View>
 
-                <View className="bg-background/50 rounded-2xl p-4 space-y-2 mb-4 border border-card">
+                {/* Summary Box */}
+                <View className="bg-background/60 rounded-2xl p-5 space-y-3 mb-5 border border-card shadow-sm">
                   <View className="flex-row justify-between items-center">
-                    <Text className="text-xs font-bold text-text-muted uppercase">
+                    <Text className="text-[11px] font-bold text-text-muted uppercase">
                       Subtotal
                     </Text>
-                    <Text className="text-xs font-bold text-text-secondary font-black">
+
+                    <Text className="text-sm font-black text-text-secondary">
                       ₹{Number(bill.subTotal || 0).toLocaleString()}
                     </Text>
                   </View>
+
                   <View className="flex-row justify-between items-center">
-                    <Text className="text-xs font-bold text-text-muted uppercase">
+                    <Text className="text-[11px] font-bold text-text-muted uppercase">
                       GST Amount
                     </Text>
-                    <Text className="text-xs font-bold text-text-secondary font-black">
+
+                    <Text className="text-sm font-black text-text-secondary">
                       ₹{Number(bill.gstAmount || 0).toLocaleString()}
                     </Text>
                   </View>
-                  <View className="flex-row justify-between items-center pt-2 border-t border-card mt-1">
-                    <Text className="text-xs font-black text-text-primary uppercase">
+
+                  <View className="flex-row justify-between items-center pt-3 border-t border-card mt-1">
+                    <Text className="text-xs font-black text-text-primary uppercase tracking-widest">
                       Grand Total
                     </Text>
-                    <Text className="text-lg font-black text-success">
+
+                    <Text className="text-xl font-black text-success">
                       ₹{Number(bill.grandTotal).toLocaleString()}
                     </Text>
                   </View>
                 </View>
 
+                {/* Actions */}
                 <View className="flex-row gap-3">
+                  {/* Premium Print Button */}
                   <TouchableOpacity
                     onPress={() =>
                       Alert.alert(
@@ -300,18 +327,21 @@ export default function EmployeeBilling() {
                         "Printing functionality will be available in the native build.",
                       )
                     }
-                    className="flex-1 bg-card/50 py-3 rounded-xl flex-row items-center justify-center gap-2 border border-card"
+                    className="flex-1 bg-primary py-3.5 rounded-2xl flex-row items-center justify-center gap-2 shadow-lg"
                   >
-                    <Ionicons name="print" size={16} color="#FFFFFF" />
-                    <Text className="text-text-primary text-[10px] font-black uppercase tracking-widest">
+                    <Ionicons name="print" size={17} color="#FFFFFF" />
+
+                    <Text className="text-white text-[11px] font-black uppercase tracking-widest">
                       Print Bill
                     </Text>
                   </TouchableOpacity>
+
+                  {/* View Button */}
                   <TouchableOpacity
                     onPress={() =>
                       Alert.alert("History", "Detail view coming soon.")
                     }
-                    className="w-12 bg-primary/10 border border-primary/20 rounded-xl items-center justify-center"
+                    className="w-12 bg-primary/10 border border-primary/20 rounded-2xl items-center justify-center"
                   >
                     <Ionicons name="eye" size={18} color="#0EA5E9" />
                   </TouchableOpacity>
