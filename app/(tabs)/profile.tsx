@@ -39,8 +39,11 @@ export default function ProfileScreen() {
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      <ScrollView className="px-4" showsVerticalScrollIndicator={false}>
+    <SafeAreaView className="flex-1 bg-background" edges={["left", "right"]}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 50 }}
+      >
 
         {/* HEADER */}
         <View className="bg-slate800/60 rounded-3xl p-6 items-center mt-6">
