@@ -54,6 +54,14 @@ export const COLORS = {
   // Black and white
   black: "#000000",
   white: "#FFFFFF",
+
+  // ✅ ADD THESE (opacity variants)
+  errorLight: "rgba(239, 68, 68, 0.1)",
+  errorBorder: "rgba(239, 68, 68, 0.3)",
+
+  // optional (recommended for reuse)
+  cardLight: "rgba(30, 41, 59, 0.5)",   // slate800/50
+  cardSoft: "rgba(30, 41, 59, 0.4)",
 };
 
 export const GRADIENT = [COLORS.primary, COLORS.primaryDark];

@@ -1,164 +1,115 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, SafeAreaView, StyleSheet, ScrollView, Alert } from 'react-native';
-import { useAuth } from '../../contexts/AuthContext';
-import { Ionicons } from '@expo/vector-icons';
+import React from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { useAuth } from "../../contexts/AuthContext";
 
 export default function ProfileScreen() {
   const { user, logout } = useAuth();
+  const router = useRouter();
 
   const handleLogout = () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to log out?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Logout', 
-          onPress: logout,
-          style: 'destructive' 
-        }
-      ]
-    );
+    Alert.alert("Logout", "Are you sure you want to log out?", [
+      { text: "Cancel", style: "cancel" },
+      { text: "Logout", onPress: logout, style: "destructive" },
+    ]);
   };
 
+  const MenuItem = ({ title, icon, route }: any) => (
+    <TouchableOpacity
+      onPress={() => router.push(route)}
+      className="flex-row items-center justify-between px-5 py-4 rounded-2xl mb-4 bg-slate800/50 border border-white/5"
+    >
+      <View className="flex-row items-center gap-4">
+        <Ionicons name={icon} size={22} color="#E5E7EB" />
+        <Text className="text-text-primary text-base font-semibold">
+          {title}
+        </Text>
+      </View>
+
+      <Ionicons name="chevron-forward" size={18} color="#94a3b8" />
+    </TouchableOpacity>
+  );
+
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.header}>
-          <View style={styles.avatarContainer}>
-            <Ionicons name="person-circle" size={100} color="#2563eb" />
-          </View>
-          <Text style={styles.name}>{user?.username || 'User'}</Text>
-          <Text style={styles.email}>{user?.email || 'email@example.com'}</Text>
-          <View style={styles.roleBadge}>
-             <Text style={styles.roleText}>{user?.role?.toUpperCase() || 'CUSTOMER'}</Text>
-          </View>
+    <SafeAreaView className="flex-1 bg-background">
+      <ScrollView className="px-4" showsVerticalScrollIndicator={false}>
+
+        {/* HEADER */}
+        <View className="bg-slate800/60 rounded-3xl p-6 items-center mt-6">
+          <Ionicons name="person-circle" size={100} color="#38bdf8" />
+
+          <Text className="text-text-primary text-xl font-bold mt-3">
+            {user?.username || "User"}
+          </Text>
+
+          <Text className="text-text-secondary text-sm mt-1">
+            {user?.email || "email@example.com"}
+          </Text>
+
+          <Text className="text-white text-xs font-bold mt-3">
+            {user?.role?.toUpperCase() || "CUSTOMER"}
+          </Text>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Account Settings</Text>
-          <TouchableOpacity style={styles.menuItem}>
-            <Ionicons name="person-outline" size={24} color="#374151" />
-            <Text style={styles.menuLabel}>Edit Profile</Text>
-            <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
-          </TouchableOpacity>
-          
-          <TouchableOpacity style={styles.menuItem}>
-            <Ionicons name="notifications-outline" size={24} color="#374151" />
-            <Text style={styles.menuLabel}>Notifications</Text>
-            <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
-          </TouchableOpacity>
+        {/* MENU ITEMS (SEPARATE CARDS) */}
+        <View className="mt-6">
+          <MenuItem
+            title="Service Status"
+            icon="construct-outline"
+            route="/profile/service-status"
+          />
 
-          <TouchableOpacity style={styles.menuItem}>
-             <Ionicons name="shield-outline" size={24} color="#374151" />
-             <Text style={styles.menuLabel}>Privacy & Security</Text>
-             <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
-          </TouchableOpacity>
+          <MenuItem
+            title="Personal Info"
+            icon="person-outline"
+            route="/profile/personal-info"
+          />
+
+          <MenuItem
+            title="My Orders"
+            icon="receipt-outline"
+            route="/profile/orders"
+          />
+
+          <MenuItem
+            title="Vehicle Bookings"
+            icon="car-outline"
+            route="/profile/bookings"
+          />
+
+          <MenuItem
+            title="History"
+            icon="time-outline"
+            route="/profile/history"
+          />
+
+          <MenuItem
+            title="Set Password"
+            icon="lock-closed-outline"
+            route="/profile/change-password"
+          />
         </View>
 
-        <TouchableOpacity 
-          style={styles.logoutButton} 
+        {/* LOGOUT */}
+        <TouchableOpacity
           onPress={handleLogout}
+          className="mt-4 py-4 rounded-2xl flex-row justify-center items-center bg-error-light border border-error-border"
         >
-          <Ionicons name="log-out-outline" size={24} color="#ef4444" />
-          <Text style={styles.logoutText}>Log Out</Text>
+          <Ionicons name="log-out-outline" size={20} color="#EF4444" />
+          <Text className="text-error font-bold ml-2">
+            Log Out
+          </Text>
         </TouchableOpacity>
+
       </ScrollView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f9fafb',
-  },
-  content: {
-    padding: 20,
-    paddingBottom: 40,
-  },
-  header: {
-    alignItems: 'center',
-    marginBottom: 30,
-    backgroundColor: '#fff',
-    padding: 25,
-    borderRadius: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 3,
-  },
-  avatarContainer: {
-    marginBottom: 15,
-  },
-  name: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#111827',
-  },
-  email: {
-    fontSize: 16,
-    color: '#6b7280',
-    marginTop: 4,
-  },
-  roleBadge: {
-    backgroundColor: '#eff6ff',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
-    marginTop: 15,
-  },
-  roleText: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#2563eb',
-  },
-  section: {
-    marginBottom: 20,
-  },
-  sectionTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#9ca3af',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginBottom: 10,
-    paddingLeft: 5,
-  },
-  menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    padding: 18,
-    borderRadius: 15,
-    marginBottom: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.03,
-    shadowRadius: 5,
-    elevation: 2,
-  },
-  menuLabel: {
-    flex: 1,
-    fontSize: 16,
-    color: '#374151',
-    marginLeft: 15,
-    fontWeight: '500',
-  },
-  logoutButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#fee2e2',
-    padding: 18,
-    borderRadius: 15,
-    marginTop: 10,
-  },
-  logoutText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#ef4444',
-    marginLeft: 10,
-  },
-});
