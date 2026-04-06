@@ -10,16 +10,34 @@ module.exports = {
       colors: {
         primary: COLORS.primary,
         'primary-dark': COLORS.primaryDark,
+
         background: COLORS.background,
         card: COLORS.card,
+        modal: COLORS.modal,
+
         'text-primary': COLORS.textPrimary,
         'text-secondary': COLORS.textSecondary,
         'text-muted': COLORS.textMuted,
+
         success: COLORS.success,
         warning: COLORS.warning,
         error: COLORS.error,
+
         accent: COLORS.accent,
         rating: COLORS.rating,
+
+        // ADD THESE 👇 (important for your profile UI)
+        slate800: COLORS.slate800,
+        slate400: COLORS.slate400,
+        white: COLORS.white,
+        black: COLORS.black,
+
+        // ✅ ADD THESE
+        'error-light': COLORS.errorLight,
+        'error-border': COLORS.errorBorder,
+
+        'card-light': COLORS.cardLight,
+        'card-soft': COLORS.cardSoft,
       },
     },
   },

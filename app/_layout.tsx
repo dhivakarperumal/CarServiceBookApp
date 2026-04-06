@@ -44,7 +44,36 @@ export default function RootLayout() {
               })}
             />
 
-            {/* Other Screens */}
+            {/* PROFILE SCREENS */}
+            <Stack.Screen
+              name="profile/service-status"
+              options={{ title: "Service Status" }}
+            />
+
+            <Stack.Screen
+              name="profile/personal-info"
+              options={{ title: "Personal Info" }}
+            />
+
+            <Stack.Screen
+              name="profile/orders"
+              options={{ title: "My Orders" }}
+            />
+
+            <Stack.Screen
+              name="profile/bookings"
+              options={{ title: "Vehicle Bookings" }}
+            />
+
+            <Stack.Screen
+              name="profile/history"
+              options={{ title: "History" }}
+            />
+
+            <Stack.Screen
+              name="profile/change-password"
+              options={{ title: "Set / Change Password" }}
+            />
           </Stack>
 
           <StatusBar style="light" />
