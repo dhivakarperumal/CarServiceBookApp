@@ -144,6 +144,17 @@ export const apiService = {
     }
   },
 
+  // Pricing
+  getPricingPackages: async (): Promise<any[]> => {
+    try {
+      const response = await api.get('/pricing_packages');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching pricing packages:', error);
+      throw error;
+    }
+  },
+
   getReviews: async (productId: number): Promise<any[]> => {
     try {
       const response = await api.get(`/reviews?productId=${productId}`);
