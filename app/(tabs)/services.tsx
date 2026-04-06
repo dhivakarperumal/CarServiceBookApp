@@ -78,7 +78,7 @@ export default function ServicesScreen() {
         </View>
 
         <TouchableOpacity
-          onPress={() => router.push({ pathname: '/service/[id]', params: { id: service.id } })}
+          onPress={() => router.push({ pathname: '/service/[id]', params: { id: service.id, name: service.name, }, })}
           activeOpacity={0.8}
           className="rounded-full overflow-hidden w-[90%] self-center mt-1"
         >
