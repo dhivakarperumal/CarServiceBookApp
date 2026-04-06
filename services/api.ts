@@ -248,6 +248,16 @@ export const apiService = {
     }
   },
 
+  updateBookingStatus: async (id: number, statusData: any): Promise<any> => {
+    try {
+      const response = await api.put(`/bookings/status/${id}`, statusData);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating booking status:', error);
+      throw error;
+    }
+  },
+
   createBooking: async (bookingData: Partial<Booking>): Promise<Booking> => {
     try {
       const response = await api.post('/bookings', bookingData);
@@ -286,6 +296,7 @@ export const apiService = {
   },
 
   // User authentication (if needed)
+
   login: async (identifier: string, password: string) => {
     try {
       const loginData = {

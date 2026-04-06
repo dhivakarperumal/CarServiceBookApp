@@ -126,10 +126,10 @@ export default function AdminDashboard() {
           <View className="mb-8">
             <Text className="text-white/40 text-[10px] font-black uppercase tracking-[2px] mb-4">Quick Access</Text>
             <View className="flex-row flex-wrap justify-between">
-              <QuickAction title="Add Vehicle" icon="🚗" color="bg-sky-500" onPress={() => {}} />
-              <QuickAction title="Add Booking" icon="📅" color="bg-indigo-500" onPress={() => router.push('/(tabs)/booking')} />
+              <QuickAction title="Add Vehicle" icon="🚗" color="bg-sky-500" onPress={() => router.push('/(adminPages)/vehicles')} />
+              <QuickAction title="Add Booking" icon="📅" color="bg-indigo-500" onPress={() => router.push('/(adminPages)/add-booking')} />
               <QuickAction title="Add Billing" icon="🧾" color="bg-emerald-500" onPress={() => router.push('/(employee)/add-billing')} />
-              <QuickAction title="Add Staff" icon="👨‍🔧" color="bg-violet-500" onPress={() => {}} />
+              <QuickAction title="Add Staff" icon="👨‍🔧" color="bg-violet-500" onPress={() => router.push('/(admin)/staff')} />
               <QuickAction title="Inventory" icon="📦" color="bg-orange-500" onPress={() => router.push('/(admin)/products')} />
               <QuickAction title="Products" icon="🛒" color="bg-rose-500" onPress={() => router.push('/(admin)/products')} />
             </View>
@@ -268,8 +268,11 @@ export default function AdminDashboard() {
           <View className="mb-10">
             <View className="flex-row justify-between items-center mb-6">
               <Text className="text-white font-black text-xs uppercase tracking-widest">Recent Bookings</Text>
-              <TouchableOpacity onPress={() => router.push('/(admin)/bookings')}>
-                <Text className="text-sky-500 text-[10px] font-black uppercase">See All →</Text>
+              <TouchableOpacity 
+               onPress={() => router.push('/(admin)/add-booking')}
+               className="bg-sky-500 px-4 py-2 rounded-full shadow-lg shadow-sky-500/20"
+            >
+                <Text className="text-white text-[10px] font-black uppercase">New Booking</Text>
               </TouchableOpacity>
             </View>
 
