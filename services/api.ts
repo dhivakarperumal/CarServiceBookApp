@@ -145,6 +145,16 @@ export const apiService = {
     }
   },
 
+  updateProductStock: async (docId: string | number, stockData: { variants: any[], totalStock: number }): Promise<any> => {
+    try {
+      const response = await api.put(`/products/stock/${docId}`, stockData);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating product stock:', error);
+      throw error;
+    }
+  },
+
   // Pricing
   getPricingPackages: async (): Promise<any[]> => {
     try {

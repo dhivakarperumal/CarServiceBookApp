@@ -12,11 +12,11 @@ import { useRouter } from 'expo-router';
 const BOOKING_STATUS = ["Booked", "Call Verified", "Approved", "Cancelled", "Service Completed"];
 
 const statusColors: any = {
-  "Approved": { bg: "bg-indigo-500/10", text: "text-indigo-400", border: "border-indigo-500/20" },
-  "Service Completed": { bg: "bg-emerald-500/10", text: "text-emerald-400", border: "border-emerald-500/20" },
-  "Cancelled": { bg: "bg-red-500/10", text: "text-red-400", border: "border-red-500/20" },
-  "Call Verified": { bg: "bg-sky-500/10", text: "text-sky-400", border: "border-sky-500/20" },
-  "Booked": { bg: "bg-slate-500/10", text: "text-slate-400", border: "border-slate-500/20" },
+  "Approved": { bg: "bg-indigo-950", text: "text-indigo-400", border: "border-indigo-900" },
+  "Service Completed": { bg: "bg-emerald-950", text: "text-emerald-400", border: "border-emerald-900" },
+  "Cancelled": { bg: "bg-red-950", text: "text-red-400", border: "border-red-900" },
+  "Call Verified": { bg: "bg-sky-950", text: "text-sky-400", border: "border-sky-900" },
+  "Booked": { bg: "bg-slate-800", text: "text-slate-400", border: "border-slate-700" },
 };
 
 export default function AdminBookings() {
@@ -126,7 +126,7 @@ export default function AdminBookings() {
 
          {/* 🔎 SEARCH & FILTER */}
          <View className="flex-row gap-2">
-            <View className="flex-1 bg-slate-900 rounded-2xl flex-row items-center px-4 h-12 border border-white/5">
+            <View className="flex-1 bg-slate-900 rounded-2xl flex-row items-center px-4 h-12 border border-slate-800">
                 <Ionicons name="search" size={18} color="#475569" />
                 <TextInput 
                    placeholder="Search..."
@@ -143,7 +143,7 @@ export default function AdminBookings() {
                                     statusFilter === "Approved" ? "Cancelled" : "All";
                   setStatusFilter(nextStatus);
                }}
-               className="bg-slate-900 w-12 h-12 rounded-2xl items-center justify-center border border-white/5"
+               className="bg-slate-900 w-12 h-12 rounded-2xl items-center justify-center border border-slate-800"
             >
                 <Ionicons name="filter" size={20} color={statusFilter === "All" ? "#475569" : "#0ea5e9"} />
                 {statusFilter !== "All" && (
@@ -153,7 +153,7 @@ export default function AdminBookings() {
          </View>
          {statusFilter !== "All" && (
             <View className="mt-2 flex-row">
-               <View className="bg-sky-500/10 border border-sky-500/20 px-3 py-1 rounded-full flex-row items-center">
+               <View className="bg-sky-950 border border-sky-900 px-3 py-1 rounded-full flex-row items-center">
                   <Text className="text-sky-500 font-black text-[9px] uppercase">{statusFilter}</Text>
                   <TouchableOpacity onPress={() => setStatusFilter("All")} className="ml-2">
                      <Ionicons name="close-circle" size={12} color="#0ea5e9" />
@@ -168,38 +168,38 @@ export default function AdminBookings() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#0ea5e9" />}
       >
         {filtered.length === 0 ? (
-          <View className="p-10 items-center justify-center bg-slate-900 rounded-3xl border border-white/5 mt-4 border-dashed">
+          <View className="p-10 items-center justify-center bg-slate-900 rounded-3xl border border-slate-800 mt-4 border-dashed">
             <Ionicons name="calendar-outline" size={48} color="#475569" className="mb-4" />
-            <Text className="text-white font-black text-xs uppercase opacity-30">No matching records found</Text>
+            <Text className="text-white font-black text-xs uppercase">No matching records found</Text>
           </View>
         ) : (
           filtered.map((b, i) => (
             <View 
               key={b.id} 
-              className={`mb-4 p-4 rounded-3xl bg-slate-900 border border-white/5 shadow-2xl`}
+              className={`mb-4 p-4 rounded-3xl bg-slate-900 border border-slate-800`}
             >
                <View className="flex-row justify-between items-start mb-4">
                   <View>
                      <Text className="text-sky-500 font-black text-[9px] uppercase tracking-widest">{b.bookingId || `#${b.id}`}</Text>
                      <Text className="text-white font-black text-base mt-0.5 tracking-tighter">{b.name || "Customer"}</Text>
                   </View>
-                  <View className={`${statusColors[b.status]?.bg || 'bg-slate-500/10'} px-3 py-1.5 rounded-full border ${statusColors[b.status]?.border || 'border-slate-500/20'}`}>
+                  <View className={`${statusColors[b.status]?.bg || 'bg-slate-800'} px-3 py-1.5 rounded-full border ${statusColors[b.status]?.border || 'border-slate-700'}`}>
                      <Text className={`${statusColors[b.status]?.text || 'text-slate-400'} font-black text-[9px] uppercase tracking-widest`}>{b.status}</Text>
                   </View>
                </View>
 
                <View className="flex-row items-center gap-4 mb-4">
-                  <View className="bg-white/5 px-2 py-1 rounded-lg flex-row items-center gap-1.5">
+                  <View className="bg-slate-800 px-2 py-1 rounded-lg flex-row items-center gap-1.5">
                      <Ionicons name="car" size={14} color="#94a3b8" />
                      <Text className="text-slate-400 font-black text-[10px] tracking-tighter uppercase">{b.brand} · {b.model}</Text>
                   </View>
-                  <View className="bg-white/5 px-2 py-1 rounded-lg flex-row items-center gap-1.5">
+                  <View className="bg-slate-800 px-2 py-1 rounded-lg flex-row items-center gap-1.5">
                      <Ionicons name="call" size={12} color="#94a3b8" />
                      <Text className="text-slate-400 font-black text-[10px] tracking-tighter">{b.phone}</Text>
                   </View>
                </View>
 
-               <View className="flex-row justify-between items-center bg-white/5 -mx-4 -mb-4 p-3 border-t border-white/5">
+               <View className="flex-row justify-between items-center bg-slate-950 -mx-4 -mb-4 p-3 border-t border-slate-800">
                   <View className="flex-row items-center gap-1.5 ml-2">
                      <Ionicons name="time-outline" size={12} color="#475569" />
                      <Text className="text-slate-500 text-[9px] font-black uppercase">
@@ -208,7 +208,7 @@ export default function AdminBookings() {
                   </View>
                   <TouchableOpacity 
                      onPress={() => setPopup({ type: 'status', booking: b })}
-                     className="bg-white/10 px-4 py-2 rounded-xl mr-2"
+                     className="bg-slate-800 px-4 py-2 rounded-xl mr-2"
                   >
                      <Text className="text-white font-black text-[9px] uppercase">Update Status</Text>
                   </TouchableOpacity>
@@ -221,9 +221,9 @@ export default function AdminBookings() {
 
       {/* 🔴 MODAL: STATUS SELECTION */}
       <Modal visible={!!popup} transparent animationType="slide">
-         <View className="flex-1 bg-black/80 justify-end">
-            <View className="bg-slate-900 rounded-t-[40px] p-6 pb-12">
-               <View className="w-12 h-1 bg-white/10 rounded-full self-center mb-6" />
+         <View className="flex-1 bg-black justify-end">
+            <View className="bg-slate-900 rounded-t-3xl p-6 pb-12">
+               <View className="w-12 h-1 bg-slate-800 rounded-full self-center mb-6" />
                
                {popup?.type === 'status' && (
                   <>
@@ -233,7 +233,7 @@ export default function AdminBookings() {
                            <TouchableOpacity 
                               key={s} 
                               onPress={() => handleStatusChange(popup.booking, s)}
-                              className={`p-5 rounded-2xl ${popup.booking.status === s ? 'bg-sky-500' : 'bg-white/5'} flex-row justify-between items-center`}
+                              className={`p-5 rounded-2xl ${popup.booking.status === s ? 'bg-sky-500' : 'bg-slate-800'} flex-row justify-between items-center`}
                            >
                               <Text className={`${popup.booking.status === s ? 'text-white' : 'text-slate-400'} font-black text-xs uppercase`}>{s}</Text>
                               {popup.booking.status === s && <Ionicons name="checkmark-circle" size={20} color="white" />}
@@ -253,11 +253,11 @@ export default function AdminBookings() {
                         autoFocus
                         value={trackNumber}
                         onChangeText={setTrackNumber}
-                        className="bg-white/5 p-5 rounded-2xl text-white font-black uppercase text-center mb-6 border border-white/5"
+                        className="bg-slate-800 p-5 rounded-2xl text-white font-black uppercase text-center mb-6 border border-slate-700"
                      />
                      <TouchableOpacity 
                         onPress={() => updateStatus(popup.booking, "Approved", { trackNumber })}
-                        className="bg-sky-500 p-5 rounded-2xl items-center shadow-2xl shadow-sky-500/20"
+                        className="bg-sky-500 p-5 rounded-2xl items-center shadow-lg shadow-sky-900"
                      >
                         <Text className="text-white font-black uppercase tracking-widest">Confirm Approval</Text>
                      </TouchableOpacity>
@@ -267,7 +267,7 @@ export default function AdminBookings() {
                {popup?.type === 'cancel' && (
                   <>
                      <Text className="text-white font-black text-xl uppercase tracking-tighter text-center mb-2">Cancel Service</Text>
-                     <Text className="text-red-400/60 text-xs text-center mb-6 uppercase tracking-widest font-black">Reason Required</Text>
+                     <Text className="text-red-400 text-xs text-center mb-6 uppercase tracking-widest font-black">Reason Required</Text>
                      <TextInput 
                         placeholder="REASON FOR CANCELLATION"
                         placeholderTextColor="#475569"
@@ -276,11 +276,11 @@ export default function AdminBookings() {
                         numberOfLines={3}
                         value={cancelReason}
                         onChangeText={setCancelReason}
-                        className="bg-white/5 p-5 rounded-2xl text-white font-bold text-sm mb-6 border border-white/5 min-h-[100px]"
+                        className="bg-slate-800 p-5 rounded-2xl text-white font-bold text-sm mb-6 border border-slate-700 min-h-[100px]"
                      />
                      <TouchableOpacity 
                         onPress={() => updateStatus(popup.booking, "Cancelled", { cancelReason })}
-                        className="bg-red-500 p-5 rounded-2xl items-center shadow-2xl shadow-red-500/20"
+                        className="bg-red-500 p-5 rounded-2xl items-center shadow-lg shadow-red-900"
                      >
                         <Text className="text-white font-black uppercase tracking-widest">Submit Cancellation</Text>
                      </TouchableOpacity>
