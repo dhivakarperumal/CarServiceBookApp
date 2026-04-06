@@ -1,9 +1,16 @@
-import { Tabs, Redirect } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { View, ActivityIndicator } from 'react-native';
-import { useAuth } from '../../contexts/AuthContext';
+import { Ionicons } from "@expo/vector-icons";
+import { Redirect, Tabs, useRouter } from "expo-router";
+import {
+  ActivityIndicator,
+  Image,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { useAuth } from "../../contexts/AuthContext";
 
 export default function EmployeeAdminLayout() {
+  const router = useRouter();
   const { user, isLoading } = useAuth();
 
   if (isLoading) {
@@ -19,75 +26,145 @@ export default function EmployeeAdminLayout() {
   }
 
   const role = user.role?.toLowerCase();
-  if (role !== 'mechanic' && role !== 'employee' && role !== 'admin') {
+  if (role !== "mechanic" && role !== "employee" && role !== "admin") {
     return <Redirect href="/(tabs)/home" />;
   }
 
+  const headerLabels = {
+    staff: { title: "Dashboard", subtitle: "Overview of assigned work" },
+    assigned: { title: "Assigned", subtitle: "Current work orders" },
+    servicecenter: {
+      title: "Service Center",
+      subtitle: "Service requests and status",
+    },
+    billing: { title: "Billing", subtitle: "Invoices, payments, and receipts" },
+    profile: { title: "Profile", subtitle: "Account and preferences" },
+  };
+
+  const renderHeaderTitle = (routeName: string) => {
+    const headerInfo = headerLabels[routeName] ?? {
+      title: "Cars",
+      subtitle: "Employee control panel",
+    };
+
+    return (
+      <View className="flex-row items-center">
+        <Image
+          source={require("../../assets/images/logo_no_bg.png")}
+          className="w-14 h-10"
+          resizeMode="contain"
+        />
+        <View className="ml-3">
+          <Text className="text-base font-black text-white">
+            {headerInfo.title}
+          </Text>
+          {/* <Text className="text-[11px] text-slate-400 uppercase tracking-[0.15px]">
+            {headerInfo.subtitle}
+          </Text> */}
+        </View>
+      </View>
+    );
+  };
+
+  const renderHeaderRight = (routeName: string) => (
+    <View className="flex-row items-center gap-3 pr-2">
+      <TouchableOpacity
+        onPress={() => router.push("/(employee)/staff")}
+        activeOpacity={0.7}
+        className="p-2 bg-[#111827] rounded-2xl border border-[#334155]"
+      >
+        <Ionicons name="notifications-outline" size={20} color="#FFFFFF" />
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => router.push("/(employee)/profile")}
+        activeOpacity={0.7}
+        className="w-10 h-10 rounded-full bg-[#111827] border border-[#334155] items-center justify-center"
+      >
+        <Text className="text-sm font-black text-white">
+          {user?.username?.[0]?.toUpperCase() || "U"}
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+
   return (
     <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: '#0EA5E9',
-        tabBarInactiveTintColor: '#64748b',
+      screenOptions={({ route }) => ({
+        tabBarActiveTintColor: "#0EA5E9",
+        tabBarInactiveTintColor: "#64748b",
         tabBarStyle: {
-          backgroundColor: '#1e293b',
-          borderTopColor: '#334155',
+          backgroundColor: "#1e293b",
+          borderTopColor: "#334155",
           borderTopWidth: 1,
         },
         headerStyle: {
-          backgroundColor: '#0f172a',
+          backgroundColor: "#0f172a",
         },
-        headerTintColor: '#fff',
-      }}
+        headerTitle: () => renderHeaderTitle(route.name),
+        headerTitleAlign: "left",
+        headerRight: () => renderHeaderRight(route.name),
+        headerTintColor: "#fff",
+      })}
     >
       <Tabs.Screen
         name="staff"
         options={{
-          title: 'Dashboard',
-          tabBarIcon: ({ color, size }) => <Ionicons name="apps" size={size} color={color} />
+          title: "Dashboard",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="apps" size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="assigned"
         options={{
-          title: 'Assigned',
-          tabBarIcon: ({ color, size }) => <Ionicons name="clipboard" size={size} color={color} />
+          title: "Assigned",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="clipboard" size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="servicecenter"
         options={{
-          title: 'Center',
-          tabBarIcon: ({ color, size }) => <Ionicons name="build" size={size} color={color} />
+          title: "Center",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="build" size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="billing"
         options={{
-          title: 'Billing',
-          tabBarIcon: ({ color, size }) => <Ionicons name="receipt" size={size} color={color} />
+          title: "Billing",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="receipt" size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="add-billing"
         options={{
           href: null,
-          title: 'New Bill',
-          headerShown: false
+          title: "New Bill",
+          headerShown: false,
         }}
       />
       <Tabs.Screen
         name="add-parts"
         options={{
           href: null,
-          title: 'Add Parts',
-          headerShown: false
+          title: "Add Parts",
+          headerShown: false,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          title: 'Profile',
-          tabBarIcon: ({ color, size }) => <Ionicons name="person" size={size} color={color} />
+          title: "Profile",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="person" size={size} color={color} />
+          ),
         }}
       />
     </Tabs>
