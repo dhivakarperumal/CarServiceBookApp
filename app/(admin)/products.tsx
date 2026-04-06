@@ -85,10 +85,10 @@ const AllProducts = () => {
 
   /* EDIT */
   const handleEdit = (product: any) => {
-    // In many Expo Router setups, we pass params or use context/state
-    // router.push({ pathname: "/(adminPages)/add-product", params: { editData: JSON.stringify(product) } });
-    router.push("/(admin)/products"); // Placeholder for now, assume addproducts screen exists
-    Alert.alert("Edit", "Navigate to edit product screen with data: " + product.name);
+    router.push({
+      pathname: "/(adminPages)/add-products",
+      params: { editData: JSON.stringify(product) }
+    });
   };
 
   /* TOGGLE ACTIVE */
@@ -237,7 +237,7 @@ const AllProducts = () => {
             <Text className="text-sky-500 text-[10px] font-black uppercase tracking-widest">Global Product Catalog</Text>
           </View>
           <TouchableOpacity 
-            onPress={() => router.push("/(admin)/products")}
+            onPress={() => router.push("/(adminPages)/add-products")}
             className="w-12 h-12 bg-sky-500 rounded-3xl items-center justify-center shadow-lg shadow-sky-500/20"
           >
             <Ionicons name="add" size={24} color="white" />

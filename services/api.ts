@@ -237,6 +237,16 @@ export const apiService = {
     }
   },
 
+  getUsers: async (): Promise<any[]> => {
+    try {
+      const response = await api.get('/users');
+      return Array.isArray(response.data) ? response.data : [];
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      return [];
+    }
+  },
+
   // Bookings
   getBookings: async (): Promise<Booking[]> => {
     try {
