@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, TextInput, ActivityIndicator, Alert, Modal, KeyboardAvoidingView, Platform, Switch } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { api } from '../../services/api';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
@@ -81,8 +82,9 @@ const SectionTitle = ({ icon, title }: { icon: string, title: string }) => (
 
 const BookingForm = ({ currentUser, router }: any) => {
   const [vehicleType, setVehicleType] = useState('car');
-  const [formData, setFormData] = useState({ name: "", phone: "", email: "", altPhone: "", brand: "", model: "", issue: "", otherIssue: "", vehicleNumber: "", address: "", location: "" });
+  const [formData, setFormData] = useState({ name: "", phone: "", email: "", altPhone: "", brand: "", model: "", issue: "", otherIssue: "", vehicleNumber: "", address: "", location: "", preferredDate: new Date().toISOString().split('T')[0] });
   const [submitting, setSubmitting] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [locationQuery, setLocationQuery] = useState("");
   const [locationResults, setLocationResults] = useState<any[]>([]);
   const [coords, setCoords] = useState({ lat: null as any, lng: null as any });
@@ -146,7 +148,7 @@ const BookingForm = ({ currentUser, router }: any) => {
       const bookingId = `BS${Math.floor(100000 + Math.random() * 900000)}`;
       await api.post("/bookings/create", { ...formData, bookingId, uid: currentUser.id || currentUser.uid || currentUser._id, vehicleType, latitude: coords.lat, longitude: coords.lng, status: BOOKING_STATUS.BOOKED });
       Alert.alert("Success", "Your service booking was successful!");
-      setFormData({ name: currentUser.username || currentUser.name || "", email: currentUser.email || "", phone: currentUser.mobile || "", altPhone: "", brand: "", model: "", issue: "", otherIssue: "", vehicleNumber: "", address: "", location: "" });
+      setFormData({ name: currentUser.username || currentUser.name || "", email: currentUser.email || "", phone: currentUser.mobile || "", altPhone: "", brand: "", model: "", issue: "", otherIssue: "", vehicleNumber: "", address: "", location: "", preferredDate: new Date().toISOString().split('T')[0] });
       setLocationQuery(""); setCoords({ lat: null, lng: null });
     } catch (error) { Alert.alert("Error", "Booking failed."); } finally { setSubmitting(false); }
   };
@@ -215,6 +217,7 @@ const AppointmentForm = ({ currentUser, router }: any) => {
   });
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [estimatedCost, setEstimatedCost] = useState(0);
   const [errors, setErrors] = useState<any>({});
 
@@ -427,7 +430,31 @@ const AppointmentForm = ({ currentUser, router }: any) => {
       <CustomInput label="Additional Notes" value={formData.notes} onChangeText={(val: string) => handleChange('notes', val)} multiline numberOfLines={2} placeholder="Optional instructions..." />
 
       <SectionTitle icon="📅" title="Appointment Scheduling" />
-      <CustomInput label="Preferred Date" value={formData.preferredDate} onChangeText={(val: string) => handleChange('preferredDate', val)} placeholder="YYYY-MM-DD" required error={errors.preferredDate} />
+      <View className="mb-4">
+        <Text className="mb-2 text-sm text-gray-300 font-medium ml-1">Preferred Date *</Text>
+        <TouchableOpacity 
+           onPress={() => setShowDatePicker(true)}
+           className={`w-full bg-white/10 rounded-xl border px-5 py-4 flex-row justify-between items-center ${errors.preferredDate ? 'border-red-400' : 'border-white/20'}`}
+        >
+          <Text className="text-white">{formData.preferredDate || "Select Date"}</Text>
+          <Ionicons name="calendar-outline" size={20} color="#9ca3af" />
+        </TouchableOpacity>
+        {showDatePicker && (
+          <DateTimePicker
+            value={formData.preferredDate ? new Date(formData.preferredDate) : new Date()}
+            mode="date"
+            display="default"
+            minimumDate={new Date()}
+            onChange={(event, selectedDate) => {
+              setShowDatePicker(false);
+              if (selectedDate) {
+                setFormData({ ...formData, preferredDate: selectedDate.toISOString().split('T')[0] });
+              }
+            }}
+          />
+        )}
+        {errors.preferredDate && <Text className="mt-1 text-xs text-red-500 ml-1">{errors.preferredDate}</Text>}
+      </View>
       <CustomSelect label="Time Slot" value={formData.preferredTimeSlot} onSelect={(val: string) => handleChange('preferredTimeSlot', val)} options={["Morning (9AM–12PM)", "Afternoon (12PM–4PM)", "Evening (4PM–7PM)"]} required />
 
       <SectionTitle icon="💳" title="Payment & Offers" />

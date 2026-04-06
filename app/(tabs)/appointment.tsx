@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from "react";
 import { View, Text, SafeAreaView, ScrollView, TouchableOpacity, TextInput, ActivityIndicator, Alert, Modal, KeyboardAvoidingView, Platform, Switch } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from "expo-router";
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { api, apiService } from "../../services/api";
 import { useAuth } from "../../contexts/AuthContext";
 import * as Location from 'expo-location';
@@ -125,6 +126,7 @@ export default function AppointmentScreen() {
   });
 
   const [errors, setErrors] = useState<any>({});
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [locationQuery, setLocationQuery] = useState("");
   const [locationResults, setLocationResults] = useState<any[]>([]);
   const [coords, setCoords] = useState({ lat: null as any, lng: null as any });
@@ -398,7 +400,29 @@ export default function AppointmentScreen() {
             <SectionTitle icon="📅" title="Appointment Scheduling" />
             <View className="flex-row gap-4 mb-2">
               <View className="flex-1">
-                <CustomInput label="Date" value={formData.preferredDate} onChangeText={(t: string) => setFormData({...formData, preferredDate: t})} required placeholder="YYYY-MM-DD" />
+                <Text className="mb-1.5 text-[10px] uppercase font-black text-slate-500 tracking-[1px] ml-1">Preferred Date *</Text>
+                <TouchableOpacity 
+                   onPress={() => setShowDatePicker(true)}
+                   className={`w-full bg-white/[0.05] border rounded-2xl px-5 py-4 flex-row justify-between items-center ${errors.preferredDate ? 'border-red-500/50' : 'border-white/10'}`}
+                >
+                  <Text className="text-white font-bold">{formData.preferredDate || "Select Date"}</Text>
+                  <Ionicons name="calendar-outline" size={16} color="#64748b" />
+                </TouchableOpacity>
+                {showDatePicker && (
+                  <DateTimePicker
+                    value={formData.preferredDate ? new Date(formData.preferredDate) : new Date()}
+                    mode="date"
+                    display="default"
+                    minimumDate={new Date()}
+                    onChange={(event, selectedDate) => {
+                      setShowDatePicker(false);
+                      if (selectedDate) {
+                        setFormData({ ...formData, preferredDate: selectedDate.toISOString().split('T')[0] });
+                      }
+                    }}
+                  />
+                )}
+                {errors.preferredDate ? <Text className="mt-1 text-[10px] font-bold text-red-500 ml-1">{errors.preferredDate}</Text> : null}
               </View>
               <View className="flex-1">
                 <CustomSelect label="Time Slot" value={formData.preferredTimeSlot} onSelect={(v: string) => setFormData({...formData, preferredTimeSlot: v})} options={["Morning (9AM–12PM)", "Afternoon (12PM–4PM)", "Evening (4PM–7PM)"]} required />
