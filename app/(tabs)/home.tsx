@@ -116,6 +116,49 @@ export default function HomeScreen({ navigation }) {
   const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState("");
 
+  const getServiceImage = (service: any) => {
+    const img = service.image || service.images?.[0];
+
+    if (!img) return null;
+    if (img.startsWith("data:")) return img;
+    if (img.startsWith("http")) return img;
+
+    return `https://cars.qtechx.com/${img}`;
+  };
+
+  const serviceListRef = useRef(null);
+  const extendedServices = [...services, ...services];
+
+  useEffect(() => {
+    if (!services.length) return;
+
+    let index = 0;
+
+    const interval = setInterval(() => {
+      if (!serviceListRef.current) return;
+
+      index++;
+
+      serviceListRef.current.scrollToOffset({
+        offset: index * (CARD_WIDTH + CARD_MARGIN),
+        animated: true,
+      });
+
+      if (index >= services.length) {
+        index = 0;
+
+        setTimeout(() => {
+          serviceListRef.current?.scrollToOffset({
+            offset: 0,
+            animated: false,
+          });
+        }, 400);
+      }
+    }, 2500);
+
+    return () => clearInterval(interval);
+  }, [services]);
+
   const [myVehicles, setMyVehicles] = useState([]);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
 
@@ -447,6 +490,104 @@ export default function HomeScreen({ navigation }) {
           </TouchableOpacity>
 
         </LinearGradient>
+      </View>
+
+      {/* ================= SERVICES ================= */}
+      <View className="px-5 mb-6">
+        <View className="flex-row items-center mb-4">
+          <View className="w-1 h-5 bg-white rounded mr-2" />
+          <Ionicons name="construct-outline" size={18} color={COLORS.primary} />
+          <Text className="text-primary text-lg font-bold ml-2">
+            Our Services
+          </Text>
+        </View>
+
+        <Animated.FlatList
+          ref={serviceListRef}
+          data={extendedServices}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingRight: 20 }}
+          keyExtractor={(_, index) => index.toString()}
+          renderItem={({ item: service }) => {
+            const imageUri = getServiceImage(service);
+
+            return (
+              <View
+                style={{ width: CARD_WIDTH, borderRadius: 18 }}
+                className="bg-[#111827] p-2.5 rounded-[18px] mr-3 border border-[#0EA5E9]/20"
+              >
+                {/* IMAGE */}
+                <View className="mb-2.5">
+                  {imageUri ? (
+                    <Image
+                      source={{ uri: imageUri }}
+                      className="w-full h-[110px] rounded-xl"
+                      resizeMode="cover"
+                    />
+                  ) : (
+                    <View className="w-full h-[110px] rounded-xl bg-[#1F2937] justify-center items-center">
+                      <Text className="text-[#94A3B8] text-xs">No Image</Text>
+                    </View>
+                  )}
+                </View>
+
+                {/* NAME */}
+                <Text
+                  className="text-white text-[13px] font-bold mb-1"
+                  numberOfLines={1}
+                >
+                  {service.name}
+                </Text>
+
+                {/* DESCRIPTION */}
+                <Text
+                  className="text-[#94A3B8] text-[11px] mb-2"
+                  numberOfLines={2}
+                >
+                  {service.description || "No description provided."}
+                </Text>
+
+                {/* PRICE */}
+                <View className="flex-row items-center mb-1">
+                  {service.price ? (
+                    <Text className="text-[#0EA5E9] font-bold text-sm">
+                      {service.price}
+                    </Text>
+                  ) : (
+                    <Text className="text-[#64748B] italic text-[11px]">
+                      Price on request
+                    </Text>
+                  )}
+                </View>
+
+                {/* BUTTON */}
+                <TouchableOpacity
+                  onPress={() =>
+                    router.push({
+                      pathname: "/service/[id]",
+                      params: { id: service.id },
+                    })
+                  }
+                  activeOpacity={0.8}
+                  className="rounded-full overflow-hidden w-[90%] self-center mt-1"
+                >
+                  <LinearGradient
+                    colors={[COLORS.primary, COLORS.primaryDark]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={{ borderRadius: 25 }}
+                    className="py-1.5 justify-center items-center"
+                  >
+                    <Text className="text-white font-bold text-xs tracking-[0.5px]">
+                      Details
+                    </Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              </View>
+            );
+          }}
+        />
       </View>
 
 
