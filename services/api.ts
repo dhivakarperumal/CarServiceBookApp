@@ -197,6 +197,24 @@ export const apiService = {
     }
   },
 
+  getAllServices: async (uid: string): Promise<any[]> => {
+    try {
+      const response = await api.get(`/all-services/${uid}`);
+
+      console.log("✅ ALL SERVICES API:", response.data);
+
+      // handle both formats
+      const data = Array.isArray(response.data)
+        ? response.data
+        : response.data?.data || [];
+
+      return data;
+    } catch (error) {
+      console.error("❌ getAllServices error:", error);
+      return [];
+    }
+  },
+
   createBooking: async (bookingData: Partial<Booking>): Promise<Booking> => {
     try {
       const response = await api.post('/bookings', bookingData);
@@ -230,7 +248,7 @@ export const apiService = {
         if (err.response?.status === 400) break;
       }
     }
-    
+
     throw lastError;
   },
 
