@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../../contexts/AuthContext";
 import { api, apiService } from "../../services/api";
+import { COLORS } from "../../theme/colors";
 
 const STATUS_LABELS = {
   "Service Completed": "✅ Completed",
@@ -72,10 +73,10 @@ const History = () => {
 
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 bg-[#0B1120]">
+      <SafeAreaView className="flex-1 bg-background">
         <View className="flex-1 justify-center items-center">
-          <ActivityIndicator size="large" color="#0EA5E9" />
-          <Text className="mt-2 text-base text-gray-400">
+          <ActivityIndicator size="large" color={COLORS.primary} />
+          <Text className="mt-2 text-base text-text-secondary">
             Loading service history...
           </Text>
         </View>
@@ -85,12 +86,12 @@ const History = () => {
 
   if (completedServices.length === 0) {
     return (
-      <SafeAreaView className="flex-1 bg-[#0B1120]">
+      <SafeAreaView className="flex-1 bg-background">
         <View className="flex-1 justify-center items-center">
-          <Text className="text-2xl font-bold text-gray-400 text-center">
+          <Text className="text-2xl font-bold text-text-secondary text-center">
             No service history yet
           </Text>
-          <Text className="text-sm text-gray-400 text-center mt-2">
+          <Text className="text-sm text-text-secondary text-center mt-2">
             Your completed services will appear here
           </Text>
         </View>
@@ -99,9 +100,9 @@ const History = () => {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-[#0B1120]">
+    <SafeAreaView className="flex-1 bg-background">
       <ScrollView className="flex-1 p-4">
-        <Text className="text-3xl font-bold text-sky-500 text-center mb-6">
+        <Text className="text-3xl font-bold text-sky text-center mb-6">
           📜 Service History
         </Text>
 
@@ -118,7 +119,7 @@ const History = () => {
             return (
               <View
                 key={service.id}
-                className="border border-sky-500/30 rounded-xl bg-gray-900 overflow-hidden"
+                className="border border-sky/30 rounded-xl bg-card overflow-hidden"
               >
                 {/* Header */}
                 <TouchableOpacity
@@ -133,40 +134,40 @@ const History = () => {
                         <Ionicons
                           name="checkmark-circle"
                           size={16}
-                          color="#10B981"
+                          color={COLORS.success}
                         />
-                        <Text className="text-lg font-bold text-white">
+                        <Text className="text-lg font-bold text-text-primary">
                           {service.bookingId}
                         </Text>
                       </View>
 
                       <View className="gap-1">
-                        <Text className="text-sm text-gray-400">
-                          <Text className="text-white font-medium">
+                        <Text className="text-sm text-text-secondary">
+                          <Text className="text-text-primary font-medium">
                             Vehicle:
                           </Text>{" "}
                           {service.brand} {service.model}
                         </Text>
 
-                        <Text className="text-sm text-gray-400">
-                          <Text className="text-white font-medium">
+                        <Text className="text-sm text-text-secondary">
+                          <Text className="text-text-primary font-medium">
                             Number:
                           </Text>{" "}
                           {service.vehicleNumber}
                         </Text>
 
-                        <Text className="text-sm text-gray-400">
-                          <Text className="text-white font-medium">
+                        <Text className="text-sm text-text-secondary">
+                          <Text className="text-text-primary font-medium">
                             Issue:
                           </Text>{" "}
                           {service.issue}
                         </Text>
 
-                        <Text className="text-sm text-gray-400">
-                          <Text className="text-white font-medium">
+                        <Text className="text-sm text-text-secondary">
+                          <Text className="text-text-primary font-medium">
                             Status:
                           </Text>{" "}
-                          <Text className="text-green-500 font-bold">
+                          <Text className="text-success font-bold">
                             {STATUS_LABELS[service.serviceStatus] ||
                               service.serviceStatus}
                           </Text>
@@ -175,10 +176,10 @@ const History = () => {
                     </View>
 
                     <View className="items-end">
-                      <Text className="text-2xl font-bold text-sky-500">
+                      <Text className="text-2xl font-bold text-sky">
                         ₹{totalSpareAmount.toFixed(2)}
                       </Text>
-                      <Text className="text-xs text-gray-400 mt-1">
+                      <Text className="text-xs text-text-secondary mt-1">
                         {isExpanded ? "▼ Collapse" : "▶ Expand"}
                       </Text>
                     </View>
@@ -187,33 +188,33 @@ const History = () => {
 
                 {/* Expanded */}
                 {isExpanded && (
-                  <View className="border-t border-sky-500/20 p-4 gap-4">
+                  <View className="border-t border-sky/20 p-4 gap-4">
                     {/* Service Details */}
                     <View className="bg-gray-800 rounded-lg p-4">
-                      <Text className="text-base font-bold text-sky-500 mb-3">
+                      <Text className="text-base font-bold text-sky mb-3">
                         📋 Service Details
                       </Text>
 
                       <View className="gap-1">
-                        <Text className="text-sm text-gray-400">
-                          <Text className="text-white">
+                        <Text className="text-sm text-text-secondary">
+                          <Text className="text-text-primary">
                             Customer Name:
                           </Text>{" "}
                           {service.name}
                         </Text>
 
-                        <Text className="text-sm text-gray-400">
-                          <Text className="text-white">Phone:</Text>{" "}
+                        <Text className="text-sm text-text-secondary">
+                          <Text className="text-text-primary">Phone:</Text>{" "}
                           {service.phone}
                         </Text>
 
-                        <Text className="text-sm text-gray-400">
-                          <Text className="text-white">Email:</Text>{" "}
+                        <Text className="text-sm text-text-secondary">
+                          <Text className="text-text-primary">Email:</Text>{" "}
                           {service.email}
                         </Text>
 
-                        <Text className="text-sm text-gray-400">
-                          <Text className="text-white">Address:</Text>{" "}
+                        <Text className="text-sm text-text-secondary">
+                          <Text className="text-text-primary">Address:</Text>{" "}
                           {service.address}
                         </Text>
                       </View>
@@ -222,7 +223,7 @@ const History = () => {
                     {/* Parts */}
                     {service.parts?.length > 0 ? (
                       <View className="bg-gray-800 rounded-lg p-4">
-                        <Text className="text-base font-bold text-sky-500 mb-3">
+                        <Text className="text-base font-bold text-sky mb-3">
                           🔧 Spare Parts
                         </Text>
 
@@ -233,16 +234,16 @@ const History = () => {
                               className="flex-row justify-between items-center bg-gray-700 p-3 rounded-lg border border-gray-600"
                             >
                               <View>
-                                <Text className="text-white font-bold">
+                                <Text className="text-text-primary font-bold">
                                   {part.partName}
                                 </Text>
-                                <Text className="text-xs text-gray-400">
+                                <Text className="text-xs text-text-secondary">
                                   Qty: {part.qty} × ₹{part.price}
                                 </Text>
                               </View>
 
                               <View className="items-end">
-                                <Text className="text-lg font-bold text-amber-400">
+                                <Text className="text-lg font-bold text-rating">
                                   ₹{part.total}
                                 </Text>
                               </View>
@@ -251,16 +252,16 @@ const History = () => {
                         </View>
 
                         <View className="mt-4 pt-4 border-t border-gray-600 flex-row justify-between">
-                          <Text className="text-gray-400">
+                          <Text className="text-text-secondary">
                             Total Spare Cost
                           </Text>
-                          <Text className="text-2xl font-bold text-amber-400">
+                          <Text className="text-2xl font-bold text-rating">
                             ₹{totalSpareAmount.toFixed(2)}
                           </Text>
                         </View>
                       </View>
                     ) : (
-                      <Text className="text-center text-gray-400">
+                      <Text className="text-center text-text-secondary">
                         No spare parts recorded
                       </Text>
                     )}
