@@ -126,44 +126,22 @@ const BookingModal: React.FC<Props> = ({
                     return (
                         <View key={status} className="items-center m-2">
                             <View
-                                style={{
-                                    width: 44,
-                                    height: 44,
-                                    borderRadius: 22,
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                    borderWidth: 2,
-                                    backgroundColor: isCompleted
-                                        ? COLORS.primary
-                                        : COLORS.card,
-                                    borderColor: isCompleted
-                                        ? COLORS.primary
-                                        : COLORS.gray700,
-                                }}
+                                className={`w-11 h-11 rounded-full items-center justify-center border-2 ${isCompleted
+                                    ? "bg-primary border-primary"
+                                    : "bg-card border-gray700"
+                                    }`}
                             >
                                 <Text
-                                    style={{
-                                        color: isCompleted
-                                            ? COLORS.white
-                                            : COLORS.gray400,
-                                        fontWeight: "bold",
-                                        fontSize: 12,
-                                    }}
+                                    className={`font-bold text-xs ${isCompleted ? "text-text-primary" : "text-gray400"
+                                        }`}
                                 >
                                     {index + 1}
                                 </Text>
                             </View>
 
                             <Text
-                                style={{
-                                    fontSize: 10,
-                                    textAlign: "center",
-                                    marginTop: 4,
-                                    color: isCompleted
-                                        ? COLORS.primary
-                                        : COLORS.gray500,
-                                    width: 70,
-                                }}
+                                className={`text-[10px] text-center mt-1 w-[70px] ${isCompleted ? "text-primary" : "text-gray500"
+                                    }`}
                             >
                                 {status.replace("_", " ")}
                             </Text>
@@ -191,51 +169,51 @@ const BookingModal: React.FC<Props> = ({
                             onPress={onClose}
                             className="absolute right-2 top-2 z-10"
                         >
-                            <Text className="text-gray-400 text-xl">✕</Text>
+                            <Text className="text-text-secondary text-xl">✕</Text>
                         </TouchableOpacity>
 
                         {/* HEADER */}
-                        <Text className="text-sky-400 text-lg font-bold mb-4">
+                        <Text className="text-primary text-lg font-bold mb-4">
                             Booking ID: {booking.bookingId}
                         </Text>
 
                         {/* DETAILS */}
                         <View className="space-y-2">
-                            <Text className="text-gray-300">
-                                <Text className="text-sky-400">Name: </Text>
+                            <Text className="text-text-secondary">
+                                <Text className="text-primary">Name: </Text>
                                 {booking.name}
                             </Text>
 
-                            <Text className="text-gray-300">
-                                <Text className="text-sky-400">Phone: </Text>
+                            <Text className="text-text-secondary">
+                                <Text className="text-primary">Phone: </Text>
                                 {booking.phone}
                             </Text>
 
-                            <Text className="text-gray-300">
-                                <Text className="text-sky-400">Brand: </Text>
+                            <Text className="text-text-secondary">
+                                <Text className="text-primary">Brand: </Text>
                                 {booking.brand}
                             </Text>
 
-                            <Text className="text-gray-300">
-                                <Text className="text-sky-400">Model: </Text>
+                            <Text className="text-text-secondary">
+                                <Text className="text-primary">Model: </Text>
                                 {booking.model}
                             </Text>
 
-                            <Text className="text-gray-300">
-                                <Text className="text-sky-400">Reg No: </Text>
+                            <Text className="text-text-secondary">
+                                <Text className="text-primary">Reg No: </Text>
                                 {booking.vehicleNumber ||
                                     booking.registrationNumber ||
                                     "N/A"}
                             </Text>
 
-                            <Text className="text-gray-300">
-                                <Text className="text-sky-400">Issue: </Text>
+                            <Text className="text-text-secondary">
+                                <Text className="text-primary">Issue: </Text>
                                 {booking.issue}
                             </Text>
 
                             {booking.preferredDate && (
-                                <Text className="text-gray-300">
-                                    <Text className="text-sky-400">Date: </Text>
+                                <Text className="text-text-secondary">
+                                    <Text className="text-primary">Date: </Text>
                                     {new Date(
                                         booking.preferredDate
                                     ).toLocaleDateString()}
@@ -249,14 +227,14 @@ const BookingModal: React.FC<Props> = ({
                                         backgroundColor: COLORS.primary + "20",
                                     }}
                                 >
-                                    <Text className="text-sky-400 font-bold">
+                                    <Text className="text-primary font-bold">
                                         🔧 {booking.assignedEmployeeName}
                                     </Text>
                                 </View>
                             )}
 
-                            <Text className="text-gray-300">
-                                <Text className="text-sky-400">Address: </Text>
+                            <Text className="text-text-secondary">
+                                <Text className="text-primary">Address: </Text>
                                 {booking.address || booking.location}
                             </Text>
                         </View>
@@ -264,7 +242,7 @@ const BookingModal: React.FC<Props> = ({
                         {/* ===== SPARE PARTS ===== */}
                         {bookingSpare?.parts?.length > 0 && (
                             <View className="mt-6">
-                                <Text className="text-sky-400 font-bold mb-2">
+                                <Text className="text-primary font-bold mb-2">
                                     🔧 Spare Parts
                                 </Text>
 
@@ -274,14 +252,15 @@ const BookingModal: React.FC<Props> = ({
                                     return (
                                         <View
                                             key={part.id}
-                                            className="p-3 rounded-lg mb-2"
-                                            style={{ backgroundColor: COLORS.card }}
+                                            className="p-3 rounded-lg mb-2 bg-card"
+
                                         >
-                                            <Text className="text-white font-semibold">
+                                            <Text className="text-text-primary
+ font-semibold">
                                                 {part.partName}
                                             </Text>
 
-                                            <Text className="text-gray-400 text-sm">
+                                            <Text className="text-text-secondary text-sm">
                                                 {part.qty} × ₹{part.price} = ₹
                                                 {part.total}
                                             </Text>
@@ -313,7 +292,8 @@ const BookingModal: React.FC<Props> = ({
                                                         className="flex-1 p-2 rounded-lg"
                                                         style={{ backgroundColor: COLORS.success }}
                                                     >
-                                                        <Text className="text-white text-center text-xs font-bold">
+                                                        <Text className="text-text-primary
+ text-center text-xs font-bold">
                                                             Approve
                                                         </Text>
                                                     </TouchableOpacity>
@@ -329,7 +309,8 @@ const BookingModal: React.FC<Props> = ({
                                                         className="flex-1 p-2 rounded-lg"
                                                         style={{ backgroundColor: COLORS.error }}
                                                     >
-                                                        <Text className="text-white text-center text-xs font-bold">
+                                                        <Text className="text-text-primary
+ text-center text-xs font-bold">
                                                             Reject
                                                         </Text>
                                                     </TouchableOpacity>
@@ -339,7 +320,7 @@ const BookingModal: React.FC<Props> = ({
                                     );
                                 })}
 
-                                <Text className="text-right text-sky-400 font-bold mt-2">
+                                <Text className="text-right text-primary font-bold mt-2">
                                     Total: ₹
                                     {bookingSpare.parts
                                         .reduce((sum, p) => sum + Number(p.total), 0)
@@ -350,7 +331,7 @@ const BookingModal: React.FC<Props> = ({
 
                         {/* ===== ISSUES ===== */}
                         <View className="mt-6">
-                            <Text className="text-sky-400 font-bold mb-2">
+                            <Text className="text-primary font-bold mb-2">
                                 ⚙️ Service Issues
                             </Text>
 
@@ -359,11 +340,11 @@ const BookingModal: React.FC<Props> = ({
                                     const status = issue.issueStatus || "pending";
 
                                     return (
-                                        <View key={issue.id} className="p-3 rounded-lg mb-2" style={{ backgroundColor: COLORS.card }}>
-                                            <Text className="text-gray-300 text-sm">{issue.issue}</Text>
+                                        <View key={issue.id} className="p-3 rounded-lg mb-2 bg-card" >
+                                            <Text className="text-text-secondary text-sm">{issue.issue}</Text>
 
                                             {issue.issueAmount && (
-                                                <Text className="text-orange-400 font-bold">
+                                                <Text className="text-warning font-bold">
                                                     ₹{issue.issueAmount}
                                                 </Text>
                                             )}
@@ -387,10 +368,10 @@ const BookingModal: React.FC<Props> = ({
                                                         onPress={() =>
                                                             onApprove(booking.serviceId!, issue.id, "approved", "issue")
                                                         }
-                                                        style={{ backgroundColor: COLORS.success }}
-                                                        className="flex-1 p-2 rounded-lg"
+                                                        className="flex-1 p-2 rounded-lg bg-success"
                                                     >
-                                                        <Text className="text-white text-center text-xs font-bold">
+                                                        <Text className="text-text-primary
+ text-center text-xs font-bold">
                                                             Approve
                                                         </Text>
                                                     </TouchableOpacity>
@@ -399,10 +380,10 @@ const BookingModal: React.FC<Props> = ({
                                                         onPress={() =>
                                                             onApprove(booking.serviceId!, issue.id, "rejected", "issue")
                                                         }
-                                                        style={{ backgroundColor: COLORS.error }}
-                                                        className="flex-1 p-2 rounded-lg"
+                                                        className="flex-1 p-2 rounded-lg bg-error"
                                                     >
-                                                        <Text className="text-white text-center text-xs font-bold">
+                                                        <Text className="text-text-primary
+ text-center text-xs font-bold">
                                                             Reject
                                                         </Text>
                                                     </TouchableOpacity>
@@ -412,9 +393,9 @@ const BookingModal: React.FC<Props> = ({
                                     );
                                 })
                             ) : booking.issue ? (
-                                <Text className="text-gray-400">{booking.issue}</Text>
+                                <Text className="text-text-secondary">{booking.issue}</Text>
                             ) : (
-                                <Text className="text-gray-500">No issues</Text>
+                                <Text className="text-gray500">No issues</Text>
                             )}
                         </View>
 
@@ -422,7 +403,7 @@ const BookingModal: React.FC<Props> = ({
                             {booking.status !== "CANCELLED" ? (
                                 <StatusTracker currentStatus={booking.status} />
                             ) : (
-                                <Text className="text-red-400 text-center font-bold">
+                                <Text className="text-error text-center font-bold">
                                     ❌ Booking Cancelled
                                 </Text>
                             )}
@@ -431,10 +412,10 @@ const BookingModal: React.FC<Props> = ({
                         {/* CLOSE BUTTON */}
                         <TouchableOpacity
                             onPress={onClose}
-                            className="mt-6 p-3 rounded-lg"
-                            style={{ backgroundColor: COLORS.primary }}
+                            className="mt-6 p-3 rounded-lg bg-primary"
                         >
-                            <Text className="text-white text-center font-bold">
+                            <Text className="text-text-primary
+ text-center font-bold">
                                 Close
                             </Text>
                         </TouchableOpacity>
