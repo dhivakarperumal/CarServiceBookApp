@@ -4,7 +4,6 @@ import {
   ActivityIndicator,
   Alert,
   ScrollView,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -12,7 +11,6 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../../contexts/AuthContext";
 import { api, apiService } from "../../services/api";
-import { COLORS } from "../../theme/colors";
 
 const STATUS_LABELS = {
   "Service Completed": "✅ Completed",
@@ -31,24 +29,17 @@ const History = () => {
       setLoading(true);
 
       if (!user?.uid) {
-        console.warn('User UID not available');
         setCompletedServices([]);
         setLoading(false);
         return;
       }
 
-      // Fetch all services for this user
-      console.log('📋 Fetching all services...');
       const allServices = await apiService.getAllServices(user.uid);
 
-      // Filter for completed services
       const completed = (allServices || []).filter((s) =>
-        ['Service Completed', 'Bill Completed'].includes(s.serviceStatus)
+        ["Service Completed", "Bill Completed"].includes(s.serviceStatus)
       );
 
-      console.log(`✅ Found ${completed.length} completed services`);
-
-      // Fetch spare parts for each completed service
       const enrichedServices = await Promise.all(
         completed.map(async (service) => {
           try {
@@ -57,29 +48,23 @@ const History = () => {
               ...service,
               parts: partsRes.data?.parts || [],
             };
-          } catch (err) {
-            console.error(`Failed to fetch parts for service ${service.id}`, err);
-            return {
-              ...service,
-              parts: [],
-            };
+          } catch {
+            return { ...service, parts: [] };
           }
         })
       );
 
       setCompletedServices(enrichedServices);
     } catch (err) {
-      console.error('Error fetching completed services:', err);
-      Alert.alert('Error', 'Failed to load service history');
+      Alert.alert("Error", "Failed to load service history");
     } finally {
       setLoading(false);
     }
   }, [user?.uid]);
 
   useEffect(() => {
-    if (user?.uid) {
-      fetchCompletedServices();
-    } else {
+    if (user?.uid) fetchCompletedServices();
+    else {
       setCompletedServices([]);
       setLoading(false);
     }
@@ -87,10 +72,12 @@ const History = () => {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.center}>
-          <ActivityIndicator size="large" color={COLORS.primary} />
-          <Text style={styles.loadingText}>Loading service history...</Text>
+      <SafeAreaView className="flex-1 bg-[#0B1120]">
+        <View className="flex-1 justify-center items-center">
+          <ActivityIndicator size="large" color="#0EA5E9" />
+          <Text className="mt-2 text-base text-gray-400">
+            Loading service history...
+          </Text>
         </View>
       </SafeAreaView>
     );
@@ -98,153 +85,185 @@ const History = () => {
 
   if (completedServices.length === 0) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.center}>
-          <Text style={styles.title}>No service history yet</Text>
-          <Text style={styles.subtitle}>Your completed services will appear here</Text>
+      <SafeAreaView className="flex-1 bg-[#0B1120]">
+        <View className="flex-1 justify-center items-center">
+          <Text className="text-2xl font-bold text-gray-400 text-center">
+            No service history yet
+          </Text>
+          <Text className="text-sm text-gray-400 text-center mt-2">
+            Your completed services will appear here
+          </Text>
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollView}>
-        <Text style={styles.header}>📜 Service History</Text>
+    <SafeAreaView className="flex-1 bg-[#0B1120]">
+      <ScrollView className="flex-1 p-4">
+        <Text className="text-3xl font-bold text-sky-500 text-center mb-6">
+          📜 Service History
+        </Text>
 
-        <View style={styles.servicesContainer}>
+        <View className="gap-4">
           {completedServices.map((service) => {
             const isExpanded = expandedService === service.id;
-            const totalSpareAmount = service.parts?.reduce(
-              (sum, p) => sum + Number(p.total || 0),
-              0
-            ) || 0;
+
+            const totalSpareAmount =
+              service.parts?.reduce(
+                (sum, p) => sum + Number(p.total || 0),
+                0
+              ) || 0;
 
             return (
-              <View key={service.id} style={styles.serviceCard}>
-                {/* Header - Click to Expand */}
+              <View
+                key={service.id}
+                className="border border-sky-500/30 rounded-xl bg-gray-900 overflow-hidden"
+              >
+                {/* Header */}
                 <TouchableOpacity
                   onPress={() =>
                     setExpandedService(isExpanded ? null : service.id)
                   }
-                  style={styles.serviceHeader}
+                  className="p-4"
                 >
-                  <View style={styles.headerContent}>
-                    <View style={styles.serviceInfo}>
-                      <View style={styles.bookingIdRow}>
-                        <Ionicons name="checkmark-circle" size={16} color="#10B981" />
-                        <Text style={styles.bookingId}>{service.bookingId}</Text>
+                  <View className="flex-row justify-between items-start">
+                    <View className="flex-1">
+                      <View className="flex-row items-center gap-2 mb-2">
+                        <Ionicons
+                          name="checkmark-circle"
+                          size={16}
+                          color="#10B981"
+                        />
+                        <Text className="text-lg font-bold text-white">
+                          {service.bookingId}
+                        </Text>
                       </View>
-                      <View style={styles.detailsGrid}>
-                        <Text style={styles.detailText}>
-                          <Text style={styles.detailLabel}>Vehicle:</Text> {service.brand} {service.model}
+
+                      <View className="gap-1">
+                        <Text className="text-sm text-gray-400">
+                          <Text className="text-white font-medium">
+                            Vehicle:
+                          </Text>{" "}
+                          {service.brand} {service.model}
                         </Text>
-                        <Text style={styles.detailText}>
-                          <Text style={styles.detailLabel}>Number:</Text> {service.vehicleNumber}
+
+                        <Text className="text-sm text-gray-400">
+                          <Text className="text-white font-medium">
+                            Number:
+                          </Text>{" "}
+                          {service.vehicleNumber}
                         </Text>
-                        <Text style={styles.detailText}>
-                          <Text style={styles.detailLabel}>Issue:</Text> {service.issue}
+
+                        <Text className="text-sm text-gray-400">
+                          <Text className="text-white font-medium">
+                            Issue:
+                          </Text>{" "}
+                          {service.issue}
                         </Text>
-                        <Text style={styles.detailText}>
-                          <Text style={styles.detailLabel}>Status:</Text>{" "}
-                          <Text style={styles.statusText}>
-                            {STATUS_LABELS[service.serviceStatus] || service.serviceStatus}
+
+                        <Text className="text-sm text-gray-400">
+                          <Text className="text-white font-medium">
+                            Status:
+                          </Text>{" "}
+                          <Text className="text-green-500 font-bold">
+                            {STATUS_LABELS[service.serviceStatus] ||
+                              service.serviceStatus}
                           </Text>
                         </Text>
                       </View>
                     </View>
-                    <View style={styles.priceSection}>
-                      <Text style={styles.totalPrice}>₹{totalSpareAmount.toFixed(2)}</Text>
-                      <Text style={styles.expandText}>
+
+                    <View className="items-end">
+                      <Text className="text-2xl font-bold text-sky-500">
+                        ₹{totalSpareAmount.toFixed(2)}
+                      </Text>
+                      <Text className="text-xs text-gray-400 mt-1">
                         {isExpanded ? "▼ Collapse" : "▶ Expand"}
                       </Text>
                     </View>
                   </View>
                 </TouchableOpacity>
 
-                {/* Expanded Details */}
+                {/* Expanded */}
                 {isExpanded && (
-                  <View style={styles.expandedContent}>
-                    {/* Service Details Section */}
-                    <View style={styles.section}>
-                      <Text style={styles.sectionTitle}>📋 Service Details</Text>
-                      <View style={styles.detailsGrid}>
-                        <Text style={styles.detailText}>
-                          <Text style={styles.detailLabel}>Customer Name:</Text> {service.name}
+                  <View className="border-t border-sky-500/20 p-4 gap-4">
+                    {/* Service Details */}
+                    <View className="bg-gray-800 rounded-lg p-4">
+                      <Text className="text-base font-bold text-sky-500 mb-3">
+                        📋 Service Details
+                      </Text>
+
+                      <View className="gap-1">
+                        <Text className="text-sm text-gray-400">
+                          <Text className="text-white">
+                            Customer Name:
+                          </Text>{" "}
+                          {service.name}
                         </Text>
-                        <Text style={styles.detailText}>
-                          <Text style={styles.detailLabel}>Phone:</Text> {service.phone}
+
+                        <Text className="text-sm text-gray-400">
+                          <Text className="text-white">Phone:</Text>{" "}
+                          {service.phone}
                         </Text>
-                        <Text style={styles.detailText}>
-                          <Text style={styles.detailLabel}>Email:</Text> {service.email}
+
+                        <Text className="text-sm text-gray-400">
+                          <Text className="text-white">Email:</Text>{" "}
+                          {service.email}
                         </Text>
-                        <Text style={styles.detailText}>
-                          <Text style={styles.detailLabel}>Address:</Text> {service.address}
+
+                        <Text className="text-sm text-gray-400">
+                          <Text className="text-white">Address:</Text>{" "}
+                          {service.address}
                         </Text>
                       </View>
                     </View>
 
-                    {/* Spare Parts Section */}
-                    {service.parts && service.parts.length > 0 ? (
-                      <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>🔧 Spare Parts / Materials Used</Text>
-                        <View style={styles.partsList}>
+                    {/* Parts */}
+                    {service.parts?.length > 0 ? (
+                      <View className="bg-gray-800 rounded-lg p-4">
+                        <Text className="text-base font-bold text-sky-500 mb-3">
+                          🔧 Spare Parts
+                        </Text>
+
+                        <View className="gap-3">
                           {service.parts.map((part, idx) => (
-                            <View key={part.id || idx} style={styles.partItem}>
-                              <View style={styles.partInfo}>
-                                <Text style={styles.partName}>{part.partName}</Text>
-                                <Text style={styles.partQty}>
-                                  Qty: {part.qty} × ₹{Number(part.price).toFixed(2)}
+                            <View
+                              key={idx}
+                              className="flex-row justify-between items-center bg-gray-700 p-3 rounded-lg border border-gray-600"
+                            >
+                              <View>
+                                <Text className="text-white font-bold">
+                                  {part.partName}
+                                </Text>
+                                <Text className="text-xs text-gray-400">
+                                  Qty: {part.qty} × ₹{part.price}
                                 </Text>
                               </View>
-                              <View style={styles.partRight}>
-                                <Text style={styles.partTotal}>₹{Number(part.total).toFixed(2)}</Text>
-                                <Text style={[
-                                  styles.partStatus,
-                                  {
-                                    backgroundColor: part.status === "approved" ? "#10B98120" :
-                                                   part.status === "pending" ? "#F59E0B20" : "#EF444420",
-                                    color: part.status === "approved" ? "#10B981" :
-                                          part.status === "pending" ? "#F59E0B" : "#EF4444"
-                                  }
-                                ]}>
-                                  {(part.status || "completed").toUpperCase()}
+
+                              <View className="items-end">
+                                <Text className="text-lg font-bold text-amber-400">
+                                  ₹{part.total}
                                 </Text>
                               </View>
                             </View>
                           ))}
                         </View>
-                        <View style={styles.totalSection}>
-                          <View style={styles.totalRow}>
-                            <Text style={styles.totalLabel}>Total Spare Cost</Text>
-                            <Text style={styles.totalAmount}>₹{totalSpareAmount.toFixed(2)}</Text>
-                          </View>
+
+                        <View className="mt-4 pt-4 border-t border-gray-600 flex-row justify-between">
+                          <Text className="text-gray-400">
+                            Total Spare Cost
+                          </Text>
+                          <Text className="text-2xl font-bold text-amber-400">
+                            ₹{totalSpareAmount.toFixed(2)}
+                          </Text>
                         </View>
                       </View>
                     ) : (
-                      <View style={styles.section}>
-                        <Text style={styles.noPartsText}>No spare parts recorded for this service</Text>
-                      </View>
+                      <Text className="text-center text-gray-400">
+                        No spare parts recorded
+                      </Text>
                     )}
-
-                    {/* Service Labor/Notes Section */}
-                    <View style={styles.section}>
-                      <Text style={styles.sectionTitle}>ℹ️ Service Information</Text>
-                      <View style={styles.detailsGrid}>
-                        <Text style={styles.detailText}>
-                          <Text style={styles.detailLabel}>Issue Reported:</Text> {service.issue}
-                        </Text>
-                        <Text style={styles.detailText}>
-                          <Text style={styles.detailLabel}>Service Status:</Text>{" "}
-                          <Text style={styles.statusText}>{service.serviceStatus}</Text>
-                        </Text>
-                        {service.otherIssue && (
-                          <Text style={[styles.detailText, styles.fullWidth]}>
-                            <Text style={styles.detailLabel}>Additional Notes:</Text> {service.otherIssue}
-                          </Text>
-                        )}
-                      </View>
-                    </View>
                   </View>
                 )}
               </View>
@@ -255,190 +274,5 @@ const History = () => {
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
-  scrollView: {
-    flex: 1,
-    padding: 16,
-  },
-  center: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  loadingText: {
-    marginTop: 8,
-    fontSize: 16,
-    color: COLORS.textSecondary,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: COLORS.textSecondary,
-    textAlign: "center",
-  },
-  subtitle: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-    textAlign: "center",
-    marginTop: 8,
-  },
-  header: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: COLORS.primary,
-    textAlign: "center",
-    marginBottom: 24,
-  },
-  servicesContainer: {
-    gap: 16,
-  },
-  serviceCard: {
-    borderWidth: 1,
-    borderColor: COLORS.primary + "30",
-    borderRadius: 12,
-    backgroundColor: COLORS.card,
-    overflow: "hidden",
-  },
-  serviceHeader: {
-    padding: 16,
-  },
-  headerContent: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-  },
-  serviceInfo: {
-    flex: 1,
-  },
-  bookingIdRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginBottom: 8,
-  },
-  bookingId: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: COLORS.textPrimary,
-  },
-  detailsGrid: {
-    gap: 4,
-  },
-  detailText: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-  },
-  detailLabel: {
-    fontWeight: "500",
-    color: COLORS.textPrimary,
-  },
-  statusText: {
-    color: "#10B981",
-    fontWeight: "bold",
-  },
-  priceSection: {
-    alignItems: "flex-end",
-  },
-  totalPrice: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: COLORS.primary,
-  },
-  expandText: {
-    fontSize: 12,
-    color: COLORS.textSecondary,
-    marginTop: 4,
-  },
-  expandedContent: {
-    borderTopWidth: 1,
-    borderTopColor: COLORS.primary + "20",
-    padding: 16,
-    gap: 16,
-  },
-  section: {
-    backgroundColor: COLORS.gray800,
-    borderRadius: 8,
-    padding: 16,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: COLORS.primary,
-    marginBottom: 12,
-  },
-  partsList: {
-    gap: 12,
-  },
-  partItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 12,
-    backgroundColor: COLORS.gray700,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: COLORS.gray600,
-  },
-  partInfo: {
-    flex: 1,
-  },
-  partName: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: COLORS.textPrimary,
-  },
-  partQty: {
-    fontSize: 12,
-    color: COLORS.textSecondary,
-  },
-  partRight: {
-    alignItems: "flex-end",
-  },
-  partTotal: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#F59E0B",
-  },
-  partStatus: {
-    fontSize: 10,
-    fontWeight: "bold",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
-    marginTop: 4,
-  },
-  totalSection: {
-    marginTop: 16,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.gray600,
-  },
-  totalRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  totalLabel: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-  },
-  totalAmount: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#F59E0B",
-  },
-  noPartsText: {
-    textAlign: "center",
-    color: COLORS.textSecondary,
-  },
-  fullWidth: {
-    width: "100%",
-  },
-});
 
 export default History;
