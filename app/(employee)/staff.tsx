@@ -3,14 +3,14 @@ import * as Location from "expo-location";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Modal,
-    SafeAreaView,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Modal,
+  SafeAreaView,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
 import { api } from "../../services/api";
@@ -296,166 +296,174 @@ export default function EmployeeDashboard() {
           </View>
         ) : (
           <View className="mb-6 mt-2">
-            {myTasks.map((task, idx) => {
-              const statusStyle = getStatusStyles(task.status);
-              return (
-                <View
-                  key={task.id || idx}
-                  className="bg-card p-4 rounded-2xl border border-card mb-3"
-                >
-                  <View className="flex-row justify-between mb-2">
-                    <View>
-                      <Text className="font-bold text-text-primary text-base">
-                        {task.brand} {task.model}
-                      </Text>
-                      <Text className="text-xs text-text-muted">
-                        {task.vehicleNumber || "No Plate"} • {task.name}
-                      </Text>
-                    </View>
-                    <View
-                      className={`${statusStyle.bg} px-2 flex items-center justify-center rounded-md self-start py-1`}
-                    >
-                      <Text
-                        className={`${statusStyle.text} text-[10px] font-bold`}
-                      >
-                        {task.status}
-                      </Text>
-                    </View>
-                  </View>
+  {myTasks.map((task, idx) => {
+    const statusStyle = getStatusStyles(task.status);
 
-                  <View className="flex-row mt-2 pt-3 border-t border-card space-x-2">
-                    {(task.status === "Assigned" ||
-                      task.status === "Pending" ||
-                      task.status === "Approved" ||
-                      task.status === "Processing") && (
-                      <TouchableOpacity
-                        onPress={() =>
-                          updateServiceStatus(task, "Service Going on")
-                        }
-                        className="bg-primary px-3 py-2 rounded-lg flex-1 items-center mx-1"
-                      >
-                        <Text className="text-text-primary text-xs font-bold uppercase">
-                          Start
-                        </Text>
-                      </TouchableOpacity>
-                    )}
-                    {(task.status === "Service Going on" ||
-                      task.status === "Waiting for Spare") && (
-                      <TouchableOpacity
-                        onPress={() =>
-                          updateServiceStatus(task, "Service Completed")
-                        }
-                        className="bg-success px-3 py-2 rounded-lg flex-1 items-center mx-1"
-                      >
-                        <Text className="text-text-primary text-xs font-bold uppercase">
-                          Done
-                        </Text>
-                      </TouchableOpacity>
-                    )}
+    return (
+      <View
+        key={task.id || idx}
+        className="bg-card p-5 rounded-3xl border border-card mb-4"
+      >
+        {/* HEADER */}
+        <View className="flex-row items-start justify-between">
 
-                    {!(
-                      task.status === "Completed" ||
-                      task.status === "Service Completed" ||
-                      task.status === "Cancelled"
-                    ) && (
-                      <TouchableOpacity
-                        onPress={() =>
-                          router.push(
-                            `/(employee)/servicecenter?id=${task.id}` as any,
-                          )
-                        }
-                        className="bg-card px-3 py-2 rounded-lg flex-1 items-center mx-1 border border-card"
-                      >
-                        <Text className="text-text-primary text-xs font-bold uppercase">
-                          Manage
-                        </Text>
-                      </TouchableOpacity>
-                    )}
-                  </View>
-                </View>
-              );
-            })}
+          <View className="flex-row items-center flex-1">
+            <View className="w-10 h-10 rounded-xl bg-primary/20 items-center justify-center mr-3">
+              <Ionicons name="car-sport-outline" size={20} color="#0EA5E9" />
+            </View>
+
+            <View className="flex-1">
+              <Text className="font-black text-text-primary text-base">
+                {task.brand} {task.model}
+              </Text>
+
+              <Text className="text-xs text-text-muted mt-1">
+                {task.vehicleNumber || "No Plate"} • {task.name}
+              </Text>
+            </View>
           </View>
+
+          {/* STATUS BADGE */}
+          <View
+            className={`${statusStyle.bg} px-3 py-1.5 rounded-lg items-center justify-center ml-2`}
+          >
+            <Text className={`${statusStyle.text} text-[10px] font-black uppercase`}>
+              {task.status}
+            </Text>
+          </View>
+        </View>
+
+        {/* ACTION BUTTONS */}
+        <View className="flex-row mt-4 pt-4 border-t border-card gap-2">
+
+          {(task.status === "Assigned" ||
+            task.status === "Pending" ||
+            task.status === "Approved" ||
+            task.status === "Processing") && (
+            <TouchableOpacity
+              onPress={() => updateServiceStatus(task, "Service Going on")}
+              className="bg-primary flex-1 py-2.5 rounded-xl items-center"
+            >
+              <Text className="text-text-primary text-[11px] font-black uppercase tracking-widest">
+                Start
+              </Text>
+            </TouchableOpacity>
+          )}
+
+          {(task.status === "Service Going on" ||
+            task.status === "Waiting for Spare") && (
+            <TouchableOpacity
+              onPress={() => updateServiceStatus(task, "Service Completed")}
+              className="bg-success flex-1 py-2.5 rounded-xl items-center"
+            >
+              <Text className="text-text-primary text-[11px] font-black uppercase tracking-widest">
+                Done
+              </Text>
+            </TouchableOpacity>
+          )}
+
+          {!(
+            task.status === "Completed" ||
+            task.status === "Service Completed" ||
+            task.status === "Cancelled"
+          ) && (
+            <TouchableOpacity
+              onPress={() =>
+                router.push(
+                  `/(employee)/servicecenter?id=${task.id}` as any,
+                )
+              }
+              className="bg-background border border-card flex-1 py-2.5 rounded-xl items-center"
+            >
+              <Text className="text-text-primary text-[11px] font-black uppercase tracking-widest">
+                Manage
+              </Text>
+            </TouchableOpacity>
+          )}
+
+        </View>
+      </View>
+    );
+  })}
+</View>
         )}
 
         {/* Quick Tools */}
         <Text className="font-black text-text-primary mb-4 text-xs uppercase tracking-widest mt-6 px-1">
-  Quick Tools
-</Text>
+          Quick Tools
+        </Text>
 
-{/* NEW SERVICE ENTRY */}
-<TouchableOpacity
-  onPress={() => router.push("/(employee)/servicecenter" as any)}
-  className="flex-row items-center justify-between p-5 bg-card rounded-2xl border border-card mb-4"
->
-  <View className="flex-row items-center">
-    <View className="w-12 h-12 bg-warning/20 rounded-xl items-center justify-center mr-4">
-      <Ionicons name="construct" size={22} color="#F59E0B" />
-    </View>
+        {/* NEW SERVICE ENTRY */}
+        <TouchableOpacity
+          onPress={() => router.push("/(employee)/servicecenter" as any)}
+          className="flex-row items-center justify-between p-5 bg-card rounded-2xl border border-card mb-4"
+        >
+          <View className="flex-row items-center">
+            <View className="w-12 h-12 bg-warning/20 rounded-xl items-center justify-center mr-4">
+              <Ionicons name="construct" size={22} color="#F59E0B" />
+            </View>
 
-    <View>
-      <Text className="text-text-primary font-bold text-sm">
-        New Service Entry
-      </Text>
-      <Text className="text-text-muted text-[10px] uppercase tracking-widest">
-        Create new service booking
-      </Text>
-    </View>
-  </View>
+            <View>
+              <Text className="text-text-primary font-bold text-sm">
+                New Service Entry
+              </Text>
+              <Text className="text-text-muted text-[10px] uppercase tracking-widest">
+                Create new service booking
+              </Text>
+            </View>
+          </View>
 
-  <Ionicons name="chevron-forward" size={18} color="#64748B" />
-</TouchableOpacity>
+          <Ionicons name="chevron-forward" size={18} color="#64748B" />
+        </TouchableOpacity>
 
+        {/* ADD SERVICE PARTS */}
+        <TouchableOpacity
+          onPress={() => router.push("/(employee)/billing" as any)}
+          className="flex-row items-center justify-between p-5 bg-card rounded-2xl border border-card mb-4"
+        >
+          <View className="flex-row items-center">
+            <View className="w-12 h-12 bg-primary/20 rounded-xl items-center justify-center mr-4">
+              <Ionicons name="clipboard" size={22} color="#0EA5E9" />
+            </View>
 
-{/* ADD SERVICE PARTS */}
-<TouchableOpacity
-  onPress={() => router.push("/(employee)/billing" as any)}
-  className="flex-row items-center justify-between p-5 bg-card rounded-2xl border border-card mb-4"
->
-  <View className="flex-row items-center">
-    <View className="w-12 h-12 bg-primary/20 rounded-xl items-center justify-center mr-4">
-      <Ionicons name="clipboard" size={22} color="#0EA5E9" />
-    </View>
+            <View>
+              <Text className="text-text-primary font-bold text-sm">
+                Add Service Parts
+              </Text>
+              <Text className="text-text-muted text-[10px] uppercase tracking-widest">
+                Manage spare parts
+              </Text>
+            </View>
+          </View>
 
-    <View>
-      <Text className="text-text-primary font-bold text-sm">
-        Add Service Parts
-      </Text>
-      <Text className="text-text-muted text-[10px] uppercase tracking-widest">
-        Manage spare parts
-      </Text>
-    </View>
-  </View>
+          <Ionicons name="chevron-forward" size={18} color="#64748B" />
+        </TouchableOpacity>
 
-  <Ionicons name="chevron-forward" size={18} color="#64748B" />
-</TouchableOpacity>
+        {/* LOGOUT */}
+        <TouchableOpacity
+          onPress={async () => {
+            await logout();
+            router.replace("/(auth)/login");
+          }}
+          className="flex-row items-center justify-between p-5 bg-card rounded-2xl border border-card mt-2 mb-10"
+        >
+          <View className="flex-row items-center">
+            <View className="w-12 h-12 bg-error/20 rounded-xl items-center justify-center mr-4">
+              <Ionicons name="log-out" size={22} color="#EF4444" />
+            </View>
 
+            <View>
+              <Text className="text-error font-bold text-sm">
+                Logout Account
+              </Text>
+              <Text className="text-text-muted text-[10px] uppercase tracking-widest">
+                Sign out of dashboard
+              </Text>
+            </View>
+          </View>
 
-{/* LOGOUT */}
-<TouchableOpacity
-  onPress={async () => {
-    await logout();
-    router.replace("/(auth)/login");
-  }}
-  className="flex-row items-center justify-between p-5 bg-card rounded-2xl border border-card mt-2 mb-10"
->
-  <View className="flex-row items-center">
-    <View className="w-12 h-12 bg-error/20 rounded-xl items-center justify-center mr-4">
-      <Ionicons name="log-out" size={22} color="#EF4444" />
-    </View>
-
-    <View>
-      <Text className="text-error font-bold text-sm">
-        Logout Account
-      </Text>
-      <Text className="text-text-muted text-[10px] uppercase tracking-widest">
-        Sign out of dashboard
-      </Text>
-    </View>
-  </View>
-
-  <Ionicons name="chevron-forward" size={18} color="#64748B" />
-</TouchableOpacity>
+          <Ionicons name="chevron-forward" size={18} color="#64748B" />
+        </TouchableOpacity>
       </ScrollView>
 
       {/* Attendance Modal */}
