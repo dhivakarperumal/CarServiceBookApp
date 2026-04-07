@@ -61,7 +61,7 @@ export default function RootLayout() {
             />
 
             <Stack.Screen
-              name="profile/bookings"
+              name="profile/VehicleBookings"
               options={{ title: "Vehicle Bookings" }}
             />
 

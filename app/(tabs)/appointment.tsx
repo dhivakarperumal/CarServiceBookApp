@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
-import { View, Text, SafeAreaView, ScrollView, TouchableOpacity, TextInput, ActivityIndicator, Alert, Modal, KeyboardAvoidingView, Platform, Switch } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from "expo-router";
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { api, apiService } from "../../services/api";
-import { useAuth } from "../../contexts/AuthContext";
 import * as Location from 'expo-location';
+import { useRouter } from "expo-router";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { ActivityIndicator, Alert, KeyboardAvoidingView, Modal, Platform, SafeAreaView, ScrollView, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useAuth } from "../../contexts/AuthContext";
+import { apiService } from "../../services/api";
 
 const APPOINTMENT_STATUS = {
   BOOKED: "Appointment Booked",
@@ -28,21 +28,21 @@ const SERVICE_PRICES: any = {
 const SectionTitle = ({ icon, title }: { icon: string, title: string }) => (
   <View className="flex-row items-center gap-3 mb-6 mt-8">
      <Text className="text-xl">{icon}</Text>
-     <Text className="text-sm font-black text-sky-400 uppercase tracking-widest">{title}</Text>
-     <View className="flex-1 h-[1px] bg-sky-400/20 ml-3" />
+     <Text className="text-sm font-black text-primary uppercase tracking-widest">{title}</Text>
+     <View className="flex-1 h-[1px] bg-primary/20 ml-3" />
   </View>
 );
 
 const CustomInput = ({ label, required, error, disabled, ...props }: any) => (
   <View className="mb-4">
-    <Text className="mb-1.5 text-[10px] uppercase font-black text-slate-500 tracking-[1px] ml-1">
+    <Text className="mb-1.5 text-[10px] uppercase font-black text-text-secondary tracking-[1px] ml-1">
       {label} {required && <Text className="text-red-500">*</Text>}
     </Text>
     <TextInput
       {...props}
       editable={!disabled}
       placeholderTextColor="#475569"
-      className={`w-full bg-white/[0.05] border rounded-2xl px-5 py-4 text-white font-bold ${error ? 'border-red-500/50' : 'border-white/10'}`}
+      className={`w-full bg-card-light border rounded-2xl px-5 py-4 text-text-primary font-bold ${error ? 'border-red-500/50' : 'border-white/10'}`}
     />
     {error ? <Text className="mt-1 text-[10px] font-bold text-red-500 ml-1">{error}</Text> : null}
   </View>
@@ -57,9 +57,9 @@ const CustomSelect = ({ label, required, value, options, onSelect, error }: any)
       </Text>
       <TouchableOpacity 
         onPress={() => setVisible(true)}
-        className={`w-full bg-white/[0.05] border rounded-2xl px-5 py-4 flex-row justify-between items-center ${error ? 'border-red-500/50' : 'border-white/10'}`}
+        className={`w-full bg-card-light border rounded-2xl px-5 py-4 flex-row justify-between items-center ${error ? 'border-red-500/50' : 'border-white/10'}`}
       >
-        <Text className={`font-bold ${value ? 'text-white' : 'text-slate-500'}`}>{value || `Select ${label}`}</Text>
+        <Text className={`font-bold ${value ? 'text-text-primary' : 'text-text-secondary'}`}>{value || `Select ${label}`}</Text>
         <Ionicons name="chevron-down" size={16} color="#64748b" />
       </TouchableOpacity>
       {error ? <Text className="mt-1 text-[10px] font-bold text-red-500 ml-1">{error}</Text> : null}
@@ -70,8 +70,8 @@ const CustomSelect = ({ label, required, value, options, onSelect, error }: any)
           onPress={() => setVisible(false)} 
           className="flex-1 bg-black/80 justify-center p-6"
         >
-          <View className="bg-slate-900 border border-white/10 rounded-3xl p-6">
-            <Text className="text-white font-black uppercase tracking-widest mb-6">Select {label}</Text>
+          <View className="bg-modal border border-white/10 rounded-3xl p-6">
+            <Text className="text-text-primary font-black uppercase tracking-widest mb-6">Select {label}</Text>
             <ScrollView className="max-h-80" showsVerticalScrollIndicator={false}>
               {options.map((opt: string) => (
                 <TouchableOpacity 
@@ -267,19 +267,19 @@ export default function AppointmentScreen() {
     <SafeAreaView className="flex-1 bg-[#0a0a0b]">
       <View className="px-6 py-4 flex-row justify-between items-center border-b border-white/5">
         <View>
-          <Text className="text-xl font-black text-white tracking-tighter">Service Appointment</Text>
-          <Text className="text-[9px] font-black text-slate-500 uppercase tracking-widest mt-0.5">Premium Booking Desk</Text>
+          <Text className="text-xl font-black text-primary tracking-tighter">Service Appointment</Text>
+          <Text className="text-[9px] font-black text-text-secondary uppercase tracking-widest mt-0.5">Premium Booking Desk</Text>
         </View>
-        <View className="bg-sky-500/10 border border-sky-500/20 px-4 py-2 rounded-2xl items-end">
-          <Text className="text-[8px] font-black text-sky-500 uppercase tracking-widest leading-none mb-1">Est Cost</Text>
-          <Text className="text-lg font-black text-white leading-none">₹{estimatedCost}</Text>
+        <View className="bg-primary/10 border border-primary/20 px-4 py-2 rounded-2xl items-end">
+          <Text className="text-[8px] font-black text-primary uppercase tracking-widest leading-none mb-1">Est Cost</Text>
+          <Text className="text-lg font-black text-text-primary leading-none">₹{estimatedCost}</Text>
         </View>
       </View>
 
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1">
         <ScrollView className="flex-1 p-5" showsVerticalScrollIndicator={false}>
           
-          <View className="bg-white/[0.03] border border-white/10 rounded-[2.5rem] p-8 mb-20 shadow-2xl">
+          <View className="bg-card border border-white/10 rounded-[2.5rem] p-8 mb-20 shadow-2xl">
             
             {/* CUSTOMER DETAILS */}
             <SectionTitle icon="🧾" title="Customer Details" />
@@ -294,14 +294,14 @@ export default function AppointmentScreen() {
             <CustomInput label="Email Address" value={formData.email} onChangeText={(t: string) => setFormData({...formData, email: t})} keyboardType="email-address" />
             
             <View className="mb-4">
-               <Text className="mb-1.5 text-[10px] uppercase font-black text-slate-500 tracking-[1px] ml-1">Search Location</Text>
+               <Text className="mb-1.5 text-[10px] uppercase font-black text-text-secondary tracking-[1px] ml-1">Search Location</Text>
                <View className="relative">
                   <TextInput
                     value={locationQuery}
                     onChangeText={searchLocation}
                     placeholder="Search area..."
                     placeholderTextColor="#475569"
-                    className="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-5 py-4 text-white font-bold"
+                    className="w-full bg-card-light border border-white/10 rounded-2xl px-5 py-4 text-text-primary font-bold"
                   />
                   <TouchableOpacity 
                     onPress={handleUseLocation}
@@ -312,14 +312,14 @@ export default function AppointmentScreen() {
                   </TouchableOpacity>
                </View>
                {locationResults.length > 0 && (
-                  <View className="mt-2 rounded-2xl bg-slate-900 border border-white/10 overflow-hidden">
+                  <View className="mt-2 rounded-2xl bg-modal border border-white/10 overflow-hidden">
                     {locationResults.map((p, idx) => (
                       <TouchableOpacity 
                         key={p.place_id || idx} 
                         onPress={() => handleSelectLocation(p)}
                         className="px-5 py-4 border-b border-white/5"
                       >
-                        <Text className="text-gray-400 text-xs">{p.display_name}</Text>
+                        <Text className="text-text-secondary text-xs">{p.display_name}</Text>
                       </TouchableOpacity>
                     ))}
                   </View>
@@ -355,7 +355,7 @@ export default function AppointmentScreen() {
             </View>
             <CustomInput label="Reg Number" value={formData.registrationNumber} onChangeText={(t: string) => setFormData({...formData, registrationNumber: t.toUpperCase()})} required placeholder="TN 01 AB 1234" />
             
-            <View className="flex-row gap-4">
+            {/* <View className="flex-row gap-4">
               <View className="flex-1">
                 <CustomSelect label="Fuel" value={formData.fuelType} onSelect={(v: string) => setFormData({...formData, fuelType: v})} options={["Petrol", "Diesel", "EV", "Hybrid"]} />
               </View>
@@ -363,7 +363,7 @@ export default function AppointmentScreen() {
                 <CustomInput label="Year" value={formData.yearOfManufacture} onChangeText={(t: string) => setFormData({...formData, yearOfManufacture: t})} keyboardType="number-pad" />
               </View>
             </View>
-            <CustomInput label="Mileage (KM)" value={formData.currentMileage} onChangeText={(t: string) => setFormData({...formData, currentMileage: t})} keyboardType="number-pad" />
+            <CustomInput label="Mileage (KM)" value={formData.currentMileage} onChangeText={(t: string) => setFormData({...formData, currentMileage: t})} keyboardType="number-pad" /> */}
 
             {/* SERVICE DETAILS */}
             <SectionTitle icon="🛠️" title="Service Details" />
@@ -378,13 +378,13 @@ export default function AppointmentScreen() {
               <View className="flex-1">
                 <CustomSelect label="Pickup" value={formData.pickupDrop} onSelect={(v: string) => setFormData({...formData, pickupDrop: v})} options={["No", "Yes"]} />
               </View>
-              <View className="flex-2 flex-row items-center gap-3 bg-white/[0.05] border border-white/10 rounded-2xl p-4">
+              <View className="flex-2 flex-row items-center gap-3 bg-card-light border border-white/10 rounded-2xl p-4">
                  <Switch value={formData.emergencyService} onValueChange={(v) => setFormData({...formData, emergencyService: v})} trackColor={{ false: '#1e293b', true: '#0EA5E9' }} />
-                 <Text className="text-white font-black text-[10px] uppercase">Emergency (+₹500)</Text>
+                 <Text className="text-text-primary font-black text-[10px] uppercase">Emergency (+₹500)</Text>
               </View>
             </View>
             <View className="mt-4">
-              <Text className="mb-1.5 text-[10px] uppercase font-black text-slate-500 tracking-[1px] ml-1">Problem Description</Text>
+              <Text className="mb-1.5 text-[10px] uppercase font-black text-text-secondary tracking-[1px] ml-1">Problem Description</Text>
               <TextInput
                 value={formData.otherIssue}
                 onChangeText={(t: string) => setFormData({...formData, otherIssue: t})}
@@ -392,7 +392,7 @@ export default function AppointmentScreen() {
                 placeholderTextColor="#475569"
                 multiline
                 numberOfLines={4}
-                className="w-full bg-white/[0.05] border border-white/10 rounded-2xl px-5 py-4 text-white font-bold min-h-[100px]"
+                className="w-full bg-card-light border border-white/10 rounded-2xl px-5 py-4 text-text-primary font-bold min-h-[100px]"
               />
             </View>
 
@@ -400,12 +400,12 @@ export default function AppointmentScreen() {
             <SectionTitle icon="📅" title="Appointment Scheduling" />
             <View className="flex-row gap-4 mb-2">
               <View className="flex-1">
-                <Text className="mb-1.5 text-[10px] uppercase font-black text-slate-500 tracking-[1px] ml-1">Preferred Date *</Text>
+                <Text className="mb-1.5 text-[10px] uppercase font-black text-text-secondary tracking-[1px] ml-1">Preferred Date *</Text>
                 <TouchableOpacity 
                    onPress={() => setShowDatePicker(true)}
-                   className={`w-full bg-white/[0.05] border rounded-2xl px-5 py-4 flex-row justify-between items-center ${errors.preferredDate ? 'border-red-500/50' : 'border-white/10'}`}
+                   className={`w-full bg-card-light border rounded-2xl px-5 py-4 flex-row justify-between items-center ${errors.preferredDate ? 'border-red-500/50' : 'border-white/10'}`}
                 >
-                  <Text className="text-white font-bold">{formData.preferredDate || "Select Date"}</Text>
+                  <Text className="text-text-primary font-bold">{formData.preferredDate || "Select Date"}</Text>
                   <Ionicons name="calendar-outline" size={16} color="#64748b" />
                 </TouchableOpacity>
                 {showDatePicker && (
@@ -430,20 +430,20 @@ export default function AppointmentScreen() {
             </View>
 
             {/* MODE & PAYMENT */}
-            <SectionTitle icon="💳" title="Preferences" />
+            {/* <SectionTitle icon="💳" title="Preferences" />
             <CustomSelect label="Mode" value={formData.serviceMode} onSelect={(v: string) => setFormData({...formData, serviceMode: v})} options={["At Service Center", "Doorstep Service"]} />
             {formData.serviceMode === "Doorstep Service" && (
               <CustomInput label="Pickup Address" value={formData.pickupAddress} onChangeText={(t: string) => setFormData({...formData, pickupAddress: t})} />
             )}
             <CustomSelect label="Payment" value={formData.paymentMode} onSelect={(v: string) => setFormData({...formData, paymentMode: v})} options={["Pay After Service", "Pay Online"]} />
             <CustomInput label="Coupon Code" value={formData.couponCode} onChangeText={(t: string) => setFormData({...formData, couponCode: t})} placeholder="CARCARE10" />
-            <CustomInput label="Special Notes" value={formData.notes} onChangeText={(t: string) => setFormData({...formData, notes: t})} multiline />
+            <CustomInput label="Special Notes" value={formData.notes} onChangeText={(t: string) => setFormData({...formData, notes: t})} multiline /> */}
 
             {/* BUTTON */}
             <TouchableOpacity 
               onPress={handleSubmit}
               disabled={submitting}
-              className={`w-full py-6 rounded-[2rem] items-center mt-12 ${submitting ? 'bg-slate-800' : 'bg-sky-500'}`}
+              className={`w-full py-6 rounded-[2rem] items-center mt-12 ${submitting ? 'bg-slate-800' : 'bg-primary'}`}
             >
               {submitting ? <ActivityIndicator color="white" /> : (
                 <Text className="text-white font-black uppercase tracking-[3px]">Schedule Appointment →</Text>
@@ -452,7 +452,7 @@ export default function AppointmentScreen() {
 
             <View className="mt-6 flex-row items-center justify-center gap-2">
                <Ionicons name="shield-checkmark" size={16} color="#475569" />
-               <Text className="text-[10px] font-bold text-slate-500 uppercase tracking-widest text-center">I agree to the Terms & Conditions</Text>
+               <Text className="text-[10px] font-bold text-text-secondary uppercase tracking-widest text-center">I agree to the Terms & Conditions</Text>
             </View>
 
           </View>

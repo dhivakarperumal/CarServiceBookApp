@@ -270,13 +270,22 @@ export const apiService = {
     }
   },
 
-  updateBookingStatus: async (id: number, statusData: any): Promise<any> => {
+  getAllServices: async (uid: string): Promise<any[]> => {
     try {
-      const response = await api.put(`/bookings/status/${id}`, statusData);
-      return response.data;
-    } catch (error) {
-      console.error('Error updating booking status:', error);
-      throw error;
+      const response = await api.get('/all-services', {
+        params: { uid },
+      });
+
+      console.log('✅ ALL SERVICES API:', response.data);
+
+      const data = Array.isArray(response.data)
+        ? response.data
+        : response.data?.data || [];
+
+      return data;
+    } catch (_error) {
+      console.error('❌ getAllServices error:', _error);
+      return [];
     }
   },
 
@@ -284,9 +293,9 @@ export const apiService = {
     try {
       const response = await api.post('/bookings', bookingData);
       return response.data;
-    } catch (error) {
-      console.error('Error creating booking:', error);
-      throw error;
+    } catch (_error) {
+      console.error('Error creating booking:', _error);
+      throw _error;
     }
   },
 
@@ -313,7 +322,7 @@ export const apiService = {
         if (err.response?.status === 400) break;
       }
     }
-    
+
     throw lastError;
   },
 
