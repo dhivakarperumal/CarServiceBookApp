@@ -85,9 +85,19 @@ export default function EmployeeAdminLayout() {
         tabBarActiveTintColor: "#0EA5E9",
         tabBarInactiveTintColor: "#64748b",
         tabBarStyle: {
-          backgroundColor: "#1e293b",
+          backgroundColor: "#0f172a",
           borderTopColor: "#334155",
           borderTopWidth: 1,
+          height: 68,
+          paddingBottom: 13,
+          paddingTop: 8,
+        },
+        tabBarItemStyle: {
+          paddingVertical: 4,
+        },
+        tabBarLabelStyle: {
+          fontSize: 11,
+          marginTop: 2,
         },
         headerStyle: {
           backgroundColor: "#0f172a",
@@ -132,6 +142,12 @@ export default function EmployeeAdminLayout() {
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="receipt" size={size} color={color} />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          href: null,
         }}
       />
       <Tabs.Screen
