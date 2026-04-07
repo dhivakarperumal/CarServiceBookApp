@@ -342,7 +342,7 @@ export default function ServiceCenter() {
         <View className="flex-row bg-background p-1 rounded-2xl border border-card">
           <TouchableOpacity
             onPress={() => setMainTab("booked")}
-            className={`flex-1 py-3 items-center rounded-xl ${mainTab === "booked" ? "bg-card" : ""}`}
+            className={`flex-1 py-3 items-center rounded-xl ${mainTab === "booked" ? "bg-primary" : ""}`}
           >
             <Text
               className={`font-black text-[10px] uppercase tracking-widest ${mainTab === "booked" ? "text-text-primary" : "text-text-muted"}`}
@@ -352,7 +352,7 @@ export default function ServiceCenter() {
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => setMainTab("addVehicle")}
-            className={`flex-1 py-3 items-center rounded-xl ${mainTab === "addVehicle" ? "bg-card" : ""}`}
+            className={`flex-1 py-3 items-center rounded-xl ${mainTab === "addVehicle" ? "bg-primary" : ""}`}
           >
             <Text
               className={`font-black text-[10px] uppercase tracking-widest ${mainTab === "addVehicle" ? "text-text-primary" : "text-text-muted"}`}

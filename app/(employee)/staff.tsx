@@ -379,45 +379,83 @@ export default function EmployeeDashboard() {
         )}
 
         {/* Quick Tools */}
-        <Text className="font-bold text-text-primary mb-4 text-sm uppercase tracking-wider mt-4">
-          Quick Tools
-        </Text>
-        <TouchableOpacity
-          onPress={() => router.push("/(employee)/servicecenter" as any)}
-          className="flex-row items-center p-4 bg-card rounded-xl border border-card mb-3"
-        >
-          <View className="p-2 bg-warning/20 rounded-lg mr-3">
-            <Ionicons name="construct" size={20} color="#F59E0B" />
-          </View>
-          <Text className="text-text-primary font-medium">
-            New Service Entry
-          </Text>
-        </TouchableOpacity>
+        <Text className="font-black text-text-primary mb-4 text-xs uppercase tracking-widest mt-6 px-1">
+  Quick Tools
+</Text>
 
-        <TouchableOpacity
-          onPress={() => router.push("/(employee)/billing" as any)}
-          className="flex-row items-center p-4 bg-card rounded-xl border border-card mb-3"
-        >
-          <View className="p-2 bg-primary/20 rounded-lg mr-3">
-            <Ionicons name="clipboard" size={20} color="#0EA5E9" />
-          </View>
-          <Text className="text-text-primary font-medium">
-            Add Service Parts
-          </Text>
-        </TouchableOpacity>
+{/* NEW SERVICE ENTRY */}
+<TouchableOpacity
+  onPress={() => router.push("/(employee)/servicecenter" as any)}
+  className="flex-row items-center justify-between p-5 bg-card rounded-2xl border border-card mb-4"
+>
+  <View className="flex-row items-center">
+    <View className="w-12 h-12 bg-warning/20 rounded-xl items-center justify-center mr-4">
+      <Ionicons name="construct" size={22} color="#F59E0B" />
+    </View>
 
-        <TouchableOpacity
-          onPress={async () => {
-            await logout();
-            router.replace("/(auth)/login");
-          }}
-          className="flex-row items-center p-4 bg-card rounded-xl border border-card mt-2 mb-10"
-        >
-          <View className="p-2 bg-error/20 rounded-lg mr-3">
-            <Ionicons name="log-out" size={20} color="#EF4444" />
-          </View>
-          <Text className="text-error font-medium">Logout Account</Text>
-        </TouchableOpacity>
+    <View>
+      <Text className="text-text-primary font-bold text-sm">
+        New Service Entry
+      </Text>
+      <Text className="text-text-muted text-[10px] uppercase tracking-widest">
+        Create new service booking
+      </Text>
+    </View>
+  </View>
+
+  <Ionicons name="chevron-forward" size={18} color="#64748B" />
+</TouchableOpacity>
+
+
+{/* ADD SERVICE PARTS */}
+<TouchableOpacity
+  onPress={() => router.push("/(employee)/billing" as any)}
+  className="flex-row items-center justify-between p-5 bg-card rounded-2xl border border-card mb-4"
+>
+  <View className="flex-row items-center">
+    <View className="w-12 h-12 bg-primary/20 rounded-xl items-center justify-center mr-4">
+      <Ionicons name="clipboard" size={22} color="#0EA5E9" />
+    </View>
+
+    <View>
+      <Text className="text-text-primary font-bold text-sm">
+        Add Service Parts
+      </Text>
+      <Text className="text-text-muted text-[10px] uppercase tracking-widest">
+        Manage spare parts
+      </Text>
+    </View>
+  </View>
+
+  <Ionicons name="chevron-forward" size={18} color="#64748B" />
+</TouchableOpacity>
+
+
+{/* LOGOUT */}
+<TouchableOpacity
+  onPress={async () => {
+    await logout();
+    router.replace("/(auth)/login");
+  }}
+  className="flex-row items-center justify-between p-5 bg-card rounded-2xl border border-card mt-2 mb-10"
+>
+  <View className="flex-row items-center">
+    <View className="w-12 h-12 bg-error/20 rounded-xl items-center justify-center mr-4">
+      <Ionicons name="log-out" size={22} color="#EF4444" />
+    </View>
+
+    <View>
+      <Text className="text-error font-bold text-sm">
+        Logout Account
+      </Text>
+      <Text className="text-text-muted text-[10px] uppercase tracking-widest">
+        Sign out of dashboard
+      </Text>
+    </View>
+  </View>
+
+  <Ionicons name="chevron-forward" size={18} color="#64748B" />
+</TouchableOpacity>
       </ScrollView>
 
       {/* Attendance Modal */}

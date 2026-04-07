@@ -140,7 +140,7 @@ export default function AddServiceParts() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <View className="bg-card p-6 pb-4 border-b border-card flex-row items-center justify-between">
+      <View className="bg-card p-6 pb-4 mt-6 border-b border-card flex-row items-center justify-between">
         <TouchableOpacity
           onPress={() => router.back()}
           className="w-10 h-10 items-center justify-center rounded-full bg-background"
