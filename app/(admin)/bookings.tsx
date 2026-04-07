@@ -117,7 +117,7 @@ export default function AdminBookings() {
          <View className="flex-row justify-between items-center mb-4">
             <Text className="text-white font-black text-xl uppercase tracking-tighter">Global Bookings</Text>
             <TouchableOpacity 
-               onPress={() => router.push('/(tabs)/booking')}
+                onPress={() => router.push('/booking-form')} 
                className="bg-sky-500 px-4 py-2 rounded-full shadow-lg shadow-sky-500/20"
             >
                <Text className="text-white font-black text-[10px] uppercase">+ New Booking</Text>
