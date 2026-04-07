@@ -23,8 +23,8 @@ const CustomInput = ({ label, required, ...props }: any) => (
     </Text>
     <TextInput
       {...props}
-      placeholderTextColor="#64748B"
-      className="w-full bg-card rounded-2xl border border-card px-5 py-4 text-text-primary font-bold"
+      placeholderTextColor="#94A3B8"
+      className="w-full bg-slate-950/80 rounded-2xl border border-slate-800 px-5 py-4 text-text-primary font-bold"
     />
   </View>
 );
@@ -427,7 +427,7 @@ export default function AddBillingScreen() {
               </View>
             </View>
 
-            <View className="mt-4 flex-row flex-nowrap items-center rounded-full bg-slate-900/90 p-1 border border-slate-700">
+            <View className="mt-4 self-start flex-row flex-nowrap items-center rounded-full bg-slate-900/90 p-1 border border-slate-700">
               {[
                 { mode: "online", label: "Online Booking" },
                 { mode: "manual", label: "Manual Entry" },
@@ -779,7 +779,7 @@ export default function AddBillingScreen() {
             </View>
           </View>
 
-          <View className="flex-row flex-wrap gap-4 mb-20">
+          <View className="flex-row flex-wrap gap-4 mb-20 items-start">
             <View className="flex-1 min-w-[300px] bg-card rounded-[2rem] p-6 border border-card shadow-xl shadow-slate-900/20">
               <Text className="text-xl font-black text-text-primary mb-4">
                 Accounting Summary
@@ -842,7 +842,7 @@ export default function AddBillingScreen() {
               </View>
             </View>
 
-            <View className="min-w-[260px] bg-card rounded-[2rem] p-6 border border-card shadow-xl shadow-slate-900/20">
+            <View className="w-full bg-card rounded-[2rem] p-6 border border-card shadow-xl shadow-slate-900/20">
               <Text className="text-xl font-black text-text-primary mb-4">
                 Review & Commit
               </Text>
