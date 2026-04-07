@@ -85,7 +85,7 @@ export default function ProfileScreen() {
           <MenuItem
             title="Vehicle Bookings"
             icon="car-outline"
-            route="/profile/bookings"
+            route="/profile/VehicleBookings"
           />
 
           <MenuItem

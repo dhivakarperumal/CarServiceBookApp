@@ -79,78 +79,78 @@ export default function ChangePassword() {
             {/* INPUTS */}
             <View className="space-y-4">
 
-  {/* CURRENT PASSWORD */}
-  <View className="relative">
-    <TextInput
-      placeholder="Current Password"
-      placeholderTextColor="#94a3b8"
-      secureTextEntry={!showCurrent}
-      value={currentPwd}
-      onChangeText={setCurrentPwd}
-      className="bg-card px-4 py-4 pr-12 rounded-xl text-white border border-primary/30"
-    />
+                {/* CURRENT PASSWORD */}
+                <View className="relative">
+                    <TextInput
+                        placeholder="Current Password"
+                        placeholderTextColor="#94a3b8"
+                        secureTextEntry={!showCurrent}
+                        value={currentPwd}
+                        onChangeText={setCurrentPwd}
+                        className="bg-card px-4 py-4 pr-12 rounded-xl text-white border border-primary/30"
+                    />
 
-    <TouchableOpacity
-      onPress={() => setShowCurrent(!showCurrent)}
-      className="absolute right-4 top-4"
-    >
-      <Ionicons
-        name={showCurrent ? "eye-off-outline" : "eye-outline"}
-        size={20}
-        color="#94a3b8"
-      />
-    </TouchableOpacity>
-  </View>
-
-
-  {/* NEW PASSWORD */}
-  <View className="relative mt-4">
-    <TextInput
-      placeholder="New Password"
-      placeholderTextColor="#94a3b8"
-      secureTextEntry={!showNew}
-      value={newPwd}
-      onChangeText={setNewPwd}
-      className="bg-card px-4 py-4 pr-12 rounded-xl text-white border border-primary/30"
-    />
-
-    <TouchableOpacity
-      onPress={() => setShowNew(!showNew)}
-      className="absolute right-4 top-4"
-    >
-      <Ionicons
-        name={showNew ? "eye-off-outline" : "eye-outline"}
-        size={20}
-        color="#94a3b8"
-      />
-    </TouchableOpacity>
-  </View>
+                    <TouchableOpacity
+                        onPress={() => setShowCurrent(!showCurrent)}
+                        className="absolute right-4 top-4"
+                    >
+                        <Ionicons
+                            name={showCurrent ? "eye-off-outline" : "eye-outline"}
+                            size={20}
+                            color="#94a3b8"
+                        />
+                    </TouchableOpacity>
+                </View>
 
 
-  {/* CONFIRM PASSWORD */}
-  <View className="relative mt-4">
-    <TextInput
-      placeholder="Confirm New Password"
-      placeholderTextColor="#94a3b8"
-      secureTextEntry={!showConfirm}
-      value={confirmPwd}
-      onChangeText={setConfirmPwd}
-      className="bg-card px-4 py-4 pr-12 rounded-xl text-white border border-primary/30"
-    />
+                {/* NEW PASSWORD */}
+                <View className="relative mt-4">
+                    <TextInput
+                        placeholder="New Password"
+                        placeholderTextColor="#94a3b8"
+                        secureTextEntry={!showNew}
+                        value={newPwd}
+                        onChangeText={setNewPwd}
+                        className="bg-card px-4 py-4 pr-12 rounded-xl text-white border border-primary/30"
+                    />
 
-    <TouchableOpacity
-      onPress={() => setShowConfirm(!showConfirm)}
-      className="absolute right-4 top-4"
-    >
-      <Ionicons
-        name={showConfirm ? "eye-off-outline" : "eye-outline"}
-        size={20}
-        color="#94a3b8"
-      />
-    </TouchableOpacity>
-  </View>
+                    <TouchableOpacity
+                        onPress={() => setShowNew(!showNew)}
+                        className="absolute right-4 top-4"
+                    >
+                        <Ionicons
+                            name={showNew ? "eye-off-outline" : "eye-outline"}
+                            size={20}
+                            color="#94a3b8"
+                        />
+                    </TouchableOpacity>
+                </View>
 
-</View>
+
+                {/* CONFIRM PASSWORD */}
+                <View className="relative mt-4">
+                    <TextInput
+                        placeholder="Confirm New Password"
+                        placeholderTextColor="#94a3b8"
+                        secureTextEntry={!showConfirm}
+                        value={confirmPwd}
+                        onChangeText={setConfirmPwd}
+                        className="bg-card px-4 py-4 pr-12 rounded-xl text-white border border-primary/30"
+                    />
+
+                    <TouchableOpacity
+                        onPress={() => setShowConfirm(!showConfirm)}
+                        className="absolute right-4 top-4"
+                    >
+                        <Ionicons
+                            name={showConfirm ? "eye-off-outline" : "eye-outline"}
+                            size={20}
+                            color="#94a3b8"
+                        />
+                    </TouchableOpacity>
+                </View>
+
+            </View>
 
             {/* BUTTON */}
             <TouchableOpacity
