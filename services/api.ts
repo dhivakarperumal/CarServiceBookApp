@@ -51,6 +51,7 @@ export interface Vehicle {
   price: string;
   description?: string;
   image?: string;
+  images?: any;
   make?: string;
   model?: string;
 }
