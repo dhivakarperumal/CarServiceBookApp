@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import EmployeeHeaderDropdown from "../../components/EmployeeHeaderDropdown";
 import { useAuth } from "../../contexts/AuthContext";
 
 export default function EmployeeAdminLayout() {
@@ -38,7 +39,6 @@ export default function EmployeeAdminLayout() {
       subtitle: "Service requests and status",
     },
     billing: { title: "Billing", subtitle: "Invoices, payments, and receipts" },
-    profile: { title: "Profile", subtitle: "Account and preferences" },
   };
 
   const renderHeaderTitle = (routeName: string) => {
@@ -75,15 +75,7 @@ export default function EmployeeAdminLayout() {
       >
         <Ionicons name="notifications-outline" size={20} color="#FFFFFF" />
       </TouchableOpacity>
-      <TouchableOpacity
-        onPress={() => router.push("/(employee)/profile")}
-        activeOpacity={0.7}
-        className="w-10 h-10 rounded-full bg-[#111827] border border-[#334155] items-center justify-center"
-      >
-        <Text className="text-sm font-black text-white">
-          {user?.username?.[0]?.toUpperCase() || "U"}
-        </Text>
-      </TouchableOpacity>
+      <EmployeeHeaderDropdown />
     </View>
   );
 
@@ -156,15 +148,6 @@ export default function EmployeeAdminLayout() {
           href: null,
           title: "Add Parts",
           headerShown: false,
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: "Profile",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person" size={size} color={color} />
-          ),
         }}
       />
     </Tabs>
