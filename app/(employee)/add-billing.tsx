@@ -140,12 +140,13 @@ export default function AddBillingScreen() {
           .toString()
           .trim()
           .toLowerCase();
-        const isBillPending =
-          status === "bill pending" ||
-          status === "waiting for bill" ||
-          status === "service completed" ||
-          status === "pending billing" ||
-          status === "billing pending";
+        const isBillPending = [
+          "bill pending",
+          "waiting for bill",
+          "service completed",
+          "pending billing",
+          "billing pending",
+        ].includes(status);
         return assignedMatch && isBillPending;
       });
 
@@ -239,9 +240,9 @@ export default function AddBillingScreen() {
         if (i !== index) return part;
         const updated = { ...part };
         if (field === "qty") {
-          updated.qty = Number(value) || 0;
+          updated.qty = value === "" ? 0 : Number(value);
         } else if (field === "price") {
-          updated.price = Number(value) || 0;
+          updated.price = value === "" ? 0 : Number(value);
         } else {
           updated.partName = value;
         }
@@ -515,7 +516,16 @@ export default function AddBillingScreen() {
                       {filteredServices.map((service) => (
                         <TouchableOpacity
                           key={service.id}
-                          onPress={() => selectService(service)}
+                          onPress={() => {
+                            if (selectedService?.id === service.id) {
+                              setSelectedService(null);
+                              setParts([]);
+                              setIssues([]);
+                              setServiceDropdownOpen(false);
+                              return;
+                            }
+                            selectService(service);
+                          }}
                           className={`px-4 py-4 border-b border-slate-800 ${selectedService?.id === service.id ? "bg-slate-900" : "bg-slate-950/70"}`}
                         >
                           <Text className="text-sm font-black text-text-primary">
@@ -750,13 +760,13 @@ export default function AddBillingScreen() {
                     </View>
                     <TextInput
                       keyboardType="numeric"
-                      value={String(part.qty)}
+                      value={part.qty === 0 ? "" : String(part.qty)}
                       onChangeText={(value) => updatePart(index, "qty", value)}
                       className="w-14 text-right text-xs text-text-secondary bg-slate-950/70 rounded-2xl px-3 py-2"
                     />
                     <TextInput
                       keyboardType="numeric"
-                      value={String(part.price)}
+                      value={part.price === 0 ? "" : String(part.price)}
                       onChangeText={(value) =>
                         updatePart(index, "price", value)
                       }
