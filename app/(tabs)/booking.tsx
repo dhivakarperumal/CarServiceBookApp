@@ -43,7 +43,7 @@ const CustomSelect = ({ label, required, error, options, value, onSelect, placeh
       <Text className="mb-2 text-sm text-text-secondary font-medium ml-1">
         {label} {required && <Text className="text-error">*</Text>}
       </Text>
-      <TouchableOpacity 
+      <TouchableOpacity
         onPress={() => setVisible(true)}
         className={`w-full bg-card-light rounded-xl border px-5 py-4 flex-row justify-between items-center ${error ? 'border-red-400' : 'border-white/20'}`}
       >
@@ -55,17 +55,17 @@ const CustomSelect = ({ label, required, error, options, value, onSelect, placeh
       <Modal visible={visible} transparent={true} animationType="fade">
         <View className="flex-1 bg-black/80 justify-center items-center p-6">
           <View className="w-full bg-modal rounded-2xl p-4 border border-white/10">
-             <Text className="text-text-primary text-lg font-bold mb-4 px-2">Select {label}</Text>
-             <ScrollView className="max-h-72" showsVerticalScrollIndicator={false}>
-               {options.map((opt: string) => (
-                 <TouchableOpacity key={opt} className="py-4 px-2 border-b border-white/5" onPress={() => { onSelect(opt); setVisible(false); }}>
-                   <Text className="text-text-primary text-base">{opt}</Text>
-                 </TouchableOpacity>
-               ))}
-             </ScrollView>
-             <TouchableOpacity onPress={() => setVisible(false)} className="mt-4 py-3 bg-card-light rounded-xl items-center border border-white/20">
-               <Text className="text-text-primary font-bold">Cancel</Text>
-             </TouchableOpacity>
+            <Text className="text-text-primary text-lg font-bold mb-4 px-2">Select {label}</Text>
+            <ScrollView className="max-h-72" showsVerticalScrollIndicator={false}>
+              {options.map((opt: string) => (
+                <TouchableOpacity key={opt} className="py-4 px-2 border-b border-white/5" onPress={() => { onSelect(opt); setVisible(false); }}>
+                  <Text className="text-text-primary text-base">{opt}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            <TouchableOpacity onPress={() => setVisible(false)} className="mt-4 py-3 bg-card-light rounded-xl items-center border border-white/20">
+              <Text className="text-text-primary font-bold">Cancel</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -91,6 +91,7 @@ const BookingForm = ({ currentUser, router }: any) => {
   const [errors, setErrors] = useState<any>({});
   const [locationLoading, setLocationLoading] = useState(false);
   const searchTimeoutRef = useRef<any>(null);
+  const [serviceType, setServiceType] = useState<"home" | "shop">("home");
 
   useEffect(() => {
     if (currentUser) {
@@ -138,15 +139,18 @@ const BookingForm = ({ currentUser, router }: any) => {
     if (!formData.brand) newErrors.brand = "Required";
     if (!formData.model) newErrors.model = "Required";
     if (!formData.issue) newErrors.issue = "Required";
-    if (!formData.location) newErrors.location = "Required";
-    if (!formData.address) newErrors.address = "Required";
+    // ✅ ONLY FOR HOME
+    if (serviceType === "home") {
+      if (!formData.location) newErrors.location = "Location required";
+      if (!formData.address) newErrors.address = "Address required";
+    }
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
 
     try {
       setSubmitting(true);
       const bookingId = `BS${Math.floor(100000 + Math.random() * 900000)}`;
-      await api.post("/bookings/create", { ...formData, bookingId, uid: currentUser.id || currentUser.uid || currentUser._id, vehicleType, latitude: coords.lat, longitude: coords.lng, status: BOOKING_STATUS.BOOKED });
+      await api.post("/bookings/create", { ...formData, place: serviceType, bookingId, uid: currentUser.id || currentUser.uid || currentUser._id, vehicleType, latitude: coords.lat, longitude: coords.lng, status: BOOKING_STATUS.BOOKED });
       Alert.alert("Success", "Your service booking was successful!");
       setFormData({ name: currentUser.username || currentUser.name || "", email: currentUser.email || "", phone: currentUser.mobile || "", altPhone: "", brand: "", model: "", issue: "", otherIssue: "", vehicleNumber: "", address: "", location: "", preferredDate: new Date().toISOString().split('T')[0] });
       setLocationQuery(""); setCoords({ lat: null, lng: null });
@@ -160,7 +164,7 @@ const BookingForm = ({ currentUser, router }: any) => {
       <CustomInput label="Email Address" value={formData.email} onChangeText={(val: string) => handleChange('email', val)} placeholder="Optional" disabled />
       <CustomInput label="Phone Number" value={formData.phone} onChangeText={(val: string) => handleChange('phone', val)} placeholder="+91" keyboardType="phone-pad" required error={errors.phone} />
       <CustomInput label="Alternative Phone" value={formData.altPhone} onChangeText={(val: string) => handleChange('altPhone', val)} placeholder="Optional" keyboardType="phone-pad" />
-      <View className="flex-row gap-6 py-5 border-y border-white/10 mb-5 justify-around mt-2">
+      {/* <View className="flex-row gap-6 py-5 border-y border-white/10 mb-5 justify-around mt-2">
         <TouchableOpacity onPress={() => setVehicleType('car')} className="flex-row items-center gap-3">
           <View className={`w-5 h-5 rounded-full border-2 items-center justify-center ${vehicleType === 'car' ? 'border-primary' : 'border-gray-500'}`}>{vehicleType === 'car' && <View className="w-2 h-2 rounded-full bg-primary" />}</View>
           <Text className={`font-bold ${vehicleType === 'car' ? 'text-text-primary' : 'text-text-secondary'}`}>Car</Text>
@@ -169,34 +173,79 @@ const BookingForm = ({ currentUser, router }: any) => {
           <View className={`w-5 h-5 rounded-full border-2 items-center justify-center ${vehicleType === 'bike' ? 'border-primary' : 'border-gray-500'}`}>{vehicleType === 'bike' && <View className="w-2 h-2 rounded-full bg-primary" />}</View>
           <Text className={`font-bold ${vehicleType === 'bike' ? 'text-text-primary' : 'text-text-secondary'}`}>Bike</Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
       <CustomSelect label="Brand" value={formData.brand} onSelect={(val: string) => handleChange('brand', val)} options={vehicleType === 'car' ? ["Honda", "Hyundai", "BMW", "Audi", "Ford", "Toyota"] : ["Yamaha", "Royal Enfield", "Bajaj", "TVS"]} required error={errors.brand} />
       <CustomInput label="Model" value={formData.model} onChangeText={(val: string) => handleChange('model', val)} placeholder="i20, R15..." required error={errors.model} />
       <CustomSelect label="Issue" value={formData.issue} onSelect={(val: string) => handleChange('issue', val)} options={["Engine Problem", "Brake Issue", "Electrical", "Others"]} required error={errors.issue} />
       {formData.issue === 'Others' && <CustomInput label="Describe Issue" value={formData.otherIssue} onChangeText={(val: string) => handleChange('otherIssue', val)} />}
       <CustomInput label="Vehicle Number" value={formData.vehicleNumber} onChangeText={(val: string) => handleChange('vehicleNumber', val)} placeholder="TN 01 AB 1234" />
-      <View className="mb-4 relative ">
-        <Text className="mb-2 text-sm text-text-secondary font-medium ml-1">Search Location <Text className="text-error">*</Text></Text>
-        <TextInput value={locationQuery} onChangeText={searchLocation} placeholder="Search area..." placeholderTextColor="#6b7280" className={`w-full bg-card-light rounded-xl border px-5 py-4 text-text-primary ${errors.location ? 'border-red-400' : 'border-white/20'}`} />
-        {errors.location && <Text className="mt-1 text-xs text-error ml-1">{errors.location}</Text>}
-        {locationResults.length > 0 && (
-          <View className="mt-2 rounded-xl bg-modal border border-white/20 max-h-56 overflow-hidden ">
-            {locationResults.map((p, index) => (
-              <TouchableOpacity key={p.place_id || index} onPress={() => { setFormData((prev) => ({ ...prev, location: p.display_name })); setLocationQuery(p.display_name); setCoords({ lat: p.lat, lng: p.lon }); setLocationResults([]); }} className="px-5 py-4 border-b border-white/10">
-                <Text className="text-text-secondary text-sm">{p.display_name}</Text>
-              </TouchableOpacity>
-            ))}
+
+      <View className="flex-row justify-around py-4 border-y border-primary/20 my-4">
+
+        {/* HOME */}
+        <TouchableOpacity
+          onPress={() => setServiceType("home")}
+          className="flex-row items-center gap-2"
+        >
+          <View
+            className={`w-5 h-5 rounded-full border-2 items-center justify-center ${serviceType === "home" ? "border-primary" : "border-gray400"
+              }`}
+          >
+            {serviceType === "home" && (
+              <View className="w-2 h-2 rounded-full bg-primary" />
+            )}
           </View>
-        )}
-        <TouchableOpacity onPress={handleUseCurrentLocation} disabled={locationLoading} className="mt-5 px-6 py-3 rounded-xl bg-primary/10 border border-primary/30 items-center flex-row justify-center">
-          {locationLoading ? <ActivityIndicator color="#0EA5E9" /> : <><Ionicons name="location-outline" size={18} color="#0EA5E9" /><Text className="text-text-primary font-bold tracking-wide text-xs ml-2">USE CURRENT LOCATION</Text></>}
+          <Text className={serviceType === "home" ? "text-text-primary font-bold" : "text-gray400"}>
+            Home Service
+          </Text>
         </TouchableOpacity>
+
+        {/* SHOP */}
+        <TouchableOpacity
+          onPress={() => setServiceType("shop")}
+          className="flex-row items-center gap-2"
+        >
+          <View
+            className={`w-5 h-5 rounded-full border-2 items-center justify-center ${serviceType === "shop" ? "border-primary" : "border-gray400"
+              }`}
+          >
+            {serviceType === "shop" && (
+              <View className="w-2 h-2 rounded-full bg-primary" />
+            )}
+          </View>
+          <Text className={serviceType === "shop" ? "text-text-primary font-bold" : "text-gray400"}>
+            Shop Service
+          </Text>
+        </TouchableOpacity>
+
       </View>
-      <View className="mb-6 mt-2">
-        <Text className="mb-2 text-sm text-text-secondary font-medium ml-1">Service Address <Text className="text-error">*</Text></Text>
-        <TextInput value={formData.address} onChangeText={(val: string) => handleChange('address', val)} placeholder="Door No, Street Name, City..." placeholderTextColor="#6b7280" multiline numberOfLines={4} textAlignVertical="top" style={{ minHeight: 100 }} className={`w-full bg-card-light rounded-xl border px-5 py-4 text-text-primary ${errors.address ? 'border-red-400' : 'border-white/20'}`} />
-        {errors.address && <Text className="mt-1 text-xs text-error ml-1">{errors.address}</Text>}
-      </View>
+      {serviceType === "home" && (
+        <>
+          <View className="mb-4 relative ">
+            <Text className="mb-2 text-sm text-text-secondary font-medium ml-1">Search Location <Text className="text-error">*</Text></Text>
+            <TextInput value={locationQuery} onChangeText={searchLocation} placeholder="Search area..." placeholderTextColor="#6b7280" className={`w-full bg-card-light rounded-xl border px-5 py-4 text-text-primary ${errors.location ? 'border-red-400' : 'border-white/20'}`} />
+            {errors.location && <Text className="mt-1 text-xs text-error ml-1">{errors.location}</Text>}
+            {locationResults.length > 0 && (
+              <View className="mt-2 rounded-xl bg-modal border border-white/20 max-h-56 overflow-hidden ">
+                {locationResults.map((p, index) => (
+                  <TouchableOpacity key={p.place_id || index} onPress={() => { setFormData((prev) => ({ ...prev, location: p.display_name })); setLocationQuery(p.display_name); setCoords({ lat: p.lat, lng: p.lon }); setLocationResults([]); }} className="px-5 py-4 border-b border-white/10">
+                    <Text className="text-text-secondary text-sm">{p.display_name}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+            <TouchableOpacity onPress={handleUseCurrentLocation} disabled={locationLoading} className="mt-5 px-6 py-3 rounded-xl bg-primary/10 border border-primary/30 items-center flex-row justify-center">
+              {locationLoading ? <ActivityIndicator color="#0EA5E9" /> : <><Ionicons name="location-outline" size={18} color="#0EA5E9" /><Text className="text-text-primary font-bold tracking-wide text-xs ml-2">USE CURRENT LOCATION</Text></>}
+            </TouchableOpacity>
+          </View>
+          <View className="mb-6 mt-2">
+            <Text className="mb-2 text-sm text-text-secondary font-medium ml-1">Service Address <Text className="text-error">*</Text></Text>
+            <TextInput value={formData.address} onChangeText={(val: string) => handleChange('address', val)} placeholder="Door No, Street Name, City..." placeholderTextColor="#6b7280" multiline numberOfLines={4} textAlignVertical="top" style={{ minHeight: 100 }} className={`w-full bg-card-light rounded-xl border px-5 py-4 text-text-primary ${errors.address ? 'border-red-400' : 'border-white/20'}`} />
+            {errors.address && <Text className="mt-1 text-xs text-error ml-1">{errors.address}</Text>}
+          </View>
+
+        </>
+      )}
       <TouchableOpacity onPress={handleSubmit} disabled={submitting} className={`w-full mt-2 py-4 rounded-xl items-center ${submitting ? 'bg-primary/50' : 'bg-primary '}`}>
         {submitting ? <ActivityIndicator color="white" /> : <Text className="text-white font-black text-base tracking-wide">BOOK SERVICE →</Text>}
       </TouchableOpacity>
@@ -205,11 +254,11 @@ const BookingForm = ({ currentUser, router }: any) => {
 };
 
 const AppointmentForm = ({ currentUser, router }: any) => {
-  const [formData, setFormData] = useState({ 
-    name: "", phone: "", email: "", address: "", city: "", pincode: "", 
-    vehicleType: "Car", brand: "", model: "", registrationNumber: "", 
-    fuelType: "Petrol", yearOfManufacture: "", currentMileage: "", 
-    serviceType: "", otherIssue: "", pickupDrop: "No", 
+  const [formData, setFormData] = useState({
+    name: "", phone: "", email: "", address: "", city: "", pincode: "",
+    vehicleType: "Car", brand: "", model: "", registrationNumber: "",
+    fuelType: "Petrol", yearOfManufacture: "", currentMileage: "",
+    serviceType: "", otherIssue: "", pickupDrop: "No",
     preferredDate: "", preferredTimeSlot: "Morning (9AM–12PM)",
     serviceMode: "At Service Center", pickupAddress: "", location: "",
     paymentMode: "Pay After Service", couponCode: "", notes: "",
@@ -293,25 +342,25 @@ const AppointmentForm = ({ currentUser, router }: any) => {
     try {
       setSubmitting(true);
       const bookingId = `AP${Math.floor(100000 + Math.random() * 900000)}`;
-      
+
       // Prepare normalized data for backend compatibility
-      const appointmentData = { 
-        ...formData, 
-        bookingId, 
-        uid: currentUser.id || currentUser.uid || currentUser._id, 
+      const appointmentData = {
+        ...formData,
+        bookingId,
+        uid: currentUser.id || currentUser.uid || currentUser._id,
         latitude: coords.lat || null,
         longitude: coords.lng || null,
-        estimatedCost, 
+        estimatedCost,
         yearOfManufacture: formData.yearOfManufacture ? parseInt(formData.yearOfManufacture) : null,
         currentMileage: formData.currentMileage ? parseInt(formData.currentMileage) : null,
         status: "Appointment Booked", // Match requested status
-        
+
         // Map fields for common booking endpoint compatibility
         vehicleNumber: formData.registrationNumber,
         issue: formData.serviceType || formData.otherIssue || "General Service",
         vehicleType: formData.vehicleType ? formData.vehicleType.toLowerCase() : 'car'
       };
-      
+
       console.log("Submitting Appointment Data:", appointmentData);
 
       // Try multiple potential endpoints
@@ -328,20 +377,20 @@ const AppointmentForm = ({ currentUser, router }: any) => {
           console.warn("/bookings failed, trying /bookings/create");
           return api.post("/bookings/create", appointmentData);
         });
-      
+
       Alert.alert("Success", "Service Appointment Scheduled Successfully!");
       setTermsAccepted(false);
-      setFormData({ 
-        name: currentUser.username || currentUser.name || "", 
-        phone: currentUser.mobile || "", 
-        email: currentUser.email || "", 
-        address: "", city: "", pincode: "", 
-        vehicleType: "Car", brand: "", model: "", registrationNumber: "", 
-        fuelType: "Petrol", yearOfManufacture: "", currentMileage: "", 
-        serviceType: "", otherIssue: "", pickupDrop: "No", 
-        preferredDate: "", preferredTimeSlot: "Morning (9AM–12PM)", 
-        serviceMode: "At Service Center", pickupAddress: "", location: "", 
-        paymentMode: "Pay After Service", couponCode: "", notes: "", emergencyService: false 
+      setFormData({
+        name: currentUser.username || currentUser.name || "",
+        phone: currentUser.mobile || "",
+        email: currentUser.email || "",
+        address: "", city: "", pincode: "",
+        vehicleType: "Car", brand: "", model: "", registrationNumber: "",
+        fuelType: "Petrol", yearOfManufacture: "", currentMileage: "",
+        serviceType: "", otherIssue: "", pickupDrop: "No",
+        preferredDate: "", preferredTimeSlot: "Morning (9AM–12PM)",
+        serviceMode: "At Service Center", pickupAddress: "", location: "",
+        paymentMode: "Pay After Service", couponCode: "", notes: "", emergencyService: false
       });
       setLocationQuery("");
       setCoords({ lat: null, lng: null });
@@ -350,13 +399,13 @@ const AppointmentForm = ({ currentUser, router }: any) => {
       if (err.response) {
         console.error("Backend Error Data:", err.response.data);
       }
-      
-      const errorMsg = err.response?.data?.message || 
-                     err.response?.data?.error || 
-                     (typeof err.response?.data === 'string' ? err.response.data : null) ||
-                     err.message || 
-                     "Failed to schedule appointment.";
-                     
+
+      const errorMsg = err.response?.data?.message ||
+        err.response?.data?.error ||
+        (typeof err.response?.data === 'string' ? err.response.data : null) ||
+        err.message ||
+        "Failed to schedule appointment.";
+
       Alert.alert("Error", errorMsg);
     } finally {
       setSubmitting(false);
@@ -379,7 +428,7 @@ const AppointmentForm = ({ currentUser, router }: any) => {
       <CustomInput label="Full Name" value={formData.name} onChangeText={(val: string) => handleChange('name', val)} required error={errors.name} />
       <CustomInput label="Mobile Number" value={formData.phone} onChangeText={(val: string) => handleChange('phone', val)} keyboardType="phone-pad" required error={errors.phone} />
       <CustomInput label="Email Address" value={formData.email} onChangeText={(val: string) => handleChange('email', val)} keyboardType="email-address" />
-      
+
       <View className="mb-4 relative ">
         <Text className="mb-2 text-sm text-text-secondary font-medium ml-1">Search Location</Text>
         <TextInput value={locationQuery} onChangeText={searchLocation} placeholder="Search area..." placeholderTextColor="#6b7280" className={`w-full bg-card-light rounded-xl border px-5 py-4 text-text-primary border-white/20`} />
@@ -412,15 +461,15 @@ const AppointmentForm = ({ currentUser, router }: any) => {
 
       <SectionTitle icon="🛠️" title="Service Details" />
       <CustomSelect label="Service Type" value={formData.serviceType} onSelect={(val: string) => handleChange('serviceType', val)} options={Object.keys(SERVICE_PRICES)} required error={errors.serviceType} />
-      
+
       <CustomSelect label="Service Mode" value={formData.serviceMode} onSelect={(val: string) => handleChange('serviceMode', val)} options={["At Service Center", "Doorstep Service"]} />
-      
+
       {formData.serviceMode === "Doorstep Service" && (
         <CustomInput label="Pickup Address" value={formData.pickupAddress} onChangeText={(val: string) => handleChange('pickupAddress', val)} required error={errors.pickupAddress} multiline numberOfLines={3} />
       )}
 
       <CustomSelect label="Pickup & Drop" value={formData.pickupDrop} onSelect={(val: string) => handleChange('pickupDrop', val)} options={["No", "Yes"]} />
-      
+
       <View className="flex-row items-center gap-3 my-4 p-4 rounded-xl border border-red-500/30 bg-red-500/10">
         <Switch value={formData.emergencyService} onValueChange={(val: boolean) => handleChange('emergencyService', val)} trackColor={{ false: '#374151', true: '#ef4444' }} thumbColor="#fff" />
         <Text className="text-text-secondary text-sm flex-1">Emergency Service <Text className="text-red-400 font-bold">(+ ₹500)</Text></Text>
@@ -432,9 +481,9 @@ const AppointmentForm = ({ currentUser, router }: any) => {
       <SectionTitle icon="📅" title="Appointment Scheduling" />
       <View className="mb-4">
         <Text className="mb-2 text-sm text-text-secondary font-medium ml-1">Preferred Date *</Text>
-        <TouchableOpacity 
-           onPress={() => setShowDatePicker(true)}
-           className={`w-full bg-card-light rounded-xl border px-5 py-4 flex-row justify-between items-center ${errors.preferredDate ? 'border-red-400' : 'border-white/20'}`}
+        <TouchableOpacity
+          onPress={() => setShowDatePicker(true)}
+          className={`w-full bg-card-light rounded-xl border px-5 py-4 flex-row justify-between items-center ${errors.preferredDate ? 'border-red-400' : 'border-white/20'}`}
         >
           <Text className="text-text-primary">{formData.preferredDate || "Select Date"}</Text>
           <Ionicons name="calendar-outline" size={20} color="#9ca3af" />
@@ -488,7 +537,7 @@ export default function BookingScreen() {
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1 bg-black">
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         <View className="px-5 pt-8 pb-32">
-          
+
           <View className="mb-6">
             <Text className="text-2xl font-black text-primary tracking-tight">Quick Service Booking</Text>
             <Text className="text-[10px] font-black text-text-secondary uppercase tracking-widest mt-0.5">On-demand service request</Text>
