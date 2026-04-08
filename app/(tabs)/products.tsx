@@ -418,7 +418,7 @@ export default function ProductsScreen() {
             ))}
 
             {/* 🔥 OFFER */}
-            <TouchableOpacity
+            {/* <TouchableOpacity
               onPress={() => setFilters({ ...filters, offer: !filters.offer })}
               className="flex-row items-center mt-4 mb-4"
             >
@@ -429,7 +429,7 @@ export default function ProductsScreen() {
                   }`}
               />
               <Text className="text-gray-300">Offers Only</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
 
             {/* 🔥 CLEAR BUTTON */}
             <TouchableOpacity
@@ -443,7 +443,7 @@ export default function ProductsScreen() {
                   offer: false,
                 })
               }
-              className="w-full bg-primary/20 border border-primary py-2 rounded-lg mb-3"
+              className="w-full mt-5 bg-primary/20 border border-primary py-2 rounded-lg mb-3"
             >
               <Text className="text-primary text-center font-medium">
                 Clear Filters

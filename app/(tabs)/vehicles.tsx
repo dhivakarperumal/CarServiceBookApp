@@ -22,6 +22,7 @@ export default function VehiclesScreen() {
    const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
    const [bookingInProgress, setBookingInProgress] = useState<number | null>(null);
    const { user } = useAuth();
+   const [showTypeDropdown, setShowTypeDropdown] = useState(false);
 
    useEffect(() => {
       fetchVehicles();
@@ -161,7 +162,7 @@ export default function VehiclesScreen() {
                   onPress: () => {
                      setSelectedVehicle(null);
                      fetchVehicles();
-                     router.push("/profile/VehicleBookings"); 
+                     router.push("/profile/VehicleBookings");
                   },
                },
             ]);
@@ -329,13 +330,46 @@ export default function VehiclesScreen() {
                      className="flex-1 ml-2 text-white h-full text-sm"
                   />
                </View>
-               <TouchableOpacity
-                  onPress={() => setFilterType(prev => prev === 'all' ? 'car' : prev === 'car' ? 'bike' : 'all')}
-                  className="bg-white/10 border border-[#38bdf8]/30 px-4 h-12 rounded-xl justify-center items-center"
-               >
-                  <Ionicons name="filter" size={16} color="#38bdf8" />
-                  <Text className="text-[9px] font-black uppercase text-white mt-1">{filterType}</Text>
-               </TouchableOpacity>
+               <View className="relative">
+
+                  {/* BUTTON */}
+                  <TouchableOpacity
+                     onPress={() => setShowTypeDropdown(!showTypeDropdown)}
+                     className="bg-white/10 border border-[#38bdf8]/30 px-4 h-12 rounded-xl justify-center items-center"
+                  >
+                     <Ionicons name="filter" size={16} color="#38bdf8" />
+                     <Text className="text-[9px] font-black uppercase text-white mt-1">
+                        {filterType}
+                     </Text>
+                  </TouchableOpacity>
+
+                  {/* DROPDOWN */}
+                  {showTypeDropdown && (
+                     <View className="absolute top-14 right-0 bg-[#0a0a0b] border border-[#38bdf8]/30 rounded-xl w-32 z-50">
+
+                        {["all", "car", "bike"].map((type) => (
+                           <TouchableOpacity
+                              key={type}
+                              onPress={() => {
+                                 setFilterType(type);
+                                 setShowTypeDropdown(false);
+                              }}
+                              className={`px-4 py-3 border-b border-[#1f2937] ${filterType === type ? "bg-[#0EA5E9]/20" : ""
+                                 }`}
+                           >
+                              <Text
+                                 className={`text-sm ${filterType === type ? "text-[#38bdf8]" : "text-gray-300"
+                                    }`}
+                              >
+                                 {type.toUpperCase()}
+                              </Text>
+                           </TouchableOpacity>
+                        ))}
+
+                     </View>
+                  )}
+
+               </View>
             </View>
 
             <View className="px-5 mb-4">
