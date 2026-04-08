@@ -328,24 +328,11 @@ export default function AdminBookings() {
   return (
     <SafeAreaView className="flex-1 bg-background">
       {/* ── HEADER ── */}
-      <View className="border-b border-slate-800">
-        <View className="px-6 pt-10 pb-4 relative">
-          <TouchableOpacity
-            onPress={() =>
-              router.push(
-                activeTab === "appointment"
-                  ? ("/(adminPages)/add-appointment" as any)
-                  : ("/(adminPages)/add-booking" as any),
-              )
-            }
-            className="absolute right-6 bottom-4 w-10 h-10 rounded-xl items-center justify-center shadow-md bg-white border border-white/10"
-          >
-            <Ionicons name="add" size={24} color="black" />
-          </TouchableOpacity>
-        </View>
+      <View>
+
 
         {/* TABS */}
-        <View className="px-6 pb-4 flex-row gap-3">
+        <View className="px-6 mt-5 pb-4 flex-row gap-3">
           {(["booking", "appointment"] as const).map((tab) => (
             <TouchableOpacity
               key={tab}
@@ -1205,6 +1192,21 @@ export default function AdminBookings() {
           </TouchableOpacity>
         </TouchableOpacity>
       </Modal>
+
+      {/* ── FLOATING ACTION BUTTON ── */}
+      <TouchableOpacity
+        onPress={() =>
+          router.push(
+            activeTab === "appointment"
+              ? ("/(adminPages)/add-appointment" as any)
+              : ("/(adminPages)/add-booking" as any),
+          )
+        }
+        activeOpacity={0.85}
+        className="absolute bottom-5 right-5 w-14 h-14 rounded-full bg-white items-center justify-center shadow-lg shadow-primary/40 border border-white/15"
+      >
+        <Ionicons name="add" size={28} color="black" />
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
