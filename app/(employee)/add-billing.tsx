@@ -422,9 +422,6 @@ export default function AddBillingScreen() {
                 >
                   Generate Billing
                 </Text>
-                <Text className="text-[10px] uppercase tracking-[0.35em] text-text-muted font-black mt-1">
-                  Invoice No {invoiceNo}
-                </Text>
               </View>
             </View>
 
@@ -452,6 +449,10 @@ export default function AddBillingScreen() {
                 </TouchableOpacity>
               ))}
             </View>
+
+            <Text className="text-[14px] uppercase tracking-[0.35em] text-text-primary font-black mt-4 ml-1">
+              Invoice No :{invoiceNo}
+            </Text>
           </View>
         </View>
 
@@ -679,7 +680,9 @@ export default function AddBillingScreen() {
                 onPress={addManualPart}
                 className="min-w-[140px] bg-[#111827] rounded-3xl px-5 py-4 items-center justify-center"
               >
-                <Text className="text-text-primary bg-primary p-3 rounded-xl font-black">+ Add Part</Text>
+                <Text className="text-text-primary bg-primary p-3 rounded-xl font-black">
+                  + Add Part
+                </Text>
               </TouchableOpacity>
             </View>
             {matchingProducts.length > 0 && (
