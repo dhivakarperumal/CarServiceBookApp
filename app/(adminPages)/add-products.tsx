@@ -1,43 +1,50 @@
-import React, { useState, useEffect } from "react";
-import { 
-  View, 
-  Text, 
-  SafeAreaView, 
-  ScrollView, 
-  TouchableOpacity, 
-  TextInput, 
-  Image, 
-  ActivityIndicator, 
-  Alert, 
-  Platform,
-  Switch
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  SafeAreaView,
+  ScrollView,
+  Switch,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from "react-native";
-import { api } from "../../services/api";
-import { useRouter, useLocalSearchParams, Stack } from "expo-router";
-import { Ionicons, MaterialIcons, FontAwesome } from "@expo/vector-icons";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import * as ImagePicker from 'expo-image-picker';
+import { api } from "../../services/api";
 import { COLORS } from "../../theme/colors";
 
 /* REUSABLE COMPONENTS */
 const Label = ({ children, required }: any) => (
-  <Text className="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-2 ml-1">
+  <Text className="mb-2 text-[10px] uppercase font-black text-text-muted tracking-wider ml-1">
     {children} {required && <Text className="text-red-500">*</Text>}
   </Text>
 );
 
 const StyledInput = ({ ...props }: any) => (
   <TextInput
-    placeholderTextColor={COLORS.slate400}
-    className="bg-slate-900 border border-slate-800 rounded-2xl px-5 py-4 text-white font-bold text-xs mb-4"
+    placeholderTextColor="#94A3B8"
+    className="w-full bg-slate-950/80 rounded-2xl border border-slate-800 px-5 py-4 text-text-primary font-bold mb-4"
     {...props}
   />
+);
+
+const SectionTitle = ({ title }: { title: string }) => (
+  <Text className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-3">
+    {title}
+  </Text>
 );
 
 const AdminAddProduct = () => {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const editData = params.editData ? JSON.parse(params.editData as string) : null;
+  const editData = params.editData
+    ? JSON.parse(params.editData as string)
+    : null;
 
   const [loading, setLoading] = useState(false);
   const [product, setProduct] = useState({
@@ -94,10 +101,14 @@ const AdminAddProduct = () => {
   useEffect(() => {
     if (editData) {
       let cleanThumbnail = editData.thumbnail || "";
-      if (typeof cleanThumbnail === 'string' && cleanThumbnail.startsWith('[')) {
+      if (
+        typeof cleanThumbnail === "string" &&
+        cleanThumbnail.startsWith("[")
+      ) {
         try {
           const parsed = JSON.parse(cleanThumbnail);
-          cleanThumbnail = Array.isArray(parsed) && parsed.length > 0 ? parsed[0] : "";
+          cleanThumbnail =
+            Array.isArray(parsed) && parsed.length > 0 ? parsed[0] : "";
         } catch (e) {
           console.error("Malformed thumbnail:", e);
         }
@@ -109,20 +120,26 @@ const AdminAddProduct = () => {
           ? editData.tags.join(", ")
           : editData.tags || "",
         warrantyAvailable: editData?.warranty?.available || false,
-        warrantyMonths: editData?.warranty?.available ? String(editData?.warranty?.months || "") : "",
+        warrantyMonths: editData?.warranty?.available
+          ? String(editData?.warranty?.months || "")
+          : "",
         returnAvailable: editData?.returnPolicy?.available || false,
-        returnDays: editData?.returnPolicy?.available ? String(editData?.returnPolicy?.days || "") : "",
+        returnDays: editData?.returnPolicy?.available
+          ? String(editData?.returnPolicy?.days || "")
+          : "",
         rating: String(editData?.rating || ""),
         mrp: String(editData.mrp || ""),
         offer: String(editData.offer || ""),
         offerPrice: String(editData.offerPrice || ""),
       });
-      setVariants(editData.variants?.map((v: any) => ({
-        sku: v.sku || "",
-        position: v.position || "",
-        material: v.material || "",
-        stock: String(v.stock || "")
-      })) || [{ sku: "", position: "", material: "", stock: "" }]);
+      setVariants(
+        editData.variants?.map((v: any) => ({
+          sku: v.sku || "",
+          position: v.position || "",
+          material: v.material || "",
+          stock: String(v.stock || ""),
+        })) || [{ sku: "", position: "", material: "", stock: "" }],
+      );
       setImages(editData.images || []);
       setThumbnail(cleanThumbnail);
     }
@@ -132,7 +149,9 @@ const AdminAddProduct = () => {
   const generateProductId = async () => {
     try {
       const res = await api.get("/products");
-      const products = Array.isArray(res.data) ? res.data : (res.data?.data || []);
+      const products = Array.isArray(res.data)
+        ? res.data
+        : res.data?.data || [];
       const count = products.length + 1;
       return `PR${String(count).padStart(3, "0")}`;
     } catch {
@@ -148,7 +167,10 @@ const AdminAddProduct = () => {
   };
 
   const addVariant = () =>
-    setVariants([...variants, { sku: "", position: "", material: "", stock: "" }]);
+    setVariants([
+      ...variants,
+      { sku: "", position: "", material: "", stock: "" },
+    ]);
 
   const removeVariant = (index: number) => {
     if (variants.length > 1) {
@@ -158,40 +180,44 @@ const AdminAddProduct = () => {
 
   /* IMAGE HANDLING */
   const pickImage = async () => {
-  try {
-    // Request permission
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permission Denied', 'Sorry, we need camera roll permissions to upload images!');
-      return;
-    }
+    try {
+      // Request permission
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert(
+          "Permission Denied",
+          "Sorry, we need camera roll permissions to upload images!",
+        );
+        return;
+      }
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsMultipleSelection: true,
-      quality: 0.6,
-      base64: true,
-    });
-
-    if (!result.canceled) {
-      const selectedImages = result.assets.map((asset: any) => {
-        // Return base64 with data URI prefix if available
-        if (asset.base64) {
-          return `data:image/jpeg;base64,${asset.base64}`;
-        }
-        return asset.uri;
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"],
+        allowsMultipleSelection: true,
+        quality: 0.6,
+        base64: true,
       });
 
-      setImages([...images, ...selectedImages]);
-      if (!thumbnail && selectedImages.length > 0) {
-        setThumbnail(selectedImages[0]);
+      if (!result.canceled) {
+        const selectedImages = result.assets.map((asset: any) => {
+          // Return base64 with data URI prefix if available
+          if (asset.base64) {
+            return `data:image/jpeg;base64,${asset.base64}`;
+          }
+          return asset.uri;
+        });
+
+        setImages([...images, ...selectedImages]);
+        if (!thumbnail && selectedImages.length > 0) {
+          setThumbnail(selectedImages[0]);
+        }
       }
+    } catch (error) {
+      console.error("Error picking image:", error);
+      Alert.alert("Error", "Something went wrong while picking images.");
     }
-  } catch (error) {
-    console.error("Error picking image:", error);
-    Alert.alert("Error", "Something went wrong while picking images.");
-  }
-};
+  };
 
   const removeImage = (index: number) => {
     const imageToRemove = images[index];
@@ -214,7 +240,10 @@ const AdminAddProduct = () => {
       let productId = product.id;
       if (!editData) productId = await generateProductId();
 
-      const totalStock = variants.reduce((sum, v) => sum + Number(v.stock || 0), 0);
+      const totalStock = variants.reduce(
+        (sum, v) => sum + Number(v.stock || 0),
+        0,
+      );
 
       const productData = {
         id: productId,
@@ -227,7 +256,9 @@ const AdminAddProduct = () => {
         offerPrice: Number(product.offerPrice),
         warranty: {
           available: product.warrantyAvailable,
-          months: product.warrantyAvailable ? Number(product.warrantyMonths || 0) : 0,
+          months: product.warrantyAvailable
+            ? Number(product.warrantyMonths || 0)
+            : 0,
         },
         returnPolicy: {
           available: product.returnAvailable,
@@ -247,318 +278,460 @@ const AdminAddProduct = () => {
         await api.post("/products", productData);
         Alert.alert("Success", `Product ${productId} Added Successfully`);
       } else {
-        await api.put(`/products/${editData.docId || editData.id}`, productData);
+        await api.put(
+          `/products/${editData.docId || editData.id}`,
+          productData,
+        );
         Alert.alert("Success", `Product ${productId} Updated Successfully`);
       }
 
       router.replace("/(admin)/products");
     } catch (error: any) {
       console.error(error);
-      Alert.alert("Error", error.response?.data?.message || "Error saving product");
+      Alert.alert(
+        "Error",
+        error.response?.data?.message || "Error saving product",
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-slate-950">
-      <Stack.Screen 
+    <SafeAreaView className="flex-1 bg-background">
+      <Stack.Screen
         options={{
           headerShown: true,
           title: editData ? "Update Product" : "Add Products",
-          headerTitleStyle: { color: COLORS.white, fontWeight: '900', fontSize: 16 },
+          headerTitleStyle: {
+            color: COLORS.white,
+            fontWeight: "900",
+            fontSize: 16,
+          },
           headerStyle: { backgroundColor: COLORS.background },
           headerTintColor: COLORS.white,
           headerLeft: () => (
-            <TouchableOpacity onPress={() => router.back()} className="ml-2 w-8 h-8 items-center justify-center">
-               <Ionicons name="arrow-back" size={20} color={COLORS.white} />
-            </TouchableOpacity>
-          )
-        }} 
-      />
-      <KeyboardAwareScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-        <View className="p-6">
-          {/* REMOVED PREVIOUS CUSTOM HEADER */}
-
-          {/* FORM CONTAINER */}
-          <View className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl mb-12">
-            
-            {/* BASIC INFO */}
-            <Label required>Product Name</Label>
-            <StyledInput 
-              value={product.name} 
-              onChangeText={(val: string) => setProduct({...product, name: val})}
-              placeholder="e.g. Bosch Brake Pad Set"
-            />
-
-            <Label>Brand</Label>
-            <StyledInput 
-              value={product.brand} 
-              onChangeText={(val: string) => setProduct({...product, brand: val})}
-              placeholder="e.g. Bosch / Brembo"
-            />
-
-            <Label>Category</Label>
-            <View className="flex-row flex-wrap gap-2 mb-4">
-               {['General', 'Exterior', 'Interior', 'Engine', 'Electronics', 'Brakes', 'Suspension'].map((cat) => (
-                  <TouchableOpacity 
-                     key={cat}
-                     onPress={() => setProduct({...product, category: cat})}
-                     className={`px-4 py-2 rounded-xl border ${product.category === cat ? 'bg-sky-500 border-sky-400' : 'bg-slate-900 border-slate-800'}`}
-                  >
-                     <Text className={`${product.category === cat ? 'text-white' : 'text-slate-500'} text-[10px] font-black uppercase tracking-tighter`}>{cat}</Text>
-                  </TouchableOpacity>
-               ))}
-            </View>
-
-            <Label>Description</Label>
-            <StyledInput 
-              value={product.description} 
-              onChangeText={(val: string) => setProduct({...product, description: val})}
-              placeholder="Detailed specifications..."
-              multiline
-              numberOfLines={4}
-              textAlignVertical="top"
-            />
-
-            <View className="h-px bg-white/5 my-6" />
-
-            {/* PRICING */}
-            <View className="flex-row gap-4">
-              <View className="flex-1">
-                <Label required>MRP (₹)</Label>
-                <StyledInput 
-                  value={product.mrp} 
-                  keyboardType="numeric"
-                  onChangeText={(val: string) => setProduct({...product, mrp: val})}
-                  placeholder="2499"
-                />
-              </View>
-              <View className="flex-1">
-                <Label>Offer %</Label>
-                <StyledInput 
-                  value={product.offer} 
-                  keyboardType="numeric"
-                  onChangeText={(val: string) => setProduct({...product, offer: val})}
-                  placeholder="15"
-                />
-              </View>
-            </View>
-
-            <View className="flex-row gap-4">
-              <View className="flex-1">
-                <Label>Final Price (₹)</Label>
-                <View className="bg-slate-800 rounded-2xl px-5 py-4 mb-4 border border-slate-700">
-                   <Text className="text-sky-400 font-bold text-xs">{product.offerPrice || "0.00"}</Text>
-                </View>
-              </View>
-              <View className="flex-1">
-                <Label>Rating (0-5)</Label>
-                <StyledInput 
-                  value={product.rating} 
-                  keyboardType="numeric"
-                  onChangeText={(val: string) => setProduct({...product, rating: val})}
-                  placeholder="4.5"
-                />
-              </View>
-            </View>
-
-            <View className="h-px bg-white/5 my-6" />
-
-            {/* VARIANTS */}
-            <View className="flex-row justify-between items-center mb-4">
-              <Label>Product Variants</Label>
-              <TouchableOpacity onPress={addVariant} className="bg-sky-950 px-3 py-1.5 rounded-xl border border-sky-500">
-                <Text className="text-sky-500 text-[10px] font-black uppercase">+ Add</Text>
-              </TouchableOpacity>
-            </View>
-
-            {variants.map((v, i) => (
-              <View key={i} className="bg-slate-950 p-4 rounded-2xl border border-slate-800 mb-4 relative">
-                {variants.length > 1 && (
-                  <TouchableOpacity 
-                    onPress={() => removeVariant(i)}
-                    className="absolute top-2 right-2 w-6 h-6 items-center justify-center"
-                  >
-                    <Ionicons name="close-circle" size={18} color={COLORS.error} />
-                  </TouchableOpacity>
-                )}
-                <View className="flex-row gap-2">
-                  <View className="flex-1">
-                    <Text className="text-gray-600 text-[8px] font-black uppercase mb-1 ml-1">SKU</Text>
-                    <TextInput 
-                      className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-white text-[10px] font-bold"
-                      value={v.sku}
-                      onChangeText={(val) => handleVariantChange(i, 'sku', val)}
-                      placeholder="SKU001"
-                      placeholderTextColor={COLORS.slate700}
-                    />
-                  </View>
-                  <View className="flex-1">
-                    <Text className="text-gray-600 text-[8px] font-black uppercase mb-1 ml-1">Stock</Text>
-                    <TextInput 
-                      className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-white text-[10px] font-bold"
-                      value={v.stock}
-                      keyboardType="numeric"
-                      onChangeText={(val) => handleVariantChange(i, 'stock', val)}
-                      placeholder="10"
-                      placeholderTextColor="#334155"
-                    />
-                  </View>
-                </View>
-                <View className="flex-row gap-2 mt-2">
-                  <View className="flex-1">
-                    <Text className="text-gray-600 text-[8px] font-black uppercase mb-1 ml-1">Position</Text>
-                    <TextInput 
-                      className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-white text-[10px] font-bold"
-                      value={v.position}
-                      onChangeText={(val) => handleVariantChange(i, 'position', val)}
-                      placeholder="Front Left"
-                      placeholderTextColor="#334155"
-                    />
-                  </View>
-                  <View className="flex-1">
-                    <Text className="text-gray-600 text-[8px] font-black uppercase mb-1 ml-1">Material</Text>
-                    <TextInput 
-                      className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-white text-[10px] font-bold"
-                      value={v.material}
-                      onChangeText={(val) => handleVariantChange(i, 'material', val)}
-                      placeholder="Ceramic"
-                      placeholderTextColor="#334155"
-                    />
-                  </View>
-                </View>
-              </View>
-            ))}
-
-            <View className="h-px bg-white/5 my-6" />
-
-            {/* IMAGES */}
-            <View className="flex-row justify-between items-center mb-4">
-              <Label>Product Gallery</Label>
-              <TouchableOpacity onPress={pickImage} className="bg-amber-950 px-3 py-1.5 rounded-xl border border-amber-500">
-                <Text className="text-amber-500 text-[10px] font-black uppercase">Upload Images</Text>
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row mb-6">
-              {images.length === 0 ? (
-                <View className="w-32 h-32 bg-slate-950 rounded-2xl border border-slate-800 border-dashed items-center justify-center">
-                  <MaterialIcons name="image" size={24} color="#1e293b" />
-                  <Text className="text-gray-700 text-[8px] font-black uppercase mt-2">No Images</Text>
-                </View>
-              ) : (
-                images.map((img, i) => (
-                  <View key={i} className={`mr-4 relative ${thumbnail === img ? 'border-2 border-sky-500 p-0.5 rounded-2xl' : ''}`}>
-                    <Image source={{ uri: img }} className="w-32 h-32 rounded-2xl bg-slate-950" />
-                    <TouchableOpacity 
-                      onPress={() => removeImage(i)}
-                      className="absolute -top-2 -right-2 bg-red-500 w-6 h-6 rounded-full items-center justify-center border-2 border-slate-950 shadow-lg"
-                    >
-                      <Ionicons name="close" size={14} color="white" />
-                    </TouchableOpacity>
-                    {thumbnail !== img && (
-                      <TouchableOpacity 
-                         onPress={() => setThumbnail(img)}
-                         className="absolute bottom-2 left-2 bg-slate-900 px-2 py-1 rounded-lg border border-slate-700"
-                      >
-                        <Text className="text-white text-[7px] font-black uppercase">Set Main</Text>
-                      </TouchableOpacity>
-                    )}
-                    {thumbnail === img && (
-                      <View className="absolute bottom-2 left-2 bg-sky-500 px-2 py-1 rounded-lg">
-                        <Text className="text-white text-[7px] font-black uppercase">Main Image</Text>
-                      </View>
-                    )}
-                  </View>
-                ))
-              )}
-            </ScrollView>
-
-            <View className="h-px bg-white/5 my-6" />
-
-            {/* ADDITIONAL OPTIONS */}
-            <View className="bg-slate-950 p-4 rounded-3xl border border-slate-800 mb-6">
-               <View className="flex-row justify-between items-center mb-4">
-                  <Text className="text-white text-[10px] font-black uppercase">Warranty Policy</Text>
-                  <Switch 
-                    value={product.warrantyAvailable} 
-                    onValueChange={(val) => setProduct({...product, warrantyAvailable: val})}
-                    trackColor={{ false: COLORS.slate800, true: COLORS.primaryDark }}
-                    thumbColor={product.warrantyAvailable ? COLORS.sky : COLORS.slate400}
-                  />
-               </View>
-               {product.warrantyAvailable && (
-                 <StyledInput 
-                    value={product.warrantyMonths}
-                    onChangeText={(val: string) => setProduct({...product, warrantyMonths: val})}
-                    placeholder="Duration in Months (e.g. 12)"
-                    keyboardType="numeric"
-                 />
-               )}
-
-               <View className="flex-row justify-between items-center mb-4 mt-2">
-                  <Text className="text-white text-[10px] font-black uppercase">Return Policy</Text>
-                  <Switch 
-                    value={product.returnAvailable} 
-                    onValueChange={(val) => setProduct({...product, returnAvailable: val})}
-                    trackColor={{ false: COLORS.slate800, true: COLORS.success }}
-                    thumbColor={product.returnAvailable ? COLORS.success : COLORS.slate400}
-                  />
-               </View>
-               {product.returnAvailable && (
-                 <StyledInput 
-                    value={product.returnDays}
-                    onChangeText={(val: string) => setProduct({...product, returnDays: val})}
-                    placeholder="Return Window in Days (e.g. 7)"
-                    keyboardType="numeric"
-                 />
-               )}
-            </View>
-
-            <Label>Tags (Comma separated)</Label>
-            <StyledInput 
-              value={product.tags} 
-              onChangeText={(val: string) => setProduct({...product, tags: val})}
-              placeholder="breaks, bosch, car-spare, spare-parts"
-            />
-
-            <View className="flex-row gap-8 mb-8 ml-2">
-               <View className="flex-row items-center gap-2">
-                  <Switch 
-                    value={product.isFeatured} 
-                    onValueChange={(val) => setProduct({...product, isFeatured: val})}
-                  />
-                  <Text className="text-gray-500 text-[10px] font-black uppercase">Featured</Text>
-               </View>
-               <View className="flex-row items-center gap-2">
-                  <Switch 
-                    value={product.isActive} 
-                    onValueChange={(val) => setProduct({...product, isActive: val})}
-                  />
-                  <Text className="text-gray-500 text-[10px] font-black uppercase">Active</Text>
-               </View>
-            </View>
-
-            {/* SUBMIT BUTTON */}
-            <TouchableOpacity 
-              onPress={handleSubmit}
-              disabled={loading}
-              className={`rounded-3xl overflow-hidden ${loading ? 'opacity-50' : ''}`}
+            <TouchableOpacity
+              onPress={() => router.back()}
+              className="ml-2 w-8 h-8 items-center justify-center"
             >
-              <View className="bg-sky-500 py-5 items-center flex-row justify-center gap-3">
-                 {loading ? <ActivityIndicator color={COLORS.white} /> : (
-                   <>
-                    <Text className="text-white font-black uppercase tracking-widest">
-                      {editData ? "Update Component →" : "Register Product →"}
-                    </Text>
-                   </>
-                 )}
-              </View>
+              <Ionicons name="arrow-back" size={20} color={COLORS.white} />
             </TouchableOpacity>
+          ),
+        }}
+      />
+      <KeyboardAwareScrollView
+        className="flex-1"
+        showsVerticalScrollIndicator={false}
+      >
+        <View className="p-5 mt-6">
+          <View className="mb-6">
+            <View className="flex-row items-center gap-4 ">
+              <TouchableOpacity
+                onPress={() => router.back()}
+                className="p-3 bg-card rounded-2xl border border-card"
+              >
+                <Ionicons name="chevron-back" size={24} color="#FFFFFF" />
+              </TouchableOpacity>
+              <View className="flex-1 min-w-0">
+                <Text
+                  className="text-4xl font-black text-text-primary tracking-tight"
+                  numberOfLines={1}
+                >
+                  {editData ? "Update Product" : "Add Products"}
+                </Text>
+              </View>
+            </View>
 
+            <Text className="text-[14px] uppercase tracking-[0.35em] text-text-primary font-black mt-4 ml-1">
+              Manage inventory & pricing
+            </Text>
           </View>
         </View>
+
+        <ScrollView
+          className="flex-1 px-5"
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View className="flex-row flex-wrap gap-4 mb-6">
+            {/* BASIC INFO */}
+            <View className="flex-1 min-w-[280px] bg-card rounded-[2rem] p-5 border border-card shadow-xl shadow-slate-900/20">
+              <SectionTitle title="Basic Information" />
+              <Label required>Product Name</Label>
+              <StyledInput
+                value={product.name}
+                onChangeText={(val: string) =>
+                  setProduct({ ...product, name: val })
+                }
+                placeholder="e.g. Bosch Brake Pad Set"
+              />
+
+              <Label>Brand</Label>
+              <StyledInput
+                value={product.brand}
+                onChangeText={(val: string) =>
+                  setProduct({ ...product, brand: val })
+                }
+                placeholder="e.g. Bosch / Brembo"
+              />
+
+              <Label>Category</Label>
+              <View className="flex-row flex-wrap gap-2 mb-4">
+                {[
+                  "General",
+                  "Exterior",
+                  "Interior",
+                  "Engine",
+                  "Electronics",
+                  "Brakes",
+                  "Suspension",
+                ].map((cat) => (
+                  <TouchableOpacity
+                    key={cat}
+                    onPress={() => setProduct({ ...product, category: cat })}
+                    className={`px-4 py-2 rounded-xl border ${product.category === cat ? "bg-primary border-primary" : "bg-slate-950/80 border-slate-800"}`}
+                  >
+                    <Text
+                      className={`${product.category === cat ? "text-text-primary" : "text-text-muted"} text-[10px] font-black uppercase tracking-tighter`}
+                    >
+                      {cat}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <Label>Description</Label>
+              <StyledInput
+                value={product.description}
+                onChangeText={(val: string) =>
+                  setProduct({ ...product, description: val })
+                }
+                placeholder="Detailed specifications..."
+                multiline
+                numberOfLines={4}
+                textAlignVertical="top"
+              />
+            </View>
+
+            {/* PRICING */}
+            <View className="flex-1 min-w-[280px] bg-card rounded-[2rem] p-5 border border-card shadow-xl shadow-slate-900/20">
+              <SectionTitle title="Pricing & Rating" />
+              <View className="flex-row gap-4">
+                <View className="flex-1">
+                  <Label required>MRP (₹)</Label>
+                  <StyledInput
+                    value={product.mrp}
+                    keyboardType="numeric"
+                    onChangeText={(val: string) =>
+                      setProduct({ ...product, mrp: val })
+                    }
+                    placeholder="2499"
+                  />
+                </View>
+                <View className="flex-1">
+                  <Label>Offer %</Label>
+                  <StyledInput
+                    value={product.offer}
+                    keyboardType="numeric"
+                    onChangeText={(val: string) =>
+                      setProduct({ ...product, offer: val })
+                    }
+                    placeholder="15"
+                  />
+                </View>
+              </View>
+
+              <View className="flex-row gap-4">
+                <View className="flex-1">
+                  <Label>Final Price (₹)</Label>
+                  <View className="bg-slate-950/80 rounded-2xl px-5 py-4 mb-4 border border-slate-800">
+                    <Text className="text-primary font-bold">
+                      {product.offerPrice || "0.00"}
+                    </Text>
+                  </View>
+                </View>
+                <View className="flex-1">
+                  <Label>Rating (0-5)</Label>
+                  <StyledInput
+                    value={product.rating}
+                    keyboardType="numeric"
+                    onChangeText={(val: string) =>
+                      setProduct({ ...product, rating: val })
+                    }
+                    placeholder="4.5"
+                  />
+                </View>
+              </View>
+            </View>
+
+            {/* VARIANTS */}
+            <View className="flex-1 min-w-[280px] bg-card rounded-[2rem] p-5 border border-card shadow-xl shadow-slate-900/20">
+              <View className="flex-row justify-between items-center mb-4">
+                <SectionTitle title="Product Variants" />
+                <TouchableOpacity
+                  onPress={addVariant}
+                  className="bg-primary px-3 py-1.5 rounded-xl"
+                >
+                  <Text className="text-text-primary text-[10px] font-black uppercase">
+                    + Add
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              {variants.map((v, i) => (
+                <View
+                  key={i}
+                  className="bg-slate-950/80 p-4 rounded-2xl border border-slate-800 mb-4 relative"
+                >
+                  {variants.length > 1 && (
+                    <TouchableOpacity
+                      onPress={() => removeVariant(i)}
+                      className="absolute top-2 right-2 w-6 h-6 items-center justify-center"
+                    >
+                      <Ionicons name="close-circle" size={18} color="#ef4444" />
+                    </TouchableOpacity>
+                  )}
+                  <View className="flex-row gap-2">
+                    <View className="flex-1">
+                      <Text className="text-text-muted text-[8px] font-black uppercase mb-1 ml-1">
+                        SKU
+                      </Text>
+                      <TextInput
+                        className="bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-text-primary text-[10px] font-bold"
+                        value={v.sku}
+                        onChangeText={(val) =>
+                          handleVariantChange(i, "sku", val)
+                        }
+                        placeholder="SKU001"
+                        placeholderTextColor="#94A3B8"
+                      />
+                    </View>
+                    <View className="flex-1">
+                      <Text className="text-text-muted text-[8px] font-black uppercase mb-1 ml-1">
+                        Stock
+                      </Text>
+                      <TextInput
+                        className="bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-text-primary text-[10px] font-bold"
+                        value={v.stock}
+                        keyboardType="numeric"
+                        onChangeText={(val) =>
+                          handleVariantChange(i, "stock", val)
+                        }
+                        placeholder="10"
+                        placeholderTextColor="#94A3B8"
+                      />
+                    </View>
+                  </View>
+                  <View className="flex-row gap-2 mt-2">
+                    <View className="flex-1">
+                      <Text className="text-text-muted text-[8px] font-black uppercase mb-1 ml-1">
+                        Position
+                      </Text>
+                      <TextInput
+                        className="bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-text-primary text-[10px] font-bold"
+                        value={v.position}
+                        onChangeText={(val) =>
+                          handleVariantChange(i, "position", val)
+                        }
+                        placeholder="Front Left"
+                        placeholderTextColor="#94A3B8"
+                      />
+                    </View>
+                    <View className="flex-1">
+                      <Text className="text-text-muted text-[8px] font-black uppercase mb-1 ml-1">
+                        Material
+                      </Text>
+                      <TextInput
+                        className="bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-text-primary text-[10px] font-bold"
+                        value={v.material}
+                        onChangeText={(val) =>
+                          handleVariantChange(i, "material", val)
+                        }
+                        placeholder="Ceramic"
+                        placeholderTextColor="#94A3B8"
+                      />
+                    </View>
+                  </View>
+                </View>
+              ))}
+            </View>
+
+            {/* IMAGES */}
+            <View className="flex-1 min-w-[280px] bg-card rounded-[2rem] p-5 border border-card shadow-xl shadow-slate-900/20">
+              <View className="flex-row justify-between items-center mb-4">
+                <SectionTitle title="Product Gallery" />
+                <TouchableOpacity
+                  onPress={pickImage}
+                  className="bg-primary px-3 py-1.5 rounded-xl"
+                >
+                  <Text className="text-text-primary text-[10px] font-black uppercase">
+                    Upload Images
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                className="flex-row mb-6"
+              >
+                {images.length === 0 ? (
+                  <View className="w-32 h-32 bg-slate-950/80 rounded-2xl border border-slate-800 border-dashed items-center justify-center">
+                    <MaterialIcons name="image" size={24} color="#475569" />
+                    <Text className="text-text-muted text-[8px] font-black uppercase mt-2">
+                      No Images
+                    </Text>
+                  </View>
+                ) : (
+                  images.map((img, i) => (
+                    <View
+                      key={i}
+                      className={`mr-4 relative ${thumbnail === img ? "border-2 border-sky-500 p-0.5 rounded-2xl" : ""}`}
+                    >
+                      <Image
+                        source={{ uri: img }}
+                        className="w-32 h-32 rounded-2xl bg-slate-950"
+                      />
+                      <TouchableOpacity
+                        onPress={() => removeImage(i)}
+                        className="absolute -top-2 -right-2 bg-red-500 w-6 h-6 rounded-full items-center justify-center border-2 border-slate-950 shadow-lg"
+                      >
+                        <Ionicons name="close" size={14} color="white" />
+                      </TouchableOpacity>
+                      {thumbnail !== img && (
+                        <TouchableOpacity
+                          onPress={() => setThumbnail(img)}
+                          className="absolute bottom-2 left-2 bg-slate-900 px-2 py-1 rounded-lg border border-slate-700"
+                        >
+                          <Text className="text-white text-[7px] font-black uppercase">
+                            Set Main
+                          </Text>
+                        </TouchableOpacity>
+                      )}
+                      {thumbnail === img && (
+                        <View className="absolute bottom-2 left-2 bg-sky-500 px-2 py-1 rounded-lg">
+                          <Text className="text-white text-[7px] font-black uppercase">
+                            Main Image
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                  ))
+                )}
+              </ScrollView>
+            </View>
+
+            {/* ADDITIONAL OPTIONS */}
+            <View className="flex-1 min-w-[280px] bg-card rounded-[2rem] p-5 border border-card shadow-xl shadow-slate-900/20">
+              <SectionTitle title="Additional Options" />
+              <View className="bg-slate-950/80 p-4 rounded-3xl border border-slate-800 mb-6">
+                <View className="flex-row justify-between items-center mb-4">
+                  <Text className="text-text-primary text-[10px] font-black uppercase">
+                    Warranty Policy
+                  </Text>
+                  <Switch
+                    value={product.warrantyAvailable}
+                    onValueChange={(val) =>
+                      setProduct({ ...product, warrantyAvailable: val })
+                    }
+                    trackColor={{ false: "#374151", true: "#0EA5E9" }}
+                    thumbColor={
+                      product.warrantyAvailable ? "#0EA5E9" : "#94A3B8"
+                    }
+                  />
+                </View>
+                {product.warrantyAvailable && (
+                  <StyledInput
+                    value={product.warrantyMonths}
+                    onChangeText={(val: string) =>
+                      setProduct({ ...product, warrantyMonths: val })
+                    }
+                    placeholder="Duration in Months (e.g. 12)"
+                    keyboardType="numeric"
+                  />
+                )}
+
+                <View className="flex-row justify-between items-center mb-4 mt-2">
+                  <Text className="text-text-primary text-[10px] font-black uppercase">
+                    Return Policy
+                  </Text>
+                  <Switch
+                    value={product.returnAvailable}
+                    onValueChange={(val) =>
+                      setProduct({ ...product, returnAvailable: val })
+                    }
+                    trackColor={{ false: "#374151", true: "#10B981" }}
+                    thumbColor={product.returnAvailable ? "#10B981" : "#94A3B8"}
+                  />
+                </View>
+                {product.returnAvailable && (
+                  <StyledInput
+                    value={product.returnDays}
+                    onChangeText={(val: string) =>
+                      setProduct({ ...product, returnDays: val })
+                    }
+                    placeholder="Return Window in Days (e.g. 7)"
+                    keyboardType="numeric"
+                  />
+                )}
+              </View>
+
+              <Label>Tags (Comma separated)</Label>
+              <StyledInput
+                value={product.tags}
+                onChangeText={(val: string) =>
+                  setProduct({ ...product, tags: val })
+                }
+                placeholder="breaks, bosch, car-spare, spare-parts"
+              />
+
+              <View className="flex-row gap-8 mb-8 ml-2">
+                <View className="flex-row items-center gap-2">
+                  <Switch
+                    value={product.isFeatured}
+                    onValueChange={(val) =>
+                      setProduct({ ...product, isFeatured: val })
+                    }
+                  />
+                  <Text className="text-text-muted text-[10px] font-black uppercase">
+                    Featured
+                  </Text>
+                </View>
+                <View className="flex-row items-center gap-2">
+                  <Switch
+                    value={product.isActive}
+                    onValueChange={(val) =>
+                      setProduct({ ...product, isActive: val })
+                    }
+                  />
+                  <Text className="text-text-muted text-[10px] font-black uppercase">
+                    Active
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </View>
+
+          {/* SUBMIT BUTTON */}
+          <TouchableOpacity
+            onPress={handleSubmit}
+            disabled={loading}
+            className={`mb-8 rounded-[2rem] overflow-hidden ${loading ? "opacity-50" : ""}`}
+          >
+            <View className="bg-primary py-5 items-center flex-row justify-center gap-3">
+              {loading ? (
+                <ActivityIndicator color="#FFFFFF" />
+              ) : (
+                <>
+                  <Text className="text-text-primary font-black uppercase tracking-widest">
+                    {editData ? "Update Component →" : "Register Product →"}
+                  </Text>
+                </>
+              )}
+            </View>
+          </TouchableOpacity>
+        </ScrollView>
       </KeyboardAwareScrollView>
     </SafeAreaView>
   );
