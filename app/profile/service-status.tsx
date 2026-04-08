@@ -105,11 +105,11 @@ const ServiceStatus: React.FC = () => {
       setLoading(true);
 
       if (!user?.email) {
-        console.log("ServiceStatus: no user email yet");
+        // console.log("ServiceStatus: no user email yet");
         return;
       }
 
-      console.log("ServiceStatus: fetching bookings and all-services for", user.email);
+      // console.log("ServiceStatus: fetching bookings and all-services for", user.email);
       const [bookingsRes, servicesRes] = await Promise.all([
         api.get("/bookings"),
         api.get("/all-services"),
@@ -122,12 +122,12 @@ const ServiceStatus: React.FC = () => {
         ? servicesRes.data
         : servicesRes.data?.services || servicesRes.data?.data || [];
 
-      console.log(
-        "ServiceStatus: raw bookings",
-        bookingsRaw.length,
-        "raw all-services",
-        servicesRaw.length
-      );
+      // console.log(
+      //   "ServiceStatus: raw bookings",
+      //   bookingsRaw.length,
+      //   "raw all-services",
+      //   servicesRaw.length
+      // );
 
       const userServices = servicesRaw.filter((service: any) => {
         const serviceEmail = service.email?.toLowerCase();
@@ -143,7 +143,7 @@ const ServiceStatus: React.FC = () => {
         return isUserEmail || isUserUid || isBookingMatch;
       });
 
-      console.log("ServiceStatus: userServices count", userServices.length);
+      // console.log("ServiceStatus: userServices count", userServices.length);
 
       const servicesWithDetails = await Promise.all(
         userServices.map(async (service: any) => {
@@ -178,7 +178,7 @@ const ServiceStatus: React.FC = () => {
         issues: service.issues || [],
       }));
 
-      console.log("ServiceStatus: processed spare parts", spares);
+      // console.log("ServiceStatus: processed spare parts", spares);
       setSpareParts(spares);
 
       const userBookings: Booking[] = bookingsRaw
@@ -222,7 +222,7 @@ const ServiceStatus: React.FC = () => {
           } as Booking;
         });
 
-      console.log("ServiceStatus: processed bookings", userBookings);
+      // console.log("ServiceStatus: processed bookings", userBookings);
       setBookings(userBookings);
 
       if (selectedBooking) {
@@ -254,7 +254,7 @@ const ServiceStatus: React.FC = () => {
     type: "part" | "issue" = "part"
   ) => {
     const normalizedItemId = itemId || null;
-    console.log("ServiceStatus: handleApprove", { serviceId, itemId: normalizedItemId, status, type });
+    // console.log("ServiceStatus: handleApprove", { serviceId, itemId: normalizedItemId, status, type });
     setApproving(true);
     try {
       if (type === "part") {
@@ -318,7 +318,7 @@ const ServiceStatus: React.FC = () => {
         }
       }
 
-      console.log("ServiceStatus: approve success", { serviceId, itemId, status, type });
+      // console.log("ServiceStatus: approve success", { serviceId, itemId, status, type });
       await fetchData();
       if (selectedBooking) {
         setSelectedBooking((prev) => {
@@ -352,7 +352,7 @@ const ServiceStatus: React.FC = () => {
     return (
       <TouchableOpacity
         onPress={() => {
-          console.log("ServiceStatus: selected booking", item);
+          // console.log("ServiceStatus: selected booking", item);
           setSelectedBooking(item);
         }}
         className="rounded-xl p-4 mb-4"
@@ -374,15 +374,6 @@ const ServiceStatus: React.FC = () => {
               {item.name} • {item.phone}
             </Text>
 
-            {bookingSpares?.parts?.length ? (
-              <Text className="text-xs mt-2 text-text-secondary">
-                🔧 ₹
-                {bookingSpares.parts?.reduce(
-                  (sum, p) => sum + Number(p.total || 0),
-                  0
-                ) ?? 0}
-              </Text>
-            ) : null}
           </View>
 
           {/* RIGHT STATUS BADGE */}
@@ -430,7 +421,7 @@ const ServiceStatus: React.FC = () => {
       </Text>
 
       {/* ALERT */}
-      {spareParts.some((sp) =>
+      {/* {spareParts.some((sp) =>
         sp.parts.some((p) => p.status === "pending")
       ) && (
           <TouchableOpacity
@@ -442,7 +433,7 @@ const ServiceStatus: React.FC = () => {
               Spare parts pending approval
             </Text>
           </TouchableOpacity>
-        )}
+        )} */}
 
       {/* LIST */}
       <FlatList
