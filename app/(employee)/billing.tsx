@@ -264,7 +264,7 @@ export default function EmployeeBilling() {
                 <View className="flex-row justify-between items-start mb-5">
                   <StatusBadge status={bill.paymentStatus} />
 
-                  <Text className="text-[10px] font-black text-text-muted uppercase tracking-widest">
+                  <Text className="text-[14px] font-black text-text-primary uppercase tracking-widest">
                     INV: {bill.invoiceNo}
                   </Text>
                 </View>
@@ -279,7 +279,7 @@ export default function EmployeeBilling() {
                     {bill.carNumber || "SERVICE JOB"}
                   </Text>
 
-                  <Text className="text-[10px] text-text-muted font-bold uppercase mt-1 tracking-widest">
+                  <Text className="text-[12px] text-text-primary font-bold uppercase mt-1 tracking-widest">
                     Job ID: {bill.bookingId}
                   </Text>
                 </View>
@@ -287,21 +287,21 @@ export default function EmployeeBilling() {
                 {/* Summary Box */}
                 <View className="bg-background/60 rounded-2xl p-5 space-y-3 mb-5 border border-card shadow-sm">
                   <View className="flex-row justify-between items-center">
-                    <Text className="text-[11px] font-bold text-text-muted uppercase">
+                    <Text className="text-[12px] font-bold text-text-muted uppercase">
                       Subtotal
                     </Text>
 
-                    <Text className="text-sm font-black text-text-secondary">
+                    <Text className="text-md font-black text-text-secondary">
                       ₹{Number(bill.subTotal || 0).toLocaleString()}
                     </Text>
                   </View>
 
-                  <View className="flex-row justify-between items-center">
-                    <Text className="text-[11px] font-bold text-text-muted uppercase">
+                  <View className="flex-row justify-between items-center mt-2">
+                    <Text className="text-[12px] font-bold text-text-muted uppercase">
                       GST Amount
                     </Text>
 
-                    <Text className="text-sm font-black text-text-secondary">
+                    <Text className="text-md font-black text-text-secondary">
                       ₹{Number(bill.gstAmount || 0).toLocaleString()}
                     </Text>
                   </View>

@@ -290,7 +290,7 @@ export default function AssignedHistory() {
                 <View className="flex-row justify-between items-start mb-6">
                   <StatusBadge status={item.serviceStatus || item.status} />
 
-                  <Text className="text-[10px] font-black uppercase tracking-widest text-text-muted">
+                  <Text className="text-[14px] font-black uppercase tracking-widest text-text-primary">
                     ID: {item.bookingId || item.id}
                   </Text>
                 </View>
@@ -315,11 +315,11 @@ export default function AssignedHistory() {
                     </View>
 
                     <View className="flex-1">
-                      <Text className="text-[10px] font-black uppercase tracking-wider text-text-muted">
+                      <Text className="text-[12px] font-black uppercase tracking-wider text-text-muted">
                         Reported Issue
                       </Text>
 
-                      <Text className="text-sm font-bold leading-snug mt-1 text-text-secondary">
+                      <Text className="text-md font-bold leading-snug mt-1 text-text-primary">
                         {item.carIssue || item.issue || "General Inspection"}
                       </Text>
                     </View>
@@ -332,21 +332,21 @@ export default function AssignedHistory() {
                     </View>
 
                     <View className="flex-1">
-                      <Text className="text-[10px] font-black uppercase tracking-wider text-text-muted">
+                      <Text className="text-[12px] font-black uppercase tracking-wider text-text-muted">
                         Customer
                       </Text>
 
-                      <Text className="text-sm font-black truncate text-text-primary">
+                      <Text className="text-md font-black mt-1 truncate text-text-primary">
                         {item.customer_name || item.name}
                       </Text>
 
-                      <View className="flex-row items-center gap-1 mt-1">
+                      <View className="flex-row items-center gap-1 mt-2">
                         <Ionicons
                           name="call-outline"
                           size={12}
-                          color="#64748B"
+                          color="#fff"
                         />
-                        <Text className="text-xs font-bold text-text-muted">
+                        <Text className="text-md font-bold text-text-primary">
                           {item.phone || item.mobile || "N/A"}
                         </Text>
                       </View>
@@ -381,9 +381,9 @@ export default function AssignedHistory() {
                     <Ionicons
                       name="calendar-outline"
                       size={14}
-                      color="#64748B"
+                      color="#fff"
                     />
-                    <Text className="text-[11px] font-bold text-text-muted">
+                    <Text className="text-[11px] font-bold text-text-primary">
                       {item.created_at
                         ? new Date(item.created_at).toLocaleDateString()
                         : "N/A"}
