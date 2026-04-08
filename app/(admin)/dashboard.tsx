@@ -9,7 +9,7 @@ import {
   ScrollView,
   Text,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import { apiService } from "../../services/api";
 import { COLORS } from "../../theme/colors";
@@ -184,7 +184,7 @@ export default function AdminDashboard() {
                 title="Add Booking"
                 icon="📅"
                 color="bg-indigo-500"
-                onPress={() => router.push("/(adminPages)/add-booking" as any)}
+                onPress={() => router.push("/(adminPages)/book-service" as any)}
               />
               <QuickAction
                 title="Add Billing"
