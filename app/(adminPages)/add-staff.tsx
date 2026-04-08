@@ -27,18 +27,18 @@ const CustomInput = ({
   keyboardType,
 }: any) => (
   <View className="mb-4">
-    <Text className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-2 ml-1">
+    <Text className="mb-2 text-[10px] uppercase font-black text-text-muted tracking-wider ml-1">
       {label}
     </Text>
     <TextInput
       placeholder={placeholder}
-      placeholderTextColor="#64748b"
+      placeholderTextColor="#94A3B8"
       value={value}
       onChangeText={onChangeText}
       multiline={multiline}
       numberOfLines={numberOfLines}
       keyboardType={keyboardType}
-      className={`w-full bg-slate-900 rounded-2xl border px-4 py-3 text-white font-bold ${
+      className={`w-full bg-slate-950/80 rounded-2xl border px-5 py-4 text-text-primary font-bold ${
         error ? "border-red-500" : "border-slate-800"
       }`}
     />
@@ -55,16 +55,20 @@ const CustomSelect = ({ label, value, options, onSelect, error }: any) => {
 
   return (
     <View className="mb-4">
-      <Text className="text-[10px] font-black text-slate-500 uppercase tracking-wider mb-2 ml-1">
+      <Text className="mb-2 text-[10px] uppercase font-black text-text-muted tracking-wider ml-1">
         {label}
       </Text>
       <TouchableOpacity
         onPress={() => setOpen(!open)}
-        className={`w-full bg-slate-900 rounded-2xl border px-4 py-3 flex-row justify-between items-center ${
+        className={`w-full bg-slate-950/80 rounded-2xl border px-5 py-4 flex-row justify-between items-center ${
           error ? "border-red-500" : "border-slate-800"
         }`}
       >
-        <Text className={value ? "text-white font-bold" : "text-slate-500"}>
+        <Text
+          className={
+            value ? "text-text-primary font-bold" : "text-slate-500 font-bold"
+          }
+        >
           {value || "Select option"}
         </Text>
         <Ionicons
@@ -99,6 +103,12 @@ const CustomSelect = ({ label, value, options, onSelect, error }: any) => {
     </View>
   );
 };
+
+const SectionTitle = ({ title }: { title: string }) => (
+  <Text className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-3">
+    {title}
+  </Text>
+);
 
 export default function AddStaff() {
   const router = useRouter();
@@ -288,228 +298,243 @@ export default function AddStaff() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-slate-950">
+    <SafeAreaView className="flex-1 bg-background">
       <ScrollView
         className="flex-1"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
+        contentContainerStyle={{ paddingBottom: 100 }}
       >
-        {/* HEADER */}
-        <View className="mb-8 flex-row items-center gap-4">
-          <TouchableOpacity
-            onPress={() => router.back()}
-            className="p-3 bg-slate-900 rounded-2xl border border-slate-800"
-          >
-            <Ionicons name="chevron-back" size={24} color="#ffffff" />
-          </TouchableOpacity>
-          <View className="flex-1">
-            <Text className="text-3xl font-black text-white">
-              {isEdit ? "Edit Staff" : "Register Staff"}
-            </Text>
-            <Text className="text-[10px] uppercase tracking-widest text-slate-500 mt-1 font-black">
+        <View className="p-5 mt-6">
+          <View className="mb-6">
+            <View className="flex-row items-center gap-4 ">
+              <TouchableOpacity
+                onPress={() => router.back()}
+                className="p-3 bg-card rounded-2xl border border-card"
+              >
+                <Ionicons name="chevron-back" size={24} color="#FFFFFF" />
+              </TouchableOpacity>
+              <View className="flex-1 min-w-0">
+                <Text
+                  className="text-4xl font-black text-text-primary tracking-tight"
+                  numberOfLines={1}
+                >
+                  {isEdit ? "Edit Staff" : "Register Staff"}
+                </Text>
+              </View>
+            </View>
+
+            <Text className="text-[14px] uppercase tracking-[0.35em] text-text-primary font-black mt-4 ml-1">
               {isEdit ? "Update details" : "Auto-create login account"}
             </Text>
           </View>
         </View>
 
-        {/* FORM SECTIONS */}
-        <View className="bg-slate-900 rounded-3xl p-6 border border-slate-800 shadow-xl">
-          {/* PERSONAL DETAILS */}
-          <Text className="text-lg font-black text-white mb-4">
-            👤 Personal Details
-          </Text>
+        <ScrollView
+          className="flex-1 px-5"
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View className="flex-row flex-wrap gap-4 mb-6">
+            {/* PERSONAL DETAILS */}
+            <View className="flex-1 min-w-[280px] bg-card rounded-[2rem] p-5 border border-card shadow-xl shadow-slate-900/20">
+              <SectionTitle title="Personal Details" />
+              <CustomInput
+                label="Full Name *"
+                placeholder="Enter name"
+                value={form.name}
+                onChangeText={(val: string) => handleChange("name", val)}
+                error={errors.name}
+              />
 
-          <CustomInput
-            label="Full Name *"
-            placeholder="Enter name"
-            value={form.name}
-            onChangeText={(val) => handleChange("name", val)}
-            error={errors.name}
-          />
+              <CustomInput
+                label="Display Name *"
+                placeholder="Username"
+                value={form.username}
+                onChangeText={(val: string) => handleChange("username", val)}
+                error={errors.username}
+              />
 
-          <CustomInput
-            label="Display Name *"
-            placeholder="Username"
-            value={form.username}
-            onChangeText={(val) => handleChange("username", val)}
-            error={errors.username}
-          />
+              <CustomInput
+                label="Email *"
+                placeholder="staff@example.com"
+                value={form.email}
+                onChangeText={(val: string) => handleChange("email", val)}
+                error={errors.email}
+                keyboardType="email-address"
+              />
 
-          <CustomInput
-            label="Email *"
-            placeholder="staff@example.com"
-            value={form.email}
-            onChangeText={(val) => handleChange("email", val)}
-            error={errors.email}
-            keyboardType="email-address"
-          />
+              {!isEdit && (
+                <CustomInput
+                  label="Password (Auto-set from phone) *"
+                  placeholder="Set password"
+                  value={form.password}
+                  onChangeText={(val: string) => handleChange("password", val)}
+                  error={errors.password}
+                />
+              )}
 
-          {!isEdit && (
-            <CustomInput
-              label="Password (Auto-set from phone) *"
-              placeholder="Set password"
-              value={form.password}
-              onChangeText={(val) => handleChange("password", val)}
-              error={errors.password}
-            />
-          )}
+              <CustomInput
+                label="Phone *"
+                placeholder="10-digit number"
+                value={form.phone}
+                onChangeText={(val: string) => handleChange("phone", val)}
+                error={errors.phone}
+                keyboardType="phone-pad"
+              />
 
-          <CustomInput
-            label="Phone *"
-            placeholder="10-digit number"
-            value={form.phone}
-            onChangeText={(val) => handleChange("phone", val)}
-            error={errors.phone}
-            keyboardType="phone-pad"
-          />
+              <CustomSelect
+                label="Gender *"
+                value={form.gender}
+                options={["Male", "Female", "Other"]}
+                onSelect={(val: string) => handleChange("gender", val)}
+                error={errors.gender}
+              />
 
-          <CustomSelect
-            label="Gender *"
-            value={form.gender}
-            options={["Male", "Female", "Other"]}
-            onSelect={(val) => handleChange("gender", val)}
-            error={errors.gender}
-          />
+              <CustomSelect
+                label="Blood Group *"
+                value={form.bloodGroup}
+                options={bloodGroups}
+                onSelect={(val: string) => handleChange("bloodGroup", val)}
+                error={errors.bloodGroup}
+              />
 
-          <CustomSelect
-            label="Blood Group *"
-            value={form.bloodGroup}
-            options={bloodGroups}
-            onSelect={(val) => handleChange("bloodGroup", val)}
-            error={errors.bloodGroup}
-          />
+              <CustomInput
+                label="Date of Birth *"
+                placeholder="YYYY-MM-DD"
+                value={form.dob}
+                onChangeText={(val: string) => handleChange("dob", val)}
+                error={errors.dob}
+              />
 
-          <CustomInput
-            label="Date of Birth *"
-            placeholder="YYYY-MM-DD"
-            value={form.dob}
-            onChangeText={(val) => handleChange("dob", val)}
-            error={errors.dob}
-          />
+              <CustomInput
+                label="Address *"
+                placeholder="Full address"
+                value={form.address}
+                onChangeText={(val: string) => handleChange("address", val)}
+                error={errors.address}
+                multiline
+                numberOfLines={3}
+              />
+            </View>
 
-          <CustomInput
-            label="Address *"
-            placeholder="Full address"
-            value={form.address}
-            onChangeText={(val) => handleChange("address", val)}
-            error={errors.address}
-            multiline
-            numberOfLines={3}
-          />
+            {/* EMPLOYMENT DETAILS */}
+            <View className="flex-1 min-w-[280px] bg-card rounded-[2rem] p-5 border border-card shadow-xl shadow-slate-900/20">
+              <SectionTitle title="Employment Details" />
+              <CustomSelect
+                label="Role *"
+                value={form.role}
+                options={roles}
+                onSelect={(val: string) => handleChange("role", val)}
+                error={errors.role}
+              />
 
-          {/* EMPLOYMENT DETAILS */}
-          <Text className="text-lg font-black text-white mt-8 mb-4">
-            💼 Employment Details
-          </Text>
+              <CustomInput
+                label="Salary *"
+                placeholder="Monthly salary"
+                value={form.salary}
+                onChangeText={(val: string) => handleChange("salary", val)}
+                error={errors.salary}
+                keyboardType="decimal-pad"
+              />
 
-          <CustomSelect
-            label="Role *"
-            value={form.role}
-            options={roles}
-            onSelect={(val) => handleChange("role", val)}
-            error={errors.role}
-          />
+              <CustomInput
+                label="Shift *"
+                placeholder="e.g., Morning"
+                value={form.shift}
+                onChangeText={(val: string) => handleChange("shift", val)}
+                error={errors.shift}
+              />
 
-          <CustomInput
-            label="Salary *"
-            placeholder="Monthly salary"
-            value={form.salary}
-            onChangeText={(val) => handleChange("salary", val)}
-            error={errors.salary}
-            keyboardType="decimal-pad"
-          />
+              <CustomInput
+                label="Time In (HH:MM) *"
+                placeholder="09:00"
+                value={form.timeIn}
+                onChangeText={(val: string) => handleChange("timeIn", val)}
+                error={errors.timeIn}
+              />
 
-          <CustomInput
-            label="Shift *"
-            placeholder="e.g., Morning"
-            value={form.shift}
-            onChangeText={(val) => handleChange("shift", val)}
-            error={errors.shift}
-          />
+              <CustomInput
+                label="Time Out (HH:MM) *"
+                placeholder="18:00"
+                value={form.timeOut}
+                onChangeText={(val: string) => handleChange("timeOut", val)}
+                error={errors.timeOut}
+              />
 
-          <CustomInput
-            label="Time In (HH:MM) *"
-            placeholder="09:00"
-            value={form.timeIn}
-            onChangeText={(val) => handleChange("timeIn", val)}
-            error={errors.timeIn}
-          />
+              <CustomInput
+                label="Joining Date *"
+                placeholder="YYYY-MM-DD"
+                value={form.joiningDate}
+                onChangeText={(val: string) => handleChange("joiningDate", val)}
+                error={errors.joiningDate}
+              />
+            </View>
 
-          <CustomInput
-            label="Time Out (HH:MM) *"
-            placeholder="18:00"
-            value={form.timeOut}
-            onChangeText={(val) => handleChange("timeOut", val)}
-            error={errors.timeOut}
-          />
+            {/* ADDITIONAL DETAILS */}
+            <View className="flex-1 min-w-[280px] bg-card rounded-[2rem] p-5 border border-card shadow-xl shadow-slate-900/20">
+              <SectionTitle title="Additional Details" />
+              <CustomInput
+                label="Qualification"
+                placeholder="e.g., Diploma in Mechanical"
+                value={form.qualification}
+                onChangeText={(val: string) =>
+                  handleChange("qualification", val)
+                }
+              />
 
-          <CustomInput
-            label="Joining Date *"
-            placeholder="YYYY-MM-DD"
-            value={form.joiningDate}
-            onChangeText={(val) => handleChange("joiningDate", val)}
-            error={errors.joiningDate}
-          />
+              <CustomInput
+                label="Experience (Years)"
+                placeholder="e.g., 5"
+                value={form.experience}
+                onChangeText={(val: string) => handleChange("experience", val)}
+                keyboardType="decimal-pad"
+              />
 
-          {/* ADDITIONAL DETAILS */}
-          <Text className="text-lg font-black text-white mt-8 mb-4">
-            📋 Additional Details
-          </Text>
+              <CustomInput
+                label="Emergency Contact Name"
+                placeholder="Name"
+                value={form.emergencyName}
+                onChangeText={(val: string) =>
+                  handleChange("emergencyName", val)
+                }
+              />
 
-          <CustomInput
-            label="Qualification"
-            placeholder="e.g., Diploma in Mechanical"
-            value={form.qualification}
-            onChangeText={(val) => handleChange("qualification", val)}
-          />
-
-          <CustomInput
-            label="Experience (Years)"
-            placeholder="e.g., 5"
-            value={form.experience}
-            onChangeText={(val) => handleChange("experience", val)}
-            keyboardType="decimal-pad"
-          />
-
-          <CustomInput
-            label="Emergency Contact Name"
-            placeholder="Name"
-            value={form.emergencyName}
-            onChangeText={(val) => handleChange("emergencyName", val)}
-          />
-
-          <CustomInput
-            label="Emergency Contact Phone"
-            placeholder="Phone number"
-            value={form.emergencyPhone}
-            onChangeText={(val) => handleChange("emergencyPhone", val)}
-            keyboardType="phone-pad"
-          />
+              <CustomInput
+                label="Emergency Contact Phone"
+                placeholder="Phone number"
+                value={form.emergencyPhone}
+                onChangeText={(val: string) =>
+                  handleChange("emergencyPhone", val)
+                }
+                keyboardType="phone-pad"
+              />
+            </View>
+          </View>
 
           {/* ACTIONS */}
-          <View className="flex-row gap-4 mt-8">
+          <View className="flex-row gap-4 mb-8">
             <TouchableOpacity
               onPress={() => router.back()}
-              className="flex-1 border border-sky-500 py-4 rounded-2xl items-center"
+              className="flex-1 border border-primary py-4 rounded-[2rem] items-center"
             >
-              <Text className="text-sky-500 font-black uppercase">Cancel</Text>
+              <Text className="text-primary font-black uppercase">Cancel</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               onPress={handleSubmit}
               disabled={loading}
-              className="flex-1 bg-sky-500 py-4 rounded-2xl items-center shadow-lg"
+              className="flex-1 bg-primary py-4 rounded-[2rem] items-center shadow-lg"
             >
               {loading ? (
-                <ActivityIndicator color="#ffffff" />
+                <ActivityIndicator color="#FFFFFF" />
               ) : (
-                <Text className="text-white font-black uppercase">
+                <Text className="text-text-primary font-black uppercase">
                   {isEdit ? "Update" : "Register"}
                 </Text>
               )}
             </TouchableOpacity>
           </View>
-        </View>
+        </ScrollView>
       </ScrollView>
     </SafeAreaView>
   );

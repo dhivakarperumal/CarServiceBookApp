@@ -14,41 +14,93 @@ import {
 import { apiService } from "../../services/api";
 import { COLORS } from "../../theme/colors";
 
-const QuickAction = ({ title, icon, color, onPress }: any) => (
-  <TouchableOpacity onPress={onPress} className="w-[31%] mb-4 items-center">
-    <View
-      className={`${color} w-14 h-14 rounded-3xl items-center justify-center shadow-lg shadow-black`}
+const QuickAction = ({ title, icon, color, onPress }: any) => {
+  return (
+    <TouchableOpacity
+      activeOpacity={0.85}
+      onPress={onPress}
+      className="w-[31%] rounded-3xl overflow-hidden"
     >
-      <Text className="text-2xl">{icon}</Text>
-    </View>
-    <Text className="text-gray-400 text-[9px] font-black uppercase text-center mt-2 tracking-tighter">
-      {title}
-    </Text>
-  </TouchableOpacity>
-);
+      <LinearGradient
+        colors={["#0f172a", "#1e293b"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        className="p-4 border border-slate-800 items-center justify-center shadow-xl"
+      >
+        {/* Icon Glow Circle */}
+        <View
+          className={`w-14 h-14 ${color} rounded-2xl items-center justify-center mb-3 shadow-lg`}
+          style={{
+            shadowColor: "#000",
+            shadowOpacity: 0.4,
+            shadowRadius: 10,
+          }}
+        >
+          <Ionicons name={icon} size={24} color="#fff" />
+        </View>
+
+        {/* Title */}
+        <Text className="text-white text-[10px] font-black uppercase tracking-widest text-center">
+          {title}
+        </Text>
+
+        {/* Decorative Line */}
+        <View className="w-6 h-[2px] bg-sky-500 rounded-full mt-2 opacity-70" />
+      </LinearGradient>
+    </TouchableOpacity>
+  );
+};
 
 const StatCard = ({ title, value, gradient, isSmall = false }: any) => (
   <View
-    className={`${isSmall ? "w-[48%]" : "w-full"} mb-4 rounded-3xl overflow-hidden shadow-2xl shadow-black`}
+    className={`${isSmall ? "w-[48%]" : "w-full"} mb-4 rounded-3xl overflow-hidden`}
+    style={{
+      shadowColor: "#000",
+      shadowOpacity: 0.35,
+      shadowRadius: 20,
+      elevation: 8,
+    }}
   >
     <LinearGradient
       colors={gradient}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
-      className="p-5"
+      className="p-5 relative"
     >
-      <Text className="text-white opacity-70 text-[9px] font-black uppercase tracking-widest">
+      {/* Gradient Glow Overlay */}
+      <View
+        className="absolute -top-10 -right-10 w-32 h-32 rounded-full opacity-20"
+        style={{
+          backgroundColor: "#ffffff",
+        }}
+      />
+
+      {/* Glass Highlight */}
+      <View className="absolute inset-0 bg-white/5 rounded-3xl" />
+
+      {/* Title */}
+      <Text className="text-white/70 text-[9px] font-black uppercase tracking-widest">
         {title}
       </Text>
-      <Text className="text-white text-2xl font-black mt-1">
+
+      {/* Value */}
+      <Text className="text-white text-3xl font-black mt-1">
         {value || "0"}
       </Text>
-      <View className="flex-row items-center justify-between mt-3">
-        <Text className="text-white opacity-60 text-[8px] font-bold">
+
+      {/* Footer */}
+      <View className="flex-row items-center justify-between mt-4">
+        <Text className="text-white/60 text-[8px] font-bold uppercase tracking-wider">
           vs last week
         </Text>
-        <Ionicons name="trending-up" size={14} color="rgba(255,255,255,0.6)" />
+
+        <View className="flex-row items-center gap-1">
+          <Ionicons name="trending-up" size={14} color="rgba(255,255,255,0.8)" />
+        </View>
       </View>
+
+      {/* Bottom Accent Line */}
+      <View className="absolute bottom-0 left-0 right-0 h-[3px] bg-white/20" />
     </LinearGradient>
   </View>
 );
@@ -171,42 +223,48 @@ export default function AdminDashboard() {
             <Text className="text-white opacity-40 text-[10px] font-black uppercase tracking-widest mb-4">
               Quick Access
             </Text>
-            <View className="flex-row flex-wrap justify-between">
+
+            <View className="flex-row flex-wrap justify-between gap-y-4">
               <QuickAction
                 title="Add Vehicle"
-                icon="🚗"
-                color="bg-sky-500"
+                icon="car-sport-outline"
+                color="bg-blue-500"
                 onPress={() =>
                   router.push("/(adminPages)/add-service-vehicle" as any)
                 }
               />
+
               <QuickAction
                 title="Add Booking"
-                icon="📅"
+                icon="calendar-outline"
                 color="bg-indigo-500"
                 onPress={() => router.push("/(adminPages)/book-service" as any)}
               />
+
               <QuickAction
                 title="Add Billing"
-                icon="🧾"
+                icon="receipt-outline"
                 color="bg-emerald-500"
                 onPress={() => router.push("/(adminPages)/add-billing" as any)}
               />
+
               <QuickAction
                 title="Add Staff"
-                icon="👨‍🔧"
+                icon="people-outline"
                 color="bg-violet-500"
                 onPress={() => router.push("/(adminPages)/staff" as any)}
               />
+
               <QuickAction
                 title="Inventory"
-                icon="📦"
+                icon="cube-outline"
                 color="bg-orange-500"
                 onPress={() => router.push("/(admin)/products" as any)}
               />
+
               <QuickAction
                 title="Products"
-                icon="🛒"
+                icon="cart-outline"
                 color="bg-rose-500"
                 onPress={() => router.push("/(admin)/products" as any)}
               />
@@ -217,39 +275,39 @@ export default function AdminDashboard() {
           <StatCard
             title="Today's Active Bookings"
             value={stats.todayBookings}
-            gradient={["#1d4ed8", "#3b82f6"]}
+            gradient={["#2563eb", "#1e3a8a"]}
           />
 
           <View className="flex-row flex-wrap justify-between">
             <StatCard
               title="Today's New Customers"
               value={stats.todayCustomers}
-              gradient={["#1e40af", "#3b82f6"]}
+              gradient={["#7c3aed", "#4c1d95"]}
               isSmall
             />
             <StatCard
               title="Pending Queue"
               value={recentBookings.length}
-              gradient={["#b45309", "#f59e0b"]}
+              gradient={["#059669", "#064e3b"]}
               isSmall
             />
 
             <StatCard
               title="Total Billing"
               value={`₹${stats.totalBilling.toLocaleString()}`}
-              gradient={["#065f46", "#10b981"]}
+              gradient={["#f59e0b", "#78350f"]}
             />
 
             <StatCard
               title="Net Earnings"
               value={`₹${stats.totalEarnings.toLocaleString()}`}
-              gradient={["#064e3b", "#059669"]}
+              gradient={["#db2777", "#831843"]}
               isSmall
             />
             <StatCard
               title="Global Services"
               value={stats.totalServices}
-              gradient={["#4c1d95", "#8b5cf6"]}
+              gradient={["#14b8a6", "#134e4a"]}
               isSmall
             />
 
@@ -269,7 +327,7 @@ export default function AdminDashboard() {
             <StatCard
               title="Inventory Items"
               value={stats.totalProducts}
-              gradient={["#111827", "#334155"]}
+              gradient={["#4ade80", "#166534"]}
               isSmall
             />
             <StatCard
@@ -282,26 +340,26 @@ export default function AdminDashboard() {
             <StatCard
               title="Delivery Status"
               value={stats.deliveryOrders}
-              gradient={["#0f172a", "#334155"]}
+              gradient={["#6366f1", "#312e81"]}
               isSmall
             />
             <StatCard
               title="Vehicle bookings"
               value={stats.totalVehicleBookings}
-              gradient={["#0f172a", "#334155"]}
+              gradient={["#10b981", "#064e3b"]}
               isSmall
             />
 
             <StatCard
               title="Fleet: Cars"
               value={stats.totalCars}
-              gradient={["#111827", "#1f2937"]}
+              gradient={["#fde047", "#854d0e"]}
               isSmall
             />
             <StatCard
               title="Fleet: Bikes"
               value={stats.totalBikes}
-              gradient={["#111827", "#1f2937"]}
+              gradient={["#a855f7", "#581c87"]}
               isSmall
             />
           </View>
@@ -464,51 +522,65 @@ export default function AdminDashboard() {
 
           {/* RECENT ACTIVITY */}
           <View className="mb-10">
+            {/* Header */}
             <View className="flex-row justify-between items-center mb-6">
-              <Text className="text-white font-black text-xs uppercase tracking-widest">
+              <Text className="text-white font-black text-xs uppercase tracking-[3px] opacity-80">
                 Recent Bookings
               </Text>
+
               <TouchableOpacity
                 onPress={() => router.push("/(adminPages)/add-booking" as any)}
-                className="bg-sky-500 px-4 py-2 rounded-full shadow-lg"
+                activeOpacity={0.85}
+                className="bg-sky-500 px-5 py-2 rounded-full shadow-[0_10px_25px_rgba(56,189,248,0.35)] border border-sky-400/40"
               >
-                <Text className="text-white text-xs font-black uppercase">
+                <Text className="text-white bg-primary p-2 rounded-xl text-[10px] font-black uppercase tracking-wider">
                   New Booking
                 </Text>
               </TouchableOpacity>
             </View>
 
+            {/* List */}
             <View className="gap-3">
               {recentBookings.length === 0 ? (
-                <View className="bg-slate-900 p-6 rounded-2xl border border-slate-800 border-dashed items-center">
-                  <Text className="text-gray-500 text-xs font-bold">
-                    No recent activities found.
+                <View className="bg-slate-900/80 backdrop-blur-xl p-7 rounded-2xl border border-slate-800 border-dashed items-center shadow-[0_10px_30px_rgba(0,0,0,0.35)]">
+                  <Text className="text-gray-500 text-[10px] font-bold uppercase tracking-wider">
+                    No recent activities found
                   </Text>
                 </View>
               ) : (
                 recentBookings.map((b, i) => (
                   <TouchableOpacity
                     key={i}
-                    className="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex-row justify-between items-center shadow-sm"
+                    activeOpacity={0.9}
+                    className="bg-slate-900/90 backdrop-blur-xl border border-slate-800/80 p-4 rounded-2xl flex-row justify-between items-center shadow-[0_15px_35px_rgba(0,0,0,0.35)]"
                   >
+                    {/* Left */}
                     <View className="flex-row items-center gap-3">
-                      <View className="w-10 h-10 rounded-full bg-slate-800 items-center justify-center border border-slate-800 shadow-inner">
-                        <Text className="text-white font-black">
+                      {/* Avatar */}
+                      <View className="w-11 h-11 rounded-full bg-slate-800 items-center justify-center border border-slate-700 shadow-inner">
+                        <Text className="text-white font-black text-sm">
                           {(b.name || "C")[0]}
                         </Text>
                       </View>
+
+                      {/* Customer Info */}
                       <View>
-                        <Text className="text-white font-bold text-xs">
+                        <Text className="text-white font-bold text-[12px] tracking-wide">
                           {b.name || "Customer"}
                         </Text>
-                        <Text className="text-gray-500 text-[9px] uppercase font-black tracking-tighter mt-0.5">
+
+                        <Text className="text-gray-500 text-[9px] uppercase font-black tracking-[1.5px] mt-0.5">
                           {b.brand} · {b.model}
                         </Text>
                       </View>
                     </View>
-                    <Text className="text-emerald-500 font-black text-[10px] uppercase">
-                      ₹{b.totalCost || "---"}
-                    </Text>
+
+                    {/* Price Badge */}
+                    <View className="bg-emerald-500/10 border border-emerald-500/30 px-3 py-1.5 rounded-full">
+                      <Text className="text-emerald-400 font-black text-[10px] uppercase tracking-wider">
+                        ₹{b.totalCost || "---"}
+                      </Text>
+                    </View>
                   </TouchableOpacity>
                 ))
               )}

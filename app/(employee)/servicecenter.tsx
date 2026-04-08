@@ -534,7 +534,7 @@ export default function ServiceCenter() {
                       ))}
                     </View>
                   ) : (
-                    <Text className="text-[10px] text-text-muted italic">
+                    <Text className="text-[12px] text-text-muted italic">
                       No job issues recorded yet.
                     </Text>
                   )}
