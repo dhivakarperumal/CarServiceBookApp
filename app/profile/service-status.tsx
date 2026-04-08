@@ -51,6 +51,7 @@ type SpareService = {
   serviceId: number;
   serviceName: string;
   parts: Part[];
+  issues?: any[];
 };
 
 /* ===== STATUS ===== */
@@ -108,40 +109,115 @@ const ServiceStatus: React.FC = () => {
         return;
       }
 
-      console.log("ServiceStatus: fetching bookings for", user.email);
-      const res = await api.get("/bookings");
-      console.log("ServiceStatus: raw bookings response", res.data);
+      console.log("ServiceStatus: fetching bookings and all-services for", user.email);
+      const [bookingsRes, servicesRes] = await Promise.all([
+        api.get("/bookings"),
+        api.get("/all-services"),
+      ]);
 
-      const userBookings: Booking[] = (res.data || [])
-        .filter((b: any) => b.email?.toLowerCase() === user.email.toLowerCase())
-        .map((b: any) => ({
-          ...b,
-          normalizedStatus: STATUS_NORMALIZER[b.status] || b.status,
-          issues: b.issues || b.serviceIssues || [],
-          issue: b.issue || b.serviceType || "",
-          issueAmount: b.issueAmount,
-          issueStatus: b.issueStatus,
-          serviceId: b.serviceId || b.id || b.service_id,
-          brand: b.brand || b.vehicleBrand || undefined,
-          model: b.model || b.vehicleModel || undefined,
-          vehicleNumber: b.vehicleNumber || b.registrationNumber || undefined,
-          address: b.address || b.location || undefined,
-          preferredDate: b.preferredDate || b.date || undefined,
-          assignedEmployeeName: b.assignedEmployeeName || b.assignedEmployee || undefined,
-        }));
+      const bookingsRaw = Array.isArray(bookingsRes.data)
+        ? bookingsRes.data
+        : bookingsRes.data?.bookings || bookingsRes.data?.data || [];
+      const servicesRaw = Array.isArray(servicesRes.data)
+        ? servicesRes.data
+        : servicesRes.data?.services || servicesRes.data?.data || [];
 
-      console.log("ServiceStatus: processed bookings", userBookings);
-      setBookings(userBookings);
+      console.log(
+        "ServiceStatus: raw bookings",
+        bookingsRaw.length,
+        "raw all-services",
+        servicesRaw.length
+      );
 
-      const spares: SpareService[] = (res.data || []).map((b: any) => ({
-        serviceId: b.serviceId || b.id || b.service_id,
-        serviceName: b.bookingId || b.booking_id || b.orderId || "",
-        parts: b.parts || b.spareParts || b.spare_parts || [],
+      const userServices = servicesRaw.filter((service: any) => {
+        const serviceEmail = service.email?.toLowerCase();
+        const isUserEmail = serviceEmail === user.email.toLowerCase();
+        const isUserUid = service.uid === user.uid || service.uid === user.id;
+        const isBookingMatch = bookingsRaw.some(
+          (b: any) =>
+            b.bookingId === service.bookingId ||
+            b.bookingId === service.booking_id ||
+            b.id === service.serviceId ||
+            b.id === service.id
+        );
+        return isUserEmail || isUserUid || isBookingMatch;
+      });
+
+      console.log("ServiceStatus: userServices count", userServices.length);
+
+      const servicesWithDetails = await Promise.all(
+        userServices.map(async (service: any) => {
+          try {
+            const detailRes = await api.get(`/all-services/${service.id}`);
+            return {
+              ...service,
+              parts: detailRes.data?.parts || service.parts || [],
+              issues: detailRes.data?.issues || service.issues || [],
+              issueAmount: detailRes.data?.issueAmount ?? service.issueAmount,
+              issueStatus: detailRes.data?.issueStatus || service.issueStatus,
+            };
+          } catch (err) {
+            console.warn(
+              "ServiceStatus: failed service detail fetch",
+              service.id,
+              err
+            );
+            return {
+              ...service,
+              parts: service.parts || [],
+              issues: service.issues || [],
+            };
+          }
+        })
+      );
+
+      const spares: SpareService[] = servicesWithDetails.map((service: any) => ({
+        serviceId: service.id,
+        serviceName: service.bookingId || service.booking_id || service.orderId || "",
+        parts: service.parts || [],
+        issues: service.issues || [],
       }));
 
       console.log("ServiceStatus: processed spare parts", spares);
       setSpareParts(spares);
 
+      const userBookings: Booking[] = bookingsRaw
+        .filter((b: any) => b.email?.toLowerCase() === user.email.toLowerCase())
+        .map((b: any) => {
+          const matchedService = servicesWithDetails.find(
+            (s: any) =>
+              s.id === b.serviceId ||
+              s.id === b.service_id ||
+              s.bookingId === b.bookingId ||
+              s.bookingId === b.booking_id
+          );
+
+          return {
+            ...b,
+            normalizedStatus: STATUS_NORMALIZER[b.status] || b.status,
+            issues: matchedService?.issues || b.issues || b.serviceIssues || [],
+            issue: b.issue || b.serviceType || matchedService?.issue || "",
+            issueAmount: b.issueAmount ?? matchedService?.issueAmount,
+            issueStatus: b.issueStatus || matchedService?.issueStatus,
+            serviceId: b.serviceId || b.id || b.service_id || matchedService?.id,
+            brand: b.brand || b.vehicleBrand || matchedService?.brand,
+            model: b.model || b.vehicleModel || matchedService?.model,
+            vehicleNumber:
+              b.vehicleNumber ||
+              b.registrationNumber ||
+              matchedService?.vehicleNumber ||
+              matchedService?.registrationNumber,
+            address: b.address || b.location || matchedService?.address || matchedService?.location,
+            preferredDate: b.preferredDate || b.date || matchedService?.preferredDate,
+            assignedEmployeeName:
+              b.assignedEmployeeName ||
+              b.assignedEmployee ||
+              matchedService?.assignedEmployeeName,
+          } as Booking;
+        });
+
+      console.log("ServiceStatus: processed bookings", userBookings);
+      setBookings(userBookings);
     } catch (err) {
       console.log("ServiceStatus: fetch error", err);
     } finally {
