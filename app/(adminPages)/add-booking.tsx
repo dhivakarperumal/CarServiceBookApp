@@ -170,13 +170,7 @@ export default function AdminAddBooking() {
     <SafeAreaView className="flex-1 bg-slate-950">
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1">
         <ScrollView className="flex-1 p-6" showsVerticalScrollIndicator={false}>
-          <View className="mb-8">
-            <TouchableOpacity onPress={() => router.back()} className="mb-6 w-10 h-10 items-center justify-center bg-white/5 rounded-full border border-white/5">
-              <Ionicons name="arrow-back" size={20} color={COLORS.white} />
-            </TouchableOpacity>
-            <Text className="text-white font-black text-2xl uppercase tracking-tighter">Add Service Vehicle</Text>
-            <Text className="text-slate-500 text-[10px] font-black uppercase tracking-widest mt-1">Register walk-in customers & vehicles</Text>
-          </View>
+        
 
           <View className="bg-slate-900/50 p-6 rounded-[32px] border border-white/5 shadow-2xl mb-24 overflow-hidden">
              

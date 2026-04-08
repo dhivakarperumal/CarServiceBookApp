@@ -430,15 +430,7 @@ const AdminAddVehicle = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-slate-950">
-      <View className="flex-row items-center justify-between px-6 py-5 bg-slate-950 border-b border-white/5">
-        <TouchableOpacity onPress={() => router.back()} className="w-10 h-10 items-center justify-center bg-slate-900 rounded-xl border border-white/10">
-          <Ionicons name="arrow-back" size={20} color={COLORS.white} />
-        </TouchableOpacity>
-        <Text className="text-white font-black uppercase tracking-widest text-xs">
-          {id ? "Update Listing" : "Register Listing"}
-        </Text>
-        <View className="w-10" />
-      </View>
+     
       <View className="flex-1">
         {/* STEPPER BAR */}
         <View className="flex-row justify-between px-6 py-4 bg-slate-950 border-b border-white/5">

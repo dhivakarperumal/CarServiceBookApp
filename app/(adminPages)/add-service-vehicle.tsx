@@ -239,19 +239,9 @@ export default function AddServiceVehicle() {
       <SafeAreaView className="flex-1 bg-[#0F172A]">
         <View className="flex-1 items-center justify-center px-6 py-8">
           {/* Success Icon */}
-          <View className="w-28 h-28 rounded-full bg-emerald-500/15 items-center justify-center mb-8 border-2 border-emerald-500/30 shadow-2xl shadow-emerald-500/10">
-            <Ionicons name="checkmark-done" size={56} color="#10B981" />
-          </View>
+         
 
-          {/* Success Title */}
-          <Text className="text-3xl font-black text-white text-center mb-2 uppercase tracking-tight">
-            Service Vehicle Added!
-          </Text>
-
-          {/* Success Description */}
-          <Text className="text-slate-400 text-center text-[15px] mb-10 leading-relaxed px-4">
-            The vehicle has been registered and a customer account was created automatically.
-          </Text>
+         
 
           {/* Booking ID Card */}
           <View className="w-full bg-gradient-to-b from-slate-900/60 to-slate-900/30 border border-white/5 rounded-3xl p-8 mb-12 shadow-2xl items-center">

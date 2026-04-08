@@ -133,19 +133,7 @@ export default function AddCarService() {
     <SafeAreaView className="flex-1 bg-slate-950">
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1">
         <ScrollView className="flex-1 p-6" contentContainerStyle={{ paddingBottom: 100 }}>
-          {/* HEADER */}
-          <View className="flex-row items-center justify-between mt-12 mb-10">
-             <TouchableOpacity 
-               onPress={() => router.back()}
-               className="w-12 h-12 bg-white/5 rounded-2xl items-center justify-center border border-white/5"
-             >
-                <Ionicons name="arrow-back" size={24} color="white" />
-             </TouchableOpacity>
-             <Text className="text-white font-black text-2xl uppercase tracking-tighter">
-               {isEditing ? "Update Service" : "Add Service"}
-             </Text>
-             <View className="w-12" />
-          </View>
+      
 
           {/* FORM */}
           <View className="gap-6 bg-slate-900 border border-white/5 p-8 rounded-[40px]">
