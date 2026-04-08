@@ -253,7 +253,7 @@ export default function AppointmentScreen() {
       await apiService.createAppointment(appointmentData);
 
       Alert.alert("Success", "Service Appointment Scheduled Successfully!");
-      router.replace("/(tabs)/home");
+      router.push("/profile/service-status");
     } catch (err: any) {
       console.error("Appointment Submission Error:", err);
       const errorMsg = err.response?.data?.message || err.message || "Failed to schedule appointment.";

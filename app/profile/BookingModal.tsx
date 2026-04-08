@@ -78,6 +78,8 @@ type Booking = {
   issueAmount?: number;
   issueStatus?: string;
   serviceId?: number;
+  service_id?: number;
+  booking_id?: string;
   status: string;
 };
 
@@ -109,19 +111,23 @@ const BookingModal: React.FC<Props> = ({
   onClose,
   onApprove,
 }) => {
-  console.log("BookingModal render", { booking, spareParts });
+  console.log("BookingModal render", { booking: booking.bookingId, issuesCount: booking.issues?.length, issues: booking.issues });
 
   const bookingSpare = spareParts?.find((sp) => {
-    const serviceIdMatch = booking.serviceId != null && sp.serviceId === booking.serviceId;
-    const idMatch = booking.id != null && sp.serviceId === booking.id;
-    const nameMatch = sp.serviceName === booking.bookingId || sp.serviceName === booking.bookingId?.toString();
-    return serviceIdMatch || idMatch || nameMatch;
+    const spServiceId = sp.serviceId?.toString?.() ?? "";
+    const bookingServiceId = (booking.serviceId?.toString?.() || booking.service_id?.toString?.()) ?? "";
+    const bookingReference = booking.bookingId?.toString?.() || booking.booking_id?.toString?.() || "";
+    const serviceName = sp.serviceName?.toString?.() ?? "";
+
+    const serviceIdMatch = bookingServiceId && spServiceId && spServiceId === bookingServiceId;
+    const nameMatch = bookingReference && serviceName && serviceName === bookingReference;
+
+    return serviceIdMatch || nameMatch;
   });
 
-  const effectiveServiceId = bookingSpare?.serviceId || booking.serviceId || booking.id || null;
+  const effectiveServiceId = bookingSpare?.serviceId || booking.serviceId || booking.service_id || null;
 
   /* ===== STATUS TRACKER ===== */
-
   const StatusTracker = ({ currentStatus }: { currentStatus: string }) => {
     const normalized =
       STATUS_NORMALIZER[currentStatus] || currentStatus;
@@ -129,38 +135,70 @@ const BookingModal: React.FC<Props> = ({
     const activeIndex = STATUS_FLOW.indexOf(normalized);
 
     return (
-      <View className="flex-row flex-wrap justify-center mt-6">
-        {STATUS_FLOW.map((status, index) => {
-          const isCompleted = index <= activeIndex;
+      <View className="mt-6 px-3">
 
-          return (
-            <View key={status} className="items-center m-2">
-              <View
-                className={`w-10 h-10 rounded-full items-center justify-center border-2 ${
-                  isCompleted
-                    ? "bg-primary border-primary"
-                    : "bg-card border-gray700"
-                }`}
-              >
-                <Text
-                  className={`text-xs font-bold ${
-                    isCompleted ? "text-white" : "text-gray400"
-                  }`}
-                >
-                  {index + 1}
-                </Text>
-              </View>
+        {/* ===== TOP: 1 ─── 2 ─── 3 ===== */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <View className="flex-row items-center">
 
+            {STATUS_FLOW.map((status, index) => {
+              const isCompleted = index <= activeIndex;
+
+              return (
+                <React.Fragment key={status}>
+
+                  {/* NUMBER CIRCLE */}
+                  <View
+                    className={`w-10 h-10 rounded-full items-center justify-center border-2 ${isCompleted
+                        ? "bg-primary border-primary"
+                        : "bg-card border-gray700"
+                      }`}
+                  >
+                    <Text
+                      className={`text-xs font-bold ${isCompleted ? "text-white" : "text-gray400"
+                        }`}
+                    >
+                      {index + 1}
+                    </Text>
+                  </View>
+
+                  {/* LINE */}
+                  {index !== STATUS_FLOW.length - 1 && (
+                    <View
+                      style={{
+                        height: 2,
+                        width: 20,
+                        backgroundColor:
+                          index < activeIndex
+                            ? COLORS.primary
+                            : COLORS.gray700,
+                      }}
+                    />
+                  )}
+                </React.Fragment>
+              );
+            })}
+
+          </View>
+        </ScrollView>
+
+        {/* ===== BOTTOM: DETAILS LIST ===== */}
+        <View className="mt-5 space-y-2">
+          {STATUS_FLOW.map((status, index) => {
+            const isCompleted = index <= activeIndex;
+
+            return (
               <Text
-                className={`text-[10px] mt-1 text-center w-[70px] ${
-                  isCompleted ? "text-primary" : "text-gray500"
-                }`}
+                key={status}
+                className={`text-sm ${isCompleted ? "text-primary" : "text-gray400"
+                  }`}
               >
-                {status.replace("_", " ")}
+                {index + 1}. {status.replace(/_/g, " ")}
               </Text>
-            </View>
-          );
-        })}
+            );
+          })}
+        </View>
+
       </View>
     );
   };
@@ -190,15 +228,72 @@ const BookingModal: React.FC<Props> = ({
               Booking ID: {booking.bookingId}
             </Text>
 
-            {/* DETAILS */}
-            <Text className="text-text-secondary">
+
+            {/* BASIC DETAILS */}
+            <Text className="text-text-secondary mb-1">
               <Text className="text-primary">Name: </Text>
               {booking.name}
             </Text>
 
-            <Text className="text-text-secondary">
+            <Text className="text-text-secondary mb-1">
               <Text className="text-primary">Phone: </Text>
               {booking.phone}
+            </Text>
+
+            {/* NEW FIELDS (LIKE WEB) */}
+            <Text className="text-text-secondary mb-1">
+              <Text className="text-primary">Brand: </Text>
+              {booking.brand || "N/A"}
+            </Text>
+
+            <Text className="text-text-secondary mb-1">
+              <Text className="text-primary">Model: </Text>
+              {booking.model || "N/A"}
+            </Text>
+
+            <Text className="text-text-secondary mb-1">
+              <Text className="text-primary">Reg No: </Text>
+              {booking.vehicleNumber || booking.registrationNumber || "N/A"}
+            </Text>
+
+            {/* ISSUE */}
+            {booking.issue && (
+              <Text className="text-text-secondary mt-1 mb-1">
+                <Text className="text-primary">Issue: </Text>
+                {booking.issue}
+              </Text>
+            )}
+
+            {/* SERVICE DATE */}
+            {booking.preferredDate && (
+              <Text className="text-text-secondary">
+                <Text className="text-primary">Service Date: </Text>
+                {new Date(booking.preferredDate).toLocaleDateString()}
+              </Text>
+            )}
+
+            {/* ASSIGNED MECHANIC */}
+            {booking.assignedEmployeeName && (
+              <View
+                style={{
+                  backgroundColor: COLORS.primary + "15",
+                  padding: 8,
+                  borderRadius: 8,
+                  marginTop: 6,
+                  borderWidth: 1,
+                  borderColor: COLORS.primary + "30",
+                }}
+              >
+                <Text style={{ color: COLORS.primary, fontWeight: "bold" }}>
+                  🔧 Assigned Mechanic: {booking.assignedEmployeeName}
+                </Text>
+              </View>
+            )}
+
+            {/* ADDRESS */}
+            <Text className="text-text-secondary mt-2">
+              <Text className="text-primary">Address: </Text>
+              {booking.address || booking.location || "N/A"}
             </Text>
 
             {/* ===== SPARE PARTS ===== */}
@@ -231,8 +326,8 @@ const BookingModal: React.FC<Props> = ({
                             status === "approved"
                               ? COLORS.success
                               : status === "rejected"
-                              ? COLORS.error
-                              : COLORS.warning,
+                                ? COLORS.error
+                                : COLORS.warning,
                         }}
                       >
                         {status.toUpperCase()}
@@ -326,8 +421,8 @@ const BookingModal: React.FC<Props> = ({
                             status === "approved"
                               ? COLORS.success
                               : status === "rejected"
-                              ? COLORS.error
-                              : COLORS.warning,
+                                ? COLORS.error
+                                : COLORS.warning,
                         }}
                       >
                         {status.toUpperCase()}
@@ -385,7 +480,7 @@ const BookingModal: React.FC<Props> = ({
                   );
                 })}
               </View>
-            ) : booking.issue ? (
+            ) : booking.issue && booking.issueStatus ? (
               <View className="mt-6">
                 <Text className="text-primary font-bold mb-2">
                   ⚙️ Issue
@@ -397,7 +492,7 @@ const BookingModal: React.FC<Props> = ({
                   </Text>
                 )}
                 <Text className="text-text-secondary text-sm mt-2">
-                  Status: <Text className="font-bold" style={{ color: booking.issueStatus === 'approved' ? COLORS.success : booking.issueStatus === 'rejected' ? COLORS.error : COLORS.warning }}>{(booking.issueStatus || 'pending').toUpperCase()}</Text>
+                  Status: <Text className="font-bold" style={{ color: booking.issueStatus === 'approved' ? COLORS.success : booking.issueStatus === 'rejected' ? COLORS.error : COLORS.warning }}>{booking.issueStatus.toUpperCase()}</Text>
                 </Text>
               </View>
             ) : (
