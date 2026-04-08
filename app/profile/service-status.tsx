@@ -43,6 +43,8 @@ type Booking = {
   issueStatus?: string;
   issues?: any[];
   serviceId?: number;
+  service_id?: number;
+  booking_id?: string;
   preferredDate?: string;
   assignedEmployeeName?: string;
 };
@@ -214,9 +216,13 @@ const ServiceStatus: React.FC = () => {
 
       // 🔥 USE combinedData instead of bookingsRaw
       const userBookings: Booking[] = combinedData.map((b: any) => {
-        const matchedService = servicesWithDetails.find(
-          (s: any) =>
-            s.bookingId === b.bookingId || s.id === b.id || s.bookingDocId === b.id
+        const bookingId = b.bookingId || b.booking_id;
+        const serviceId = b.serviceId || b.service_id;
+
+        const matchedService = servicesWithDetails.find((s: any) =>
+          (bookingId && (s.bookingId === bookingId || s.booking_id === bookingId)) ||
+          (serviceId && (s.id === serviceId || s.serviceId === serviceId)) ||
+          (bookingId && s.bookingDocId === bookingId)
         );
 
         console.log(`ServiceStatus: booking ${b.bookingId} matched service:`, matchedService?.id, matchedService?.bookingId);
@@ -229,7 +235,7 @@ const ServiceStatus: React.FC = () => {
           issue: b.issue || b.serviceType || matchedService?.issue || "",
           issueAmount: b.issueAmount ?? matchedService?.issueAmount,
           issueStatus: b.issueStatus || matchedService?.issueStatus,
-          serviceId: b.serviceId || b.id || b.service_id || matchedService?.id || matchedService?.serviceId,
+          serviceId: b.serviceId || b.service_id || matchedService?.id || matchedService?.serviceId || null,
           brand: b.brand || b.vehicleBrand || matchedService?.brand,
           model: b.model || b.vehicleModel || matchedService?.model,
           vehicleNumber:

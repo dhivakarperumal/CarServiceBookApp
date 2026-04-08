@@ -488,10 +488,24 @@ setSpareParts((prev: any[]) =>
               console.log(`Home: service ${service.id} (${service.bookingId}) has ${detailRes.data?.issues?.length || 0} issues`);
               return {
                 ...service,
-                parts: detailRes.data?.parts || service.parts || [],
-                issues: detailRes.data?.issues || service.issues || [],
-                issueAmount: detailRes.data?.issueAmount ?? service.issueAmount,
-                issueStatus: detailRes.data?.issueStatus || service.issueStatus,
+                parts:
+                  detailRes.data?.parts ||
+                  detailRes.data?.spareParts ||
+                  detailRes.data?.serviceParts ||
+                  [],
+                issues:
+                  detailRes.data?.issues ||
+                  detailRes.data?.serviceIssues ||
+                  detailRes.data?.issueDetails ||
+                  [],
+                issueAmount:
+                  detailRes.data?.issueAmount ??
+                  detailRes.data?.issue_amount ??
+                  null,
+                issueStatus:
+                  detailRes.data?.issueStatus ??
+                  detailRes.data?.issue_status ??
+                  null,
               };
             } catch (err) {
               console.warn(
@@ -501,8 +515,10 @@ setSpareParts((prev: any[]) =>
               );
               return {
                 ...service,
-                parts: service.parts || [],
-                issues: service.issues || [],
+                parts: [],
+                issues: [],
+                issueAmount: null,
+                issueStatus: null,
               };
             }
           })
@@ -532,10 +548,16 @@ setSpareParts((prev: any[]) =>
 
         // Match bookings with service details to get issues (like profile page)
         const mappedServiceBookings = userServiceBookings.map((booking) => {
-          const matchedService = servicesWithDetails.find(
-            (s: any) =>
-              s.bookingId === booking.bookingId || s.id === booking.id || s.bookingDocId === booking.id
-          );
+          const matchedService = servicesWithDetails.find((s: any) => {
+            const bookingId = booking.bookingId || booking.booking_id;
+            const serviceId = booking.serviceId || booking.service_id;
+
+            return (
+              (bookingId && (s.bookingId === bookingId || s.booking_id === bookingId)) ||
+              (serviceId && (s.id === serviceId || s.serviceId === serviceId)) ||
+              (bookingId && s.bookingDocId === bookingId)
+            );
+          });
 
           console.log(`Home: booking ${booking.bookingId} matched service:`, matchedService?.id, matchedService?.bookingId);
           console.log(`Home: booking ${booking.bookingId} getting ${matchedService?.issues?.length || 0} issues from service ${matchedService?.id}`);
@@ -543,11 +565,11 @@ setSpareParts((prev: any[]) =>
           return {
             ...booking,
             normalizedStatus: STATUS_NORMALIZER[booking.status] || booking.status,
-            issues: matchedService?.issues || booking.issues || booking.serviceIssues || [],
-            issue: booking.issue || booking.serviceType || matchedService?.issue || "",
-            issueAmount: booking.issueAmount ?? matchedService?.issueAmount,
-            issueStatus: booking.issueStatus || matchedService?.issueStatus,
-            serviceId: booking.serviceId || booking.id || booking.service_id || matchedService?.id || matchedService?.serviceId,
+            issues: matchedService?.issues || [],
+            issue: matchedService?.issue || booking.issue || booking.serviceType || "",
+            issueAmount: matchedService?.issueAmount ?? null,
+            issueStatus: matchedService?.issueStatus || null,
+            serviceId: booking.serviceId || booking.service_id || matchedService?.id || matchedService?.serviceId || null,
             brand: booking.brand || booking.vehicleBrand || matchedService?.brand,
             model: booking.model || booking.vehicleModel || matchedService?.model,
             vehicleNumber:

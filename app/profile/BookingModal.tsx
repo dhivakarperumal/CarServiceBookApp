@@ -78,6 +78,8 @@ type Booking = {
   issueAmount?: number;
   issueStatus?: string;
   serviceId?: number;
+  service_id?: number;
+  booking_id?: string;
   status: string;
 };
 
@@ -112,13 +114,18 @@ const BookingModal: React.FC<Props> = ({
   console.log("BookingModal render", { booking: booking.bookingId, issuesCount: booking.issues?.length, issues: booking.issues });
 
   const bookingSpare = spareParts?.find((sp) => {
-    const serviceIdMatch = booking.serviceId != null && sp.serviceId === booking.serviceId;
-    const idMatch = booking.id != null && sp.serviceId === booking.id;
-    const nameMatch = sp.serviceName === booking.bookingId || sp.serviceName === booking.bookingId?.toString();
-    return serviceIdMatch || idMatch || nameMatch;
+    const spServiceId = sp.serviceId?.toString?.() ?? "";
+    const bookingServiceId = (booking.serviceId?.toString?.() || booking.service_id?.toString?.()) ?? "";
+    const bookingReference = booking.bookingId?.toString?.() || booking.booking_id?.toString?.() || "";
+    const serviceName = sp.serviceName?.toString?.() ?? "";
+
+    const serviceIdMatch = bookingServiceId && spServiceId && spServiceId === bookingServiceId;
+    const nameMatch = bookingReference && serviceName && serviceName === bookingReference;
+
+    return serviceIdMatch || nameMatch;
   });
 
-  const effectiveServiceId = bookingSpare?.serviceId || booking.serviceId || booking.id || null;
+  const effectiveServiceId = bookingSpare?.serviceId || booking.serviceId || booking.service_id || null;
 
   /* ===== STATUS TRACKER ===== */
   const StatusTracker = ({ currentStatus }: { currentStatus: string }) => {
@@ -473,7 +480,7 @@ const BookingModal: React.FC<Props> = ({
                   );
                 })}
               </View>
-            ) : booking.issue ? (
+            ) : booking.issue && booking.issueStatus ? (
               <View className="mt-6">
                 <Text className="text-primary font-bold mb-2">
                   ⚙️ Issue
@@ -485,7 +492,7 @@ const BookingModal: React.FC<Props> = ({
                   </Text>
                 )}
                 <Text className="text-text-secondary text-sm mt-2">
-                  Status: <Text className="font-bold" style={{ color: booking.issueStatus === 'approved' ? COLORS.success : booking.issueStatus === 'rejected' ? COLORS.error : COLORS.warning }}>{(booking.issueStatus || 'pending').toUpperCase()}</Text>
+                  Status: <Text className="font-bold" style={{ color: booking.issueStatus === 'approved' ? COLORS.success : booking.issueStatus === 'rejected' ? COLORS.error : COLORS.warning }}>{booking.issueStatus.toUpperCase()}</Text>
                 </Text>
               </View>
             ) : (
