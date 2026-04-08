@@ -51,13 +51,17 @@ type Part = {
 };
 
 type Issue = {
-  id: string;
+  id?: string;
+  _id?: string;
+  issueId?: string;
+  issue_id?: string;
   issue: string;
   issueAmount?: number;
   issueStatus?: "pending" | "approved" | "rejected";
 };
 
 type Booking = {
+  id?: number;
   bookingId: string;
   name: string;
   phone: string;
@@ -107,11 +111,12 @@ const BookingModal: React.FC<Props> = ({
 }) => {
   console.log("BookingModal render", { booking, spareParts });
 
-  const bookingSpare = spareParts?.find(
-    (sp) =>
-      sp.serviceId === booking.serviceId ||
-      sp.serviceName === booking.bookingId
-  );
+  const bookingSpare = spareParts?.find((sp) => {
+    const serviceIdMatch = booking.serviceId != null && sp.serviceId === booking.serviceId;
+    const idMatch = booking.id != null && sp.serviceId === booking.id;
+    const nameMatch = sp.serviceName === booking.bookingId || sp.serviceName === booking.bookingId?.toString();
+    return serviceIdMatch || idMatch || nameMatch;
+  });
 
   /* ===== STATUS TRACKER ===== */
 
@@ -297,17 +302,19 @@ const BookingModal: React.FC<Props> = ({
                 </Text>
 
                 {booking.issues.map((issue) => {
+                  const issueId = issue.id || issue._id || issue.issueId || issue.issue_id || "";
                   const status = issue.issueStatus || "pending";
+                  const amount = issue.issueAmount != null ? issue.issueAmount : booking.issueAmount;
 
                   return (
-                    <View key={issue.id} className="p-3 bg-card rounded-lg mb-2">
+                    <View key={issueId || issue.issue} className="p-3 bg-card rounded-lg mb-2">
                       <Text className="text-text-secondary">
                         {issue.issue}
                       </Text>
 
-                      {issue.issueAmount != null && (
+                      {amount != null && (
                         <Text className="text-text-secondary text-sm mt-1">
-                          Amount: ₹{Number(issue.issueAmount).toFixed(2)}
+                          Amount: ₹{Number(amount).toFixed(2)}
                         </Text>
                       )}
 
@@ -325,13 +332,13 @@ const BookingModal: React.FC<Props> = ({
                       </Text>
 
                       {/* ✅ ISSUE APPROVAL FIX */}
-                      {status === "pending" && booking.serviceId && (
+                      {status === "pending" && booking.serviceId && issueId && (
                         <View className="flex-row gap-2 mt-2">
                           <TouchableOpacity
                             onPress={() =>
                               onApprove(
                                 booking.serviceId!,
-                                issue.id,
+                                issueId,
                                 "approved",
                                 "issue"
                               )
@@ -339,7 +346,7 @@ const BookingModal: React.FC<Props> = ({
                             className="p-2 rounded-lg"
                             style={{
                               backgroundColor: COLORS.success,
-                              minWidth: 90,
+                              minWidth: 72,
                               alignItems: "center",
                               justifyContent: "center",
                             }}
@@ -353,7 +360,7 @@ const BookingModal: React.FC<Props> = ({
                             onPress={() =>
                               onApprove(
                                 booking.serviceId!,
-                                issue.id,
+                                issueId,
                                 "rejected",
                                 "issue"
                               )
@@ -361,7 +368,7 @@ const BookingModal: React.FC<Props> = ({
                             className="p-2 rounded-lg"
                             style={{
                               backgroundColor: COLORS.error,
-                              minWidth: 90,
+                              minWidth: 72,
                               alignItems: "center",
                               justifyContent: "center",
                             }}

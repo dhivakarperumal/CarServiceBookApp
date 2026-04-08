@@ -188,8 +188,14 @@ const ServiceStatus: React.FC = () => {
             (s: any) =>
               s.id === b.serviceId ||
               s.id === b.service_id ||
+              s.serviceId === b.serviceId ||
+              s.serviceId === b.service_id ||
+              s._id === b.serviceId ||
+              s._id === b.service_id ||
               s.bookingId === b.bookingId ||
-              s.bookingId === b.booking_id
+              s.bookingId === b.booking_id ||
+              s.booking_id === b.bookingId ||
+              s.booking_id === b.booking_id
           );
 
           return {
@@ -243,11 +249,12 @@ const ServiceStatus: React.FC = () => {
 
   const handleApprove = async (
     serviceId: number,
-    itemId: string,
+    itemId: string | null,
     status: "approved" | "rejected",
     type: "part" | "issue" = "part"
   ) => {
-    console.log("ServiceStatus: handleApprove", { serviceId, itemId, status, type });
+    const normalizedItemId = itemId || null;
+    console.log("ServiceStatus: handleApprove", { serviceId, itemId: normalizedItemId, status, type });
     setApproving(true);
     try {
       if (type === "part") {
@@ -266,9 +273,15 @@ const ServiceStatus: React.FC = () => {
           });
         } catch (err) {
           console.warn("issue approval fallback 1", err);
-          await api.put(`/bookings/${serviceId}/issues/${itemId}`, {
-            issueStatus: status,
-          });
+          if (itemId) {
+            await api.put(`/bookings/${serviceId}/issues/${itemId}`, {
+              issueStatus: status,
+            });
+          } else {
+            await api.put(`/all-services/${serviceId}/issue`, {
+              issueStatus: status,
+            });
+          }
         }
       }
 
