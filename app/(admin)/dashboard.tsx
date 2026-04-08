@@ -190,7 +190,7 @@ export default function AdminDashboard() {
                 title="Add Billing"
                 icon="🧾"
                 color="bg-emerald-500"
-                onPress={() => router.push("/(employee)/add-billing" as any)}
+                onPress={() => router.push("/(adminPages)/add-billing" as any)}
               />
               <QuickAction
                 title="Add Staff"
