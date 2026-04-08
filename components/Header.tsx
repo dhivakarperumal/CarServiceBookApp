@@ -52,11 +52,17 @@ const Header: React.FC = () => {
     <>
       {/* 🔷 HEADER */}
       <SafeAreaView edges={["top"]} className="bg-background">
-        <View className="flex-row items-center justify-between px-5 py-4">
+        <View
+          className="flex-row items-center justify-between px-5 py-4"
+          style={{
+            borderBottomWidth: 0.6,
+            borderBottomColor: COLORS.primary,
+          }}
+        >
 
           {/* 🧩 LOGO */}
           <TouchableOpacity
-            onPress={() => router.push("/")} 
+            onPress={() => router.push("/")}
             activeOpacity={0.7}
           >
             <Image

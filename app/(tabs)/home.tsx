@@ -154,7 +154,7 @@ export default function HomeScreen({ navigation }) {
           });
         }, 400);
       }
-    }, 2500);
+    }, 7000);
 
     return () => clearInterval(interval);
   }, [services]);
@@ -407,7 +407,7 @@ export default function HomeScreen({ navigation }) {
           });
         }, 400);
       }
-    }, 4000); // 🔥 4 seconds (different from why section)
+    }, 4000); 
 
     return () => clearInterval(interval);
   }, [reviews]);
@@ -437,7 +437,7 @@ export default function HomeScreen({ navigation }) {
           });
         }, 400);
       }
-    }, 2500);
+    }, 5000);
 
     return () => clearInterval(interval);
   }, []);
@@ -447,7 +447,7 @@ export default function HomeScreen({ navigation }) {
       className="flex-1 bg-background"
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{
-        paddingBottom: 120,
+        paddingBottom: 50,
         paddingTop: 10,
       }}
     >
@@ -561,7 +561,7 @@ export default function HomeScreen({ navigation }) {
                 </Text>
 
                 {/* PRICE */}
-                <View className="flex-row items-center mb-1">
+                {/* <View className="flex-row items-center mb-1">
                   {service.price ? (
                     <Text className="text-[#0EA5E9] font-bold text-sm">
                       {service.price}
@@ -571,7 +571,7 @@ export default function HomeScreen({ navigation }) {
                       Price on request
                     </Text>
                   )}
-                </View>
+                </View> */}
 
                 {/* BUTTON */}
                 <TouchableOpacity

@@ -35,9 +35,15 @@ const History = () => {
         return;
       }
 
-      const allServices = await apiService.getAllServices(user.uid);
+      const allServices = await apiService.getAllServices(user.email);
 
-      const completed = (allServices || []).filter((s) =>
+      const userServices = (allServices || []).filter(
+        (s) =>
+          (s.customerEmail || s.email)?.toLowerCase() ===
+          user?.email?.toLowerCase()
+      );
+
+      const completed = (userServices || []).filter((s) =>
         ["Service Completed", "Bill Completed"].includes(s.serviceStatus)
       );
 
