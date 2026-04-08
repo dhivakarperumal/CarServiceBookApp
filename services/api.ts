@@ -269,6 +269,56 @@ export const apiService = {
     }
   },
 
+  getServiceAreas: async (): Promise<any[]> => {
+    try {
+      const response = await api.get('/service-areas');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching service areas:', error);
+      return [];
+    }
+  },
+
+  createServiceArea: async (data: any): Promise<any> => {
+    try {
+      const response = await api.post('/service-areas', data);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating service area:', error);
+      throw error;
+    }
+  },
+
+  updateServiceArea: async (id: number | string, data: any): Promise<any> => {
+    try {
+      const response = await api.put(`/service-areas/${id}`, data);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating service area:', error);
+      throw error;
+    }
+  },
+
+  deleteServiceArea: async (id: number | string): Promise<any> => {
+    try {
+      const response = await api.delete(`/service-areas/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting service area:', error);
+      throw error;
+    }
+  },
+
+  toggleServiceAreaStatus: async (id: number | string, status: string): Promise<any> => {
+    try {
+      const response = await api.patch(`/service-areas/${id}/status`, { status });
+      return response.data;
+    } catch (error) {
+      console.error('Error toggling service area status:', error);
+      throw error;
+    }
+  },
+
   getUsers: async (): Promise<any[]> => {
     try {
       const response = await api.get('/users');
