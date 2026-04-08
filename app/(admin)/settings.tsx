@@ -22,10 +22,29 @@ export default function AdminSettings() {
 
                <Section>
 
+                  {/* ── Users & Directory ── */}
+                  <TouchableOpacity
+                     onPress={() => router.push('/(adminPages)/users' as any)}
+                     className="flex-row items-center justify-between p-5 bg-slate-900 border border-slate-800 rounded-3xl mt-2 shadow-2xl"
+                  >
+                     <View className="flex-row items-center gap-4 flex-1">
+                        <View className="w-12 h-12 bg-sky-950 rounded-2xl items-center justify-center border border-sky-900 shadow-lg shadow-sky-500/10">
+                           <Ionicons name="people-outline" size={24} color="#0ea5e9" />
+                        </View>
+                        <View>
+                           <Text className="text-white font-black text-sm uppercase tracking-tighter">Users & Directory</Text>
+                           <Text className="text-gray-500 text-[8px] font-black uppercase tracking-widest mt-1">Manage Customers & Platform Accounts</Text>
+                        </View>
+                     </View>
+                     <View className="bg-slate-800 p-2 rounded-full">
+                        <Ionicons name="chevron-forward" size={16} color="#475569" />
+                     </View>
+                  </TouchableOpacity>
+
                   {/* ── Orders ── */}
                   <TouchableOpacity
                      onPress={() => router.push('/(adminPages)/orders' as any)}
-                     className="flex-row items-center justify-between p-5 bg-slate-900 border border-slate-800 rounded-3xl mt-2 shadow-2xl"
+                     className="flex-row items-center justify-between p-5 bg-slate-900 border border-slate-800 rounded-3xl mt-4 shadow-2xl"
                   >
                      <View className="flex-row items-center gap-4 flex-1">
                         <View className="w-12 h-12 bg-sky-950 rounded-2xl items-center justify-center border border-sky-900">
@@ -167,6 +186,25 @@ export default function AdminSettings() {
                         <View>
                            <Text className="text-white font-black text-sm uppercase tracking-tighter">Customer Reviews</Text>
                            <Text className="text-gray-500 text-[8px] font-black uppercase tracking-widest mt-1">Manage Ratings & Feedback</Text>
+                        </View>
+                     </View>
+                     <View className="bg-slate-800 p-2 rounded-full">
+                        <Ionicons name="chevron-forward" size={16} color="#475569" />
+                     </View>
+                  </TouchableOpacity>
+
+                  {/* ── Pricing Packages ── */}
+                  <TouchableOpacity
+                     onPress={() => router.push('/(adminPages)/pricing' as any)}
+                     className="flex-row items-center justify-between p-5 bg-slate-900 border border-slate-800 rounded-3xl mt-4 shadow-2xl"
+                  >
+                     <View className="flex-row items-center gap-4 flex-1">
+                        <View className="w-12 h-12 bg-sky-950 rounded-2xl items-center justify-center border border-sky-900 shadow-lg shadow-sky-500/10">
+                           <Ionicons name="pricetags-outline" size={24} color="#0ea5e9" />
+                        </View>
+                        <View>
+                           <Text className="text-white font-black text-sm uppercase tracking-tighter">Pricing Packages</Text>
+                           <Text className="text-gray-500 text-[8px] font-black uppercase tracking-widest mt-1">Manage Service Plan & Pricing</Text>
                         </View>
                      </View>
                      <View className="bg-slate-800 p-2 rounded-full">

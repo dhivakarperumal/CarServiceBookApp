@@ -63,6 +63,9 @@ export interface Booking {
   date: string;
   status: string;
   notes?: string;
+  name?: string;
+  email?: string;
+  phone?: string;
 }
 
 // API functions
@@ -164,6 +167,46 @@ export const apiService = {
       return response.data;
     } catch (error) {
       console.error('Error fetching pricing packages:', error);
+      throw error;
+    }
+  },
+
+  getPricingPackageById: async (id: number | string): Promise<any> => {
+    try {
+      const response = await api.get(`/pricing_packages/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching pricing package:', error);
+      throw error;
+    }
+  },
+
+  createPricingPackage: async (data: any): Promise<any> => {
+    try {
+      const response = await api.post('/pricing_packages', data);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating pricing package:', error);
+      throw error;
+    }
+  },
+
+  updatePricingPackage: async (id: number | string, data: any): Promise<any> => {
+    try {
+      const response = await api.put(`/pricing_packages/${id}`, data);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating pricing package:', error);
+      throw error;
+    }
+  },
+
+  deletePricingPackage: async (id: number | string): Promise<any> => {
+    try {
+      const response = await api.delete(`/pricing_packages/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting pricing package:', error);
       throw error;
     }
   },
