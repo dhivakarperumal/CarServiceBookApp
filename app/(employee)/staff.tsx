@@ -130,21 +130,37 @@ export default function EmployeeDashboard() {
 
       setMyTasks(filtered.slice(0, 5));
 
+      const normalize = (s: any) => (s || "").toLowerCase().trim();
+
       setStats({
-        pending: filtered.filter(
-          (b: any) => b.status === "Booked" || b.status === "Pending",
-        ).length,
-        inProgress: filtered.filter((b: any) =>
-          [
-            "Call Verified",
-            "Approved",
-            "Processing",
-            "Service Going on",
-          ].includes(b.status),
-        ).length,
-        completed: filtered.filter((b: any) =>
-          ["Service Completed", "Completed"].includes(b.status),
-        ).length,
+        pending: filtered.filter((b: any) => {
+          const s = normalize(b.status || b.serviceStatus);
+          return (
+            ["assigned", "approved", "booked", "pending"].includes(s) ||
+            s === ""
+          );
+        }).length,
+
+        inProgress: filtered.filter((b: any) => {
+          const s = normalize(b.status || b.serviceStatus);
+          return [
+            "processing",
+            "service going on",
+            "waiting for spare",
+            "call verified",
+          ].includes(s);
+        }).length,
+
+        completed: filtered.filter((b: any) => {
+          const s = normalize(b.status || b.serviceStatus);
+          return [
+            "service completed",
+            "completed",
+            "bill pending",
+            "bill completed",
+          ].includes(s);
+        }).length,
+
         totalStaff: 0,
       });
     } catch (err) {
@@ -296,96 +312,105 @@ export default function EmployeeDashboard() {
           </View>
         ) : (
           <View className="mb-6 mt-2">
-  {myTasks.map((task, idx) => {
-    const statusStyle = getStatusStyles(task.status);
+            {myTasks.map((task, idx) => {
+              const displayStatus =
+                task.status || task.serviceStatus || "Assigned";
+              const statusStyle = getStatusStyles(displayStatus);
 
-    return (
-      <View
-        key={task.id || idx}
-        className="bg-card p-5 rounded-3xl border border-card mb-4"
-      >
-        {/* HEADER */}
-        <View className="flex-row items-start justify-between">
+              return (
+                <View
+                  key={task.id || idx}
+                  className="bg-card p-5 rounded-3xl border border-card mb-4"
+                >
+                  {/* HEADER */}
+                  <View className="flex-row items-start justify-between">
+                    <View className="flex-row items-center flex-1">
+                      <View className="w-10 h-10 rounded-xl bg-primary/20 items-center justify-center mr-3">
+                        <Ionicons
+                          name="car-sport-outline"
+                          size={20}
+                          color="#0EA5E9"
+                        />
+                      </View>
 
-          <View className="flex-row items-center flex-1">
-            <View className="w-10 h-10 rounded-xl bg-primary/20 items-center justify-center mr-3">
-              <Ionicons name="car-sport-outline" size={20} color="#0EA5E9" />
-            </View>
+                      <View className="flex-1">
+                        <Text className="font-black text-text-primary text-base">
+                          {task.brand} {task.model}
+                        </Text>
 
-            <View className="flex-1">
-              <Text className="font-black text-text-primary text-base">
-                {task.brand} {task.model}
-              </Text>
+                        <Text className="text-md text-text-primary mt-1">
+                          {task.vehicleNumber || "No Plate"} • {task.name}
+                        </Text>
+                      </View>
+                    </View>
 
-              <Text className="text-xs text-text-muted mt-1">
-                {task.vehicleNumber || "No Plate"} • {task.name}
-              </Text>
-            </View>
+                    {/* STATUS BADGE */}
+                    <View
+                      className={`${statusStyle.bg} px-3 py-1.5 rounded-lg items-center justify-center ml-2`}
+                    >
+                      <Text
+                        className={`${statusStyle.text} text-[10px] font-black uppercase`}
+                      >
+                        {displayStatus}
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* ACTION BUTTONS */}
+                  <View className="flex-row mt-4 pt-4 border-t border-card gap-2">
+                    {(task.status === "Assigned" ||
+                      task.status === "Pending" ||
+                      task.status === "Approved" ||
+                      task.status === "Processing") && (
+                      <TouchableOpacity
+                        onPress={() =>
+                          updateServiceStatus(task, "Service Going on")
+                        }
+                        className="bg-primary flex-1 py-2.5 rounded-xl items-center"
+                      >
+                        <Text className="text-text-primary text-[11px] font-black uppercase tracking-widest">
+                          Start
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+
+                    {(task.status === "Service Going on" ||
+                      task.status === "Waiting for Spare") && (
+                      <TouchableOpacity
+                        onPress={() =>
+                          updateServiceStatus(task, "Service Completed")
+                        }
+                        className="bg-success flex-1 py-2.5 rounded-xl items-center"
+                      >
+                        <Text className="text-text-primary text-[11px] font-black uppercase tracking-widest">
+                          Done
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+
+                    {!(
+                      task.status === "Completed" ||
+                      task.status === "Service Completed" ||
+                      task.status === "Cancelled"
+                    ) && (
+                      <TouchableOpacity
+                        onPress={() =>
+                          router.push(
+                            `/(employee)/servicecenter?id=${task.id}` as any,
+                          )
+                        }
+                        className="bg-primary border border-card flex-1 py-3 rounded-xl items-center"
+                      >
+                        <Text className="text-text-primary text-[13px] font-black uppercase tracking-widest">
+                          Manage
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                </View>
+              );
+            })}
           </View>
-
-          {/* STATUS BADGE */}
-          <View
-            className={`${statusStyle.bg} px-3 py-1.5 rounded-lg items-center justify-center ml-2`}
-          >
-            <Text className={`${statusStyle.text} text-[10px] font-black uppercase`}>
-              {task.status}
-            </Text>
-          </View>
-        </View>
-
-        {/* ACTION BUTTONS */}
-        <View className="flex-row mt-4 pt-4 border-t border-card gap-2">
-
-          {(task.status === "Assigned" ||
-            task.status === "Pending" ||
-            task.status === "Approved" ||
-            task.status === "Processing") && (
-            <TouchableOpacity
-              onPress={() => updateServiceStatus(task, "Service Going on")}
-              className="bg-primary flex-1 py-2.5 rounded-xl items-center"
-            >
-              <Text className="text-text-primary text-[11px] font-black uppercase tracking-widest">
-                Start
-              </Text>
-            </TouchableOpacity>
-          )}
-
-          {(task.status === "Service Going on" ||
-            task.status === "Waiting for Spare") && (
-            <TouchableOpacity
-              onPress={() => updateServiceStatus(task, "Service Completed")}
-              className="bg-success flex-1 py-2.5 rounded-xl items-center"
-            >
-              <Text className="text-text-primary text-[11px] font-black uppercase tracking-widest">
-                Done
-              </Text>
-            </TouchableOpacity>
-          )}
-
-          {!(
-            task.status === "Completed" ||
-            task.status === "Service Completed" ||
-            task.status === "Cancelled"
-          ) && (
-            <TouchableOpacity
-              onPress={() =>
-                router.push(
-                  `/(employee)/servicecenter?id=${task.id}` as any,
-                )
-              }
-              className="bg-background border border-card flex-1 py-2.5 rounded-xl items-center"
-            >
-              <Text className="text-text-primary text-[11px] font-black uppercase tracking-widest">
-                Manage
-              </Text>
-            </TouchableOpacity>
-          )}
-
-        </View>
-      </View>
-    );
-  })}
-</View>
         )}
 
         {/* Quick Tools */}
