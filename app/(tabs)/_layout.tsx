@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Header from "../../components/Header";
 import { useAuth } from "../../contexts/AuthContext";
 import { COLORS } from "../../theme/colors";
+import { FontAwesome5 } from "@expo/vector-icons";
 
 export default function TabLayout() {
   const { user, isLoading } = useAuth();
@@ -46,7 +47,7 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: COLORS.card,
           borderTopWidth: 1,
-          borderTopColor: COLORS.gray800,
+          borderTopColor: COLORS.primary,
           height: 60 + insets.bottom,
           paddingBottom: insets.bottom,
           paddingTop: 6,
@@ -62,8 +63,8 @@ export default function TabLayout() {
         name="home"
         options={{
           title: "Home",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home-outline" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <FontAwesome5 name="home" solid size={size} color={color} />
           ),
         }}
       />
@@ -72,8 +73,8 @@ export default function TabLayout() {
         name="pricing"
         options={{
           title: "Pricing",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="card-outline" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <FontAwesome5 name="tags" solid size={size} color={color} />
           ),
         }}
       />
@@ -82,8 +83,8 @@ export default function TabLayout() {
         name="booking"
         options={{
           title: "Booking",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="calendar-outline" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <FontAwesome5 name="calendar-check" solid size={size} color={color} />
           ),
         }}
       />
@@ -93,8 +94,8 @@ export default function TabLayout() {
         options={{
           title: "Appt",
           href: null,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="calendar-number-outline" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <FontAwesome5 name="clock" solid size={size} color={color} />
           ),
         }}
       />
@@ -103,19 +104,18 @@ export default function TabLayout() {
         name="products"
         options={{
           title: "Products",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="cart-outline" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <FontAwesome5 name="shopping-bag" solid size={size} color={color} />
           ),
         }}
       />
 
-      {/* ✅ FIXED VEHICLES ICON */}
       <Tabs.Screen
         name="vehicles"
         options={{
           title: "Vehicles",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="car-sport-outline" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <FontAwesome5 name="car" solid size={size} color={color} />
           ),
         }}
       />

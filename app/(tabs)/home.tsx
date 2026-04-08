@@ -154,7 +154,7 @@ export default function HomeScreen({ navigation }) {
           });
         }, 400);
       }
-    }, 2500);
+    }, 7000);
 
     return () => clearInterval(interval);
   }, [services]);
@@ -407,7 +407,7 @@ export default function HomeScreen({ navigation }) {
           });
         }, 400);
       }
-    }, 4000); // 🔥 4 seconds (different from why section)
+    }, 4000); 
 
     return () => clearInterval(interval);
   }, [reviews]);
@@ -437,7 +437,7 @@ export default function HomeScreen({ navigation }) {
           });
         }, 400);
       }
-    }, 2500);
+    }, 5000);
 
     return () => clearInterval(interval);
   }, []);
