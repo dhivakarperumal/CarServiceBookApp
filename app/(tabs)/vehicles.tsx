@@ -6,12 +6,14 @@ import { api, apiService, Vehicle } from '../../services/api';
 // @ts-ignore
 import RazorpayCheckout from 'react-native-razorpay';
 import { useAuth } from "../../contexts/AuthContext";
+import { useRouter } from "expo-router";
 
 const { width } = Dimensions.get('window');
 const COLUMN_WIDTH = (width - 48) / 2;
 
 export default function VehiclesScreen() {
    const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+   const router = useRouter();
    const [loading, setLoading] = useState(true);
    const [search, setSearch] = useState("");
    const [filterType, setFilterType] = useState("all");
@@ -153,9 +155,16 @@ export default function VehiclesScreen() {
             };
 
             await api.post("/vehicle-bookings", bookingData);
-            Alert.alert("Success", `Vehicle Booking successful! Options Paid! ID: ${paymentData.razorpay_payment_id}`);
-            setSelectedVehicle(null);
-            fetchVehicles(); // Refresh listings to mark it as sold out
+            Alert.alert("Success", "Vehicle booked successfully!", [
+               {
+                  text: "View Bookings",
+                  onPress: () => {
+                     setSelectedVehicle(null);
+                     fetchVehicles();
+                     router.push("/profile/VehicleBookings"); 
+                  },
+               },
+            ]);
          }
       } catch (error: any) {
          console.error("Payment error:", error);
