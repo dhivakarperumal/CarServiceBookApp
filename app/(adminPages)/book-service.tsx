@@ -406,25 +406,7 @@ export default function BookService() {
   return (
     <SafeAreaView className="flex-1 bg-slate-950">
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-        {/* HEADER */}
-        <View className="p-6 border-b border-white/5 bg-slate-950">
-          <View className="flex-row items-center gap-4">
-            <TouchableOpacity
-              onPress={() => router.back()}
-              className="p-3 bg-slate-900 rounded-2xl border border-slate-800"
-            >
-              <Ionicons name="chevron-back" size={24} color="#ffffff" />
-            </TouchableOpacity>
-            <View className="flex-1">
-              <Text className="text-2xl font-black text-white">
-                Book Service
-              </Text>
-              <Text className="text-[10px] uppercase tracking-widest text-slate-500 mt-1 font-black">
-                Schedule vehicle service booking
-              </Text>
-            </View>
-          </View>
-        </View>
+   
 
         {/* FORM CARD */}
         <View className="p-6">
