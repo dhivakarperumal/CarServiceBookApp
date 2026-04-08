@@ -121,7 +121,6 @@ const BookingModal: React.FC<Props> = ({
   const effectiveServiceId = bookingSpare?.serviceId || booking.serviceId || booking.id || null;
 
   /* ===== STATUS TRACKER ===== */
-
   const StatusTracker = ({ currentStatus }: { currentStatus: string }) => {
     const normalized =
       STATUS_NORMALIZER[currentStatus] || currentStatus;
@@ -129,35 +128,70 @@ const BookingModal: React.FC<Props> = ({
     const activeIndex = STATUS_FLOW.indexOf(normalized);
 
     return (
-      <View className="flex-row flex-wrap justify-center mt-6">
-        {STATUS_FLOW.map((status, index) => {
-          const isCompleted = index <= activeIndex;
+      <View className="mt-6 px-3">
 
-          return (
-            <View key={status} className="items-center m-2">
-              <View
-                className={`w-10 h-10 rounded-full items-center justify-center border-2 ${isCompleted
-                    ? "bg-primary border-primary"
-                    : "bg-card border-gray700"
-                  }`}
-              >
-                <Text
-                  className={`text-xs font-bold ${isCompleted ? "text-white" : "text-gray400"
-                    }`}
-                >
-                  {index + 1}
-                </Text>
-              </View>
+        {/* ===== TOP: 1 ─── 2 ─── 3 ===== */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <View className="flex-row items-center">
 
+            {STATUS_FLOW.map((status, index) => {
+              const isCompleted = index <= activeIndex;
+
+              return (
+                <React.Fragment key={status}>
+
+                  {/* NUMBER CIRCLE */}
+                  <View
+                    className={`w-10 h-10 rounded-full items-center justify-center border-2 ${isCompleted
+                        ? "bg-primary border-primary"
+                        : "bg-card border-gray700"
+                      }`}
+                  >
+                    <Text
+                      className={`text-xs font-bold ${isCompleted ? "text-white" : "text-gray400"
+                        }`}
+                    >
+                      {index + 1}
+                    </Text>
+                  </View>
+
+                  {/* LINE */}
+                  {index !== STATUS_FLOW.length - 1 && (
+                    <View
+                      style={{
+                        height: 2,
+                        width: 20,
+                        backgroundColor:
+                          index < activeIndex
+                            ? COLORS.primary
+                            : COLORS.gray700,
+                      }}
+                    />
+                  )}
+                </React.Fragment>
+              );
+            })}
+
+          </View>
+        </ScrollView>
+
+        {/* ===== BOTTOM: DETAILS LIST ===== */}
+        <View className="mt-5 space-y-2">
+          {STATUS_FLOW.map((status, index) => {
+            const isCompleted = index <= activeIndex;
+
+            return (
               <Text
-                className={`text-[10px] mt-1 text-center w-[70px] ${isCompleted ? "text-primary" : "text-gray500"
+                key={status}
+                className={`text-sm ${isCompleted ? "text-primary" : "text-gray400"
                   }`}
               >
-                {status.replace("_", " ")}
+                {index + 1}. {status.replace(/_/g, " ")}
               </Text>
-            </View>
-          );
-        })}
+            );
+          })}
+        </View>
+
       </View>
     );
   };
