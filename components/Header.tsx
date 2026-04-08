@@ -365,7 +365,7 @@ const Header: React.FC = () => {
         />
 
         {/* MENU BOX */}
-        <View className="absolute top-20 right-5 w-80 max-h-[70%] bg-card rounded-2xl border border-primary/30 py-2 shadow-lg">
+        <View className="absolute top-20 right-5 w-[320px] max-h-[70%] bg-card rounded-2xl border border-primary/30 py-2 shadow-lg">
 
           {/* PROFILE */}
           <TouchableOpacity
