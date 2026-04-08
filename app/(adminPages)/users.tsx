@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  View, 
-  Text, 
-  SafeAreaView, 
-  ScrollView, 
-  TouchableOpacity, 
-  ActivityIndicator, 
-  RefreshControl, 
-  Alert, 
+import {
+  View,
+  Text,
+  SafeAreaView,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+  RefreshControl,
+  Alert,
   TextInput,
   Modal,
   FlatList
@@ -30,7 +30,7 @@ export default function AdminUsers() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [users, setUsers] = useState<PlatformUser[]>([]);
-  
+
   // Filters
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
@@ -47,7 +47,7 @@ export default function AdminUsers() {
         apiService.getAuthUsers(),
         apiService.getBookings()
       ]);
-      
+
       const authUsers = (Array.isArray(authRes) ? authRes : []) as any[];
       const bookings = (Array.isArray(bookingsRes) ? bookingsRes : []) as any[];
 
@@ -72,16 +72,16 @@ export default function AdminUsers() {
       bookings.forEach(b => {
         const emailKey = b.email ? b.email.toLowerCase() : null;
         let customer: PlatformUser | undefined = undefined;
-        
+
         if (emailKey && customerMap.has(emailKey)) {
           customer = customerMap.get(emailKey);
         } else {
           // Look by phone
           for (let c of customerMap.values()) {
-             if (c.phone === b.phone && b.phone && b.phone !== "-") {
-               customer = c;
-               break;
-             }
+            if (c.phone === b.phone && b.phone && b.phone !== "-") {
+              customer = c;
+              break;
+            }
           }
         }
 
@@ -135,8 +135,8 @@ export default function AdminUsers() {
       `Are you sure you want to ${u.active ? 'deactivate' : 'activate'} ${u.username}?`,
       [
         { text: "Cancel", style: "cancel" },
-        { 
-          text: "Confirm", 
+        {
+          text: "Confirm",
           onPress: async () => {
             try {
               await apiService.updateUserStatus(u.id, !u.active);
@@ -156,8 +156,8 @@ export default function AdminUsers() {
       "Are you sure? This action cannot be undone.",
       [
         { text: "Cancel", style: "cancel" },
-        { 
-          text: "Delete", 
+        {
+          text: "Delete",
           style: "destructive",
           onPress: async () => {
             try {
@@ -186,66 +186,66 @@ export default function AdminUsers() {
   return (
     <SafeAreaView className="flex-1 bg-slate-950">
       <View className="flex-1">
-      
+
 
         {/* STATS CARDS */}
         <View className="px-6 flex-row gap-3 mb-8">
-           <View className="flex-1 bg-slate-900/50 p-5 rounded-[32px] border border-white/5 relative overflow-hidden">
-              <View className="w-10 h-10 bg-sky-500/10 rounded-2xl items-center justify-center mb-3">
-                 <Ionicons name="people" size={18} color="#0ea5e9" />
-              </View>
-              <Text className="text-slate-500 text-[8px] font-black uppercase tracking-[2px] mb-1">Total</Text>
-              <Text className="text-white font-black text-2xl tracking-tighter">{users.length}</Text>
-              <View className="absolute -top-2 -right-2 w-12 h-12 bg-sky-500/5 rounded-full" />
-           </View>
+          <View className="flex-1 bg-slate-900/50 p-5 rounded-[32px] border border-white/5 relative overflow-hidden">
+            <View className="w-10 h-10 bg-sky-500/10 rounded-2xl items-center justify-center mb-3">
+              <Ionicons name="people" size={18} color="#0ea5e9" />
+            </View>
+            <Text className="text-slate-500 text-[8px] font-black uppercase tracking-[2px] mb-1">Total</Text>
+            <Text className="text-white font-black text-2xl tracking-tighter">{users.length}</Text>
+            <View className="absolute -top-2 -right-2 w-12 h-12 bg-sky-500/5 rounded-full" />
+          </View>
 
-           <View className="flex-1 bg-slate-900/50 p-5 rounded-[32px] border border-white/5 relative overflow-hidden">
-              <View className="w-10 h-10 bg-emerald-500/10 rounded-2xl items-center justify-center mb-3">
-                 <Ionicons name="shield-checkmark" size={18} color="#10b981" />
-              </View>
-              <Text className="text-emerald-500 text-[8px] font-black uppercase tracking-[2px] mb-1">Active</Text>
-              <Text className="text-white font-black text-2xl tracking-tighter">{activeCount}</Text>
-              <View className="absolute -top-2 -right-2 w-12 h-12 bg-emerald-500/5 rounded-full" />
-           </View>
+          <View className="flex-1 bg-slate-900/50 p-5 rounded-[32px] border border-white/5 relative overflow-hidden">
+            <View className="w-10 h-10 bg-emerald-500/10 rounded-2xl items-center justify-center mb-3">
+              <Ionicons name="shield-checkmark" size={18} color="#10b981" />
+            </View>
+            <Text className="text-emerald-500 text-[8px] font-black uppercase tracking-[2px] mb-1">Active</Text>
+            <Text className="text-white font-black text-2xl tracking-tighter">{activeCount}</Text>
+            <View className="absolute -top-2 -right-2 w-12 h-12 bg-emerald-500/5 rounded-full" />
+          </View>
 
-           <View className="flex-1 bg-slate-900/50 p-5 rounded-[32px] border border-white/5 relative overflow-hidden">
-              <View className="w-10 h-10 bg-indigo-500/10 rounded-2xl items-center justify-center mb-3">
-                 <Ionicons name="finger-print" size={18} color="#6366f1" />
-              </View>
-              <Text className="text-indigo-500 text-[8px] font-black uppercase tracking-[2px] mb-1">Accounts</Text>
-              <Text className="text-white font-black text-2xl tracking-tighter">{totalRegistered}</Text>
-              <View className="absolute -top-2 -right-2 w-12 h-12 bg-indigo-500/5 rounded-full" />
-           </View>
+          <View className="flex-1 bg-slate-900/50 p-5 rounded-[32px] border border-white/5 relative overflow-hidden">
+            <View className="w-10 h-10 bg-indigo-500/10 rounded-2xl items-center justify-center mb-3">
+              <Ionicons name="finger-print" size={18} color="#6366f1" />
+            </View>
+            <Text className="text-indigo-500 text-[8px] font-black uppercase tracking-[2px] mb-1">Accounts</Text>
+            <Text className="text-white font-black text-2xl tracking-tighter">{totalRegistered}</Text>
+            <View className="absolute -top-2 -right-2 w-12 h-12 bg-indigo-500/5 rounded-full" />
+          </View>
         </View>
 
         {/* FILTERS */}
         <View className="px-6 gap-4 mb-4">
-           {/* SEARCH */}
-           <View className="flex-row items-center bg-slate-900 rounded-2xl px-5 h-14 border border-white/5 shadow-inner">
-              <Ionicons name="search" size={20} color="#475569" />
-              <TextInput 
-                 placeholder="Search name, email, or credentials..."
-                 placeholderTextColor="#475569"
-                 value={search}
-                 onChangeText={setSearch}
-                 className="flex-1 ml-3 text-white font-black text-xs"
-              />
-           </View>
+          {/* SEARCH */}
+          <View className="flex-row items-center bg-slate-900 rounded-2xl px-5 h-14 border border-white/5 shadow-inner">
+            <Ionicons name="search" size={20} color="#475569" />
+            <TextInput
+              placeholder="Search name, email, or credentials..."
+              placeholderTextColor="#475569"
+              value={search}
+              onChangeText={setSearch}
+              className="flex-1 ml-3 text-white font-black text-xs"
+            />
+          </View>
 
-           {/* CHIPS */}
-           <ScrollView horizontal showsHorizontalScrollIndicator={false} className="max-h-12">
-              <View className="flex-row gap-2 pr-6">
-                {['all', 'admin', 'mechanic', 'staff', 'customer'].map((f) => (
-                  <TouchableOpacity 
-                    key={f}
-                    onPress={() => setRoleFilter(f)}
-                    className={`px-6 h-10 items-center justify-center rounded-xl border ${roleFilter === f ? 'bg-white border-white' : 'bg-slate-900 border-slate-800'}`}
-                  >
-                    <Text className={`${roleFilter === f ? 'text-black' : 'text-slate-500'} text-[10px] font-black uppercase tracking-widest`}>{f}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-           </ScrollView>
+          {/* CHIPS */}
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="max-h-12">
+            <View className="flex-row gap-2 pr-6">
+              {['all', 'admin', 'mechanic', 'staff', 'customer'].map((f) => (
+                <TouchableOpacity
+                  key={f}
+                  onPress={() => setRoleFilter(f)}
+                  className={`px-6 h-10 items-center justify-center rounded-xl border ${roleFilter === f ? 'bg-white border-white' : 'bg-slate-900 border-slate-800'}`}
+                >
+                  <Text className={`${roleFilter === f ? 'text-black' : 'text-slate-500'} text-[10px] font-black uppercase tracking-widest`}>{f}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </ScrollView>
         </View>
 
         {/* LIST */}
@@ -254,7 +254,7 @@ export default function AdminUsers() {
             <ActivityIndicator size="large" color="#0ea5e9" />
           </View>
         ) : (
-          <FlatList 
+          <FlatList
             data={filtered}
             keyExtractor={(u) => u.id.toString()}
             contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 100 }}
@@ -263,34 +263,42 @@ export default function AdminUsers() {
               <View key={u.id} className="bg-slate-900/50 rounded-[32px] p-6 mb-5 border border-white/5 shadow-2xl relative overflow-hidden">
                 {/* Background Glow Accent */}
                 <View className={`absolute -top-10 -right-10 w-32 h-32 rounded-full opacity-10 ${u.type === 'guest' ? 'bg-cyan-500' : 'bg-indigo-500'}`} />
-                
-                <View className="flex-row items-center gap-5 mb-6">
-                   {/* Avatar / Initial Bubble */}
-                   <View className={`w-16 h-16 rounded-[22px] items-center justify-center border border-white/10 shadow-inner ${u.type === 'guest' ? 'bg-cyan-950/30' : 'bg-indigo-950/30'}`}>
-                      <Text className={`text-xl font-black ${u.type === 'guest' ? 'text-cyan-400' : 'text-indigo-400'}`}>
-                        {(u.username || 'U')[0].toUpperCase()}
-                      </Text>
-                   </View>
 
-                   <View className="flex-1">
-                      <View className="flex-row items-center gap-2 mb-0.5">
-                         <Text className="text-white font-black text-lg tracking-tight" numberOfLines={1}>{u.username}</Text>
-                         {u.type === 'guest' && (
-                           <View className="bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">
-                              <Text className="text-emerald-500 text-[6px] font-black uppercase tracking-widest">Walk-In</Text>
-                           </View>
-                         )}
-                      </View>
-                      <View className="flex-row items-center gap-2">
-                         <Text className="text-slate-500 text-[10px] font-bold" numberOfLines={1}>{u.email}</Text>
-                      </View>
-                      <View className="flex-row items-center gap-1 mt-1">
-                         <Ionicons name="call" size={8} color="#0ea5e9" />
-                         <Text className="text-sky-500 text-[9px] font-black tracking-widest">{u.phone !== '-' ? u.phone : 'NO CONTACT'}</Text>
-                      </View>
-                   </View>
+                <View className="flex-row items-center mb-6" >
+                  <View
+                    className="w-16 h-16 rounded-[22px] mr-5 items-center justify-center bg-white/10 shadow-lg"
+                    style={{
+                      borderWidth: 2,
+                      borderColor: "#0ea5e9" 
+                    }}
+                  >
+                    <Text
+                      className="text-2xl font-extrabold"
+                      style={{ color: "#fff" }}
+                    >
+                      {(u.username || 'U')[0].toUpperCase()}
+                    </Text>
+                  </View>
 
-                   <TouchableOpacity 
+                  <View className="flex-1">
+                    <View className="flex-row items-center gap-2 mb-0.5">
+                      <Text className="text-white font-black text-lg tracking-tight" numberOfLines={1}>{u.username}</Text>
+                      {u.type === 'guest' && (
+                        <View className="bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">
+                          <Text className="text-emerald-500 text-[6px] font-black uppercase tracking-widest">Walk-In</Text>
+                        </View>
+                      )}
+                    </View>
+                    <View className="flex-row items-center gap-2">
+                      <Text className="text-slate-500 text-[10px] font-bold" numberOfLines={1}>{u.email}</Text>
+                    </View>
+                    <View className="flex-row items-center gap-1 mt-1">
+                      <Ionicons name="call" size={8} color="#0ea5e9" />
+                      <Text className="text-primary text-[9px] font-black tracking-widest">{u.phone !== '-' ? u.phone : 'NO CONTACT'}</Text>
+                    </View>
+                  </View>
+
+                  <TouchableOpacity
                     onPress={() => {
                       if (u.type === 'registered') {
                         setSelectedUser(u);
@@ -298,42 +306,45 @@ export default function AdminUsers() {
                       }
                     }}
                     className="bg-slate-800/80 px-4 py-2 rounded-2xl border border-white/5 items-center justify-center"
-                   >
-                     <Text className="text-slate-100 text-[8px] font-black uppercase tracking-[2px]">{u.role}</Text>
-                     {u.type === 'registered' && <Ionicons name="chevron-down" size={10} color="#64748B" className="mt-1" />}
-                   </TouchableOpacity>
+                  >
+                    <Text
+  className="text-[10px] font-bold uppercase tracking-widest"
+  style={{ color: "#fff" }}
+>{u.role}</Text>
+                    {u.type === 'registered' && <Ionicons name="chevron-down" size={10} color="#64748B" className="mt-1" />}
+                  </TouchableOpacity>
                 </View>
 
                 {/* Status & Stats Row */}
                 <View className="flex-row justify-between items-center bg-black/20 p-3 rounded-2xl border border-white/5">
-                   <View className="flex-row items-center gap-6 px-2">
-                      <View>
-                         <Text className="text-slate-500 text-[7px] font-black uppercase tracking-widest mb-1">Engagements</Text>
-                         <View className="flex-row items-center gap-1.5">
-                            <View className="w-1.5 h-1.5 rounded-full bg-sky-500" />
-                            <Text className="text-white font-black text-sm">{u.bookingsCount} <Text className="text-slate-500 text-[10px]">Orders</Text></Text>
-                         </View>
+                  <View className="flex-row items-center gap-6 px-2">
+                    <View>
+                      <Text className="text-slate-500 text-[7px] font-black uppercase tracking-widest mb-1">Engagements</Text>
+                      <View className="flex-row items-center gap-1.5">
+                        <View className="w-1.5 h-1.5 rounded-full bg-sky-500" />
+                        <Text className="text-white font-black text-sm">{u.bookingsCount} <Text className="text-slate-500 text-[10px]">Orders</Text></Text>
                       </View>
+                    </View>
 
-                      <View className="w-px h-8 bg-white/5" />
+                    <View className="w-px h-8 bg-white/5" />
 
-                      <View>
-                         <Text className="text-slate-500 text-[7px] font-black uppercase tracking-widest mb-1">Account Visibility</Text>
-                         <TouchableOpacity onPress={() => handleToggleStatus(u)} className="flex-row items-center gap-1.5">
-                            <View className={`w-1.5 h-1.5 rounded-full ${u.active ? 'bg-emerald-500' : 'bg-rose-500'}`} />
-                            <Text className={`${u.active ? 'text-emerald-500' : 'text-rose-500'} font-black text-[10px] uppercase tracking-widest`}>
-                               {u.active ? 'LIVE' : 'LOCKED'}
-                            </Text>
-                         </TouchableOpacity>
-                      </View>
-                   </View>
+                    <View>
+                      <Text className="text-slate-500 text-[7px] font-black uppercase tracking-widest mb-1">Account Visibility</Text>
+                      <TouchableOpacity onPress={() => handleToggleStatus(u)} className="flex-row items-center gap-1.5">
+                        <View className={`w-1.5 h-1.5 rounded-full ${u.active ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                        <Text className={`${u.active ? 'text-emerald-500' : 'text-rose-500'} font-black text-[10px] uppercase tracking-widest`}>
+                          {u.active ? 'LIVE' : 'LOCKED'}
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
 
-                   <TouchableOpacity 
-                      onPress={() => handleDelete(u)}
-                      className="w-12 h-12 bg-rose-500/10 rounded-2xl items-center justify-center border border-rose-500/20"
-                    >
-                      <Ionicons name="trash-outline" size={20} color="#ef4444" />
-                   </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => handleDelete(u)}
+                    className="w-12 h-12 bg-rose-500/10 rounded-2xl items-center justify-center border border-rose-500/20"
+                  >
+                    <Ionicons name="trash-outline" size={20} color="#ef4444" />
+                  </TouchableOpacity>
                 </View>
               </View>
             )}
@@ -343,36 +354,36 @@ export default function AdminUsers() {
 
       {/* ROLE MODAL */}
       <Modal visible={roleModalVisible} transparent animationType="fade">
-         <View className="flex-1 bg-black/80 items-center justify-center px-8">
-            <View className="w-full bg-slate-900 border border-white/10 rounded-[40px] p-8">
-               <Text className="text-white font-black text-2xl tracking-tighter mb-1">UPDATE ROLE</Text>
-               <Text className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-8">Change Permissions For {selectedUser?.username}</Text>
-               
-               <View className="gap-3">
-                  {['Admin', 'Mechanic', 'Staff', 'Customer'].map((r) => (
-                    <TouchableOpacity 
-                       key={r}
-                       onPress={() => handleUpdateRole(r.toLowerCase())}
-                       className="w-full h-16 bg-slate-800 rounded-2xl flex-row items-center justify-between px-6 border border-white/5"
-                    >
-                       <Text className="text-white font-black text-sm uppercase tracking-widest">{r}</Text>
-                       {selectedUser?.role.toLowerCase() === r.toLowerCase() ? (
-                         <Ionicons name="checkmark-circle" size={20} color="#0ea5e9" />
-                       ) : (
-                         <View className="w-5 h-5 rounded-full border border-white/20" />
-                       )}
-                    </TouchableOpacity>
-                  ))}
-               </View>
+        <View className="flex-1 bg-black/80 items-center justify-center px-8">
+          <View className="w-full bg-slate-900 border border-white/10 rounded-[40px] p-8">
+            <Text className="text-white font-black text-2xl tracking-tighter mb-1">UPDATE ROLE</Text>
+            <Text className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-8">Change Permissions For {selectedUser?.username}</Text>
 
-               <TouchableOpacity 
-                 onPress={() => setRoleModalVisible(false)}
-                 className="mt-8 w-full h-14 items-center justify-center bg-white/5 rounded-2xl"
-               >
-                  <Text className="text-slate-500 font-black text-[10px] uppercase tracking-widest">Cancel</Text>
-               </TouchableOpacity>
+            <View className="gap-3">
+              {['Admin', 'Mechanic', 'Staff', 'Customer'].map((r) => (
+                <TouchableOpacity
+                  key={r}
+                  onPress={() => handleUpdateRole(r.toLowerCase())}
+                  className="w-full h-16 bg-slate-800 rounded-2xl flex-row items-center justify-between px-6 border border-white/5"
+                >
+                  <Text className="text-white font-black text-sm uppercase tracking-widest">{r}</Text>
+                  {selectedUser?.role.toLowerCase() === r.toLowerCase() ? (
+                    <Ionicons name="checkmark-circle" size={20} color="#0ea5e9" />
+                  ) : (
+                    <View className="w-5 h-5 rounded-full border border-white/20" />
+                  )}
+                </TouchableOpacity>
+              ))}
             </View>
-         </View>
+
+            <TouchableOpacity
+              onPress={() => setRoleModalVisible(false)}
+              className="mt-8 w-full h-14 items-center justify-center bg-white/5 rounded-2xl"
+            >
+              <Text className="text-slate-500 font-black text-[10px] uppercase tracking-widest">Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </Modal>
 
     </SafeAreaView>
