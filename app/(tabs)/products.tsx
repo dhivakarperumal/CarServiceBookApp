@@ -8,6 +8,9 @@ import {
   Alert,
   Image,
   Dimensions,
+  Modal,
+  TextInput,
+  ScrollView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { apiService } from '../../services/api';
@@ -42,6 +45,71 @@ export default function ProductsScreen() {
   const [products, setProducts] = useState<ApiProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const { addToCart } = useCart();
+
+  const getLabel = (value: string) => {
+    switch (value) {
+      case "low-high":
+        return "Price: Low to High";
+      case "high-low":
+        return "Price: High to Low";
+      case "a-z":
+        return "Name: A to Z";
+      case "z-a":
+        return "Name: Z to A";
+      default:
+        return value;
+    }
+  };
+  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState("");
+
+  const [filters, setFilters] = useState({
+    minPrice: "",
+    maxPrice: "",
+    brand: [],
+    rating: "",
+    offer: false,
+  });
+
+  const [showFilters, setShowFilters] = useState(false);
+
+  const filteredProducts = products
+    .filter((p) => {
+      const searchValue = search.toLowerCase();
+
+      return (
+        p.name.toLowerCase().includes(searchValue) ||
+        p.brand?.toLowerCase().includes(searchValue) ||
+        String(p.offerPrice).includes(searchValue)
+      );
+    })
+
+    .filter((p) => {
+      const price = Number(p.offerPrice || 0);
+
+      if (filters.minPrice && price < Number(filters.minPrice)) return false;
+      if (filters.maxPrice && price > Number(filters.maxPrice)) return false;
+
+      if (filters.brand.length > 0 && !filters.brand.includes(p.brand)) {
+        return false;
+      }
+
+      if (filters.rating && Number(p.rating || 0) < Number(filters.rating)) {
+        return false;
+      }
+
+      if (filters.offer && !p.offerPrice) return false;
+
+      return true;
+    })
+
+    .sort((a, b) => {
+      if (sort === "low-high") return Number(a.offerPrice) - Number(b.offerPrice);
+      if (sort === "high-low") return Number(b.offerPrice) - Number(a.offerPrice);
+      if (sort === "a-z") return a.name.localeCompare(b.name);
+      if (sort === "z-a") return b.name.localeCompare(a.name);
+      return 0;
+    });
 
   useEffect(() => {
     fetchProducts();
@@ -155,9 +223,49 @@ export default function ProductsScreen() {
   return (
     <View className="flex-1 bg-background ">
       <View className="flex-1 p-5">
+        <View className="flex-row items-center mb-4 gap-2">
+
+          {/* SEARCH */}
+          <View className="flex-1 bg-[#1F2937] rounded-lg px-3 py-2 flex-row items-center">
+            <Ionicons name="search" size={16} color="#94A3B8" />
+            <TextInput
+              placeholder="Search products..."
+              placeholderTextColor="#94A3B8"
+              value={search}
+              onChangeText={setSearch}
+              className="ml-2 text-white flex-1"
+            />
+          </View>
+
+          {/* FILTER BUTTON */}
+          <TouchableOpacity
+            onPress={() => setShowFilters(true)}
+            className="bg-[#0EA5E9] p-2 rounded-lg"
+          >
+            <Ionicons name="options" size={18} color="white" />
+          </TouchableOpacity>
+
+        </View>
+
+        <View className="mb-3">
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            {["low-high", "high-low", "a-z", "z-a"].map((item) => (
+              <TouchableOpacity
+                key={item}
+                onPress={() => setSort(item)}
+                className={`px-3 py-1 mr-2 rounded-full ${sort === item ? "bg-[#0EA5E9]" : "bg-[#1F2937]"
+                  }`}
+              >
+                <Text className="text-white text-xs">
+                  {getLabel(item)}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
 
         <FlatList
-          data={products}
+          data={filteredProducts}
           keyExtractor={(item) => String(item.docId)}
           renderItem={renderItem}
           numColumns={2}
@@ -171,6 +279,50 @@ export default function ProductsScreen() {
           )}
         />
       </View>
+      <Modal visible={showFilters} animationType="slide">
+        <View className="flex-1 bg-[#0B1120] p-5">
+
+          <Text className="text-white text-lg font-bold mb-4">Filters</Text>
+
+          {/* PRICE */}
+          <Text className="text-gray400 mb-1">Max Price</Text>
+          <TextInput
+            value={filters.maxPrice}
+            onChangeText={(val) => setFilters({ ...filters, maxPrice: val })}
+            keyboardType="numeric"
+            className="bg-[#1F2937] text-white p-2 rounded mb-3"
+          />
+
+          {/* RATING */}
+          {[4, 3].map((r) => (
+            <TouchableOpacity
+              key={r}
+              onPress={() => setFilters({ ...filters, rating: String(r) })}
+              className="mb-2"
+            >
+              <Text className="text-white">{r}★ & up</Text>
+            </TouchableOpacity>
+          ))}
+
+          {/* OFFER */}
+          <TouchableOpacity
+            onPress={() => setFilters({ ...filters, offer: !filters.offer })}
+          >
+            <Text className="text-white mb-4">
+              {filters.offer ? "✓ " : ""}Offers Only
+            </Text>
+          </TouchableOpacity>
+
+          {/* APPLY */}
+          <TouchableOpacity
+            onPress={() => setShowFilters(false)}
+            className="bg-[#0EA5E9] p-3 rounded-lg"
+          >
+            <Text className="text-white text-center">Apply Filters</Text>
+          </TouchableOpacity>
+
+        </View>
+      </Modal>
     </View>
   );
 }
