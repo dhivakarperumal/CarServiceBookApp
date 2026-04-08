@@ -102,37 +102,36 @@ export default function AdminLayout() {
       <Tabs.Screen
         name="dashboard"
         options={{
-          title: 'Admin',
-          tabBarIcon: ({ color, size }) => <Ionicons name="apps" size={size} color={color} />
-        }}
-      />
-      <Tabs.Screen
-        name="appointments"
-        options={{
-          title: 'Appts',
-          href: null,
-          tabBarIcon: ({ color, size }) => <Ionicons name="calendar-number" size={size} color={color} />
+          title: 'Home',
+          tabBarIcon: ({ color, size }) => <Ionicons name="home" size={size} color={color} />
         }}
       />
       <Tabs.Screen
         name="bookings"
         options={{
           title: 'Bookings',
-          tabBarIcon: ({ color, size }) => <Ionicons name="calendar" size={size} color={color} />
+          tabBarIcon: ({ color, size }) => <Ionicons name="calendar-outline" size={size} color={color} />
+        }}
+      />
+      <Tabs.Screen
+        name="assign-services"
+        options={{
+          title: 'Assign',
+          tabBarIcon: ({ color, size }) => <Ionicons name="person-add-outline" size={size} color={color} />
         }}
       />
       <Tabs.Screen
         name="services"
         options={{
           title: 'Services',
-          tabBarIcon: ({ color, size }) => <Ionicons name="build" size={size} color={color} />
+          tabBarIcon: ({ color, size }) => <Ionicons name="construct-outline" size={size} color={color} />
         }}
       />
       <Tabs.Screen
         name="products"
         options={{
           title: 'Products',
-          tabBarIcon: ({ color, size }) => <Ionicons name="cart" size={size} color={color} />
+          tabBarIcon: ({ color, size }) => <Ionicons name="cart-outline" size={size} color={color} />
         }}
       />
       <Tabs.Screen
