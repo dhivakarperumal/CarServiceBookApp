@@ -59,7 +59,7 @@ export default function ServiceDetails() {
               {service.serviceStatus || "Active Service"}
             </Text>
           </View>
-          <Text className="text-text-primary font-black text-xs uppercase tracking-[4px]">
+          <Text className="text-text-primary font-black text-md uppercase tracking-[4px]">
             ID: {service.bookingId || `SER-${service.id}`}
           </Text>
         </View>

@@ -445,7 +445,7 @@ export default function AddBillingScreen() {
                   className={`px-4 py-3 rounded-full ${billingMode === option.mode ? "bg-primary" : "bg-slate-900"}`}
                 >
                   <Text
-                    className={`text-[10px] font-black uppercase tracking-wider ${billingMode === option.mode ? "text-slate-950" : "text-text-muted"}`}
+                    className={`text-[10px] font-black uppercase tracking-wider ${billingMode === option.mode ? "text-text-primary" : "text-text-muted"}`}
                   >
                     {option.label}
                   </Text>
@@ -679,7 +679,7 @@ export default function AddBillingScreen() {
                 onPress={addManualPart}
                 className="min-w-[140px] bg-[#111827] rounded-3xl px-5 py-4 items-center justify-center"
               >
-                <Text className="text-text-primary font-black">+ Add Part</Text>
+                <Text className="text-text-primary bg-primary p-3 rounded-xl font-black">+ Add Part</Text>
               </TouchableOpacity>
             </View>
             {matchingProducts.length > 0 && (
