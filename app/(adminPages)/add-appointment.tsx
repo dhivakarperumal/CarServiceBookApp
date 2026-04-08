@@ -139,25 +139,12 @@ export default function AddAppointment() {
     <SafeAreaView className="flex-1 bg-slate-950">
       <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
         
-        {/* HEADER */}
-        <View className="px-6 pt-10 pb-8 flex-row justify-between items-center bg-slate-950 border-b border-white/5">
-           <View className="flex-row items-center gap-4">
-              <TouchableOpacity onPress={() => router.back()} className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 items-center justify-center">
-                 <Ionicons name="arrow-back" size={20} color="white" />
-              </TouchableOpacity>
-              <View>
-                 <Text className="text-white text-2xl font-black uppercase tracking-tighter">Reservation</Text>
-                 <Text className="text-sky-500 font-bold text-[8px] uppercase tracking-widest mt-1 text-center">New Appointment Entry</Text>
-              </View>
-           </View>
-           
-           <View className="bg-sky-500/10 border border-sky-500/20 rounded-2xl px-5 py-3 items-end">
+        <View className="p-6">
+           <View className="bg-sky-500/10 border border-sky-500/20 rounded-2xl px-5 py-3 items-center mb-6">
               <Text className="text-[8px] font-black text-sky-500 uppercase tracking-widest">Projected Fee</Text>
               <Text className="text-xl font-black text-white mt-1">₹{estimatedCost}</Text>
            </View>
-        </View>
 
-        <View className="p-6">
            
            {/* CUSTOMER SECTION */}
            <SectionTitle icon="person-outline" title="Customer Dossier" />

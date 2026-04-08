@@ -152,26 +152,17 @@ export default function BookedVehicles() {
 
   return (
     <SafeAreaView className="flex-1 bg-slate-950">
-      {/* HEADER */}
-      <View className="px-6 pt-10 pb-4 flex-row items-center justify-between border-b border-white/5">
-        <View className="flex-row items-center gap-4">
-          <TouchableOpacity onPress={() => router.back()} className="w-10 h-10 bg-slate-900 rounded-xl items-center justify-center border border-slate-800">
-            <Ionicons name="chevron-back" size={20} color="white" />
-          </TouchableOpacity>
-          <View>
-            <Text className="text-white text-xl font-black uppercase tracking-tight">Booked Vehicles</Text>
-            <Text className="text-slate-500 text-[8px] font-black uppercase tracking-[2px]">Admin Management</Text>
-          </View>
-        </View>
-        <TouchableOpacity onPress={fetchBookings} className="w-10 h-10 bg-sky-500/10 rounded-xl items-center justify-center border border-sky-500/20">
-          <Ionicons name="refresh" size={20} color="#0ea5e9" />
-        </TouchableOpacity>
-      </View>
-
       <ScrollView 
         className="flex-1"
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchBookings(); }} tintColor={COLORS.primary} />}
       >
+        <TouchableOpacity 
+          onPress={fetchBookings}
+          className="self-end mr-6 mt-4 p-3 bg-sky-500/10 rounded-xl border border-sky-500/20"
+        >
+          <Ionicons name="refresh" size={20} color="#0ea5e9" />
+        </TouchableOpacity>
+
         {/* STATS */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} className="px-6 py-6">
           <StatCard title="Active" value={stats.total} icon="calendar-outline" gradient={[]} />

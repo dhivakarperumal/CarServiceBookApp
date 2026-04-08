@@ -227,23 +227,8 @@ export default function AllOrders() {
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); loadOrders(); }} tintColor={COLORS.primary} />}
       >
-        {/* ── HEADER ── */}
-        <View style={{ paddingHorizontal: 24, paddingTop: 40, paddingBottom: 24 }}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-            <View>
-              <Text style={{ color: 'white', fontSize: 28, fontWeight: '900', textTransform: 'uppercase' }}>Orders</Text>
-              <Text style={{ color: COLORS.primary, fontSize: 9, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 2, marginTop: 4 }}>
-                Order Management
-              </Text>
-            </View>
-            <TouchableOpacity
-              onPress={() => router.push('/(admin)/orders' as any)}
-              style={{ width: 44, height: 44, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 14, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' }}
-            >
-              <Ionicons name="refresh" size={20} color={COLORS.primary} onPress={() => { setRefreshing(true); loadOrders(); }} />
-            </TouchableOpacity>
-          </View>
-        </View>
+        <View className="h-4" />
+
 
         {/* ── STATS ── */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 24 }}>

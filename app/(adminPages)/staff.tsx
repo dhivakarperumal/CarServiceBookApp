@@ -62,19 +62,7 @@ export default function AdminStaff() {
 
   return (
     <SafeAreaView className="flex-1 bg-slate-950">
-      <View className="p-4 border-b border-white/5 bg-slate-950">
-        <View className="flex-row justify-between items-center mb-4">
-          <Text className="text-white font-black text-xl uppercase tracking-tighter">
-            Team Management
-          </Text>
-          <TouchableOpacity
-            onPress={() => router.push("/(adminPages)/add-staff")}
-            className="p-3 bg-primary rounded-full shadow-lg"
-          >
-            <Ionicons name="add" size={24} color="#FFFFFF" />
-          </TouchableOpacity>
-        </View>
-
+      <View className="px-4 py-4 bg-slate-950">
         <View className="flex-row items-center bg-slate-900 rounded-2xl px-4 h-12 border border-slate-800">
           <Ionicons name="search" size={18} color="#475569" />
           <TextInput
@@ -144,7 +132,12 @@ export default function AdminStaff() {
         <View className="h-20" />
       </ScrollView>
 
-      {/* FLOATING ACTION BUTTON REMOVED - Use header button instead */}
+      <TouchableOpacity
+        onPress={() => router.push("/(adminPages)/add-staff")}
+        className="absolute bottom-8 right-8 w-14 h-14 bg-primary rounded-2xl items-center justify-center shadow-2xl shadow-sky-500/20"
+      >
+        <Ionicons name="add" size={32} color="white" />
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }

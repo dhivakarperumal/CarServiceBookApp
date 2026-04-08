@@ -248,40 +248,23 @@ export default function AttendanceScreen() {
   return (
     <SafeAreaView className="flex-1 bg-slate-950">
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-        {/* HEADER */}
-        <View className="p-6 border-b border-white/5 bg-slate-950">
-          <View className="flex-row items-center gap-4">
-            <TouchableOpacity
-              onPress={() => router.back()}
-              className="p-3 bg-slate-900 rounded-2xl border border-slate-800"
-            >
-              <Ionicons name="chevron-back" size={24} color="#ffffff" />
-            </TouchableOpacity>
-            <View className="flex-1">
-              <Text className="text-2xl font-black text-white">
-                Workforce Attendance
-              </Text>
-              <Text className="text-[10px] uppercase tracking-widest text-slate-500 mt-1 font-black">
-                Real-time personnel monitoring & analytics
-              </Text>
-            </View>
-            <TouchableOpacity
-              onPress={downloadAttendance}
-              disabled={attendanceData.length === 0}
-              className={`p-3 rounded-2xl border ${
-                attendanceData.length === 0
-                  ? "bg-slate-800 border-slate-700 opacity-50"
-                  : "bg-slate-900 border-slate-800 active:bg-slate-800"
-              }`}
-            >
-              <Ionicons
-                name="download-outline"
-                size={20}
-                color={attendanceData.length === 0 ? "#64748b" : "#0ea5e9"}
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
+        <TouchableOpacity
+          onPress={downloadAttendance}
+          disabled={attendanceData.length === 0}
+          className={`mx-6 mt-6 p-4 rounded-2xl border flex-row items-center justify-center gap-3 ${
+            attendanceData.length === 0
+              ? "bg-slate-800 border-slate-700 opacity-50"
+              : "bg-sky-500/10 border-sky-500/20 active:bg-sky-500/20"
+          }`}
+        >
+          <Ionicons
+            name="download-outline"
+            size={20}
+            color={attendanceData.length === 0 ? "#64748b" : "#0ea5e9"}
+          />
+          <Text className={`font-black uppercase tracking-widest text-[11px] ${attendanceData.length === 0 ? "text-slate-500" : "text-sky-500"}`}>Export Attendance Data</Text>
+        </TouchableOpacity>
+
 
         {/* STATS GRID */}
         <View className="p-6">

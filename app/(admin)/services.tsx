@@ -78,6 +78,7 @@ export default function Services() {
   const [editingIssueId, setEditingIssueId] = useState<any>(null);
   const [activeModalTab, setActiveModalTab] = useState("issues");
   const [editingParts, setEditingParts] = useState<any>([]);
+  const [syncing, setSyncing] = useState(false);
 
   const loadData = async () => {
     try {
@@ -94,27 +95,27 @@ export default function Services() {
         ? apptRaw
         : apptRaw.data || apptRaw.appointments || [];
 
-      const servicesWithDetails = [];
-
-      for (const service of servicesData) {
-        try {
-          const detailRes = await api.get(`/all-services/${service.id}`);
-          const details = detailRes.data || {};
-          servicesWithDetails.push({
-            ...service,
-            isAppointment: false,
-            parts: details.parts || [],
-            issues: details.issues || [],
-          });
-        } catch (err) {
-          servicesWithDetails.push({
-            ...service,
-            isAppointment: false,
-            parts: [],
-            issues: [],
-          });
-        }
-      }
+      const servicesWithDetails = await Promise.all(
+        servicesData.map(async (service: any) => {
+          try {
+            const detailRes = await api.get(`/all-services/${service.id}`);
+            const details = detailRes.data || {};
+            return {
+              ...service,
+              isAppointment: false,
+              parts: details.parts || [],
+              issues: details.issues || [],
+            };
+          } catch (err) {
+            return {
+              ...service,
+              isAppointment: false,
+              parts: [],
+              issues: [],
+            };
+          }
+        }),
+      );
 
       const combined = [
         ...servicesWithDetails,
@@ -398,24 +399,9 @@ export default function Services() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      <ScrollView
-        contentContainerStyle={{ paddingBottom: 100 }}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Header Section */}
-        <View className="px-6 pt-10 pb-8">
-          <View className="flex-end justify-between items-end">
-            <TouchableOpacity
-              onPress={() =>
-                router.push({ pathname: "/(employee)/add-parts" as any })
-              }
-              className="w-12 h-12 bg-primary rounded-2xl items-center justify-center shadow-xl shadow-primary/20"
-            >
-              <Ionicons name="add" size={24} color="white" />
-            </TouchableOpacity>
-          </View>
-        </View>
+    <SafeAreaView className="flex-1 bg-slate-950">
+      <ScrollView contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
+
 
         {/* Stats Section */}
         <ScrollView
@@ -851,10 +837,9 @@ export default function Services() {
       {/* Manifest Modal */}
       <Modal visible={issueModalVisible} transparent animationType="slide">
         <View className="flex-1 bg-black/95">
-          <View className="flex-1 bg-background mt-10 rounded-t-3xl border-t border-white/10">
-            <div style={{ display: "none" }} />
+          <View className="flex-1 bg-slate-950 mt-10 rounded-t-3xl border-t border-white/10">
             <View className="px-10 py-6 border-b border-white/5 flex-row justify-between items-center">
-              <Text className="text-primary text-xl font-black uppercase">
+              <Text className="text-white text-xl font-black uppercase">
                 Manifest
               </Text>
               <TouchableOpacity
@@ -867,20 +852,20 @@ export default function Services() {
             <View className="flex-row border-b border-white/5">
               <TouchableOpacity
                 onPress={() => setActiveModalTab("issues")}
-                className={`flex-1 py-4 items-center ${activeModalTab === "issues" ? "border-b-2 border-primary" : ""}`}
+                className={`flex-1 py-4 items-center ${activeModalTab === "issues" ? "border-b-2 border-white" : ""}`}
               >
                 <Text
-                  className={`font-black text-[10px] uppercase ${activeModalTab === "issues" ? "text-primary" : "text-white"}`}
+                  className={`font-black text-[10px] uppercase ${activeModalTab === "issues" ? "text-white" : "text-white/40"}`}
                 >
                   Issues
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => setActiveModalTab("parts")}
-                className={`flex-1 py-4 items-center ${activeModalTab === "parts" ? "border-b-2 border-primary" : ""}`}
+                className={`flex-1 py-4 items-center ${activeModalTab === "parts" ? "border-b-2 border-white" : ""}`}
               >
                 <Text
-                  className={`font-black text-[10px] uppercase ${activeModalTab === "parts" ? "text-primary" : "text-white"}`}
+                  className={`font-black text-[10px] uppercase ${activeModalTab === "parts" ? "text-white" : "text-white/40"}`}
                 >
                   Parts
                 </Text>
@@ -905,7 +890,7 @@ export default function Services() {
                           setIssueEntries(copy);
                         }}
                       />
-                      <View className="flex-row gap-4">
+                      <View className="flex-row gap-4 mb-4">
                         <View className="flex-1 bg-black/20 p-3 rounded-xl border border-white/5 flex-row items-center">
                           <Text className="text-white/20 mr-2">₹</Text>
                           <TextInput
@@ -937,7 +922,9 @@ export default function Services() {
                             setIssueEntries(copy);
                           }}
                         >
-                          <Text className="text-primary font-bold text-[8px] uppercase">
+                          <Text
+                            className={`${entry.issueStatus === "rejected" ? "text-rose-500" : entry.issueStatus === "approved" ? "text-emerald-500" : "text-amber-500"} font-bold text-[10px] uppercase`}
+                          >
                             {entry.issueStatus || "pending"}
                           </Text>
                         </TouchableOpacity>
@@ -1009,10 +996,11 @@ export default function Services() {
                 <Ionicons name="add" size={32} color="#666" />
               </TouchableOpacity>
             </ScrollView>
-            <View className="p-8 border-t border-white/5 bg-background flex-row gap-4">
+            <View className="p-8 border-t border-white/5 bg-slate-950 flex-row gap-4">
               <TouchableOpacity
                 onPress={() => setIssueModalVisible(false)}
-                className="flex-1 py-5 rounded-2xl bg-white/5 items-center"
+                disabled={syncing}
+                className={`flex-1 py-5 rounded-2xl bg-white/5 items-center ${syncing ? "opacity-20" : ""}`}
               >
                 <Text className="text-white/40 font-black text-[10px] uppercase">
                   Abort
@@ -1020,57 +1008,78 @@ export default function Services() {
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={async () => {
+                  if (syncing) return;
+                  setSyncing(true);
                   try {
                     const issuesToSave = issueEntries.filter((e: any) =>
                       e.issue?.trim(),
                     );
-                    for (const entry of issuesToSave) {
-                      if (entry.id)
-                        await api.put(
-                          `/all-services/${editingIssueId}/issues/${entry.id}`,
-                          {
-                            issue: entry.issue.trim(),
-                            issueAmount: Number(entry.issueAmount || 0),
-                            issueStatus: entry.issueStatus || "pending",
-                          },
-                        );
-                      else
-                        await api.post(
-                          `/all-services/${editingIssueId}/issues`,
-                          {
-                            issue: entry.issue.trim(),
-                            issueAmount: Number(entry.issueAmount || 0),
-                            issueStatus: entry.issueStatus || "pending",
-                          },
-                        );
-                    }
+
+                    // Execute all updates in parallel for maximum performance
+                    const updatePromises: Promise<any>[] = [
+                      ...issuesToSave.map((entry: any) => {
+                        const payload = {
+                          issue: entry.issue.trim(),
+                          issueAmount: Number(entry.issueAmount || 0),
+                          issueStatus: entry.issueStatus || "pending",
+                        };
+                        return entry.id
+                          ? api.put(
+                              `/all-services/${editingIssueId}/issues/${entry.id}`,
+                              payload,
+                            )
+                          : api.post(
+                              `/all-services/${editingIssueId}/issues`,
+                              payload,
+                            );
+                      }),
+                    ];
+
+                    // Parts sync - only if modified or length changed
                     const partsToSave = editingParts.filter((p: any) =>
                       p.partName?.trim(),
                     );
-                    if (partsToSave.length > 0 || editingParts.length === 0)
-                      await api.post(`/all-services/${editingIssueId}/parts`, {
+                    updatePromises.push(
+                      api.post(`/all-services/${editingIssueId}/parts`, {
                         parts: partsToSave.map((p: any) => ({
                           ...p,
                           status: p.status || "pending",
                         })),
-                      });
-                    if (issuesToSave.length > 0)
-                      await api.put(`/all-services/${editingIssueId}/issue`, {
-                        issue: issuesToSave[0].issue,
-                        issueAmount: Number(issuesToSave[0].issueAmount || 0),
-                      });
-                    Alert.alert("Success", "Manifest Sync OK");
+                      }),
+                    );
+
+                    // Sync primary issue description at top level
+                    if (issuesToSave.length > 0) {
+                      updatePromises.push(
+                        api.put(`/all-services/${editingIssueId}/issue`, {
+                          issue: issuesToSave[0].issue,
+                          issueAmount: Number(issuesToSave[0].issueAmount || 0),
+                        }),
+                      );
+                    }
+
+                    await Promise.all(updatePromises);
+
+                    Alert.alert("Registry Synchronized", "Operational manifest successfully updated.");
                     setIssueModalVisible(false);
                     loadData();
-                  } catch {
-                    Alert.alert("Error", "Sync Fail");
+                  } catch (error) {
+                    console.error("Sync Error:", error);
+                    Alert.alert("Protocol Error", "Failed to synchronize operational manifest. Check uplink connection.");
+                  } finally {
+                    setSyncing(false);
                   }
                 }}
+                disabled={syncing}
                 className="flex-2 py-5 rounded-2xl bg-primary items-center shadow-xl shadow-primary/20"
               >
-                <Text className="text-background font-black text-[10px] uppercase">
-                  Sync
-                </Text>
+                {syncing ? (
+                  <ActivityIndicator size="small" color={COLORS.background} />
+                ) : (
+                  <Text className="text-background font-black text-[10px] uppercase">
+                    Sync
+                  </Text>
+                )}
               </TouchableOpacity>
             </View>
           </View>
