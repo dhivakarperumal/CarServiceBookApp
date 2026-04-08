@@ -84,7 +84,7 @@ export default function AdminBookings() {
             new Date(b.created_at || b.createdAt || 0).getTime() - new Date(a.created_at || a.createdAt || 0).getTime()
          ));
          setTechnicians((staffData || []).filter((s: any) =>
-            ['mechanic', 'technician', 'employee', 'staff'].includes(s.role)
+            ['mechanic', 'technician', 'employee', 'staff', 'technicians', 'mechanics'].includes(s.role?.toLowerCase())
          ));
       } catch (err: any) {
          console.error('fetchAppointments error:', err?.response?.status, err?.message);
@@ -110,8 +110,9 @@ export default function AdminBookings() {
 
    const updateBookingStatus = async (booking: any, newStatus: string, extra = {}) => {
       try {
-         await apiService.api.put(`/bookings/${booking.id}`, { status: newStatus, ...extra });
-         setBookings(prev => prev.map(b => b.id === booking.id ? { ...b, status: newStatus, ...extra } : b));
+         const targetId = booking.id || booking._id;
+         await apiService.api.put(`/bookings/${targetId}`, { status: newStatus, ...extra });
+         setBookings(prev => prev.map(b => (b.id === targetId || b._id === targetId) ? { ...b, status: newStatus, ...extra } : b));
          Alert.alert('Updated', `Status → ${newStatus}`);
       } catch { Alert.alert('Error', 'Failed to update'); }
       finally { setStatusPopup(null); setTrackNumber(''); setCancelReason(''); }
@@ -145,8 +146,9 @@ export default function AdminBookings() {
       if (!selectedAppt || Object.keys(pendingChanges).length === 0) return;
       setSaving(true);
       try {
-         await apiService.api.put(`/appointments/${selectedAppt.id}`, pendingChanges);
-         setAppointments(prev => prev.map(a => a.id === selectedAppt.id ? { ...a, ...pendingChanges } : a));
+         const targetId = selectedAppt.id || selectedAppt._id;
+         await apiService.api.put(`/appointments/${targetId}`, pendingChanges);
+         setAppointments(prev => prev.map(a => (a.id === targetId || a._id === targetId) ? { ...a, ...pendingChanges } : a));
          Alert.alert('Success', 'Appointment updated successfully');
          setSelectedAppt(null);
          setPendingChanges({});
@@ -155,7 +157,7 @@ export default function AdminBookings() {
    };
 
    const currentStatus = pendingChanges.status ?? selectedAppt?.status;
-   const canAssign = currentStatus === 'Confirmed';
+   const canAssign = ['Appointment Booked', 'Confirmed', 'In Progress'].includes(currentStatus);
 
    /* ─── LOADING ─── */
    if (bookingLoading && apptLoading) {
@@ -441,7 +443,7 @@ export default function AdminBookings() {
       ──────────────────────────── */}
          <Modal visible={!!selectedAppt} transparent animationType="slide">
             <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.9)', justifyContent: 'flex-end' }}>
-               <View style={{ backgroundColor: '#0f172a', borderTopLeftRadius: 40, borderTopRightRadius: 40, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.08)', maxHeight: '92%' }}>
+               <View style={{ backgroundColor: '#0f172a', borderTopLeftRadius: 40, borderTopRightRadius: 40, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.08)', height: '92%', width: '100%' }}>
                   {/* Modal Header */}
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 28, paddingTop: 28, paddingBottom: 20, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.06)' }}>
                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
@@ -528,7 +530,7 @@ export default function AdminBookings() {
                            <Text style={{ color: 'rgba(255,255,255,0.4)', fontSize: 9, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1 }}>Assign Technician</Text>
                            {!canAssign && (
                               <View style={{ backgroundColor: '#451a03', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 }}>
-                                 <Text style={{ color: '#fb923c', fontSize: 7, fontWeight: '900', textTransform: 'uppercase' }}>Set "Confirmed" first</Text>
+                                 <Text style={{ color: '#fb923c', fontSize: 7, fontWeight: '900', textTransform: 'uppercase' }}>Invalid status for assignment</Text>
                               </View>
                            )}
                         </View>
@@ -537,18 +539,19 @@ export default function AdminBookings() {
                            <TouchableOpacity
                               disabled={!canAssign}
                               onPress={() => setPendingChanges((prev: any) => ({ ...prev, assignedEmployeeId: null, assignedEmployeeName: null }))}
-                              style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 14, borderRadius: 14, backgroundColor: !(pendingChanges.assignedEmployeeId ?? selectedAppt?.assignedEmployeeId) ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.04)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)' }}
+                              style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 14, borderRadius: 14, backgroundColor: !(pendingChanges.assignedEmployeeId ?? (selectedAppt?.assignedEmployeeId || selectedAppt?.assignedEmployee?._id)) ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.04)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)' }}
                            >
                               <Text style={{ color: 'rgba(255,255,255,0.5)', fontWeight: '700', fontSize: 11, fontStyle: 'italic' }}>Unassigned</Text>
-                              {!(pendingChanges.assignedEmployeeId ?? selectedAppt?.assignedEmployeeId) && <Ionicons name="checkmark-circle" size={16} color="rgba(255,255,255,0.5)" />}
+                              {!(pendingChanges.assignedEmployeeId ?? (selectedAppt?.assignedEmployeeId || selectedAppt?.assignedEmployee?._id)) && <Ionicons name="checkmark-circle" size={16} color="rgba(255,255,255,0.5)" />}
                            </TouchableOpacity>
                            {technicians.map((t: any) => {
-                              const selected = (pendingChanges.assignedEmployeeId ?? selectedAppt?.assignedEmployeeId) === t.id;
+                              const tId = t.id || t._id;
+                              const selected = (pendingChanges.assignedEmployeeId ?? (selectedAppt?.assignedEmployeeId || selectedAppt?.assignedEmployee?._id)) === tId;
                               return (
                                  <TouchableOpacity
-                                    key={t.id}
+                                    key={tId}
                                     disabled={!canAssign}
-                                    onPress={() => setPendingChanges((prev: any) => ({ ...prev, assignedEmployeeId: t.id, assignedEmployeeName: t.name }))}
+                                    onPress={() => setPendingChanges((prev: any) => ({ ...prev, assignedEmployeeId: tId, assignedEmployeeName: t.name }))}
                                     style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 14, borderRadius: 14, backgroundColor: selected ? 'rgba(14,165,233,0.15)' : 'rgba(255,255,255,0.04)', borderWidth: 1, borderColor: selected ? 'rgba(14,165,233,0.3)' : 'rgba(255,255,255,0.06)' }}
                                  >
                                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
