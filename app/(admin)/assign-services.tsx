@@ -49,7 +49,7 @@ export default function AdminAssignServices() {
 
   const [mainTab, setMainTab] = useState("all"); 
   const [tab, setTab] = useState("unassigned");
-  const [dateFilter, setDateFilter] = useState("Today");
+  const [dateFilter, setDateFilter] = useState("All");
   const [searchText, setSearchText] = useState("");
   const [viewMode, setViewMode] = useState("card"); 
   const [currentPage, setCurrentPage] = useState(1);
@@ -86,9 +86,9 @@ export default function AdminAssignServices() {
   const currentMainList = useMemo(() => {
     return bookings.filter(b => {
       const bStatus = (b.status || "").toLowerCase();
-      if (bStatus === "booked") return false;
+      // if (bStatus === "booked") return false;
       if (mainTab === "all") return true;
-      const isAddVehicle = b.uid === 'admin-created';
+      const isAddVehicle = b.addVehicle === 1 || b.addVehicle === "1" || b.uid === 'admin-created';
       return mainTab === "booked" ? !isAddVehicle : isAddVehicle;
     });
   }, [bookings, mainTab]);
@@ -141,19 +141,21 @@ export default function AdminAssignServices() {
   const stats = useMemo(() => {
     const list = dateFilteredList;
     return {
-      unassigned: list.filter((b) => !b.assignedEmployeeId).length,
-      assigned: list.filter((b) => b.assignedEmployeeId && (b.status || "").toLowerCase() !== "service completed").length,
-      approved: list.filter((b) => (b.status || "").toLowerCase() === "approved").length,
-      completed: list.filter((b) => (b.status || "").toLowerCase() === "service completed").length,
+      unassigned: list.filter((b) => !(b.assignedEmployeeId || b.assignedEmployeeName || b.assigned_employee_id)).length,
+      assigned: list.filter((b) => (b.assignedEmployeeId || b.assignedEmployeeName || b.assigned_employee_id) && !((b.serviceStatus || b.status || "").toLowerCase().includes("completed"))).length,
+      approved: list.filter((b) => (b.serviceStatus || b.status || "").toLowerCase() === "approved").length,
+      completed: list.filter((b) => (b.serviceStatus || b.status || "").toLowerCase().includes("completed")).length,
       total: list.length
     };
   }, [dateFilteredList]);
 
   const filteredBookings = useMemo(() => {
     return dateFilteredList.filter((b) => {
-      const s = (b.status || "").toLowerCase();
-      if (tab === "unassigned") return !b.assignedEmployeeId;
-      if (tab === "assigned") return !!b.assignedEmployeeId && s !== "service completed";
+      const s = (b.serviceStatus || b.status || "").toLowerCase();
+      const hasAssignee = !!(b.assignedEmployeeId || b.assignedEmployeeName || b.assigned_employee_id);
+      
+      if (tab === "unassigned") return !hasAssignee;
+      if (tab === "assigned") return hasAssignee && s !== "service completed";
       if (tab === "approved") return s === "approved";
       if (tab === "completed") return s === "service completed";
       return true;
@@ -179,12 +181,13 @@ export default function AdminAssignServices() {
     try {
       setAssigning(true);
       const selectedEmployee = employees.find(
-        (emp) => emp.id.toString() === selectedEmployeeId.toString()
+        (emp) => (emp.id || emp._id).toString() === selectedEmployeeId.toString()
       );
       if (!selectedEmployee) return Alert.alert("Error", "Mechanic not found");
 
-      await api.put(`/bookings/assign/${selectedBooking.id}`, {
-        assignedEmployeeId: selectedEmployee.id,
+      const bookingId = selectedBooking.id || selectedBooking._id;
+      await api.put(`/bookings/assign/${bookingId}`, {
+        assignedEmployeeId: selectedEmployee.id || selectedEmployee._id,
         assignedEmployeeName: selectedEmployee.name,
         status: "Assigned"
       });
@@ -347,18 +350,18 @@ export default function AdminAssignServices() {
                         </View>
                         {item.phone && <TouchableOpacity onPress={() => {}} className="w-10 h-10 bg-sky-500/10 rounded-xl items-center justify-center border border-sky-500/20"><Ionicons name="call" size={16} color="#0EA5E9" /></TouchableOpacity>}
                      </View>
-                     {item.assignedEmployeeName && (
+                     {(item.assignedEmployeeName || item.assignedEmployeeId || item.assignedEmployee) && (
                        <View className="flex-row items-center gap-4 mt-2 p-4 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
-                          <Ionicons name="construct" size={16} color="#100b98" />
+                          <Ionicons name="construct" size={16} color="#10B981" />
                           <View>
                              <Text className="text-emerald-500/40 text-[8px] font-black uppercase">Assigned Technician</Text>
-                             <Text className="text-emerald-500 text-xs font-black uppercase">{item.assignedEmployeeName}</Text>
+                             <Text className="text-emerald-500 text-xs font-black uppercase">{item.assignedEmployeeName || item.assignedEmployee?.name || "Service Personnel"}</Text>
                           </View>
                        </View>
                      )}
                   </View>
 
-                  {!item.assignedEmployeeId ? (
+                  {!item.assignedEmployeeId && !item.assignedEmployeeName && !item.assignedEmployee?._id ? (
                     <TouchableOpacity 
                       onPress={() => openAssignModal(item)}
                       className="w-full bg-white py-5 rounded-2xl items-center shadow-xl shadow-white/5 active:scale-[0.98]"
@@ -395,13 +398,15 @@ export default function AdminAssignServices() {
 
               {!selectedBooking && globalModalVisible && (
                 <View className="mb-6">
-                   <Text className="text-white/40 text-[9px] font-black uppercase mb-3 ml-2">Select Active Protocol</Text>
+                   <Text className="text-white/40 text-[9px] font-black uppercase mb-3 ml-2">Select Approved Protocol</Text>
                    <ScrollView style={{ maxHeight: 200 }} className="bg-white/5 border border-white/10 rounded-2xl p-2">
-                     {bookings.filter(b => !b.assignedEmployeeId).map(b => (
-                       <TouchableOpacity key={b.id} onPress={() => setSelectedBooking(b)} className={`p-4 rounded-xl mb-1 ${selectedBooking?.id === b.id ? "bg-white" : ""}`}>
-                         <Text className={`font-bold text-xs uppercase ${selectedBooking?.id === b.id ? "text-black" : "text-white"}`}>{b.brand} {b.model} - {b.name}</Text>
-                       </TouchableOpacity>
-                     ))}
+                     {bookings
+                      .filter(b => !(b.assignedEmployeeId || b.assignedEmployeeName || b.assigned_employee_id) && (b.serviceStatus || b.status || "").toLowerCase() === "approved")
+                      .map(b => (
+                        <TouchableOpacity key={b.id || b._id} onPress={() => setSelectedBooking(b)} className={`p-4 rounded-xl mb-1 ${selectedBooking?.id === (b.id || b._id) ? "bg-white" : ""}`}>
+                          <Text className={`font-bold text-xs uppercase ${selectedBooking?.id === (b.id || b._id) ? "text-black" : "text-white"}`}>{b.brand} {b.model} - {b.name}</Text>
+                        </TouchableOpacity>
+                      ))}
                    </ScrollView>
                 </View>
               )}
