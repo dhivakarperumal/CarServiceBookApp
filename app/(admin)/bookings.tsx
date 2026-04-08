@@ -211,7 +211,7 @@ export default function AdminBookings() {
   ) => {
     try {
       const targetId = booking.id || booking._id;
-      await apiService.api.put(`/bookings/${targetId}`, {
+      await apiService.api.put(`/bookings/status/${targetId}`, {
         status: newStatus,
         ...extra,
       });
@@ -705,16 +705,8 @@ export default function AdminBookings() {
         animationType="slide"
         onRequestClose={() => setStatusPopup(null)}
       >
-        <TouchableOpacity
-          activeOpacity={1}
-          onPress={() => setStatusPopup(null)}
-          className="flex-1 bg-black/60 justify-end"
-        >
-          <TouchableOpacity
-            activeOpacity={1}
-            onPress={(e) => e.stopPropagation()}
-            className="bg-card rounded-t-[40px] p-8 pb-12 border-t border-slate-700"
-          >
+        <View className="flex-1 bg-black/60 justify-end">
+          <View className="bg-card rounded-t-[40px] p-8 pb-12 border-t border-slate-700">
             <View className="w-12 h-1.5 bg-slate-600 rounded-full self-center mb-8" />
 
             {statusPopup?.type === "status" && (
@@ -828,8 +820,8 @@ export default function AdminBookings() {
                 Close
               </Text>
             </TouchableOpacity>
-          </TouchableOpacity>
-        </TouchableOpacity>
+          </View>
+        </View>
       </Modal>
 
       {/* ────────────────────────────
@@ -844,19 +836,8 @@ export default function AdminBookings() {
           setPendingChanges({});
         }}
       >
-        <TouchableOpacity
-          activeOpacity={1}
-          onPress={() => {
-            setSelectedAppt(null);
-            setPendingChanges({});
-          }}
-          className="flex-1 bg-black/60 justify-end"
-        >
-          <TouchableOpacity
-            activeOpacity={1}
-            onPress={(e) => e.stopPropagation()}
-            className="bg-card rounded-t-[40px] border-t border-slate-700 h-[92%] w-full"
-          >
+        <View className="flex-1 bg-black/60 justify-end">
+          <View className="bg-card rounded-t-[40px] border-t border-slate-700 h-[92%] w-full">
             {/* Modal Header */}
             <View className="flex-row justify-between items-center px-7 pt-7 pb-5 border-b border-slate-700">
               <View className="flex-row items-center gap-3.5">
@@ -1189,8 +1170,8 @@ export default function AdminBookings() {
                 )}
               </TouchableOpacity>
             </View>
-          </TouchableOpacity>
-        </TouchableOpacity>
+          </View>
+        </View>
       </Modal>
 
       {/* ── FLOATING ACTION BUTTON ── */}
