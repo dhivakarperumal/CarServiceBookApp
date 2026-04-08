@@ -110,14 +110,18 @@ const ServiceStatus: React.FC = () => {
       }
 
       // console.log("ServiceStatus: fetching bookings and all-services for", user.email);
-      const [bookingsRes, servicesRes] = await Promise.all([
+      const [bookingsRes, appointmentsRes, servicesRes] = await Promise.all([
         api.get("/bookings"),
+        api.get("/appointments/my", { params: { uid: user.uid } }),
         api.get("/all-services"),
       ]);
 
       const bookingsRaw = Array.isArray(bookingsRes.data)
         ? bookingsRes.data
         : bookingsRes.data?.bookings || bookingsRes.data?.data || [];
+      const appointmentsRaw = Array.isArray(appointmentsRes.data)
+        ? appointmentsRes.data
+        : appointmentsRes.data?.appointments || [];
       const servicesRaw = Array.isArray(servicesRes.data)
         ? servicesRes.data
         : servicesRes.data?.services || servicesRes.data?.data || [];
@@ -128,6 +132,22 @@ const ServiceStatus: React.FC = () => {
       //   "raw all-services",
       //   servicesRaw.length
       // );
+
+      const appointmentData = appointmentsRaw.map((apt: any) => ({
+        ...apt,
+        id: apt.id || apt.appointmentId,
+        bookingId: apt.appointmentId,
+        name: apt.name || apt.customerName,
+        phone: apt.phone || apt.mobile,
+        bookingType: "Appointment",
+
+        // important mappings
+        issue: apt.serviceType,
+        vehicleNumber: apt.registrationNumber,
+
+        status: apt.status,
+        normalizedStatus: STATUS_NORMALIZER[apt.status] || apt.status,
+      }));
 
       const userServices = servicesRaw.filter((service: any) => {
         const serviceEmail = service.email?.toLowerCase();
@@ -181,46 +201,54 @@ const ServiceStatus: React.FC = () => {
       // console.log("ServiceStatus: processed spare parts", spares);
       setSpareParts(spares);
 
-      const userBookings: Booking[] = bookingsRaw
-        .filter((b: any) => b.email?.toLowerCase() === user.email.toLowerCase())
-        .map((b: any) => {
-          const matchedService = servicesWithDetails.find(
-            (s: any) =>
-              s.id === b.serviceId ||
-              s.id === b.service_id ||
-              s.serviceId === b.serviceId ||
-              s.serviceId === b.service_id ||
-              s._id === b.serviceId ||
-              s._id === b.service_id ||
-              s.bookingId === b.bookingId ||
-              s.bookingId === b.booking_id ||
-              s.booking_id === b.bookingId ||
-              s.booking_id === b.booking_id
-          );
+      const regularBookings = bookingsRaw.filter(
+        (b: any) =>
+          b.email?.toLowerCase() === user.email.toLowerCase() ||
+          b.uid === user.uid
+      );
 
-          return {
-            ...b,
-            normalizedStatus: STATUS_NORMALIZER[b.status] || b.status,
-            issues: matchedService?.issues || b.issues || b.serviceIssues || [],
-            issue: b.issue || b.serviceType || matchedService?.issue || "",
-            issueAmount: b.issueAmount ?? matchedService?.issueAmount,
-            issueStatus: b.issueStatus || matchedService?.issueStatus,
-            serviceId: b.serviceId || b.id || b.service_id || matchedService?.id || matchedService?.serviceId,
-            brand: b.brand || b.vehicleBrand || matchedService?.brand,
-            model: b.model || b.vehicleModel || matchedService?.model,
-            vehicleNumber:
-              b.vehicleNumber ||
-              b.registrationNumber ||
-              matchedService?.vehicleNumber ||
-              matchedService?.registrationNumber,
-            address: b.address || b.location || matchedService?.address || matchedService?.location,
-            preferredDate: b.preferredDate || b.date || matchedService?.preferredDate,
-            assignedEmployeeName:
-              b.assignedEmployeeName ||
-              b.assignedEmployee ||
-              matchedService?.assignedEmployeeName,
-          } as Booking;
-        });
+      // 🔥 MERGE HERE
+      const combinedData = [...regularBookings, ...appointmentData];
+
+      // 🔥 USE combinedData instead of bookingsRaw
+      const userBookings: Booking[] = combinedData.map((b: any) => {
+        const matchedService = servicesWithDetails.find(
+          (s: any) =>
+            s.id === b.serviceId ||
+            s.id === b.service_id ||
+            s.serviceId === b.serviceId ||
+            s.serviceId === b.service_id ||
+            s._id === b.serviceId ||
+            s._id === b.service_id ||
+            s.bookingId === b.bookingId ||
+            s.bookingId === b.booking_id ||
+            s.booking_id === b.bookingId ||
+            s.booking_id === b.booking_id
+        );
+
+        return {
+          ...b,
+          normalizedStatus: STATUS_NORMALIZER[b.status] || b.status,
+          issues: matchedService?.issues || b.issues || b.serviceIssues || [],
+          issue: b.issue || b.serviceType || matchedService?.issue || "",
+          issueAmount: b.issueAmount ?? matchedService?.issueAmount,
+          issueStatus: b.issueStatus || matchedService?.issueStatus,
+          serviceId: b.serviceId || b.id || b.service_id || matchedService?.id || matchedService?.serviceId,
+          brand: b.brand || b.vehicleBrand || matchedService?.brand,
+          model: b.model || b.vehicleModel || matchedService?.model,
+          vehicleNumber:
+            b.vehicleNumber ||
+            b.registrationNumber ||
+            matchedService?.vehicleNumber ||
+            matchedService?.registrationNumber,
+          address: b.address || b.location || matchedService?.address || matchedService?.location,
+          preferredDate: b.preferredDate || b.date || matchedService?.preferredDate,
+          assignedEmployeeName:
+            b.assignedEmployeeName ||
+            b.assignedEmployee ||
+            matchedService?.assignedEmployeeName,
+        } as Booking;
+      });
 
       // console.log("ServiceStatus: processed bookings", userBookings);
       setBookings(userBookings);
