@@ -213,7 +213,7 @@ export default function HomeScreen({ navigation }: any) {
       console.log(`Spare part ${partId} status changed to ${status}`);
 
       // Update local state
-setSpareParts((prev: any[]) =>
+      setSpareParts((prev: any[]) =>
         prev.map((service: any) => {
           if (service.serviceId !== serviceId) return service;
           return {
@@ -312,7 +312,7 @@ setSpareParts((prev: any[]) =>
       }
 
       console.log("homescreen: approve success", { serviceId, itemId, status, type });
-      
+
       // Refresh bookings after approval
       if (!authUser?.id && !authUser?.uid && !authUser?.email) {
         return;
@@ -680,12 +680,17 @@ setSpareParts((prev: any[]) =>
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        // Assuming API has getReviews endpoint
-        // If not available, you may need to add it to api.ts
-        const data = await apiService.getServices(); // Placeholder - update as needed
-        setReviews(data.slice(0, 5)); // Mock reviews from services
+        const res = await api.get("/reviews");
+
+        // ✅ only approved reviews (same as web)
+        const approvedReviews = (res.data || []).filter(
+          (r: any) => r.status === 1 || r.status === true
+        );
+
+        setReviews(approvedReviews);
       } catch (error) {
-        console.error('Error fetching reviews:', error);
+        console.error("Error fetching reviews:", error);
+        setReviews([]);
       }
     };
 
@@ -718,7 +723,7 @@ setSpareParts((prev: any[]) =>
           });
         }, 400);
       }
-    }, 4000); 
+    }, 4000);
 
     return () => clearInterval(interval);
   }, [reviews]);
