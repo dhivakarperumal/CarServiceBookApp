@@ -272,7 +272,7 @@ export const apiService = {
 
   getAppointments: async (): Promise<any[]> => {
     try {
-      const response = await api.get('/appointments');
+      const response = await api.get('/appointments/all');
       const data = response.data;
       if (Array.isArray(data)) return data;
       if (data?.data && Array.isArray(data.data)) return data.data;
