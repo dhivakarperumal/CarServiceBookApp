@@ -303,7 +303,7 @@ export default function VehiclesScreen() {
         
 
         {/* Search & Filters */}
-        <View className="px-5 mb-5 flex-row gap-3">
+        <View className="px-5 mb-5 mt-5 flex-row gap-3">
             <View className="flex-1 bg-white/10 border border-[#38bdf8]/30 rounded-xl px-4 h-12 flex-row items-center">
                <Ionicons name="search" size={16} color="#9ca3af" />
                <TextInput 
@@ -343,7 +343,7 @@ export default function VehiclesScreen() {
               numColumns={2}
               columnWrapperStyle={{ justifyContent: 'space-between', paddingHorizontal: 20 }}
               showsVerticalScrollIndicator={false}
-              contentContainerStyle={{ paddingBottom: 100 }}
+              contentContainerStyle={{ paddingBottom: 50 }}
               ListEmptyComponent={() => (
                  <View className="items-center py-20 px-5">
                    <Text className="text-gray-400 text-lg text-center font-medium">No vehicles found matching your criteria</Text>

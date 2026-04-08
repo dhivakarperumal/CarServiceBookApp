@@ -536,7 +536,7 @@ export default function BookingScreen() {
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1 bg-black">
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-        <View className="px-5 pt-8 pb-32">
+        <View className="px-5 pt-8 pb-9">
 
           <View className="mb-6">
             <Text className="text-2xl font-black text-primary tracking-tight">Quick Service Booking</Text>

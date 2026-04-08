@@ -447,7 +447,7 @@ export default function HomeScreen({ navigation }) {
       className="flex-1 bg-background"
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{
-        paddingBottom: 120,
+        paddingBottom: 50,
         paddingTop: 10,
       }}
     >
@@ -561,7 +561,7 @@ export default function HomeScreen({ navigation }) {
                 </Text>
 
                 {/* PRICE */}
-                <View className="flex-row items-center mb-1">
+                {/* <View className="flex-row items-center mb-1">
                   {service.price ? (
                     <Text className="text-[#0EA5E9] font-bold text-sm">
                       {service.price}
@@ -571,7 +571,7 @@ export default function HomeScreen({ navigation }) {
                       Price on request
                     </Text>
                   )}
-                </View>
+                </View> */}
 
                 {/* BUTTON */}
                 <TouchableOpacity
