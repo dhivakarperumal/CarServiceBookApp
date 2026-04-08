@@ -249,6 +249,26 @@ export const apiService = {
     }
   },
 
+  updateVehicleBookingStatus: async (id: number | string, data: any): Promise<any> => {
+    try {
+      const response = await api.put(`/vehicle-bookings/${id}/status`, data);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating vehicle booking status:', error);
+      throw error;
+    }
+  },
+
+  deleteVehicleBooking: async (id: number | string): Promise<any> => {
+    try {
+      const response = await api.delete(`/vehicle-bookings/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting vehicle booking:', error);
+      throw error;
+    }
+  },
+
   getUsers: async (): Promise<any[]> => {
     try {
       const response = await api.get('/users');

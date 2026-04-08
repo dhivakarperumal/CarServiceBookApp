@@ -95,9 +95,28 @@ export default function AdminSettings() {
                      </View>
                   </TouchableOpacity>
 
+                  {/* ── Booked Vehicles ── */}
+                  <TouchableOpacity
+                     onPress={() => router.push('/(adminPages)/booked-vehicles' as any)}
+                     className="flex-row items-center justify-between p-5 bg-slate-900 border border-slate-800 rounded-3xl mt-4 shadow-2xl"
+                  >
+                     <View className="flex-row items-center gap-4 flex-1">
+                        <View className="w-12 h-12 bg-sky-950 rounded-2xl items-center justify-center border border-sky-900">
+                           <Ionicons name="car-outline" size={24} color="#0ea5e9" />
+                        </View>
+                        <View>
+                           <Text className="text-white font-black text-sm uppercase tracking-tighter">Booked Vehicles</Text>
+                           <Text className="text-gray-500 text-[8px] font-black uppercase tracking-widest mt-1">Status & Sales Settlement</Text>
+                        </View>
+                     </View>
+                     <View className="bg-slate-800 p-2 rounded-full">
+                        <Ionicons name="chevron-forward" size={16} color="#475569" />
+                     </View>
+                  </TouchableOpacity>
+
                </Section>
 
-             
+              
               
             </View>
          </ScrollView>
