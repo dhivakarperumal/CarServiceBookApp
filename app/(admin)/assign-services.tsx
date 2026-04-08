@@ -433,35 +433,67 @@ export default function AdminAssignServices() {
               <Text className="text-white text-2xl font-black uppercase text-center mb-2">Technician Selection</Text>
               <Text className="text-white/40 text-[9px] uppercase text-center mb-8 tracking-widest">Authorize personnel for service fulfillment</Text>
 
-              {!selectedBooking && globalModalVisible && (
+               {!selectedBooking && globalModalVisible && (
                 <View className="mb-6">
                    <Text className="text-white/40 text-[9px] font-black uppercase mb-3 ml-2">Select Approved Protocol</Text>
-                   <ScrollView style={{ maxHeight: 200 }} className="bg-white/5 border border-white/10 rounded-2xl p-2">
-                     {bookings
-                      .filter(b => !(b.assignedEmployeeId || b.assignedEmployeeName || b.assigned_employee_id) && !(b.serviceStatus || b.status || b.appointmentStatus || "").toLowerCase().includes("completed"))
-                      .map(b => (
-                        <TouchableOpacity key={b.id || b._id} onPress={() => setSelectedBooking(b)} className={`p-4 rounded-xl mb-1 ${selectedBooking?.id === (b.id || b._id) ? "bg-white" : ""}`}>
-                          <Text className={`font-bold text-xs uppercase ${selectedBooking?.id === (b.id || b._id) ? "text-black" : "text-white"}`}>{b.brand || "Unknown Brand"} {b.model || ""} - {b.name || "No Name"} ({b.appointmentId || b.bookingId || "ID-"+(b.id || b._id)})</Text>
-                        </TouchableOpacity>
-                      ))}
-                     {bookings.filter(b => !(b.assignedEmployeeId || b.assignedEmployeeName || b.assigned_employee_id) && !(b.serviceStatus || b.status || b.appointmentStatus || "").toLowerCase().includes("completed")).length === 0 && (
-                        <Text className="text-white/20 p-5 text-center text-[10px] font-black uppercase">No Unassigned Protocols</Text>
-                     )}
-                   </ScrollView>
+                   <View className="bg-white/5 border border-white/10 rounded-2xl p-3">
+                     <ScrollView style={{ maxHeight: 200 }} className="gap-2">
+                       {bookings
+                        .filter(b => !(b.assignedEmployeeId || b.assignedEmployeeName || b.assigned_employee_id) && !(b.serviceStatus || b.status || b.appointmentStatus || "").toLowerCase().includes("completed"))
+                        .map(b => {
+                          const isSelected = selectedBooking?.id === (b.id || b._id);
+                          return (
+                            <TouchableOpacity key={b.id || b._id} onPress={() => setSelectedBooking(b)} className={`flex-row justify-between items-center p-3.5 rounded-xl border ${isSelected ? 'bg-sky-500/15 border-sky-500/30' : 'bg-white/5 border-white/5'}`}>
+                              <View className="flex-row items-center gap-3">
+                                <View className="w-7 h-7 rounded-full bg-sky-500/10 items-center justify-center">
+                                  <Ionicons name="car-outline" size={14} color="#0ea5e9" />
+                                </View>
+                                <View>
+                                  <Text className={`font-bold text-xs uppercase ${isSelected ? 'text-sky-500' : 'text-white/80'}`}>{b.brand || (b.isAppointment ? "Appointment" : "Booking")} {b.model || ""}</Text>
+                                  <Text className={`font-bold text-[9px] uppercase mt-0.5 ${isSelected ? 'text-sky-500/70' : 'text-white/40'}`}>{b.appointmentId || b.bookingId || "ID-"+(b.id || b._id)}  •  {b.name || "No Name"}</Text>
+                                </View>
+                              </View>
+                              {isSelected && <Ionicons name="checkmark-circle" size={20} color="#0ea5e9" />}
+                            </TouchableOpacity>
+                          );
+                        })}
+                       {bookings.filter(b => !(b.assignedEmployeeId || b.assignedEmployeeName || b.assigned_employee_id) && !(b.serviceStatus || b.status || b.appointmentStatus || "").toLowerCase().includes("completed")).length === 0 && (
+                          <View className="p-8 items-center border border-dashed border-white/10 rounded-2xl bg-black/20">
+                             <Ionicons name="documents-outline" size={32} color="rgba(255,255,255,0.1)" />
+                             <Text className="text-white/30 text-center text-[10px] font-black uppercase mt-3 tracking-widest">No Unassigned Protocols</Text>
+                          </View>
+                       )}
+                     </ScrollView>
+                   </View>
                 </View>
               )}
 
               <View className="mb-8">
                  <Text className="text-white/40 text-[9px] font-black uppercase mb-3 ml-2">Available Squad</Text>
-                 <ScrollView style={{ maxHeight: 250 }} className="bg-white/5 border border-white/10 rounded-2xl p-2">
-                   {employees.map(emp => (
-                     <TouchableOpacity key={emp.id} onPress={() => setSelectedEmployeeId(emp.id)} className={`p-5 rounded-xl mb-1 flex-row justify-between items-center ${selectedEmployeeId === emp.id ? "bg-white" : ""}`}>
-                       <Text className={`font-black text-xs uppercase ${selectedEmployeeId === emp.id ? "text-black" : "text-white"}`}>{emp.name}</Text>
-                       {selectedEmployeeId === emp.id && <Ionicons name="checkmark-circle" size={20} color="black" />}
-                     </TouchableOpacity>
-                   ))}
-                   {employees.length === 0 && <Text className="text-white/20 p-5 text-center text-[10px] font-black uppercase">No Active Personnel</Text>}
-                 </ScrollView>
+                 <View className="bg-white/5 border border-white/10 rounded-2xl p-3">
+                   <ScrollView style={{ maxHeight: 250 }} className="gap-2">
+                     {employees.map(emp => {
+                       const isSelected = selectedEmployeeId === emp.id;
+                       return (
+                         <TouchableOpacity key={emp.id} onPress={() => setSelectedEmployeeId(emp.id)} className={`flex-row justify-between items-center p-3.5 rounded-xl border ${isSelected ? 'bg-sky-500/15 border-sky-500/30' : 'bg-white/5 border-white/5'}`}>
+                           <View className="flex-row items-center gap-3">
+                             <View className="w-7 h-7 rounded-full bg-sky-500/10 items-center justify-center">
+                               <Text className="text-sky-500 text-[11px] font-black">{(emp.name || 'T').charAt(0).toUpperCase()}</Text>
+                             </View>
+                             <Text className={`font-bold text-xs uppercase ${isSelected ? 'text-sky-500' : 'text-white/80'}`}>{emp.name}</Text>
+                           </View>
+                           {isSelected && <Ionicons name="checkmark-circle" size={20} color="#0ea5e9" />}
+                         </TouchableOpacity>
+                       );
+                     })}
+                     {employees.length === 0 && (
+                        <View className="p-8 items-center border border-dashed border-white/10 rounded-2xl bg-black/20">
+                           <Ionicons name="people-outline" size={32} color="rgba(255,255,255,0.1)" />
+                           <Text className="text-white/30 text-center text-[10px] font-black uppercase mt-3 tracking-widest">No Active Personnel</Text>
+                        </View>
+                     )}
+                   </ScrollView>
+                 </View>
               </View>
 
               <View className="flex-row gap-4 mb-4">
