@@ -26,7 +26,7 @@ const StatCard = ({ title, value, iconName, IconComponent, gradientColors }: any
       <View className="w-12 h-12 rounded-2xl items-center justify-center bg-white/5">
         <IconComponent name={iconName} size={24} color={gradientColors[0]} />
       </View>
-      <Text className="text-white/20 font-black text-[8px] uppercase tracking-widest leading-none">{title}</Text>
+      <Text className="text-white/50 font-black text-[8px] uppercase tracking-widest leading-none">{title}</Text>
     </View>
     <Text className="text-white text-3xl font-black">{value}</Text>
   </View>
@@ -57,10 +57,24 @@ export default function AdminAssignServices() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const res = await api.get("/bookings");
-      setBookings(res.data || []);
+      const [bookingsRes, apptsRes] = await Promise.all([
+        api.get("/bookings"),
+        api.get("/appointments/all")
+      ]);
+      
+      const bList = bookingsRes.data || [];
+      const aRaw = apptsRes.data || [];
+      const aList = Array.isArray(aRaw) ? aRaw : (aRaw.data || aRaw.appointments || []);
+      
+      // Combine list and tag appointments to distinguish them if needed
+      const combined = [
+        ...bList.map((b: any) => ({ ...b, isAppointment: false })),
+        ...aList.map((a: any) => ({ ...a, isAppointment: true }))
+      ];
+      
+      setBookings(combined);
     } catch (error) {
-      console.error("Failed to fetch bookings", error);
+      console.error("Failed to fetch data", error);
     } finally {
       setLoading(false);
     }
@@ -86,7 +100,6 @@ export default function AdminAssignServices() {
   const currentMainList = useMemo(() => {
     return bookings.filter(b => {
       const bStatus = (b.status || "").toLowerCase();
-      // if (bStatus === "booked") return false;
       if (mainTab === "all") return true;
       const isAddVehicle = b.addVehicle === 1 || b.addVehicle === "1" || b.uid === 'admin-created';
       return mainTab === "booked" ? !isAddVehicle : isAddVehicle;
@@ -102,7 +115,11 @@ export default function AdminAssignServices() {
         b.brand?.toLowerCase().includes(search) ||
         b.model?.toLowerCase().includes(search) ||
         b.vehicleNumber?.toLowerCase().includes(search) ||
+        b.registrationNumber?.toLowerCase().includes(search) ||
         b.bookingId?.toLowerCase().includes(search) ||
+        b.appointmentId?.toLowerCase().includes(search) ||
+        b.id?.toString().toLowerCase().includes(search) ||
+        b._id?.toString().toLowerCase().includes(search) ||
         b.assignedEmployeeName?.toLowerCase().includes(search);
 
       if (!matchSearch) return false;
@@ -142,8 +159,11 @@ export default function AdminAssignServices() {
     const list = dateFilteredList;
     return {
       unassigned: list.filter((b) => !(b.assignedEmployeeId || b.assignedEmployeeName || b.assigned_employee_id)).length,
-      assigned: list.filter((b) => (b.assignedEmployeeId || b.assignedEmployeeName || b.assigned_employee_id) && !((b.serviceStatus || b.status || "").toLowerCase().includes("completed"))).length,
-      approved: list.filter((b) => (b.serviceStatus || b.status || "").toLowerCase() === "approved").length,
+      assigned: list.filter((b) => (b.assignedEmployeeId || b.assignedEmployeeName || b.assigned_employee_id) && !((b.serviceStatus || b.status || b.appointmentStatus || "").toLowerCase().includes("completed"))).length,
+      approved: list.filter((b) => {
+        const s = (b.serviceStatus || b.status || b.appointmentStatus || "").toLowerCase();
+        return s === "approved" || s === "confirmed" || s.includes("booked") || s.includes("assigned");
+      }).length,
       completed: list.filter((b) => (b.serviceStatus || b.status || "").toLowerCase().includes("completed")).length,
       total: list.length
     };
@@ -151,13 +171,13 @@ export default function AdminAssignServices() {
 
   const filteredBookings = useMemo(() => {
     return dateFilteredList.filter((b) => {
-      const s = (b.serviceStatus || b.status || "").toLowerCase();
+      const s = (b.serviceStatus || b.status || b.appointmentStatus || "").toLowerCase();
       const hasAssignee = !!(b.assignedEmployeeId || b.assignedEmployeeName || b.assigned_employee_id);
       
       if (tab === "unassigned") return !hasAssignee;
-      if (tab === "assigned") return hasAssignee && s !== "service completed";
-      if (tab === "approved") return s === "approved";
-      if (tab === "completed") return s === "service completed";
+      if (tab === "assigned") return hasAssignee && !s.includes("completed");
+      if (tab === "approved") return s === "approved" || s === "confirmed" || s.includes("booked") || s.includes("assigned");
+      if (tab === "completed") return s.includes("completed");
       return true;
     });
   }, [dateFilteredList, tab]);
@@ -229,7 +249,8 @@ export default function AdminAssignServices() {
         {/* HEADER */}
         <View className="px-6 pt-10 pb-8 flex-row justify-between items-start">
            <View>
-             
+             <Text className="text-white text-3xl font-black tracking-tighter uppercase italic">Assign</Text>
+             <Text className="text-white/50 font-black text-[8px] uppercase tracking-widest mt-1">Personnel Management</Text>
            </View>
            <TouchableOpacity 
              onPress={async () => {
@@ -310,14 +331,21 @@ export default function AdminAssignServices() {
              </View>
            ) : (
              paginatedBookings.map((item: any) => (
-               <View key={item.id} style={{ backgroundColor: COLORS.card }} className="p-8 rounded-3xl border border-white/5 shadow-xl relative overflow-hidden">
+               <View key={item.id || item._id} style={{ backgroundColor: COLORS.card }} className="p-8 rounded-3xl border border-white/5 shadow-xl relative overflow-hidden">
                   <View className="flex-row justify-between items-start mb-6">
                      <View>
-                        <Text className="text-white/20 font-black text-[8px] uppercase">ID: {item.id}</Text>
-                        <Text className="text-sky-400 font-black text-sm uppercase">{item.bookingId || "BKG-NEW"}</Text>
+                        <Text className="text-white/50 font-black text-[8px] uppercase">DB-ID: {item.id || item._id}</Text>
+                        <Text className="text-white font-black text-sm uppercase">{item.appointmentId || item.bookingId || (item.id ? `ID-${item.id}` : "SVC-NEW")}</Text>
                      </View>
-                     <View className={`px-4 py-1.5 rounded-full border border-white/10 bg-white/5`}>
-                        <Text className="text-white/40 text-[9px] font-black uppercase">{(item.status || "BOOKED").toUpperCase()}</Text>
+                     <View className="flex-row gap-2">
+                        {item.isAppointment && (
+                          <View className="px-3 py-1.5 rounded-full border border-sky-500/30 bg-sky-500/10">
+                            <Text className="text-sky-400 text-[8px] font-black uppercase">APPOINTMENT</Text>
+                          </View>
+                        )}
+                        <View className={`px-4 py-1.5 rounded-full border border-white/10 bg-white/5`}>
+                           <Text className="text-white/40 text-[9px] font-black uppercase">{(item.serviceStatus || item.status || item.appointmentStatus || "BOOKED").toUpperCase()}</Text>
+                        </View>
                      </View>
                   </View>
 
@@ -328,7 +356,7 @@ export default function AdminAssignServices() {
                         </View>
                         <Text className="text-white text-xl font-black uppercase">{item.brand} {item.model}</Text>
                      </View>
-                     {item.vehicleNumber && <Text className="text-sky-500 font-bold text-xs bg-sky-500/10 px-3 py-1 rounded-lg self-start border border-sky-500/20">{item.vehicleNumber}</Text>}
+                     {(item.vehicleNumber || item.registrationNumber) && <Text className="text-sky-500 font-bold text-xs bg-sky-500/10 px-3 py-1 rounded-lg self-start border border-sky-500/20">{item.vehicleNumber || item.registrationNumber}</Text>}
                   </View>
 
                   <View className="bg-black/20 p-6 rounded-2xl gap-4 mb-8 border border-white/5">
@@ -401,7 +429,7 @@ export default function AdminAssignServices() {
                    <Text className="text-white/40 text-[9px] font-black uppercase mb-3 ml-2">Select Approved Protocol</Text>
                    <ScrollView style={{ maxHeight: 200 }} className="bg-white/5 border border-white/10 rounded-2xl p-2">
                      {bookings
-                      .filter(b => !(b.assignedEmployeeId || b.assignedEmployeeName || b.assigned_employee_id) && (b.serviceStatus || b.status || "").toLowerCase() === "approved")
+                      .filter(b => !(b.assignedEmployeeId || b.assignedEmployeeName || b.assigned_employee_id) && ((b.serviceStatus || b.status || "").toLowerCase() === "approved" || (b.serviceStatus || b.status || "").toLowerCase() === "confirmed"))
                       .map(b => (
                         <TouchableOpacity key={b.id || b._id} onPress={() => setSelectedBooking(b)} className={`p-4 rounded-xl mb-1 ${selectedBooking?.id === (b.id || b._id) ? "bg-white" : ""}`}>
                           <Text className={`font-bold text-xs uppercase ${selectedBooking?.id === (b.id || b._id) ? "text-black" : "text-white"}`}>{b.brand} {b.model} - {b.name}</Text>

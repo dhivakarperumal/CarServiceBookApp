@@ -127,13 +127,22 @@ export default function AdminBookings() {
 
    /* ─── APPOINTMENTS LOGIC ─── */
    const filteredAppts = useMemo(() => appointments.filter(a => {
+      const search = apptSearch.toLowerCase();
       const matchSearch = !apptSearch ||
-         (a.appointmentId || '').toLowerCase().includes(apptSearch.toLowerCase()) ||
-         (a.name || '').toLowerCase().includes(apptSearch.toLowerCase()) ||
-         (a.phone || '').includes(apptSearch);
-      const matchStatus = apptStatusFilter === 'all' || a.status === apptStatusFilter;
+         (a.appointmentId || '').toLowerCase().includes(search) ||
+         (a.id || '').toString().includes(search) ||
+         (a._id || '').toString().includes(search) ||
+         (a.name || '').toLowerCase().includes(search) ||
+         (a.phone || '').includes(search) ||
+         (a.brand || '').toLowerCase().includes(search) ||
+         (a.model || '').toLowerCase().includes(search) ||
+         (a.registrationNumber || a.vehicleNumber || '').toLowerCase().includes(search);
+
+      const aStatus = (a.status || a.serviceStatus || a.appointmentStatus || '').toLowerCase();
+      const matchStatus = apptStatusFilter === 'all' || aStatus.includes(apptStatusFilter.toLowerCase());
+
       const matchAssign = assignFilter === 'all' ||
-         (assignFilter === 'assigned' ? !!a.assignedEmployeeId : !a.assignedEmployeeId);
+         (assignFilter === 'assigned' ? !!(a.assignedEmployeeId || a.assignedEmployeeName) : !(a.assignedEmployeeId || a.assignedEmployeeName));
       return matchSearch && matchStatus && matchAssign;
    }), [appointments, apptSearch, apptStatusFilter, assignFilter]);
 
@@ -303,8 +312,8 @@ export default function AdminBookings() {
                      <Text style={{ color: 'rgba(255,255,255,0.15)', fontWeight: '900', fontSize: 10, textTransform: 'uppercase', marginTop: 16, letterSpacing: 2 }}>No appointments found</Text>
                   </View>
                ) : filteredAppts.map(apt => {
-                  const sc = apptStatusColors[apt.status] || apptStatusColors['Appointment Booked'];
-                  const isAssigned = !!apt.assignedEmployeeName;
+                  const sc = apptStatusColors[apt.status || apt.serviceStatus || apt.appointmentStatus || 'Appointment Booked'] || apptStatusColors['Appointment Booked'];
+                  const isAssigned = !!(apt.assignedEmployeeName || apt.assignedEmployeeId);
                   return (
                      <View key={apt.id} style={{ marginBottom: 16, backgroundColor: '#0f172a', borderRadius: 28, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
                         <View style={{ padding: 20 }}>
@@ -317,7 +326,7 @@ export default function AdminBookings() {
                               </View>
                               <View style={{ alignItems: 'flex-end', gap: 6 }}>
                                  <View style={{ backgroundColor: sc.bg, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20, borderWidth: 1, borderColor: sc.border }}>
-                                    <Text style={{ color: sc.text, fontSize: 7, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1 }}>{apt.status}</Text>
+                                    <Text style={{ color: sc.text, fontSize: 7, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1 }}>{(apt.status || apt.serviceStatus || apt.appointmentStatus || 'Appointment Booked')}</Text>
                                  </View>
                                  {apt.emergencyService && (
                                     <View style={{ backgroundColor: '#450a0a', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8, borderWidth: 1, borderColor: '#7f1d1d' }}>
@@ -333,7 +342,7 @@ export default function AdminBookings() {
                                  <Ionicons name="car-outline" size={16} color={COLORS.primary} />
                                  <View>
                                     <Text style={{ color: 'white', fontSize: 12, fontWeight: '700' }}>{apt.brand} {apt.model}</Text>
-                                    <Text style={{ color: '#475569', fontSize: 9, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1 }}>{apt.registrationNumber}</Text>
+                                    <Text style={{ color: '#475569', fontSize: 9, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1 }}>{apt.registrationNumber || apt.vehicleNumber || 'NO REG'}</Text>
                                  </View>
                               </View>
                               <View style={{ backgroundColor: 'rgba(14,165,233,0.1)', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 10, borderWidth: 1, borderColor: 'rgba(14,165,233,0.2)' }}>
