@@ -61,18 +61,35 @@ export default function VehiclesScreen() {
       });
    }, [vehicles, search, filterType]);
 
-   const parseImages = (imageString: string | undefined | null) => {
-      if (!imageString) return [];
-      try {
-         const images = JSON.parse(imageString);
-         if (typeof images === 'object' && !Array.isArray(images)) {
-            return Object.values(images).filter(url => typeof url === 'string') as string[];
-         }
-         return Array.isArray(images) ? images : [imageString];
-      } catch {
-         return [imageString];
+   const parseImages = (data: any) => {
+  if (!data) return [];
+
+  try {
+    // already array
+    if (Array.isArray(data)) return data;
+
+    // object {img1: "", img2: ""}
+    if (typeof data === "object") {
+      return Object.values(data).filter(Boolean);
+    }
+
+    // string JSON
+    if (typeof data === "string") {
+      const parsed = JSON.parse(data);
+
+      if (Array.isArray(parsed)) return parsed;
+      if (typeof parsed === "object") {
+        return Object.values(parsed).filter(Boolean);
       }
-   };
+
+      return [data];
+    }
+
+    return [];
+  } catch {
+    return [data];
+  }
+};
 
    const formatPrice = (price: any) => {
       const numericPart = String(price).replace(/[^0-9.]/g, '');
@@ -418,8 +435,14 @@ export default function VehiclesScreen() {
             <View className="flex-1 bg-black">
                {selectedVehicle && (() => {
                   const v = selectedVehicle as any;
-                  const images = parseImages(v.image || v.images);
-                  const imageList = images.map(img => img.startsWith('http') ? img : `https://cars.qtechx.com/${img}`);
+                  const images = parseImages(v.images || v.image);
+                  const imageList = images
+                     .filter(Boolean)
+                     .map((img) =>
+                        img.startsWith("http")
+                           ? img
+                           : `https://cars.qtechx.com/${img}`
+                     );
                   const mainImage = selectedImage || imageList[0];
 
                   return (
