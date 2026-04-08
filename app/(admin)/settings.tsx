@@ -9,6 +9,7 @@ import {
    TouchableOpacity,
    View,
 } from "react-native";
+import { COLORS } from "../../theme/colors";
 
 export default function AdminSettings() {
   const router = useRouter();
@@ -18,6 +19,8 @@ export default function AdminSettings() {
 
    return (
       <SafeAreaView className="flex-1 bg-slate-950">
+
+
          <ScrollView 
             className="flex-1"
             contentContainerStyle={{ padding: 24, paddingBottom: 100, flexGrow: 1 }}
@@ -36,7 +39,7 @@ export default function AdminSettings() {
                   >
                      <View className="flex-row items-center gap-4 flex-1">
                         <View className="w-12 h-12 bg-sky-950 rounded-2xl items-center justify-center border border-sky-900 shadow-lg shadow-sky-500/10">
-                           <Ionicons name="people-outline" size={24} color="#0ea5e9" />
+                           <Ionicons name="people-outline" size={24} color={COLORS.primary} />
                         </View>
                         <View>
                            <Text className="text-white font-black text-sm uppercase tracking-tighter">Users & Directory</Text>
@@ -55,7 +58,7 @@ export default function AdminSettings() {
                   >
                      <View className="flex-row items-center gap-4 flex-1">
                         <View className="w-12 h-12 bg-sky-950 rounded-2xl items-center justify-center border border-sky-900">
-                           <Ionicons name="bag-handle-outline" size={24} color="#0ea5e9" />
+                           <Ionicons name="bag-handle-outline" size={24} color={COLORS.primary} />
                         </View>
                         <View>
                            <Text className="text-white font-black text-sm uppercase tracking-tighter">Orders</Text>
@@ -74,7 +77,7 @@ export default function AdminSettings() {
             >
               <View className="flex-row items-center gap-4 flex-1">
                 <View className="w-12 h-12 bg-sky-950 rounded-2xl items-center justify-center border border-sky-900">
-                  <Ionicons name="cube-outline" size={24} color="#0ea5e9" />
+                  <Ionicons name="cube-outline" size={24} color={COLORS.primary} />
                 </View>
                 <View>
                   <Text className="text-white font-black text-sm uppercase tracking-tighter">
@@ -97,7 +100,7 @@ export default function AdminSettings() {
                   >
                      <View className="flex-row items-center gap-4 flex-1">
                         <View className="w-12 h-12 bg-sky-950 rounded-2xl items-center justify-center border border-sky-900">
-                           <Ionicons name="receipt-outline" size={24} color="#0ea5e9" />
+                           <Ionicons name="receipt-outline" size={24} color={COLORS.primary} />
                         </View>
                         <View>
                            <Text className="text-white font-black text-sm uppercase tracking-tighter">Product Billing</Text>
@@ -135,7 +138,7 @@ export default function AdminSettings() {
             >
               <View className="flex-row items-center gap-4 flex-1">
                 <View className="w-12 h-12 bg-sky-950 rounded-2xl items-center justify-center border border-sky-900">
-                  <Ionicons name="build-outline" size={24} color="#0ea5e9" />
+                  <Ionicons name="build-outline" size={24} color={COLORS.primary} />
                 </View>
                 <View>
                   <Text className="text-white font-black text-sm uppercase tracking-tighter">
@@ -160,7 +163,7 @@ export default function AdminSettings() {
             >
               <View className="flex-row items-center gap-4 flex-1">
                 <View className="w-12 h-12 bg-sky-950 rounded-2xl items-center justify-center border border-sky-900">
-                  <Ionicons name="car-outline" size={24} color="#0ea5e9" />
+                  <Ionicons name="car-outline" size={24} color={COLORS.primary} />
                 </View>
                 <View>
                   <Text className="text-white font-black text-sm uppercase tracking-tighter">
@@ -183,7 +186,7 @@ export default function AdminSettings() {
                   >
                      <View className="flex-row items-center gap-4 flex-1">
                         <View className="w-12 h-12 bg-sky-950 rounded-2xl items-center justify-center border border-sky-900 shadow-lg shadow-sky-500/10">
-                           <Ionicons name="construct-outline" size={24} color="#0ea5e9" />
+                           <Ionicons name="construct-outline" size={24} color={COLORS.primary} />
                         </View>
                         <View>
                            <Text className="text-white font-black text-sm uppercase tracking-tighter">Car Service Catalog</Text>
@@ -221,7 +224,7 @@ export default function AdminSettings() {
                   >
                      <View className="flex-row items-center gap-4 flex-1">
                         <View className="w-12 h-12 bg-sky-950 rounded-2xl items-center justify-center border border-sky-900">
-                           <Ionicons name="star-outline" size={24} color="#0ea5e9" />
+                           <Ionicons name="star-outline" size={24} color={COLORS.primary} />
                         </View>
                         <View>
                            <Text className="text-white font-black text-sm uppercase tracking-tighter">Customer Reviews</Text>
@@ -240,7 +243,7 @@ export default function AdminSettings() {
                   >
                      <View className="flex-row items-center gap-4 flex-1">
                         <View className="w-12 h-12 bg-sky-950 rounded-2xl items-center justify-center border border-sky-900 shadow-lg shadow-sky-500/10">
-                           <Ionicons name="pricetags-outline" size={24} color="#0ea5e9" />
+                           <Ionicons name="pricetags-outline" size={24} color={COLORS.primary} />
                         </View>
                         <View>
                            <Text className="text-white font-black text-sm uppercase tracking-tighter">Pricing Packages</Text>
@@ -275,7 +278,7 @@ const SettingItem = ({ icon, title, subtitle, value, onValueChange }: any) => (
   <View className="flex-row items-center justify-between p-4 bg-slate-900 border border-white/5 rounded-2xl">
     <View className="flex-row items-center gap-4 flex-1">
       <View className="p-2 bg-white/5 rounded-xl border border-white/5">
-        <Ionicons name={icon} size={18} color="#0ea5e9" />
+        <Ionicons name={icon} size={18} color={COLORS.primary} />
       </View>
       <View>
         <Text className="text-white font-bold text-sm">{title}</Text>
@@ -290,7 +293,7 @@ const SettingItem = ({ icon, title, subtitle, value, onValueChange }: any) => (
       value={value}
       onValueChange={onValueChange}
       thumbColor="#fff"
-      trackColor={{ false: "#334155", true: "#0ea5e9" }}
+      trackColor={{ false: "#334155", true: COLORS.primary }}
     />
   </View>
 );
