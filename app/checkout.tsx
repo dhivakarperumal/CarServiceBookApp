@@ -3,16 +3,16 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    SafeAreaView,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 // @ts-ignore
 import RazorpayCheckout from 'react-native-razorpay';
@@ -71,7 +71,7 @@ export default function CheckoutScreen() {
     try {
       const res = await api.get(`/addresses/${user?.id}`);
       setSavedAddresses(res.data || []);
-      
+
       if (res.data && res.data.length > 0 && !shipping.address) {
         const recent = res.data[0];
         setShipping(prev => ({
@@ -167,7 +167,7 @@ export default function CheckoutScreen() {
         total: finalTotal,
         items: items.map(i => ({
           ...i,
-          variant: i.variant || "" 
+          variant: i.variant || ""
         }))
       };
 
@@ -207,7 +207,7 @@ export default function CheckoutScreen() {
   return (
     <SafeAreaView className="flex-1 bg-[#0F172A]">
       <Stack.Screen options={{ title: 'Checkout', headerBackTitle: 'Back' }} />
-      
+
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"
@@ -216,23 +216,23 @@ export default function CheckoutScreen() {
           {/* Saved Addresses Toggle */}
           {savedAddresses.length > 0 && (
             <View className="mb-6">
-              <TouchableOpacity 
+              <TouchableOpacity
                 onPress={() => setShowAddressList(!showAddressList)}
                 className="flex-row justify-between items-center mb-4"
               >
                 <Text className="text-[#0EA5E9] text-[14px] font-[900] tracking-[1.5px]">SAVED ADDRESSES</Text>
-                <Ionicons 
-                  name={showAddressList ? "chevron-up" : "chevron-down"} 
-                  size={20} 
-                  color="#0EA5E9" 
+                <Ionicons
+                  name={showAddressList ? "chevron-up" : "chevron-down"}
+                  size={20}
+                  color="#0EA5E9"
                 />
               </TouchableOpacity>
-              
+
               {showAddressList && (
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row mb-2.5">
                   {savedAddresses.map((addr, i) => (
-                    <TouchableOpacity 
-                      key={i} 
+                    <TouchableOpacity
+                      key={i}
                       onPress={() => selectAddress(addr)}
                       className="bg-[#1E293B] border border-[#334155] rounded-2xl p-4 w-[200px] mr-4"
                     >
@@ -250,7 +250,7 @@ export default function CheckoutScreen() {
           {/* Shipping Details */}
           <View className="mb-6">
             <Text className="text-[#0EA5E9] text-[14px] font-[900] tracking-[1.5px] mb-4">SHIPPING DETAILS</Text>
-            
+
             <View className="bg-[#111827] rounded-[24px] p-5 border border-[#334155]">
               <View className="mb-4">
                 <Text className="text-[#475569] text-[10px] font-bold mb-2 ml-1.5">FULL NAME</Text>
@@ -326,9 +326,9 @@ export default function CheckoutScreen() {
 
               <View className="mb-2">
                 <Text className="text-[#475569] text-[10px] font-bold mb-2 ml-1.5">STATE</Text>
-                <TouchableOpacity 
-                   onPress={() => setShowStateDropdown(true)}
-                   className="flex-row items-center justify-between bg-[#0F172A] border border-[#334155] rounded-xl px-4 py-3"
+                <TouchableOpacity
+                  onPress={() => setShowStateDropdown(true)}
+                  className="flex-row items-center justify-between bg-[#0F172A] border border-[#334155] rounded-xl px-4 py-3"
                 >
                   <Text className={`text-sm ${shipping.state ? 'text-white' : 'text-[#64748B]'}`}>
                     {shipping.state || "Select State"}
@@ -339,10 +339,10 @@ export default function CheckoutScreen() {
                 {showStateDropdown && (
                   <View className="bg-[#1E293B] border border-[#334155] rounded-xl mt-2 overflow-hidden">
                     {indianStates.map((s, i) => (
-                      <TouchableOpacity 
-                        key={i} 
+                      <TouchableOpacity
+                        key={i}
                         onPress={() => {
-                          setShipping({...shipping, state: s});
+                          setShipping({ ...shipping, state: s });
                           setShowStateDropdown(false);
                         }}
                         className={`px-4 py-3 border-b border-[#334155] ${shipping.state === s ? 'bg-[#0EA5E920]' : ''}`}
@@ -362,26 +362,26 @@ export default function CheckoutScreen() {
           <View className="mb-6">
             <Text className="text-[#0EA5E9] text-[14px] font-[900] tracking-[1.5px] mb-4">PAYMENT METHOD</Text>
             <View className="bg-[#111827] rounded-[24px] p-2.5 border border-[#334155]">
-              <TouchableOpacity 
+              <TouchableOpacity
                 onPress={() => setPaymentMethod('CASH')}
                 className={`flex-row items-center p-4 rounded-2xl mb-1 ${paymentMethod === 'CASH' ? 'bg-[#0EA5E910]' : ''}`}
               >
-                <Ionicons 
-                  name={paymentMethod === 'CASH' ? "radio-button-on" : "radio-button-off"} 
-                  size={20} 
-                  color={paymentMethod === 'CASH' ? "#0EA5E9" : "#475569"} 
+                <Ionicons
+                  name={paymentMethod === 'CASH' ? "radio-button-on" : "radio-button-off"}
+                  size={20}
+                  color={paymentMethod === 'CASH' ? "#0EA5E9" : "#475569"}
                 />
                 <Text className={`text-sm ml-4 ${paymentMethod === 'CASH' ? 'text-white font-bold' : 'text-[#64748B]'}`}>Cash on Delivery</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity 
+              <TouchableOpacity
                 onPress={() => setPaymentMethod('ONLINE')}
                 className={`flex-row items-center p-4 rounded-2xl ${paymentMethod === 'ONLINE' ? 'bg-[#0EA5E910]' : ''}`}
               >
-                <Ionicons 
-                  name={paymentMethod === 'ONLINE' ? "radio-button-on" : "radio-button-off"} 
-                  size={20} 
-                  color={paymentMethod === 'ONLINE' ? "#0EA5E9" : "#475569"} 
+                <Ionicons
+                  name={paymentMethod === 'ONLINE' ? "radio-button-on" : "radio-button-off"}
+                  size={20}
+                  color={paymentMethod === 'ONLINE' ? "#0EA5E9" : "#475569"}
                 />
                 <Text className={`text-sm ml-4 ${paymentMethod === 'ONLINE' ? 'text-white font-bold' : 'text-[#64748B]'}`}>Online Payment (Razorpay)</Text>
               </TouchableOpacity>
@@ -408,24 +408,28 @@ export default function CheckoutScreen() {
       </KeyboardAvoidingView>
 
       <View className="absolute bottom-0 w-full px-6 pt-4 pb-10 bg-[#1E293B] border-t border-[#334155]">
-        <TouchableOpacity 
-          onPress={handlePlaceOrder} 
+        <TouchableOpacity
+          onPress={handlePlaceOrder}
           disabled={loading}
           activeOpacity={0.8}
         >
-          <LinearGradient
-            colors={[COLORS.primary, COLORS.primaryDark]}
-            className="h-14 rounded-full flex-row justify-center items-center"
-          >
-            {loading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <>
-                <Text className="text-white text-base font-[900] tracking-[1px]">CONFIRM ORDER</Text>
-                <Ionicons name="arrow-forward" size={20} color="#fff" className="ml-2.5" />
-              </>
-            )}
-          </LinearGradient>
+          <View className="h-14 rounded-full overflow-hidden">
+            <LinearGradient
+              colors={[COLORS.primary, COLORS.primaryDark]}
+              className="flex-1 flex-row justify-center items-center"
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <>
+                  <Text className="text-white text-base font-[900] tracking-[1px]">
+                    CONFIRM ORDER
+                  </Text>
+                  <Ionicons name="arrow-forward" size={20} color="#fff" className="ml-2.5" />
+                </>
+              )}
+            </LinearGradient>
+          </View>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

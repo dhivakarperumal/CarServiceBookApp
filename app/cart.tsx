@@ -131,16 +131,20 @@ export default function CartScreen() {
             </View>
             
             <TouchableOpacity onPress={handleCheckout} activeOpacity={0.8}>
-              <LinearGradient
-                colors={[COLORS.primary, COLORS.primaryDark]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                className="flex-row justify-center items-center py-4 rounded-2xl"
-              >
-                <Text className="text-white text-lg font-bold mr-2.5">Proceed to Checkout</Text>
-                <Ionicons name="arrow-forward" size={20} color="#fff" />
-              </LinearGradient>
-            </TouchableOpacity>
+  <View className="rounded-2xl overflow-hidden">
+    <LinearGradient
+      colors={[COLORS.primary, COLORS.primaryDark]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      className="flex-row justify-center items-center py-4"
+    >
+      <Text className="text-white text-lg font-bold mr-2.5">
+        Proceed to Checkout
+      </Text>
+      <Ionicons name="arrow-forward" size={20} color="#fff" />
+    </LinearGradient>
+  </View>
+</TouchableOpacity>
           </View>
         </View>
       )}
