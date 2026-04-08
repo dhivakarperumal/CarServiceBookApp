@@ -33,6 +33,12 @@ export interface Service {
   description: string;
   price: string;
   category?: string;
+  bigDescription?: string;
+  icon?: string;
+  image?: string;
+  supportedBrands?: string[];
+  sparePartsIncluded?: string[];
+  status?: string;
 }
 
 export interface Product {
@@ -98,12 +104,42 @@ export const apiService = {
     }
   },
 
-  getServiceById: async (id: number): Promise<Service> => {
+  getServiceById: async (id: number | string): Promise<Service> => {
     try {
       const response = await api.get(`/services/${id}`);
       return response.data;
     } catch (error) {
       console.error('Error fetching service:', error);
+      throw error;
+    }
+  },
+
+  createService: async (data: any): Promise<any> => {
+    try {
+      const response = await api.post('/services', data);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating service:', error);
+      throw error;
+    }
+  },
+
+  updateService: async (id: number | string, data: any): Promise<any> => {
+    try {
+      const response = await api.put(`/services/${id}`, data);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating service:', error);
+      throw error;
+    }
+  },
+
+  deleteService: async (id: number | string): Promise<any> => {
+    try {
+      const response = await api.delete(`/services/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting service:', error);
       throw error;
     }
   },
