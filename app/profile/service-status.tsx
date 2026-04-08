@@ -43,6 +43,8 @@ type Booking = {
   issueStatus?: string;
   issues?: any[];
   serviceId?: number;
+  service_id?: number;
+  booking_id?: string;
   preferredDate?: string;
   assignedEmployeeName?: string;
 };
@@ -82,6 +84,7 @@ const STATUS_NORMALIZER: Record<string, string> = {
   "Bill Pending": "BILL_PENDING",
   "Bill Completed": "BILL_COMPLETED",
   "Service Completed": "SERVICE_COMPLETED",
+  "Completed": "SERVICE_COMPLETED",
   "Cancelled": "CANCELLED",
   "Assigned": "ASSIGNED",
 };
@@ -105,29 +108,49 @@ const ServiceStatus: React.FC = () => {
       setLoading(true);
 
       if (!user?.email) {
-        console.log("ServiceStatus: no user email yet");
+        // console.log("ServiceStatus: no user email yet");
         return;
       }
 
-      console.log("ServiceStatus: fetching bookings and all-services for", user.email);
-      const [bookingsRes, servicesRes] = await Promise.all([
+      // console.log("ServiceStatus: fetching bookings and all-services for", user.email);
+      const [bookingsRes, appointmentsRes, servicesRes] = await Promise.all([
         api.get("/bookings"),
+        api.get("/appointments/my", { params: { uid: user.uid } }),
         api.get("/all-services"),
       ]);
 
       const bookingsRaw = Array.isArray(bookingsRes.data)
         ? bookingsRes.data
         : bookingsRes.data?.bookings || bookingsRes.data?.data || [];
+      const appointmentsRaw = Array.isArray(appointmentsRes.data)
+        ? appointmentsRes.data
+        : appointmentsRes.data?.appointments || [];
       const servicesRaw = Array.isArray(servicesRes.data)
         ? servicesRes.data
         : servicesRes.data?.services || servicesRes.data?.data || [];
 
-      console.log(
-        "ServiceStatus: raw bookings",
-        bookingsRaw.length,
-        "raw all-services",
-        servicesRaw.length
-      );
+      // console.log(
+      //   "ServiceStatus: raw bookings",
+      //   bookingsRaw.length,
+      //   "raw all-services",
+      //   servicesRaw.length
+      // );
+
+      const appointmentData = appointmentsRaw.map((apt: any) => ({
+        ...apt,
+        id: apt.id || apt.appointmentId,
+        bookingId: apt.appointmentId,
+        name: apt.name || apt.customerName,
+        phone: apt.phone || apt.mobile,
+        bookingType: "Appointment",
+
+        // important mappings
+        issue: apt.serviceType,
+        vehicleNumber: apt.registrationNumber,
+
+        status: apt.status,
+        normalizedStatus: STATUS_NORMALIZER[apt.status] || apt.status,
+      }));
 
       const userServices = servicesRaw.filter((service: any) => {
         const serviceEmail = service.email?.toLowerCase();
@@ -143,18 +166,33 @@ const ServiceStatus: React.FC = () => {
         return isUserEmail || isUserUid || isBookingMatch;
       });
 
-      console.log("ServiceStatus: userServices count", userServices.length);
+      // console.log("ServiceStatus: userServices count", userServices.length);
 
       const servicesWithDetails = await Promise.all(
         userServices.map(async (service: any) => {
           try {
             const detailRes = await api.get(`/all-services/${service.id}`);
+            console.log(`ServiceStatus: service ${service.id} (${service.bookingId}) has ${detailRes.data?.issues?.length || 0} issues`);
             return {
               ...service,
-              parts: detailRes.data?.parts || service.parts || [],
-              issues: detailRes.data?.issues || service.issues || [],
-              issueAmount: detailRes.data?.issueAmount ?? service.issueAmount,
-              issueStatus: detailRes.data?.issueStatus || service.issueStatus,
+              parts:
+                detailRes.data?.parts ||
+                detailRes.data?.spareParts ||
+                detailRes.data?.serviceParts ||
+                [],
+              issues:
+                detailRes.data?.issues ||
+                detailRes.data?.serviceIssues ||
+                detailRes.data?.issueDetails ||
+                [],
+              issueAmount:
+                detailRes.data?.issueAmount ??
+                detailRes.data?.issue_amount ??
+                null,
+              issueStatus:
+                detailRes.data?.issueStatus ??
+                detailRes.data?.issue_status ??
+                null,
             };
           } catch (err) {
             console.warn(
@@ -164,8 +202,10 @@ const ServiceStatus: React.FC = () => {
             );
             return {
               ...service,
-              parts: service.parts || [],
-              issues: service.issues || [],
+              parts: [],
+              issues: [],
+              issueAmount: null,
+              issueStatus: null,
             };
           }
         })
@@ -178,51 +218,57 @@ const ServiceStatus: React.FC = () => {
         issues: service.issues || [],
       }));
 
-      console.log("ServiceStatus: processed spare parts", spares);
+      // console.log("ServiceStatus: processed spare parts", spares);
       setSpareParts(spares);
 
-      const userBookings: Booking[] = bookingsRaw
-        .filter((b: any) => b.email?.toLowerCase() === user.email.toLowerCase())
-        .map((b: any) => {
-          const matchedService = servicesWithDetails.find(
-            (s: any) =>
-              s.id === b.serviceId ||
-              s.id === b.service_id ||
-              s.serviceId === b.serviceId ||
-              s.serviceId === b.service_id ||
-              s._id === b.serviceId ||
-              s._id === b.service_id ||
-              s.bookingId === b.bookingId ||
-              s.bookingId === b.booking_id ||
-              s.booking_id === b.bookingId ||
-              s.booking_id === b.booking_id
-          );
+      const regularBookings = bookingsRaw.filter(
+        (b: any) =>
+          b.email?.toLowerCase() === user.email.toLowerCase() ||
+          b.uid === user.uid
+      );
 
-          return {
-            ...b,
-            normalizedStatus: STATUS_NORMALIZER[b.status] || b.status,
-            issues: matchedService?.issues || b.issues || b.serviceIssues || [],
-            issue: b.issue || b.serviceType || matchedService?.issue || "",
-            issueAmount: b.issueAmount ?? matchedService?.issueAmount,
-            issueStatus: b.issueStatus || matchedService?.issueStatus,
-            serviceId: b.serviceId || b.id || b.service_id || matchedService?.id || matchedService?.serviceId,
-            brand: b.brand || b.vehicleBrand || matchedService?.brand,
-            model: b.model || b.vehicleModel || matchedService?.model,
-            vehicleNumber:
-              b.vehicleNumber ||
-              b.registrationNumber ||
-              matchedService?.vehicleNumber ||
-              matchedService?.registrationNumber,
-            address: b.address || b.location || matchedService?.address || matchedService?.location,
-            preferredDate: b.preferredDate || b.date || matchedService?.preferredDate,
-            assignedEmployeeName:
-              b.assignedEmployeeName ||
-              b.assignedEmployee ||
-              matchedService?.assignedEmployeeName,
-          } as Booking;
-        });
+      // 🔥 MERGE HERE
+      const combinedData = [...regularBookings, ...appointmentData];
 
-      console.log("ServiceStatus: processed bookings", userBookings);
+      // 🔥 USE combinedData instead of bookingsRaw
+      const userBookings: Booking[] = combinedData.map((b: any) => {
+        const bookingId = b.bookingId || b.booking_id;
+        const serviceId = b.serviceId || b.service_id;
+
+        const matchedService = servicesWithDetails.find((s: any) =>
+          (bookingId && (s.bookingId === bookingId || s.booking_id === bookingId)) ||
+          (serviceId && (s.id === serviceId || s.serviceId === serviceId)) ||
+          (bookingId && s.bookingDocId === bookingId)
+        );
+
+        console.log(`ServiceStatus: booking ${b.bookingId} matched service:`, matchedService?.id, matchedService?.bookingId);
+        console.log(`ServiceStatus: booking ${b.bookingId} getting ${matchedService?.issues?.length || 0} issues from service ${matchedService?.id}`);
+
+        return {
+          ...b,
+          normalizedStatus: STATUS_NORMALIZER[b.status] || b.status,
+          issues: matchedService?.issues || b.issues || b.serviceIssues || [],
+          issue: b.issue || b.serviceType || matchedService?.issue || "",
+          issueAmount: b.issueAmount ?? matchedService?.issueAmount,
+          issueStatus: b.issueStatus || matchedService?.issueStatus,
+          serviceId: b.serviceId || b.service_id || matchedService?.id || matchedService?.serviceId || null,
+          brand: b.brand || b.vehicleBrand || matchedService?.brand,
+          model: b.model || b.vehicleModel || matchedService?.model,
+          vehicleNumber:
+            b.vehicleNumber ||
+            b.registrationNumber ||
+            matchedService?.vehicleNumber ||
+            matchedService?.registrationNumber,
+          address: b.address || b.location || matchedService?.address || matchedService?.location,
+          preferredDate: b.preferredDate || b.date || matchedService?.preferredDate,
+          assignedEmployeeName:
+            b.assignedEmployeeName ||
+            b.assignedEmployee ||
+            matchedService?.assignedEmployeeName,
+        } as Booking;
+      });
+
+      // console.log("ServiceStatus: processed bookings", userBookings);
       setBookings(userBookings);
 
       if (selectedBooking) {
@@ -254,7 +300,7 @@ const ServiceStatus: React.FC = () => {
     type: "part" | "issue" = "part"
   ) => {
     const normalizedItemId = itemId || null;
-    console.log("ServiceStatus: handleApprove", { serviceId, itemId: normalizedItemId, status, type });
+    // console.log("ServiceStatus: handleApprove", { serviceId, itemId: normalizedItemId, status, type });
     setApproving(true);
     try {
       if (type === "part") {
@@ -318,7 +364,7 @@ const ServiceStatus: React.FC = () => {
         }
       }
 
-      console.log("ServiceStatus: approve success", { serviceId, itemId, status, type });
+      // console.log("ServiceStatus: approve success", { serviceId, itemId, status, type });
       await fetchData();
       if (selectedBooking) {
         setSelectedBooking((prev) => {
@@ -352,7 +398,7 @@ const ServiceStatus: React.FC = () => {
     return (
       <TouchableOpacity
         onPress={() => {
-          console.log("ServiceStatus: selected booking", item);
+          // console.log("ServiceStatus: selected booking", item);
           setSelectedBooking(item);
         }}
         className="rounded-xl p-4 mb-4"
@@ -374,15 +420,6 @@ const ServiceStatus: React.FC = () => {
               {item.name} • {item.phone}
             </Text>
 
-            {bookingSpares?.parts?.length ? (
-              <Text className="text-xs mt-2 text-text-secondary">
-                🔧 ₹
-                {bookingSpares.parts?.reduce(
-                  (sum, p) => sum + Number(p.total || 0),
-                  0
-                ) ?? 0}
-              </Text>
-            ) : null}
           </View>
 
           {/* RIGHT STATUS BADGE */}
@@ -430,7 +467,7 @@ const ServiceStatus: React.FC = () => {
       </Text>
 
       {/* ALERT */}
-      {spareParts.some((sp) =>
+      {/* {spareParts.some((sp) =>
         sp.parts.some((p) => p.status === "pending")
       ) && (
           <TouchableOpacity
@@ -442,7 +479,7 @@ const ServiceStatus: React.FC = () => {
               Spare parts pending approval
             </Text>
           </TouchableOpacity>
-        )}
+        )} */}
 
       {/* LIST */}
       <FlatList

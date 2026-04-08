@@ -28,7 +28,7 @@ export default function ProductDetailsScreen() {
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
   const [qty, setQty] = useState(1);
   const [reviews, setReviews] = useState<any[]>([]);
-  
+
   const { addToCart } = useCart();
   const { user } = useAuth();
   const { toggleFavorite, isFavorite } = useFavorites();
@@ -45,7 +45,7 @@ export default function ProductDetailsScreen() {
       setProduct(data);
       setSelectedVariantIndex(0);
       setActiveImage(0);
-      
+
       if (data?.docId) {
         const reviewsData = await apiService.getReviews(data.docId);
         setReviews(reviewsData.filter((r: any) => r.status === 1 || r.status === true));
@@ -97,7 +97,7 @@ export default function ProductDetailsScreen() {
       router.push('/(auth)/login');
       return;
     }
-    
+
     const variant = product.variants?.[selectedVariantIndex] || {};
     const itemData = {
       docId: product.docId,
@@ -106,8 +106,8 @@ export default function ProductDetailsScreen() {
       price: product.offerPrice,
       image: productImages[0],
       quantity: qty,
-      variant: (variant.position || variant.material) 
-        ? `${variant.position || ''} ${variant.material || ''}`.trim() 
+      variant: (variant.position || variant.material)
+        ? `${variant.position || ''} ${variant.material || ''}`.trim()
         : variant.sku,
     };
 
@@ -139,11 +139,11 @@ export default function ProductDetailsScreen() {
   return (
     <View className="flex-1 bg-[#0F172A]">
       <ScrollView showsVerticalScrollIndicator={false}>
-        <Stack.Screen options={{ 
-          title: product.name, 
+        <Stack.Screen options={{
+          title: product.name,
           headerBackTitle: 'Back',
           headerRight: () => (
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={() => toggleFavorite(product.docId)}
               className="mr-2"
             >
@@ -155,7 +155,7 @@ export default function ProductDetailsScreen() {
             </TouchableOpacity>
           )
         }} />
-        
+
         {/* Image Gallery */}
         <View className="bg-[#1E293B] pb-5">
           <Image
@@ -163,7 +163,7 @@ export default function ProductDetailsScreen() {
             style={{ width: width, height: 300 }}
             resizeMode="contain"
           />
-          
+
           <ScrollView horizontal showsHorizontalScrollIndicator={false} className="px-4 mt-4">
             {productImages.map((img: string, i: number) => (
               <TouchableOpacity
@@ -181,7 +181,7 @@ export default function ProductDetailsScreen() {
         <View className="p-5">
           <Text className="text-[#94A3B8] text-sm mb-1">{product.brand}</Text>
           <Text className="text-white text-2xl font-bold mb-4">{product.name}</Text>
-          
+
           <View className="flex-row items-center mb-2.5">
             <Text className="text-[#0EA5E9] text-3xl font-bold mr-2.5">₹{product.offerPrice}</Text>
             <Text className="text-[#64748B] text-lg line-through mr-4">₹{product.mrp}</Text>
@@ -249,7 +249,7 @@ export default function ProductDetailsScreen() {
           </View>
 
           {/* Reviews */}
-          <View className="mb-6">
+          {/* <View className="mb-6">
             <View className="flex-row justify-between items-center mb-4">
               <Text className="text-white text-lg font-bold">Reviews ({reviews.length})</Text>
               <TouchableOpacity>
@@ -278,7 +278,7 @@ export default function ProductDetailsScreen() {
                 </View>
               ))
             )}
-          </View>
+          </View> */}
         </View>
 
         <View className="h-32" />
@@ -291,14 +291,18 @@ export default function ProductDetailsScreen() {
           activeOpacity={0.8}
           className="flex-1"
         >
-          <LinearGradient
-            colors={['#2563EB', '#0EA5E9']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            className="h-14 rounded-2xl justify-center items-center shadow-lg"
-          >
-            <Text className="text-white text-base font-bold">Add to Cart</Text>
-          </LinearGradient>
+          <View className="h-14 rounded-2xl overflow-hidden">
+            <LinearGradient
+              colors={['#2563EB', '#0EA5E9']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              className="flex-1 justify-center items-center"
+            >
+              <Text className="text-white text-base font-bold">
+                Add to Cart
+              </Text>
+            </LinearGradient>
+          </View>
         </TouchableOpacity>
 
         <TouchableOpacity
