@@ -136,25 +136,22 @@ const BookingModal: React.FC<Props> = ({
           return (
             <View key={status} className="items-center m-2">
               <View
-                className={`w-10 h-10 rounded-full items-center justify-center border-2 ${
-                  isCompleted
+                className={`w-10 h-10 rounded-full items-center justify-center border-2 ${isCompleted
                     ? "bg-primary border-primary"
                     : "bg-card border-gray700"
-                }`}
+                  }`}
               >
                 <Text
-                  className={`text-xs font-bold ${
-                    isCompleted ? "text-white" : "text-gray400"
-                  }`}
+                  className={`text-xs font-bold ${isCompleted ? "text-white" : "text-gray400"
+                    }`}
                 >
                   {index + 1}
                 </Text>
               </View>
 
               <Text
-                className={`text-[10px] mt-1 text-center w-[70px] ${
-                  isCompleted ? "text-primary" : "text-gray500"
-                }`}
+                className={`text-[10px] mt-1 text-center w-[70px] ${isCompleted ? "text-primary" : "text-gray500"
+                  }`}
               >
                 {status.replace("_", " ")}
               </Text>
@@ -190,15 +187,72 @@ const BookingModal: React.FC<Props> = ({
               Booking ID: {booking.bookingId}
             </Text>
 
-            {/* DETAILS */}
-            <Text className="text-text-secondary">
+
+            {/* BASIC DETAILS */}
+            <Text className="text-text-secondary mb-1">
               <Text className="text-primary">Name: </Text>
               {booking.name}
             </Text>
 
-            <Text className="text-text-secondary">
+            <Text className="text-text-secondary mb-1">
               <Text className="text-primary">Phone: </Text>
               {booking.phone}
+            </Text>
+
+            {/* NEW FIELDS (LIKE WEB) */}
+            <Text className="text-text-secondary mb-1">
+              <Text className="text-primary">Brand: </Text>
+              {booking.brand || "N/A"}
+            </Text>
+
+            <Text className="text-text-secondary mb-1">
+              <Text className="text-primary">Model: </Text>
+              {booking.model || "N/A"}
+            </Text>
+
+            <Text className="text-text-secondary mb-1">
+              <Text className="text-primary">Reg No: </Text>
+              {booking.vehicleNumber || booking.registrationNumber || "N/A"}
+            </Text>
+
+            {/* ISSUE */}
+            {booking.issue && (
+              <Text className="text-text-secondary mt-1 mb-1">
+                <Text className="text-primary">Issue: </Text>
+                {booking.issue}
+              </Text>
+            )}
+
+            {/* SERVICE DATE */}
+            {booking.preferredDate && (
+              <Text className="text-text-secondary">
+                <Text className="text-primary">Service Date: </Text>
+                {new Date(booking.preferredDate).toLocaleDateString()}
+              </Text>
+            )}
+
+            {/* ASSIGNED MECHANIC */}
+            {booking.assignedEmployeeName && (
+              <View
+                style={{
+                  backgroundColor: COLORS.primary + "15",
+                  padding: 8,
+                  borderRadius: 8,
+                  marginTop: 6,
+                  borderWidth: 1,
+                  borderColor: COLORS.primary + "30",
+                }}
+              >
+                <Text style={{ color: COLORS.primary, fontWeight: "bold" }}>
+                  🔧 Assigned Mechanic: {booking.assignedEmployeeName}
+                </Text>
+              </View>
+            )}
+
+            {/* ADDRESS */}
+            <Text className="text-text-secondary mt-2">
+              <Text className="text-primary">Address: </Text>
+              {booking.address || booking.location || "N/A"}
             </Text>
 
             {/* ===== SPARE PARTS ===== */}
@@ -231,8 +285,8 @@ const BookingModal: React.FC<Props> = ({
                             status === "approved"
                               ? COLORS.success
                               : status === "rejected"
-                              ? COLORS.error
-                              : COLORS.warning,
+                                ? COLORS.error
+                                : COLORS.warning,
                         }}
                       >
                         {status.toUpperCase()}
@@ -326,8 +380,8 @@ const BookingModal: React.FC<Props> = ({
                             status === "approved"
                               ? COLORS.success
                               : status === "rejected"
-                              ? COLORS.error
-                              : COLORS.warning,
+                                ? COLORS.error
+                                : COLORS.warning,
                         }}
                       >
                         {status.toUpperCase()}
