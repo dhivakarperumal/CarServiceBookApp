@@ -102,6 +102,65 @@ export default function ServiceDetailsScreen() {
           </Text>
         </View>
 
+        {(service as any)?.bigDescription && (
+          <View className="bg-[#111827]/80 p-5 rounded-[20px] border border-[#1F2937] mb-6">
+            <Text className="text-[#0EA5E9] font-bold text-sm mb-4 tracking-wider">
+              SERVICE DETAILS
+            </Text>
+
+            {(service as any).bigDescription
+              .split("\n")
+              .map((item: string, index: number) => (
+                <View key={index} className="flex-row items-start mb-2">
+                  <Text className="text-[#0EA5E9] mr-2">•</Text>
+                  <Text className="text-[#94A3B8] text-sm flex-1 leading-6">
+                    {item}
+                  </Text>
+                </View>
+              ))}
+          </View>
+        )}
+
+        {(service as any)?.supportedBrands?.length > 0 && (
+          <View className="mb-6">
+            <Text className="text-[#0EA5E9] font-bold text-sm mb-4 tracking-wider">
+              SUPPORTED BRANDS
+            </Text>
+
+            <View className="flex-row flex-wrap justify-between">
+              {(service as any).supportedBrands.map((brand: string, index: number) => (
+                <View
+                  key={index}
+                  className="w-[48%] bg-[#0B1120] border border-[#0EA5E9]/30 rounded-xl py-3 px-2 mb-3 items-center"
+                >
+                  <Text className="text-white text-sm font-semibold">
+                    {brand}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
+
+        {(service as any)?.sparePartsIncluded?.length > 0 && (
+          <View className="bg-[#111827]/80 p-5 rounded-[20px] border border-[#1F2937] mb-6">
+            <Text className="text-[#0EA5E9] font-bold text-sm mb-4 tracking-wider">
+              SPARE PARTS INCLUDED
+            </Text>
+
+            {(service as any).sparePartsIncluded.map(
+              (part: string, index: number) => (
+                <View key={index} className="flex-row items-center mb-2">
+                  <Text className="text-[#0EA5E9] mr-2">•</Text>
+                  <Text className="text-[#94A3B8] text-sm">
+                    {part}
+                  </Text>
+                </View>
+              )
+            )}
+          </View>
+        )}
+
         {/* <TouchableOpacity
           onPress={() => Alert.alert('Booking', 'Booking flow coming soon!')}
           activeOpacity={0.8}
