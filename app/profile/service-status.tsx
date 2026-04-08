@@ -175,10 +175,24 @@ const ServiceStatus: React.FC = () => {
             console.log(`ServiceStatus: service ${service.id} (${service.bookingId}) has ${detailRes.data?.issues?.length || 0} issues`);
             return {
               ...service,
-              parts: detailRes.data?.parts || service.parts || [],
-              issues: detailRes.data?.issues || service.issues || [],
-              issueAmount: detailRes.data?.issueAmount ?? service.issueAmount,
-              issueStatus: detailRes.data?.issueStatus || service.issueStatus,
+              parts:
+                detailRes.data?.parts ||
+                detailRes.data?.spareParts ||
+                detailRes.data?.serviceParts ||
+                [],
+              issues:
+                detailRes.data?.issues ||
+                detailRes.data?.serviceIssues ||
+                detailRes.data?.issueDetails ||
+                [],
+              issueAmount:
+                detailRes.data?.issueAmount ??
+                detailRes.data?.issue_amount ??
+                null,
+              issueStatus:
+                detailRes.data?.issueStatus ??
+                detailRes.data?.issue_status ??
+                null,
             };
           } catch (err) {
             console.warn(
@@ -188,8 +202,10 @@ const ServiceStatus: React.FC = () => {
             );
             return {
               ...service,
-              parts: service.parts || [],
-              issues: service.issues || [],
+              parts: [],
+              issues: [],
+              issueAmount: null,
+              issueStatus: null,
             };
           }
         })
