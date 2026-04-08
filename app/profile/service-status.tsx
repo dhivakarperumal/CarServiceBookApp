@@ -267,20 +267,53 @@ const ServiceStatus: React.FC = () => {
           await api.put(`/bookings/${serviceId}/parts/${itemId}`, { status });
         }
       } else {
+        let primaryError: any = null;
         try {
+          console.log("ServiceStatus: issue approve /all-services primary", { serviceId, itemId });
           await api.put(`/all-services/${serviceId}/issues/${itemId}/status`, {
             issueStatus: status,
           });
         } catch (err) {
-          console.warn("issue approval fallback 1", err);
-          if (itemId) {
-            await api.put(`/bookings/${serviceId}/issues/${itemId}`, {
+          console.warn("ServiceStatus: issue primary failed", err);
+          primaryError = err;
+        }
+
+        if (primaryError) {
+          let fallbackError: any = null;
+          try {
+            console.log("ServiceStatus: issue approve fallback /all-services/issues/{itemId}", { serviceId, itemId });
+            await api.put(`/all-services/${serviceId}/issues/${itemId}`, {
               issueStatus: status,
             });
-          } else {
-            await api.put(`/all-services/${serviceId}/issue`, {
-              issueStatus: status,
-            });
+          } catch (err2) {
+            console.warn("ServiceStatus: issue fallback 1 failed", err2);
+            fallbackError = err2;
+          }
+
+          if (fallbackError) {
+            try {
+              console.log("ServiceStatus: issue approve fallback /all-services/issues/{itemId}/approve", { serviceId, itemId });
+              await api.put(`/all-services/${serviceId}/issues/${itemId}/approve`, {
+                issueStatus: status,
+              });
+            } catch (err3) {
+              console.warn("ServiceStatus: issue fallback 2 failed", err3);
+              try {
+                console.log("ServiceStatus: issue approve fallback /bookings/issues/{itemId}", { serviceId, itemId });
+                await api.put(`/bookings/${serviceId}/issues/${itemId}`, {
+                  issueStatus: status,
+                });
+              } catch (err4) {
+                console.warn("ServiceStatus: issue fallback 3 failed", err4);
+                if (!itemId) {
+                  await api.put(`/bookings/${serviceId}/issue`, {
+                    issueStatus: status,
+                  });
+                } else {
+                  throw err4;
+                }
+              }
+            }
           }
         }
       }

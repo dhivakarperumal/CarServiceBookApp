@@ -118,6 +118,8 @@ const BookingModal: React.FC<Props> = ({
     return serviceIdMatch || idMatch || nameMatch;
   });
 
+  const effectiveServiceId = bookingSpare?.serviceId || booking.serviceId || booking.id || null;
+
   /* ===== STATUS TRACKER ===== */
 
   const StatusTracker = ({ currentStatus }: { currentStatus: string }) => {
@@ -332,12 +334,12 @@ const BookingModal: React.FC<Props> = ({
                       </Text>
 
                       {/* ✅ ISSUE APPROVAL FIX */}
-                      {status === "pending" && booking.serviceId && issueId && (
+                      {status === "pending" && effectiveServiceId && issueId && (
                         <View className="flex-row gap-2 mt-2">
                           <TouchableOpacity
                             onPress={() =>
                               onApprove(
-                                booking.serviceId!,
+                                effectiveServiceId,
                                 issueId,
                                 "approved",
                                 "issue"
@@ -359,7 +361,7 @@ const BookingModal: React.FC<Props> = ({
                           <TouchableOpacity
                             onPress={() =>
                               onApprove(
-                                booking.serviceId!,
+                                effectiveServiceId,
                                 issueId,
                                 "rejected",
                                 "issue"
