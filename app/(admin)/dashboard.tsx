@@ -14,18 +14,42 @@ import {
 import { apiService } from "../../services/api";
 import { COLORS } from "../../theme/colors";
 
-const QuickAction = ({ title, icon, color, onPress }: any) => (
-  <TouchableOpacity onPress={onPress} className="w-[31%] mb-4 items-center">
-    <View
-      className={`${color} w-14 h-14 rounded-3xl items-center justify-center shadow-lg shadow-black`}
+const QuickAction = ({ title, icon, color, onPress }: any) => {
+  return (
+    <TouchableOpacity
+      activeOpacity={0.85}
+      onPress={onPress}
+      className="w-[31%] rounded-3xl overflow-hidden"
     >
-      <Text className="text-2xl">{icon}</Text>
-    </View>
-    <Text className="text-gray-400 text-[9px] font-black uppercase text-center mt-2 tracking-tighter">
-      {title}
-    </Text>
-  </TouchableOpacity>
-);
+      <LinearGradient
+        colors={["#0f172a", "#1e293b"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        className="p-4 border border-slate-800 items-center justify-center shadow-xl"
+      >
+        {/* Icon Glow Circle */}
+        <View
+          className={`w-14 h-14 ${color} rounded-2xl items-center justify-center mb-3 shadow-lg`}
+          style={{
+            shadowColor: "#000",
+            shadowOpacity: 0.4,
+            shadowRadius: 10,
+          }}
+        >
+          <Ionicons name={icon} size={24} color="#fff" />
+        </View>
+
+        {/* Title */}
+        <Text className="text-white text-[10px] font-black uppercase tracking-widest text-center">
+          {title}
+        </Text>
+
+        {/* Decorative Line */}
+        <View className="w-6 h-[2px] bg-sky-500 rounded-full mt-2 opacity-70" />
+      </LinearGradient>
+    </TouchableOpacity>
+  );
+};
 
 const StatCard = ({ title, value, gradient, isSmall = false }: any) => (
   <View
@@ -171,42 +195,48 @@ export default function AdminDashboard() {
             <Text className="text-white opacity-40 text-[10px] font-black uppercase tracking-widest mb-4">
               Quick Access
             </Text>
-            <View className="flex-row flex-wrap justify-between">
+
+            <View className="flex-row flex-wrap justify-between gap-y-4">
               <QuickAction
                 title="Add Vehicle"
-                icon="🚗"
-                color="bg-sky-500"
+                icon="car-sport-outline"
+                color="bg-blue-500"
                 onPress={() =>
                   router.push("/(adminPages)/add-service-vehicle" as any)
                 }
               />
+
               <QuickAction
                 title="Add Booking"
-                icon="📅"
+                icon="calendar-outline"
                 color="bg-indigo-500"
                 onPress={() => router.push("/(adminPages)/book-service" as any)}
               />
+
               <QuickAction
                 title="Add Billing"
-                icon="🧾"
+                icon="receipt-outline"
                 color="bg-emerald-500"
                 onPress={() => router.push("/(adminPages)/add-billing" as any)}
               />
+
               <QuickAction
                 title="Add Staff"
-                icon="👨‍🔧"
+                icon="people-outline"
                 color="bg-violet-500"
                 onPress={() => router.push("/(adminPages)/staff" as any)}
               />
+
               <QuickAction
                 title="Inventory"
-                icon="📦"
+                icon="cube-outline"
                 color="bg-orange-500"
                 onPress={() => router.push("/(admin)/products" as any)}
               />
+
               <QuickAction
                 title="Products"
-                icon="🛒"
+                icon="cart-outline"
                 color="bg-rose-500"
                 onPress={() => router.push("/(admin)/products" as any)}
               />
@@ -464,51 +494,65 @@ export default function AdminDashboard() {
 
           {/* RECENT ACTIVITY */}
           <View className="mb-10">
+            {/* Header */}
             <View className="flex-row justify-between items-center mb-6">
-              <Text className="text-white font-black text-xs uppercase tracking-widest">
+              <Text className="text-white font-black text-xs uppercase tracking-[3px] opacity-80">
                 Recent Bookings
               </Text>
+
               <TouchableOpacity
                 onPress={() => router.push("/(adminPages)/add-booking" as any)}
-                className="bg-sky-500 px-4 py-2 rounded-full shadow-lg"
+                activeOpacity={0.85}
+                className="bg-sky-500 px-5 py-2 rounded-full shadow-[0_10px_25px_rgba(56,189,248,0.35)] border border-sky-400/40"
               >
-                <Text className="text-white text-xs font-black uppercase">
+                <Text className="text-white bg-primary p-2 rounded-xl text-[10px] font-black uppercase tracking-wider">
                   New Booking
                 </Text>
               </TouchableOpacity>
             </View>
 
+            {/* List */}
             <View className="gap-3">
               {recentBookings.length === 0 ? (
-                <View className="bg-slate-900 p-6 rounded-2xl border border-slate-800 border-dashed items-center">
-                  <Text className="text-gray-500 text-xs font-bold">
-                    No recent activities found.
+                <View className="bg-slate-900/80 backdrop-blur-xl p-7 rounded-2xl border border-slate-800 border-dashed items-center shadow-[0_10px_30px_rgba(0,0,0,0.35)]">
+                  <Text className="text-gray-500 text-[10px] font-bold uppercase tracking-wider">
+                    No recent activities found
                   </Text>
                 </View>
               ) : (
                 recentBookings.map((b, i) => (
                   <TouchableOpacity
                     key={i}
-                    className="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex-row justify-between items-center shadow-sm"
+                    activeOpacity={0.9}
+                    className="bg-slate-900/90 backdrop-blur-xl border border-slate-800/80 p-4 rounded-2xl flex-row justify-between items-center shadow-[0_15px_35px_rgba(0,0,0,0.35)]"
                   >
+                    {/* Left */}
                     <View className="flex-row items-center gap-3">
-                      <View className="w-10 h-10 rounded-full bg-slate-800 items-center justify-center border border-slate-800 shadow-inner">
-                        <Text className="text-white font-black">
+                      {/* Avatar */}
+                      <View className="w-11 h-11 rounded-full bg-slate-800 items-center justify-center border border-slate-700 shadow-inner">
+                        <Text className="text-white font-black text-sm">
                           {(b.name || "C")[0]}
                         </Text>
                       </View>
+
+                      {/* Customer Info */}
                       <View>
-                        <Text className="text-white font-bold text-xs">
+                        <Text className="text-white font-bold text-[12px] tracking-wide">
                           {b.name || "Customer"}
                         </Text>
-                        <Text className="text-gray-500 text-[9px] uppercase font-black tracking-tighter mt-0.5">
+
+                        <Text className="text-gray-500 text-[9px] uppercase font-black tracking-[1.5px] mt-0.5">
                           {b.brand} · {b.model}
                         </Text>
                       </View>
                     </View>
-                    <Text className="text-emerald-500 font-black text-[10px] uppercase">
-                      ₹{b.totalCost || "---"}
-                    </Text>
+
+                    {/* Price Badge */}
+                    <View className="bg-emerald-500/10 border border-emerald-500/30 px-3 py-1.5 rounded-full">
+                      <Text className="text-emerald-400 font-black text-[10px] uppercase tracking-wider">
+                        ₹{b.totalCost || "---"}
+                      </Text>
+                    </View>
                   </TouchableOpacity>
                 ))
               )}
