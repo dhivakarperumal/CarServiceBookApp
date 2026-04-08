@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -68,7 +68,6 @@ const getStatusColor = (status: string) => {
 
 export default function ServiceCenter() {
   const router = useRouter();
-  const { id: directId } = useLocalSearchParams();
   const { user: userProfile } = useAuth();
   const userRole = (userProfile?.role || "").toLowerCase();
   const isMechanic = userRole === "mechanic" || userRole === "staff";
@@ -347,15 +346,19 @@ export default function ServiceCenter() {
             <Text
               className={`font-black text-[10px] uppercase tracking-widest ${mainTab === "booked" ? "text-text-primary" : "text-text-muted"}`}
             >
-              
-                Appointment
-             ({services.filter(s => 
-                  !s.addVehicle && 
-                  (isMechanic ? (
-                    (s.assignedEmployeeName || "").toLowerCase() === (userProfile?.username || "").toLowerCase()
-                  ) : true)
-                ).length})
-              </Text>
+              Appointment (
+              {
+                services.filter(
+                  (s) =>
+                    !s.addVehicle &&
+                    (isMechanic
+                      ? (s.assignedEmployeeName || "").toLowerCase() ===
+                        (userProfile?.username || "").toLowerCase()
+                      : true),
+                ).length
+              }
+              )
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => setMainTab("addVehicle")}
@@ -364,15 +367,19 @@ export default function ServiceCenter() {
             <Text
               className={`font-black text-[10px] uppercase tracking-widest ${mainTab === "addVehicle" ? "text-text-primary" : "text-text-muted"}`}
             >
-              
-                Direct Visit
-             ({services.filter(s => 
-                  !!s.addVehicle && 
-                  (isMechanic ? (
-                    (s.assignedEmployeeName || "").toLowerCase() === (userProfile?.username || "").toLowerCase()
-                  ) : true)
-                ).length})
-              </Text>
+              Direct Visit (
+              {
+                services.filter(
+                  (s) =>
+                    !!s.addVehicle &&
+                    (isMechanic
+                      ? (s.assignedEmployeeName || "").toLowerCase() ===
+                        (userProfile?.username || "").toLowerCase()
+                      : true),
+                ).length
+              }
+              )
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -571,6 +578,17 @@ export default function ServiceCenter() {
 
                 {/* FOOTER ACTIONS */}
                 <View className="flex-row gap-3">
+                  <TouchableOpacity
+                    onPress={() =>
+                      router.push(
+                        `/(employee)/service-details?id=${item.id}` as any,
+                      )
+                    }
+                    className="bg-primary/10 p-4 px-6 rounded-2xl items-center justify-center"
+                  >
+                    <Ionicons name="eye" size={20} color="#0EA5E9" />
+                  </TouchableOpacity>
+
                   {!item.assignedEmployeeId ? (
                     <TouchableOpacity
                       onPress={() => {
@@ -615,20 +633,20 @@ export default function ServiceCenter() {
                         </View>
                       </TouchableOpacity>
 
-                           {(item.serviceStatus === "Processing" || item.serviceStatus === "Waiting for Spare") && (
+                      {(item.serviceStatus === "Processing" ||
+                        item.serviceStatus === "Waiting for Spare") && (
                         <TouchableOpacity
                           onPress={() =>
-                          router.push({
-                            pathname: "/(employee)/add-parts",
-                            params: { serviceId: item.id },
-                          })
+                            router.push({
+                              pathname: "/(employee)/add-parts",
+                              params: { serviceId: item.id },
+                            })
                           }
-                        className="bg-success p-4 px-6 rounded-2xl items-center justify-center"
+                          className="bg-success p-4 px-6 rounded-2xl items-center justify-center"
                         >
                           <Ionicons name="cart" size={20} color="#FFFFFF" />
                         </TouchableOpacity>
-                           )}
-
+                      )}
                       <TouchableOpacity
                         onPress={() =>
                           router.push({

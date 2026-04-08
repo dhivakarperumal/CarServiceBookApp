@@ -1,11 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Redirect, Tabs, useRouter } from "expo-router";
 import {
-  ActivityIndicator,
-  Image,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Image,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import EmployeeHeaderDropdown from "../../components/EmployeeHeaderDropdown";
 import { useAuth } from "../../contexts/AuthContext";
@@ -146,6 +146,12 @@ export default function EmployeeAdminLayout() {
       />
       <Tabs.Screen
         name="profile"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="service-details"
         options={{
           href: null,
         }}

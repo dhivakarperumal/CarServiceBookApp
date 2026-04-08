@@ -2,15 +2,15 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Dimensions,
-  SafeAreaView,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    Dimensions,
+    SafeAreaView,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
 import { api } from "../../services/api";
@@ -390,25 +390,21 @@ export default function AssignedHistory() {
                     </Text>
                   </View>
 
-                  {/* Premium Open Details Button */}
+                  {/* Premium View Details Button */}
                   <TouchableOpacity
                     onPress={() =>
                       router.push(
-                        `/(employee)/servicecenter?id=${item.id}` as any,
+                        `/(employee)/service-details?id=${item.id}` as any,
                       )
                     }
                     className="px-4 py-2 rounded-xl bg-primary/10 border border-primary/20"
                   >
                     <View className="flex-row items-center gap-1">
                       <Text className="text-[11px] font-black uppercase tracking-widest text-primary">
-                        Open Details
+                        View Details
                       </Text>
 
-                      <Ionicons
-                        name="arrow-forward"
-                        size={14}
-                        color="#0EA5E9"
-                      />
+                      <Ionicons name="eye" size={14} color="#0EA5E9" />
                     </View>
                   </TouchableOpacity>
                 </View>
