@@ -239,7 +239,7 @@ export default function AdminUsers() {
                   <TouchableOpacity 
                     key={f}
                     onPress={() => setRoleFilter(f)}
-                    className={`px-6 h-10 items-center justify-center rounded-xl border ${roleFilter === f ? 'bg-sky-500 border-sky-400' : 'bg-slate-900 border-slate-800'}`}
+                    className={`px-6 h-10 items-center justify-center rounded-xl border ${roleFilter === f ? 'bg-white border-white' : 'bg-slate-900 border-slate-800'}`}
                   >
                     <Text className={`${roleFilter === f ? 'text-black' : 'text-slate-500'} text-[10px] font-black uppercase tracking-widest`}>{f}</Text>
                   </TouchableOpacity>

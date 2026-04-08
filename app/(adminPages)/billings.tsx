@@ -29,6 +29,7 @@ export default function BillingsLedger() {
   const [billings, setBillings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("all");
 
   const fetchBillings = async () => {
     try {
@@ -45,6 +46,11 @@ export default function BillingsLedger() {
   useEffect(() => {
     fetchBillings();
   }, []);
+
+  const filteredBillings = billings.filter(b => {
+    if (statusFilter === 'all') return true;
+    return (b.paymentStatus || 'Pending').toLowerCase() === statusFilter.toLowerCase();
+  });
 
   const handleMarkPaid = async (id: any) => {
     Alert.alert("Confirm Payment", "Mark this invoice as fully PAID?", [
@@ -80,15 +86,32 @@ export default function BillingsLedger() {
       </View>
 
       {/* STATS */}
-      <View className="px-6 flex-row gap-3 mb-8">
+      <View className="px-6 flex-row gap-3 mb-6">
         <View className="flex-1 bg-slate-900/50 p-4 rounded-[28px] border border-white/5">
-           <Text className="text-slate-500 text-[8px] font-black uppercase tracking-widest mb-1">Total</Text>
-           <Text className="text-white font-black text-xl">₹{billings.reduce((s, b) => s + (b.grandTotal || 0), 0).toLocaleString()}</Text>
+           <Text className="text-slate-500 text-[8px] font-black uppercase tracking-widest mb-1">Combined Total</Text>
+           <Text className="text-white font-black text-xl">₹{billings.reduce((s, b) => s + Number(b.grandTotal || 0), 0).toLocaleString()}</Text>
         </View>
         <View className="flex-1 bg-slate-900/50 p-4 rounded-[28px] border border-white/5">
-           <Text className="text-slate-500 text-[8px] font-black uppercase tracking-widest mb-1">Unpaid</Text>
+           <Text className="text-slate-500 text-[8px] font-black uppercase tracking-widest mb-1">Unpaid count</Text>
            <Text className="text-rose-500 font-black text-xl">{billings.filter(b => b.paymentStatus?.toLowerCase() !== 'paid').length}</Text>
         </View>
+      </View>
+
+      {/* FILTERS */}
+      <View className="px-6 mb-8">
+         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <View className="flex-row gap-2">
+               {['all', 'paid', 'partial', 'pending'].map((f) => (
+                  <TouchableOpacity 
+                    key={f}
+                    onPress={() => setStatusFilter(f)}
+                    className={`px-6 h-10 items-center justify-center rounded-xl border ${statusFilter === f ? 'bg-white border-white' : 'bg-slate-900 border-slate-800'}`}
+                  >
+                    <Text className={`${statusFilter === f ? 'text-black' : 'text-slate-500'} text-[10px] font-black uppercase tracking-widest`}>{f}</Text>
+                  </TouchableOpacity>
+               ))}
+            </View>
+         </ScrollView>
       </View>
 
       {loading ? (
@@ -102,8 +125,11 @@ export default function BillingsLedger() {
           }
         >
           <View className="gap-4 pb-20">
-            {billings.map((b) => (
-              <View key={b.id} className="bg-slate-900/50 rounded-[32px] p-6 border border-white/5">
+            {filteredBillings.map((b) => (
+              <View key={b.id} className="bg-slate-900/50 rounded-[32px] p-6 border border-white/5 overflow-hidden">
+                {/* Accent Glow */}
+                {b.paymentStatus?.toLowerCase() === 'paid' && <View className="absolute -top-10 -right-10 w-32 h-32 bg-emerald-500/5 rounded-full" />}
+                
                 <View className="flex-row justify-between items-start mb-4">
                   <View className="flex-1">
                     <Text className="text-sky-500 font-black text-[10px] tracking-widest uppercase mb-1">{b.invoiceNo}</Text>
@@ -112,13 +138,13 @@ export default function BillingsLedger() {
                   </View>
                   <StatusBadge status={b.paymentStatus || 'Pending'} />
                 </View>
-
+ 
                 <View className="h-[1px] bg-white/5 mb-4" />
-
+ 
                 <View className="flex-row justify-between items-end">
                   <View>
                     <Text className="text-slate-500 text-[8px] font-black uppercase tracking-widest mb-1">Grand Total</Text>
-                    <Text className="text-white font-black text-2xl">₹{(b.grandTotal || 0).toLocaleString()}</Text>
+                    <Text className="text-white font-black text-2xl">₹{Number(b.grandTotal || 0).toLocaleString()}</Text>
                   </View>
                   
                   <View className="flex-row gap-2">
