@@ -1,10 +1,10 @@
 import React from "react";
 import {
-  View,
-  Text,
-  Modal,
-  TouchableOpacity,
-  ScrollView,
+    Modal,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { COLORS } from "../../theme/colors";
 
@@ -105,6 +105,8 @@ const BookingModal: React.FC<Props> = ({
   onClose,
   onApprove,
 }) => {
+  console.log("BookingModal render", { booking, spareParts });
+
   const bookingSpare = spareParts?.find(
     (sp) =>
       sp.serviceId === booking.serviceId ||
@@ -193,13 +195,13 @@ const BookingModal: React.FC<Props> = ({
             </Text>
 
             {/* ===== SPARE PARTS ===== */}
-            {bookingSpare?.parts?.length > 0 && (
+            {bookingSpare?.parts?.length ? (
               <View className="mt-6">
                 <Text className="text-primary font-bold mb-2">
                   🔧 Spare Parts
                 </Text>
 
-                {bookingSpare.parts.map((part) => {
+                {bookingSpare?.parts?.map((part) => {
                   const status = part.status || "pending";
 
                   return (
@@ -230,7 +232,7 @@ const BookingModal: React.FC<Props> = ({
                       </Text>
 
                       {/* ✅ APPROVE / REJECT FIX */}
-                      {status === "pending" && bookingSpare.serviceId && (
+                      {status === "pending" && bookingSpare?.serviceId && (
                         <View className="flex-row gap-2 mt-2">
                           <TouchableOpacity
                             onPress={() =>
@@ -271,10 +273,14 @@ const BookingModal: React.FC<Props> = ({
                   );
                 })}
               </View>
+            ) : (
+              <Text className="text-text-secondary mt-4 text-sm">
+                No spare parts added for this booking.
+              </Text>
             )}
 
             {/* ===== ISSUES ===== */}
-            {booking.issues?.length > 0 && (
+            {booking.issues?.length ? (
               <View className="mt-6">
                 <Text className="text-primary font-bold mb-2">
                   ⚙️ Issues
@@ -344,6 +350,25 @@ const BookingModal: React.FC<Props> = ({
                   );
                 })}
               </View>
+            ) : booking.issue ? (
+              <View className="mt-6">
+                <Text className="text-primary font-bold mb-2">
+                  ⚙️ Issue
+                </Text>
+                <Text className="text-text-secondary mb-2">{booking.issue}</Text>
+                {booking.issueAmount != null && (
+                  <Text className="text-text-secondary text-sm">
+                    Amount: ₹{Number(booking.issueAmount).toFixed(2)}
+                  </Text>
+                )}
+                <Text className="text-text-secondary text-sm mt-2">
+                  Status: <Text className="font-bold" style={{ color: booking.issueStatus === 'approved' ? COLORS.success : booking.issueStatus === 'rejected' ? COLORS.error : COLORS.warning }}>{(booking.issueStatus || 'pending').toUpperCase()}</Text>
+                </Text>
+              </View>
+            ) : (
+              <Text className="text-text-secondary mt-4 text-sm">
+                No issue details available for this booking.
+              </Text>
             )}
 
             {/* STATUS */}

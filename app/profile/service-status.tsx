@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
   ActivityIndicator,
+  FlatList,
   Modal,
   ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { COLORS } from "../../theme/colors";
-import { api } from "../../services/api";
 import { useAuth } from "../../contexts/AuthContext";
+import { api } from "../../services/api";
+import { COLORS } from "../../theme/colors";
 import BookingModal from "./BookingModal";
 
 /* ===== TYPES ===== */
@@ -32,7 +32,19 @@ type Booking = {
   phone: string;
   status: string;
   normalizedStatus?: string;
-  parts?: Part[];
+  email?: string;
+  address?: string;
+  location?: string;
+  vehicleNumber?: string;
+  brand?: string;
+  model?: string;
+  issue?: string;
+  issueAmount?: number;
+  issueStatus?: string;
+  issues?: any[];
+  serviceId?: number;
+  preferredDate?: string;
+  assignedEmployeeName?: string;
 };
 
 type SpareService = {
@@ -83,6 +95,7 @@ const ServiceStatus: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [showSpareModal, setShowSpareModal] = useState<boolean>(false);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [approving, setApproving] = useState<boolean>(false);
 
   /* ===== FETCH ===== */
 
@@ -90,38 +103,47 @@ const ServiceStatus: React.FC = () => {
     try {
       setLoading(true);
 
-      if (!user?.email) return;
+      if (!user?.email) {
+        console.log("ServiceStatus: no user email yet");
+        return;
+      }
 
+      console.log("ServiceStatus: fetching bookings for", user.email);
       const res = await api.get("/bookings");
+      console.log("ServiceStatus: raw bookings response", res.data);
 
       const userBookings: Booking[] = (res.data || [])
-        .filter((b: any) =>
-          b.email?.toLowerCase() === user.email.toLowerCase()
-        )
+        .filter((b: any) => b.email?.toLowerCase() === user.email.toLowerCase())
         .map((b: any) => ({
           ...b,
           normalizedStatus: STATUS_NORMALIZER[b.status] || b.status,
-
-          // ✅ IMPORTANT
-          issues: b.issues || [],
-          issue: b.issue || "",
+          issues: b.issues || b.serviceIssues || [],
+          issue: b.issue || b.serviceType || "",
           issueAmount: b.issueAmount,
           issueStatus: b.issueStatus,
-          serviceId: b.serviceId || b.id,
+          serviceId: b.serviceId || b.id || b.service_id,
+          brand: b.brand || b.vehicleBrand || undefined,
+          model: b.model || b.vehicleModel || undefined,
+          vehicleNumber: b.vehicleNumber || b.registrationNumber || undefined,
+          address: b.address || b.location || undefined,
+          preferredDate: b.preferredDate || b.date || undefined,
+          assignedEmployeeName: b.assignedEmployeeName || b.assignedEmployee || undefined,
         }));
 
+      console.log("ServiceStatus: processed bookings", userBookings);
       setBookings(userBookings);
 
       const spares: SpareService[] = (res.data || []).map((b: any) => ({
-        serviceId: b.serviceId || b.id,
-        serviceName: b.bookingId,
-        parts: b.parts || b.spareParts || [], 
+        serviceId: b.serviceId || b.id || b.service_id,
+        serviceName: b.bookingId || b.booking_id || b.orderId || "",
+        parts: b.parts || b.spareParts || b.spare_parts || [],
       }));
 
+      console.log("ServiceStatus: processed spare parts", spares);
       setSpareParts(spares);
 
     } catch (err) {
-      console.log("Error:", err);
+      console.log("ServiceStatus: fetch error", err);
     } finally {
       setLoading(false);
     }
@@ -129,13 +151,65 @@ const ServiceStatus: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [user]);
+
+  const handleApprove = async (
+    serviceId: number,
+    itemId: string,
+    status: "approved" | "rejected",
+    type: "part" | "issue" = "part"
+  ) => {
+    console.log("ServiceStatus: handleApprove", { serviceId, itemId, status, type });
+    setApproving(true);
+    try {
+      if (type === "part") {
+        try {
+          await api.put(`/all-services/${serviceId}/parts/${itemId}/approve`, {
+            status,
+          });
+        } catch (err) {
+          console.warn("part approval fallback 1", err);
+          await api.put(`/bookings/${serviceId}/parts/${itemId}`, { status });
+        }
+      } else {
+        try {
+          await api.put(`/all-services/${serviceId}/issues/${itemId}/status`, {
+            issueStatus: status,
+          });
+        } catch (err) {
+          console.warn("issue approval fallback 1", err);
+          await api.put(`/bookings/${serviceId}/issues/${itemId}`, {
+            issueStatus: status,
+          });
+        }
+      }
+
+      console.log("ServiceStatus: approve success", { serviceId, itemId, status, type });
+      await fetchData();
+      if (selectedBooking) {
+        setSelectedBooking((prev) => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            issueStatus: type === "issue" ? status : prev.issueStatus,
+            issues: prev.issues?.map((issue) =>
+              issue.id === itemId ? { ...issue, issueStatus: status } : issue
+            ),
+          } as Booking;
+        });
+      }
+    } catch (err) {
+      console.log("ServiceStatus: approve error", err);
+    } finally {
+      setApproving(false);
+    }
+  };
 
   /* ===== RENDER ITEM ===== */
 
   const renderItem = ({ item }: { item: Booking }) => {
     const bookingSpares = spareParts.find(
-      (sp) => sp.serviceId === item.id
+      (sp) => sp.serviceId === item.serviceId || sp.serviceId === item.id
     );
 
     const hasPending =
@@ -143,7 +217,10 @@ const ServiceStatus: React.FC = () => {
 
     return (
       <TouchableOpacity
-        onPress={() => setSelectedBooking(item)}
+        onPress={() => {
+          console.log("ServiceStatus: selected booking", item);
+          setSelectedBooking(item);
+        }}
         className="rounded-xl p-4 mb-4"
         style={{
           backgroundColor: COLORS.card,
@@ -163,15 +240,15 @@ const ServiceStatus: React.FC = () => {
               {item.name} • {item.phone}
             </Text>
 
-            {bookingSpares?.parts?.length > 0 && (
+            {bookingSpares?.parts?.length ? (
               <Text className="text-xs mt-2 text-text-secondary">
                 🔧 ₹
-                {bookingSpares.parts.reduce(
+                {bookingSpares.parts?.reduce(
                   (sum, p) => sum + Number(p.total || 0),
                   0
-                )}
+                ) ?? 0}
               </Text>
-            )}
+            ) : null}
           </View>
 
           {/* RIGHT STATUS BADGE */}
@@ -299,9 +376,7 @@ const ServiceStatus: React.FC = () => {
           booking={selectedBooking}
           spareParts={spareParts}
           onClose={() => setSelectedBooking(null)}
-          onApprove={(serviceId, itemId, status, type) => {
-            console.log("Approve:", serviceId, itemId, status, type);
-          }}
+          onApprove={handleApprove}
         />
       )}
     </SafeAreaView>
