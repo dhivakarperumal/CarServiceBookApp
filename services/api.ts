@@ -270,6 +270,21 @@ export const apiService = {
     }
   },
 
+  getAppointments: async (): Promise<any[]> => {
+    try {
+      const response = await api.get('/appointments');
+      const data = response.data;
+      if (Array.isArray(data)) return data;
+      if (data?.data && Array.isArray(data.data)) return data.data;
+      if (data?.appointments && Array.isArray(data.appointments)) return data.appointments;
+      return [];
+    } catch (error: any) {
+      console.error('Error fetching appointments:', error);
+      throw error;
+    }
+  },
+
+
   getAllServices: async (uid: string): Promise<any[]> => {
     try {
       const response = await api.get('/all-services', {
