@@ -492,9 +492,13 @@ export default function ServiceCenter() {
                       Job Details / Issues
                     </Text>
                     {item.assignedEmployeeId && (
-                      <TouchableOpacity onPress={() => openIssueEditor(item)}>
-                        <Text className="text-[10px] font-black text-text-primary p-2 bg-primary rounded-md uppercase tracking-widest">
-                          Manage Issues
+                      <TouchableOpacity
+                        onPress={() => openIssueEditor(item)}
+                        className="flex-row items-center gap-1 p-2 bg-primary rounded-md"
+                      >
+                        <Ionicons name="add" size={14} color="#FFFFFF" />
+                        <Text className="text-[10px] font-black text-text-primary  uppercase tracking-widest">
+                          Add Issues
                         </Text>
                       </TouchableOpacity>
                     )}

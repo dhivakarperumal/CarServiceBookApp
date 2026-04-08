@@ -55,7 +55,7 @@ export default function EmployeeAdminLayout() {
           resizeMode="contain"
         />
         <View className="ml-3">
-          <Text className="text-base font-black text-white">
+          <Text className="text-2xl font-black text-white">
             {headerInfo.title}
           </Text>
           {/* <Text className="text-[11px] text-slate-400 uppercase tracking-[0.15px]">
