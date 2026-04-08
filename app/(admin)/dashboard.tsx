@@ -126,7 +126,7 @@ export default function AdminDashboard() {
           <View className="mb-8">
             <Text className="text-white opacity-40 text-[10px] font-black uppercase tracking-widest mb-4">Quick Access</Text>
             <View className="flex-row flex-wrap justify-between">
-              <QuickAction title="Add Vehicle" icon="🚗" color="bg-sky-500" onPress={() => router.push('/(adminPages)/vehicles' as any)} />
+              <QuickAction title="Add Vehicle" icon="🚗" color="bg-sky-500" onPress={() => router.push('/(adminPages)/add-vehicle' as any)} />
               <QuickAction title="Add Booking" icon="📅" color="bg-indigo-500" onPress={() => router.push('/(adminPages)/add-booking' as any)} />
               <QuickAction title="Add Billing" icon="🧾" color="bg-emerald-500" onPress={() => router.push('/(employee)/add-billing' as any)} />
               <QuickAction title="Add Staff" icon="👨‍🔧" color="bg-violet-500" onPress={() => router.push('/(adminPages)/staff' as any)} />
