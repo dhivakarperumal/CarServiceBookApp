@@ -109,7 +109,7 @@ const BookingModal: React.FC<Props> = ({
   onClose,
   onApprove,
 }) => {
-  console.log("BookingModal render", { booking, spareParts });
+  console.log("BookingModal render", { booking: booking.bookingId, issuesCount: booking.issues?.length, issues: booking.issues });
 
   const bookingSpare = spareParts?.find((sp) => {
     const serviceIdMatch = booking.serviceId != null && sp.serviceId === booking.serviceId;
