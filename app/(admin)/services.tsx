@@ -72,12 +72,16 @@ export default function Services() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [servRes, empRes] = await Promise.all([
+      const [servRes, empRes, apptsRes] = await Promise.all([
         api.get("/all-services"),
         api.get("/staff"),
+        api.get("/appointments/all")
       ]);
       
       const servicesData = servRes.data || [];
+      const apptRaw = apptsRes.data || [];
+      const apptsList = Array.isArray(apptRaw) ? apptRaw : (apptRaw.data || apptRaw.appointments || []);
+      
       const servicesWithDetails = [];
 
       for (const service of servicesData) {
@@ -86,15 +90,21 @@ export default function Services() {
           const details = detailRes.data || {};
           servicesWithDetails.push({ 
             ...service, 
+            isAppointment: false,
             parts: details.parts || [], 
             issues: details.issues || [] 
           });
         } catch (err) {
-          servicesWithDetails.push({ ...service, parts: [], issues: [] });
+          servicesWithDetails.push({ ...service, isAppointment: false, parts: [], issues: [] });
         }
       }
+
+      const combined = [
+        ...servicesWithDetails,
+        ...apptsList.map((a: any) => ({ ...a, isAppointment: true, parts: [], issues: [] }))
+      ];
       
-      setServices(servicesWithDetails);
+      setServices(combined);
       setEmployees(empRes.data || []);
     } catch (error) {
       console.error("Failed to fetch data", error);
@@ -107,10 +117,17 @@ export default function Services() {
 
   const searchedServices = useMemo(() => {
     return services.filter((s: any) => {
-      const text = `${s.bookingId || ""} ${s.name || ""} ${s.phone || ""} ${s.brand || ""} ${s.model || ""} ${s.vehicleNumber || ""}`.toLowerCase();
-      if (!text.includes(search.toLowerCase())) return false;
+      const sId = (s.bookingId || s.appointmentId || s.id || s._id || "").toString().toLowerCase();
+      const sName = (s.name || "").toLowerCase();
+      const sPhone = (s.phone || "").toLowerCase();
+      const sVehicle = `${s.brand || ""} ${s.model || ""} ${s.vehicleNumber || ""} ${s.registrationNumber || ""}`.toLowerCase();
       
-      const bDateStr = s.created_at || s.createdAt;
+      const searchLower = search.toLowerCase();
+      const matchSearch = sId.includes(searchLower) || sName.includes(searchLower) || sPhone.includes(searchLower) || sVehicle.includes(searchLower);
+      
+      if (!matchSearch) return false;
+      
+      const bDateStr = s.created_at || s.createdAt || s.preferredDate;
       if (dateFilter === "All Time") return true;
       if (!bDateStr) return false;
 
@@ -140,15 +157,19 @@ export default function Services() {
 
   const stats = useMemo(() => {
     const relevantServices = isMechanic 
-      ? services.filter((s: any) => (s.assignedEmployeeName || "").toLowerCase() === (userProfile?.username || "").toLowerCase())
+      ? services.filter((s: any) => {
+          const empName = (s.assignedEmployeeName || s.assigned_employee_name || "").toLowerCase();
+          const targetName = (userProfile?.username || (userProfile as any)?.name || "").toLowerCase();
+          return empName === targetName && targetName !== "";
+        })
       : services;
 
     return {
       total: relevantServices.length,
-      assigned: relevantServices.filter((s: any) => !!s.assignedEmployeeId).length,
-      unassigned: isMechanic ? 0 : relevantServices.filter((s: any) => !s.assignedEmployeeId).length,
+      assigned: relevantServices.filter((s: any) => !!(s.assignedEmployeeId || s.assigned_employee_id)).length,
+      unassigned: isMechanic ? 0 : relevantServices.filter((s: any) => !(s.assignedEmployeeId || s.assigned_employee_id)).length,
       completed: relevantServices.filter((s: any) => {
-        const sStat = (s.serviceStatus || s.status || "").toLowerCase();
+        const sStat = (s.serviceStatus || s.status || s.appointmentStatus || "").toLowerCase();
         return sStat.includes("completed") || sStat.includes("bill completed");
       }).length
     };
@@ -157,12 +178,16 @@ export default function Services() {
   const currentMainList = mainTab === "booked" ? searchedServices.filter((s: any) => !s.addVehicle) : searchedServices.filter((s: any) => s.addVehicle);
   
   const assignedServices = currentMainList.filter((s: any) => {
-    if (!s.assignedEmployeeId) return false;
-    if (isMechanic) return (s.assignedEmployeeName || "").toLowerCase() === (userProfile?.username || "").toLowerCase();
+    if (!(s.assignedEmployeeId || s.assigned_employee_id)) return false;
+    if (isMechanic) {
+      const empName = (s.assignedEmployeeName || s.assigned_employee_name || "").toLowerCase();
+      const targetName = (userProfile?.username || (userProfile as any)?.name || "").toLowerCase();
+      return empName === targetName;
+    }
     return true;
   });
   
-  const unassignedServices = isMechanic ? [] : currentMainList.filter((s: any) => !s.assignedEmployeeId);
+  const unassignedServices = isMechanic ? [] : currentMainList.filter((s: any) => !(s.assignedEmployeeId || s.assigned_employee_id));
   const listData = subTab === "assigned" ? assignedServices : unassignedServices;
 
   const totalPages = Math.ceil(listData.length / itemsPerPage);
@@ -225,10 +250,10 @@ export default function Services() {
     if (!selectedBooking || !selectedEmployeeId || assigning) return;
     try {
       setAssigning(true);
-      const emp: any = employees.find((e: any) => e.id.toString() === selectedEmployeeId.toString());
+      const emp: any = employees.find((e: any) => (e.id || e._id).toString() === selectedEmployeeId.toString());
       if (!emp) return Alert.alert("Error", "Mechanic not found");
-      await api.put(`/all-services/${selectedBooking.id}/assign`, { 
-        assignedEmployeeId: emp.id, 
+      await api.put(`/all-services/${selectedBooking.id || selectedBooking._id}/assign`, { 
+        assignedEmployeeId: emp.id || emp._id, 
         assignedEmployeeName: emp.name, 
         serviceStatus: "Processing" 
       });
@@ -242,7 +267,7 @@ export default function Services() {
   };
 
   const handleOpenIssueModal = (item: any) => {
-    setEditingIssueId(item.id);
+    setEditingIssueId(item.id || item._id);
     let initialIssues = [...(item.issues || [])];
     if (initialIssues.length === 0) {
       const mainIssueText = item.issue || item.otherIssue || item.carIssue || "Routine Checkup";
@@ -256,6 +281,15 @@ export default function Services() {
     setEditingParts([...(item.parts || [])]);
     setActiveModalTab("issues");
     setIssueModalVisible(true);
+  };
+
+  const formatDateTime = (dateStr: string) => {
+    if (!dateStr) return { date: "N/A", time: "N/A" };
+    const date = new Date(dateStr);
+    return {
+      date: date.toLocaleDateString("en-GB"),
+      time: date.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })
+    };
   };
 
   if (loading && services.length === 0) {
@@ -319,10 +353,10 @@ export default function Services() {
            <View className="flex-row gap-4">
               <View className="flex-1 flex-row bg-white/5 p-1 rounded-2xl border border-white/10">
                  <TouchableOpacity onPress={() => { setSubTab("assigned"); setCurrentPage(1); }} className={`flex-1 py-3 rounded-xl items-center ${subTab === "assigned" ? "bg-slate-800" : ""}`}>
-                   <Text className={`text-[8px] font-black uppercase ${subTab === "assigned" ? "text-white" : "text-white/20"}`}>Active ({assignedServices.length})</Text>
+                    <Text className={`text-[8px] font-black uppercase ${subTab === "assigned" ? "text-white" : "text-white/20"}`}>Active ({assignedServices.length})</Text>
                  </TouchableOpacity>
                  <TouchableOpacity onPress={() => { setSubTab("unassigned"); setCurrentPage(1); }} className={`flex-1 py-3 rounded-xl items-center ${subTab === "unassigned" ? "bg-slate-800" : ""}`}>
-                   <Text className={`text-[8px] font-black uppercase ${subTab === "unassigned" ? "text-white" : "text-white/20"}`}>Queue ({unassignedServices.length})</Text>
+                    <Text className={`text-[8px] font-black uppercase ${subTab === "unassigned" ? "text-white" : "text-white/20"}`}>Queue ({unassignedServices.length})</Text>
                  </TouchableOpacity>
               </View>
            </View>
@@ -330,45 +364,81 @@ export default function Services() {
 
         {/* List */}
         <View className="px-6 gap-8">
-          {paginatedData.map((item: any) => (
-            <View key={item.id} style={{ backgroundColor: COLORS.card }} className="p-8 rounded-3xl border border-white/5 shadow-xl">
-               <View className="flex-row justify-between items-start mb-8">
-                  <View>
-                    <Text className="text-white/20 font-black text-[8px] uppercase">ID: {item.bookingId || item.id}</Text>
-                    <Text className="text-sky-400 font-black text-sm uppercase">{item.brand} {item.model}</Text>
+           {paginatedData.length === 0 ? (
+             <View className="bg-white/5 p-20 rounded-3xl items-center border border-dashed border-white/10">
+                <Ionicons name="document-text-outline" size={48} color={COLORS.textMuted} />
+                <Text className="text-white/20 font-black text-[10px] uppercase mt-4">No Services Found</Text>
+             </View>
+           ) : (
+             paginatedData.map((item: any) => (
+               <View key={item.id || item._id} style={{ backgroundColor: COLORS.card }} className="p-8 rounded-3xl border border-white/5 shadow-xl">
+                  <View className="flex-row justify-between items-start mb-8">
+                     <View>
+                        <Text className="text-white/50 font-black text-[8px] uppercase">DB-ID: {item.id || item._id}</Text>
+                        <Text className="text-white font-black text-sm uppercase">{item.appointmentId || item.bookingId || (item.id ? `ID-${item.id}` : "SVC-NEW")}</Text>
+                     </View>
+                     <View className="flex-row gap-2">
+                        {item.isAppointment && (
+                          <View className="px-3 py-1.5 rounded-full border border-sky-500/30 bg-sky-500/10">
+                            <Text className="text-sky-400 text-[8px] font-black uppercase">APPOINTMENT</Text>
+                          </View>
+                        )}
+                        <TouchableOpacity onPress={() => { setSelectedBooking(item); setStatusModalVisible(true); }} style={{ backgroundColor: getStatusColor(item.serviceStatus || item.status || item.appointmentStatus) + '20', borderColor: getStatusColor(item.serviceStatus || item.status || item.appointmentStatus) + '40' }} className="px-4 py-2 rounded-full border">
+                           <Text style={{ color: getStatusColor(item.serviceStatus || item.status || item.appointmentStatus) }} className="text-[9px] font-black uppercase">{getMappedStatus(item.serviceStatus || item.status || item.appointmentStatus)}</Text>
+                        </TouchableOpacity>
+                     </View>
                   </View>
-                  <TouchableOpacity onPress={() => { setSelectedBooking(item); setStatusModalVisible(true); }} style={{ backgroundColor: getStatusColor(item.serviceStatus || item.status) + '20', borderColor: getStatusColor(item.serviceStatus || item.status) + '40' }} className="px-4 py-2 rounded-full border">
-                     <Text style={{ color: getStatusColor(item.serviceStatus || item.status) }} className="text-[9px] font-black uppercase">{getMappedStatus(item.serviceStatus || item.status)}</Text>
-                  </TouchableOpacity>
-               </View>
-               <View className="bg-black/20 rounded-2xl p-4 gap-4 mb-6 border border-white/5">
-                  <View className="flex-row items-center gap-4">
-                     <View className="w-8 h-8 rounded-xl bg-white/5 items-center justify-center border border-white/5"><Text className="text-white font-black">{item.name?.charAt(0)}</Text></View>
-                     <View><Text className="text-white/20 text-[8px] uppercase">Client</Text><Text className="text-white text-xs font-black uppercase">{item.name}</Text></View>
+                  
+                  <View className="mb-6 flex-row justify-between items-end">
+                    <View>
+                      <Text className="text-white/20 text-[8px] uppercase font-black mb-1">Vehicle Specification</Text>
+                      <Text className="text-sky-400 text-lg font-black uppercase italic">{item.brand} {item.model}</Text>
+                    </View>
+                    {(item.vehicleNumber || item.registrationNumber) && (
+                      <View className="bg-sky-500/10 px-3 py-1.5 rounded-xl border border-sky-500/20">
+                        <Text className="text-sky-500 text-[9px] font-black uppercase tracking-widest">{item.vehicleNumber || item.registrationNumber}</Text>
+                      </View>
+                    )}
                   </View>
-                  <View className="flex-row items-center gap-4">
-                     <View className="w-8 h-8 rounded-xl bg-white/5 items-center justify-center border border-white/5"><Ionicons name="construct" size={14} color={COLORS.primary} /></View>
-                     <View><Text className="text-white/20 text-[8px] uppercase">Mechanic</Text><Text className="text-white text-xs font-black uppercase">{item.assignedEmployeeName || "Pending"}</Text></View>
-                  </View>
-               </View>
-               <View className="flex-row gap-3">
-                  {!item.assignedEmployeeId && (
-                    <TouchableOpacity onPress={() => { setSelectedBooking(item); setModalVisible(true); }} className="flex-1 bg-white py-4 rounded-xl items-center"><Text className="text-black font-black text-[10px] uppercase">Assign</Text></TouchableOpacity>
-                  )}
-                  <TouchableOpacity onPress={() => handleOpenIssueModal(item)} className="w-12 h-12 bg-white/5 border border-white/10 rounded-xl items-center justify-center"><Ionicons name="options-outline" size={20} color="white" /></TouchableOpacity>
-                  <TouchableOpacity onPress={() => router.push({ pathname: "/(employee)/service-details", params: { id: item.id } })} className="w-12 h-12 bg-white/5 border border-white/10 rounded-xl items-center justify-center"><Ionicons name="eye-outline" size={20} color="white" /></TouchableOpacity>
-                  <TouchableOpacity onPress={() => handleDelete(item.id)} className="w-12 h-12 bg-red-500/10 border border-red-500/20 rounded-xl items-center justify-center"><Ionicons name="trash-outline" size={20} color={COLORS.error} /></TouchableOpacity>
-               </View>
-            </View>
-          ))}
 
-          {totalPages > 1 && (
-            <View className="flex-row justify-center items-center gap-6 mt-10">
-               <TouchableOpacity disabled={currentPage === 1} onPress={() => setCurrentPage(prev => Math.max(1, prev - 1))} className={`w-10 h-10 rounded-xl items-center justify-center border border-white/10 ${currentPage === 1 ? "opacity-20" : ""}`}><Ionicons name="chevron-back" size={20} color="white" /></TouchableOpacity>
-               <Text className="text-white font-black text-[10px]">PAGE {currentPage} / {totalPages}</Text>
-               <TouchableOpacity disabled={currentPage === totalPages} onPress={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))} className={`w-10 h-10 rounded-xl items-center justify-center border border-white/10 ${currentPage === totalPages ? "opacity-20" : ""}`}><Ionicons name="chevron-forward" size={20} color="white" /></TouchableOpacity>
-            </View>
-          )}
+                  <View className="bg-black/20 rounded-2xl p-6 gap-4 mb-8 border border-white/5">
+                     <View className="flex-row items-center gap-4">
+                        <View className="w-10 h-10 rounded-xl bg-white/5 items-center justify-center border border-white/5"><Text className="text-white font-black">{item.name?.charAt(0)}</Text></View>
+                        <View className="flex-1">
+                           <Text className="text-white/20 text-[8px] uppercase font-black">Client</Text>
+                           <Text className="text-white text-xs font-black uppercase">{item.name}</Text>
+                        </View>
+                        {item.phone && <View className="p-2 bg-sky-500/10 rounded-lg"><Ionicons name="call" size={14} color="#0EA5E9" /></View>}
+                     </View>
+                     <View className="flex-row items-center gap-4">
+                        <View className="w-10 h-10 rounded-xl bg-white/5 items-center justify-center border border-white/5"><Ionicons name="construct" size={14} color={COLORS.primary} /></View>
+                        <View>
+                           <Text className="text-white/20 text-[8px] uppercase font-black">Mechanic</Text>
+                           <Text className="text-white text-xs font-black uppercase">{item.assignedEmployeeName || item.assigned_employee_name || "Allocation Pending"}</Text>
+                        </View>
+                     </View>
+                  </View>
+                  
+                  <View className="flex-row gap-3">
+                     {!(item.assignedEmployeeId || item.assigned_employee_id) && (
+                       <TouchableOpacity onPress={() => { setSelectedBooking(item); setModalVisible(true); }} className="flex-1 bg-white py-4 rounded-xl items-center"><Text className="text-black font-black text-[10px] uppercase">Assign</Text></TouchableOpacity>
+                     )}
+                     <TouchableOpacity onPress={() => handleOpenIssueModal(item)} className="w-12 h-12 bg-white/5 border border-white/10 rounded-xl items-center justify-center"><Ionicons name="options-outline" size={20} color="white" /></TouchableOpacity>
+                     <TouchableOpacity onPress={() => router.push({ pathname: "/(employee)/service-details", params: { id: item.id || item._id } })} className="w-12 h-12 bg-white/5 border border-white/10 rounded-xl items-center justify-center"><Ionicons name="eye-outline" size={20} color="white" /></TouchableOpacity>
+                     <TouchableOpacity onPress={() => handleDelete(item.id || item._id)} className="w-12 h-12 bg-red-500/10 border border-red-500/20 rounded-xl items-center justify-center"><Ionicons name="trash-outline" size={20} color={COLORS.error} /></TouchableOpacity>
+                  </View>
+               </View>
+             ))
+           )}
+
+           {/* Pagination */}
+           {totalPages > 1 && (
+             <View className="flex-row justify-center items-center gap-6 mt-10">
+                <TouchableOpacity disabled={currentPage === 1} onPress={() => setCurrentPage(prev => Math.max(1, prev - 1))} className={`w-10 h-10 rounded-xl items-center justify-center border border-white/10 ${currentPage === 1 ? "opacity-20" : ""}`}><Ionicons name="chevron-back" size={20} color="white" /></TouchableOpacity>
+                <Text className="text-white font-black text-[10px]">PAGE {currentPage} / {totalPages}</Text>
+                <TouchableOpacity disabled={currentPage === totalPages} onPress={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))} className={`w-10 h-10 rounded-xl items-center justify-center border border-white/10 ${currentPage === totalPages ? "opacity-20" : ""}`}><Ionicons name="chevron-forward" size={20} color="white" /></TouchableOpacity>
+             </View>
+           )}
         </View>
       </ScrollView>
 
@@ -379,12 +449,12 @@ export default function Services() {
               <Text className="text-white text-2xl font-black uppercase text-center mb-6">Assign Tech</Text>
               <View className="bg-white/5 border border-white/10 rounded-2xl p-2 mb-8">
                 <ScrollView style={{ maxHeight: 300 }}>
-                  {employees.map((emp: any) => (
-                    <TouchableOpacity key={emp.id} onPress={() => setSelectedEmployeeId(emp.id)} className={`p-5 rounded-xl mb-1 flex-row justify-between items-center ${selectedEmployeeId === emp.id ? "bg-white" : ""}`}>
-                      <Text className={`font-black text-xs uppercase ${selectedEmployeeId === emp.id ? "text-black" : "text-white"}`}>{emp.name}</Text>
-                      {selectedEmployeeId === emp.id && <Ionicons name="checkmark" size={18} color="black" />}
-                    </TouchableOpacity>
-                  ))}
+                   {employees.map((emp: any) => (
+                     <TouchableOpacity key={emp.id || emp._id} onPress={() => setSelectedEmployeeId(emp.id || emp._id)} className={`p-5 rounded-xl mb-1 flex-row justify-between items-center ${selectedEmployeeId === (emp.id || emp._id) ? "bg-white" : ""}`}>
+                       <Text className={`font-black text-xs uppercase ${selectedEmployeeId === (emp.id || emp._id) ? "text-black" : "text-white"}`}>{emp.name}</Text>
+                       {selectedEmployeeId === (emp.id || emp._id) && <Ionicons name="checkmark" size={18} color="black" />}
+                     </TouchableOpacity>
+                   ))}
                 </ScrollView>
               </View>
               <View className="flex-row gap-4">
@@ -402,8 +472,8 @@ export default function Services() {
               <Text className="text-white text-2xl font-black uppercase text-center mb-6">Update Status</Text>
               <ScrollView style={{ maxHeight: 400 }} className="bg-white/5 border border-white/10 rounded-2xl p-2 mb-4">
                 {STATUS_STEPS.map((s: string) => (
-                  <TouchableOpacity key={s} onPress={async () => { if (selectedBooking) { await handleUpdateStatus(selectedBooking.id, s); setStatusModalVisible(false); }}} className={`p-5 rounded-xl mb-1 flex-row justify-between items-center ${getMappedStatus(selectedBooking?.serviceStatus || selectedBooking?.status) === s ? "bg-white" : ""}`}>
-                    <Text className={`font-black text-[10px] uppercase ${getMappedStatus(selectedBooking?.serviceStatus || selectedBooking?.status) === s ? "text-black" : "text-white/40"}`}>{s}</Text>
+                  <TouchableOpacity key={s} onPress={async () => { if (selectedBooking) { await handleUpdateStatus(selectedBooking.id || selectedBooking._id, s); setStatusModalVisible(false); }}} className={`p-5 rounded-xl mb-1 flex-row justify-between items-center ${getMappedStatus(selectedBooking?.serviceStatus || selectedBooking?.status || selectedBooking?.appointmentStatus) === s ? "bg-white" : ""}`}>
+                    <Text className={`font-black text-[10px] uppercase ${getMappedStatus(selectedBooking?.serviceStatus || selectedBooking?.status || selectedBooking?.appointmentStatus) === s ? "text-black" : "text-white/40"}`}>{s}</Text>
                   </TouchableOpacity>
                 ))}
               </ScrollView>
@@ -416,6 +486,7 @@ export default function Services() {
       <Modal visible={issueModalVisible} transparent animationType="slide">
         <View className="flex-1 bg-black/95">
            <View className="flex-1 bg-slate-950 mt-10 rounded-t-3xl border-t border-white/10">
+              <div style={{ display: 'none' }} />
               <View className="px-10 py-6 border-b border-white/5 flex-row justify-between items-center">
                  <Text className="text-white text-xl font-black uppercase">Manifest</Text>
                  <TouchableOpacity onPress={() => setIssueModalVisible(false)} className="w-10 h-10 bg-white/5 rounded-xl items-center justify-center"><Ionicons name="close" size={24} color="white" /></TouchableOpacity>
@@ -469,3 +540,13 @@ export default function Services() {
     </SafeAreaView>
   );
 }
+
+const FontAwesome5Wrapper = ({ name, size, color }: any) => {
+  const mapping: any = {
+    'user-slash': 'person-remove',
+    'user-check': 'person-add',
+    'clipboard-check': 'clipboard',
+    'check-circle': 'checkmark-circle'
+  };
+  return <Ionicons name={mapping[name] || name} size={size} color={color} />;
+};

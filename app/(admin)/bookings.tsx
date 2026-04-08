@@ -315,12 +315,12 @@ export default function AdminBookings() {
                   const sc = apptStatusColors[apt.status || apt.serviceStatus || apt.appointmentStatus || 'Appointment Booked'] || apptStatusColors['Appointment Booked'];
                   const isAssigned = !!(apt.assignedEmployeeName || apt.assignedEmployeeId);
                   return (
-                     <View key={apt.id} style={{ marginBottom: 16, backgroundColor: '#0f172a', borderRadius: 28, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
+                     <View key={apt.id || apt._id} style={{ marginBottom: 16, backgroundColor: '#0f172a', borderRadius: 28, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
                         <View style={{ padding: 20 }}>
                            {/* Row 1: ID + Status */}
                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>
                               <View>
-                                 <Text style={{ color: COLORS.primary, fontSize: 9, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 2 }}>{apt.appointmentId || `APT-${apt.id}`}</Text>
+                                 <Text style={{ color: 'white', fontSize: 10, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 2 }}>{apt.appointmentId || `APT-${apt.id}`}</Text>
                                  <Text style={{ color: 'white', fontSize: 17, fontWeight: '900', marginTop: 2, textTransform: 'uppercase', letterSpacing: -0.3 }}>{apt.name}</Text>
                                  <Text style={{ color: '#475569', fontSize: 10, fontWeight: '700', marginTop: 2 }}>{apt.phone}</Text>
                               </View>
@@ -346,7 +346,7 @@ export default function AdminBookings() {
                                  </View>
                               </View>
                               <View style={{ backgroundColor: 'rgba(14,165,233,0.1)', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 10, borderWidth: 1, borderColor: 'rgba(14,165,233,0.2)' }}>
-                                 <Text style={{ color: COLORS.primary, fontSize: 9, fontWeight: '900' }}>{apt.serviceType}</Text>
+                                 <Text style={{ color: 'white', fontSize: 10, fontWeight: '900' }}>{apt.serviceType}</Text>
                               </View>
                            </View>
 
@@ -461,7 +461,7 @@ export default function AdminBookings() {
                         </View>
                         <View>
                            <Text style={{ color: 'white', fontSize: 16, fontWeight: '900', textTransform: 'uppercase' }}>Appointment</Text>
-                           <Text style={{ color: COLORS.primary, fontSize: 9, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 2, marginTop: 2 }}>{selectedAppt?.appointmentId || `APT-${selectedAppt?.id}`}</Text>
+                           <Text style={{ color: 'white', fontSize: 10, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 2, marginTop: 2 }}>{selectedAppt?.appointmentId || `APT-${selectedAppt?.id}`}</Text>
                         </View>
                      </View>
                      <TouchableOpacity onPress={() => { setSelectedAppt(null); setPendingChanges({}); }} style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.08)', alignItems: 'center', justifyContent: 'center' }}>
