@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
   ActivityIndicator,
+  FlatList,
   Modal,
   ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { COLORS } from "../../theme/colors";
-import { api } from "../../services/api";
 import { useAuth } from "../../contexts/AuthContext";
+import { api } from "../../services/api";
+import { COLORS } from "../../theme/colors";
 import BookingModal from "./BookingModal";
 
 /* ===== TYPES ===== */
@@ -32,13 +32,26 @@ type Booking = {
   phone: string;
   status: string;
   normalizedStatus?: string;
-  parts?: Part[];
+  email?: string;
+  address?: string;
+  location?: string;
+  vehicleNumber?: string;
+  brand?: string;
+  model?: string;
+  issue?: string;
+  issueAmount?: number;
+  issueStatus?: string;
+  issues?: any[];
+  serviceId?: number;
+  preferredDate?: string;
+  assignedEmployeeName?: string;
 };
 
 type SpareService = {
   serviceId: number;
   serviceName: string;
   parts: Part[];
+  issues?: any[];
 };
 
 /* ===== STATUS ===== */
@@ -83,6 +96,7 @@ const ServiceStatus: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [showSpareModal, setShowSpareModal] = useState<boolean>(false);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [approving, setApproving] = useState<boolean>(false);
 
   /* ===== FETCH ===== */
 
@@ -90,38 +104,140 @@ const ServiceStatus: React.FC = () => {
     try {
       setLoading(true);
 
-      if (!user?.email) return;
+      if (!user?.email) {
+        console.log("ServiceStatus: no user email yet");
+        return;
+      }
 
-      const res = await api.get("/bookings");
+      console.log("ServiceStatus: fetching bookings and all-services for", user.email);
+      const [bookingsRes, servicesRes] = await Promise.all([
+        api.get("/bookings"),
+        api.get("/all-services"),
+      ]);
 
-      const userBookings: Booking[] = (res.data || [])
-        .filter((b: any) =>
-          b.email?.toLowerCase() === user.email.toLowerCase()
-        )
-        .map((b: any) => ({
-          ...b,
-          normalizedStatus: STATUS_NORMALIZER[b.status] || b.status,
+      const bookingsRaw = Array.isArray(bookingsRes.data)
+        ? bookingsRes.data
+        : bookingsRes.data?.bookings || bookingsRes.data?.data || [];
+      const servicesRaw = Array.isArray(servicesRes.data)
+        ? servicesRes.data
+        : servicesRes.data?.services || servicesRes.data?.data || [];
 
-          // ✅ IMPORTANT
-          issues: b.issues || [],
-          issue: b.issue || "",
-          issueAmount: b.issueAmount,
-          issueStatus: b.issueStatus,
-          serviceId: b.serviceId || b.id,
-        }));
+      console.log(
+        "ServiceStatus: raw bookings",
+        bookingsRaw.length,
+        "raw all-services",
+        servicesRaw.length
+      );
 
-      setBookings(userBookings);
+      const userServices = servicesRaw.filter((service: any) => {
+        const serviceEmail = service.email?.toLowerCase();
+        const isUserEmail = serviceEmail === user.email.toLowerCase();
+        const isUserUid = service.uid === user.uid || service.uid === user.id;
+        const isBookingMatch = bookingsRaw.some(
+          (b: any) =>
+            b.bookingId === service.bookingId ||
+            b.bookingId === service.booking_id ||
+            b.id === service.serviceId ||
+            b.id === service.id
+        );
+        return isUserEmail || isUserUid || isBookingMatch;
+      });
 
-      const spares: SpareService[] = (res.data || []).map((b: any) => ({
-        serviceId: b.serviceId || b.id,
-        serviceName: b.bookingId,
-        parts: b.parts || b.spareParts || [], 
+      console.log("ServiceStatus: userServices count", userServices.length);
+
+      const servicesWithDetails = await Promise.all(
+        userServices.map(async (service: any) => {
+          try {
+            const detailRes = await api.get(`/all-services/${service.id}`);
+            return {
+              ...service,
+              parts: detailRes.data?.parts || service.parts || [],
+              issues: detailRes.data?.issues || service.issues || [],
+              issueAmount: detailRes.data?.issueAmount ?? service.issueAmount,
+              issueStatus: detailRes.data?.issueStatus || service.issueStatus,
+            };
+          } catch (err) {
+            console.warn(
+              "ServiceStatus: failed service detail fetch",
+              service.id,
+              err
+            );
+            return {
+              ...service,
+              parts: service.parts || [],
+              issues: service.issues || [],
+            };
+          }
+        })
+      );
+
+      const spares: SpareService[] = servicesWithDetails.map((service: any) => ({
+        serviceId: service.id || service.serviceId,
+        serviceName: service.bookingId || service.booking_id || service.orderId || "",
+        parts: service.parts || [],
+        issues: service.issues || [],
       }));
 
+      console.log("ServiceStatus: processed spare parts", spares);
       setSpareParts(spares);
 
+      const userBookings: Booking[] = bookingsRaw
+        .filter((b: any) => b.email?.toLowerCase() === user.email.toLowerCase())
+        .map((b: any) => {
+          const matchedService = servicesWithDetails.find(
+            (s: any) =>
+              s.id === b.serviceId ||
+              s.id === b.service_id ||
+              s.serviceId === b.serviceId ||
+              s.serviceId === b.service_id ||
+              s._id === b.serviceId ||
+              s._id === b.service_id ||
+              s.bookingId === b.bookingId ||
+              s.bookingId === b.booking_id ||
+              s.booking_id === b.bookingId ||
+              s.booking_id === b.booking_id
+          );
+
+          return {
+            ...b,
+            normalizedStatus: STATUS_NORMALIZER[b.status] || b.status,
+            issues: matchedService?.issues || b.issues || b.serviceIssues || [],
+            issue: b.issue || b.serviceType || matchedService?.issue || "",
+            issueAmount: b.issueAmount ?? matchedService?.issueAmount,
+            issueStatus: b.issueStatus || matchedService?.issueStatus,
+            serviceId: b.serviceId || b.id || b.service_id || matchedService?.id || matchedService?.serviceId,
+            brand: b.brand || b.vehicleBrand || matchedService?.brand,
+            model: b.model || b.vehicleModel || matchedService?.model,
+            vehicleNumber:
+              b.vehicleNumber ||
+              b.registrationNumber ||
+              matchedService?.vehicleNumber ||
+              matchedService?.registrationNumber,
+            address: b.address || b.location || matchedService?.address || matchedService?.location,
+            preferredDate: b.preferredDate || b.date || matchedService?.preferredDate,
+            assignedEmployeeName:
+              b.assignedEmployeeName ||
+              b.assignedEmployee ||
+              matchedService?.assignedEmployeeName,
+          } as Booking;
+        });
+
+      console.log("ServiceStatus: processed bookings", userBookings);
+      setBookings(userBookings);
+
+      if (selectedBooking) {
+        const refreshed = userBookings.find(
+          (booking) =>
+            booking.bookingId === selectedBooking.bookingId ||
+            booking.id === selectedBooking.id ||
+            booking.serviceId === selectedBooking.serviceId
+        );
+        if (refreshed) {
+          setSelectedBooking(refreshed);
+        }
+      }
     } catch (err) {
-      console.log("Error:", err);
+      console.log("ServiceStatus: fetch error", err);
     } finally {
       setLoading(false);
     }
@@ -129,13 +245,105 @@ const ServiceStatus: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [user]);
+
+  const handleApprove = async (
+    serviceId: number,
+    itemId: string | null,
+    status: "approved" | "rejected",
+    type: "part" | "issue" = "part"
+  ) => {
+    const normalizedItemId = itemId || null;
+    console.log("ServiceStatus: handleApprove", { serviceId, itemId: normalizedItemId, status, type });
+    setApproving(true);
+    try {
+      if (type === "part") {
+        try {
+          await api.put(`/all-services/${serviceId}/parts/${itemId}/approve`, {
+            status,
+          });
+        } catch (err) {
+          console.warn("part approval fallback 1", err);
+          await api.put(`/bookings/${serviceId}/parts/${itemId}`, { status });
+        }
+      } else {
+        let primaryError: any = null;
+        try {
+          console.log("ServiceStatus: issue approve /all-services primary", { serviceId, itemId });
+          await api.put(`/all-services/${serviceId}/issues/${itemId}/status`, {
+            issueStatus: status,
+          });
+        } catch (err) {
+          console.warn("ServiceStatus: issue primary failed", err);
+          primaryError = err;
+        }
+
+        if (primaryError) {
+          let fallbackError: any = null;
+          try {
+            console.log("ServiceStatus: issue approve fallback /all-services/issues/{itemId}", { serviceId, itemId });
+            await api.put(`/all-services/${serviceId}/issues/${itemId}`, {
+              issueStatus: status,
+            });
+          } catch (err2) {
+            console.warn("ServiceStatus: issue fallback 1 failed", err2);
+            fallbackError = err2;
+          }
+
+          if (fallbackError) {
+            try {
+              console.log("ServiceStatus: issue approve fallback /all-services/issues/{itemId}/approve", { serviceId, itemId });
+              await api.put(`/all-services/${serviceId}/issues/${itemId}/approve`, {
+                issueStatus: status,
+              });
+            } catch (err3) {
+              console.warn("ServiceStatus: issue fallback 2 failed", err3);
+              try {
+                console.log("ServiceStatus: issue approve fallback /bookings/issues/{itemId}", { serviceId, itemId });
+                await api.put(`/bookings/${serviceId}/issues/${itemId}`, {
+                  issueStatus: status,
+                });
+              } catch (err4) {
+                console.warn("ServiceStatus: issue fallback 3 failed", err4);
+                if (!itemId) {
+                  await api.put(`/bookings/${serviceId}/issue`, {
+                    issueStatus: status,
+                  });
+                } else {
+                  throw err4;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      console.log("ServiceStatus: approve success", { serviceId, itemId, status, type });
+      await fetchData();
+      if (selectedBooking) {
+        setSelectedBooking((prev) => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            issueStatus: type === "issue" ? status : prev.issueStatus,
+            issues: prev.issues?.map((issue) =>
+              issue.id === itemId ? { ...issue, issueStatus: status } : issue
+            ),
+          } as Booking;
+        });
+      }
+    } catch (err) {
+      console.log("ServiceStatus: approve error", err);
+    } finally {
+      setApproving(false);
+    }
+  };
 
   /* ===== RENDER ITEM ===== */
 
   const renderItem = ({ item }: { item: Booking }) => {
     const bookingSpares = spareParts.find(
-      (sp) => sp.serviceId === item.id
+      (sp) => sp.serviceId === item.serviceId || sp.serviceId === item.id
     );
 
     const hasPending =
@@ -143,7 +351,10 @@ const ServiceStatus: React.FC = () => {
 
     return (
       <TouchableOpacity
-        onPress={() => setSelectedBooking(item)}
+        onPress={() => {
+          console.log("ServiceStatus: selected booking", item);
+          setSelectedBooking(item);
+        }}
         className="rounded-xl p-4 mb-4"
         style={{
           backgroundColor: COLORS.card,
@@ -163,15 +374,15 @@ const ServiceStatus: React.FC = () => {
               {item.name} • {item.phone}
             </Text>
 
-            {bookingSpares?.parts?.length > 0 && (
+            {bookingSpares?.parts?.length ? (
               <Text className="text-xs mt-2 text-text-secondary">
                 🔧 ₹
-                {bookingSpares.parts.reduce(
+                {bookingSpares.parts?.reduce(
                   (sum, p) => sum + Number(p.total || 0),
                   0
-                )}
+                ) ?? 0}
               </Text>
-            )}
+            ) : null}
           </View>
 
           {/* RIGHT STATUS BADGE */}
@@ -299,9 +510,7 @@ const ServiceStatus: React.FC = () => {
           booking={selectedBooking}
           spareParts={spareParts}
           onClose={() => setSelectedBooking(null)}
-          onApprove={(serviceId, itemId, status, type) => {
-            console.log("Approve:", serviceId, itemId, status, type);
-          }}
+          onApprove={handleApprove}
         />
       )}
     </SafeAreaView>
