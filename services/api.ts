@@ -229,6 +229,46 @@ export const apiService = {
     }
   },
 
+  getBillingById: async (id: number | string): Promise<any> => {
+    try {
+      const response = await api.get(`/billings/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching billing details:', error);
+      throw error;
+    }
+  },
+
+  createBilling: async (data: any): Promise<any> => {
+    try {
+      const response = await api.post('/billings', data);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating billing:', error);
+      throw error;
+    }
+  },
+
+  updateBillingStatus: async (id: number | string, status: string): Promise<any> => {
+    try {
+      const response = await api.patch(`/billings/${id}`, { paymentStatus: status });
+      return response.data;
+    } catch (error) {
+      console.error('Error updating billing status:', error);
+      throw error;
+    }
+  },
+
+  deleteBilling: async (id: number | string): Promise<any> => {
+    try {
+      const response = await api.delete(`/billings/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting billing:', error);
+      throw error;
+    }
+  },
+
   getInventory: async (): Promise<any[]> => {
     try {
       const response = await api.get('/inventory');
@@ -326,6 +366,46 @@ export const apiService = {
     } catch (error) {
       console.error('Error fetching users:', error);
       return [];
+    }
+  },
+
+  getAuthUsers: async (): Promise<any[]> => {
+    try {
+      const response = await api.get('/auth/users');
+      return Array.isArray(response.data) ? response.data : [];
+    } catch (error) {
+      console.error('Error fetching auth users:', error);
+      return [];
+    }
+  },
+
+  updateUserRole: async (id: number | string, role: string): Promise<any> => {
+    try {
+      const response = await api.put(`/auth/users/${id}/role`, { role });
+      return response.data;
+    } catch (error) {
+      console.error('Error updating user role:', error);
+      throw error;
+    }
+  },
+
+  updateUserStatus: async (id: number | string, active: boolean): Promise<any> => {
+    try {
+      const response = await api.put(`/auth/users/${id}/status`, { active });
+      return response.data;
+    } catch (error) {
+      console.error('Error updating user status:', error);
+      throw error;
+    }
+  },
+
+  deleteUser: async (id: number | string): Promise<any> => {
+    try {
+      const response = await api.delete(`/auth/users/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      throw error;
     }
   },
 
