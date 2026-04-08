@@ -11,8 +11,11 @@ import {
   TouchableOpacity,
   View
 } from "react-native";
-import { apiService } from "../../services/api";
+import { useAuth } from "../../contexts/AuthContext";
+import { api, apiService } from "../../services/api";
 import { COLORS, GRADIENT } from "../../theme/colors";
+import BookingModal from "../profile/BookingModal";
+import VehicleBookingModal from "../profile/VehicleBookingModal";
 
 const STATUS_FLOW = [
   "BOOKED",
@@ -106,15 +109,21 @@ const CARD_WIDTH =
 
 const extendedWhyData = [...whyData, ...whyData];
 
-export default function HomeScreen({ navigation }) {
+export default function HomeScreen({ navigation }: any) {
 
   const router = useRouter();
-  const [services, setServices] = useState([]);
-  const [allBookings, setAllBookings] = useState([]);
-  const [selectedBooking, setSelectedBooking] = useState(null);
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [username, setUsername] = useState("");
+  const [services, setServices] = useState<any[]>([]);
+  const [allBookings, setAllBookings] = useState<any[]>([]);
+  const [serviceBookings, setServiceBookings] = useState<any[]>([]);
+  const [vehicleBookings, setVehicleBookings] = useState<any[]>([]);
+  const [selectedServiceBooking, setSelectedServiceBooking] = useState<any>(null);
+  const [selectedVehicleBooking, setSelectedVehicleBooking] = useState<any>(null);
+  const [serviceBookingLoading, setServiceBookingLoading] = useState<boolean>(true);
+  const [vehicleBookingLoading, setVehicleBookingLoading] = useState<boolean>(true);
+  const [selectedBooking, setSelectedBooking] = useState<any>(null);
+  const { user } = useAuth();
+  const authUser = user as any;
+  const username = authUser?.username || authUser?.name || "";
 
   const getServiceImage = (service: any) => {
     const img = service.image || service.images?.[0];
@@ -126,7 +135,7 @@ export default function HomeScreen({ navigation }) {
     return `https://cars.qtechx.com/${img}`;
   };
 
-  const serviceListRef = useRef(null);
+  const serviceListRef = useRef<any>(null);
   const extendedServices = [...services, ...services];
 
   useEffect(() => {
@@ -159,24 +168,26 @@ export default function HomeScreen({ navigation }) {
     return () => clearInterval(interval);
   }, [services]);
 
-  const [myVehicles, setMyVehicles] = useState([]);
-  const [selectedVehicle, setSelectedVehicle] = useState(null);
+  const [myVehicles, setMyVehicles] = useState<any[]>([]);
+  const [selectedVehicle, setSelectedVehicle] = useState<any>(null);
 
-  const [reviews, setReviews] = useState([]);
+  const [reviews, setReviews] = useState<any[]>([]);
   const extendedReviews = [...reviews, ...reviews];
 
+  const [approving, setApproving] = useState(false);
+
   // Spare parts state
-  const [spareParts, setSpareParts] = useState([]);
+  const [spareParts, setSpareParts] = useState<any[]>([]);
   const [showSpareModal, setShowSpareModal] = useState(false);
-  const [approvingPartId, setApprovingPartId] = useState(null);
+  const [approvingPartId, setApprovingPartId] = useState<any>(null);
 
   const carAnim = useRef(new Animated.Value(0)).current;
 
-  const whyListRef = useRef(null);
-  const reviewListRef = useRef(null);
-  const scrollX = useRef(0);
+  const whyListRef = useRef<any>(null);
+  const reviewListRef = useRef<any>(null);
+  const scrollX = useRef<number>(0);
 
-  const getStatusColor = (status) => {
+  const getStatusColor = (status: any) => {
     switch (status) {
       case "BOOKED":
         return COLORS.primary;
@@ -192,7 +203,7 @@ export default function HomeScreen({ navigation }) {
     }
   };
 
-  const handleApproveSpare = async (serviceId, partId, status) => {
+  const handleApproveSpare = async (serviceId: any, partId: any, status: any) => {
     try {
       setApprovingPartId(partId);
 
@@ -202,12 +213,12 @@ export default function HomeScreen({ navigation }) {
       console.log(`Spare part ${partId} status changed to ${status}`);
 
       // Update local state
-      setSpareParts((prev) =>
-        prev.map((service) => {
+setSpareParts((prev: any[]) =>
+        prev.map((service: any) => {
           if (service.serviceId !== serviceId) return service;
           return {
             ...service,
-            parts: service.parts.map((part) =>
+            parts: service.parts.map((part: any) =>
               part.id === partId ? { ...part, status } : part
             ),
           };
@@ -216,9 +227,9 @@ export default function HomeScreen({ navigation }) {
 
       // Update booking if it's selected
       if (selectedBooking && selectedBooking.id === serviceId) {
-        setSelectedBooking((prev) => ({
+        setSelectedBooking((prev: any) => ({
           ...prev,
-          spareParts: (prev.spareParts || []).map((part) =>
+          spareParts: (prev.spareParts || []).map((part: any) =>
             part.id === partId ? { ...part, status } : part
           ),
         }));
@@ -228,6 +239,169 @@ export default function HomeScreen({ navigation }) {
       console.error('Error updating spare part:', error);
     } finally {
       setApprovingPartId(null);
+    }
+  };
+
+  const handleApproveBooking = async (
+    serviceId: any,
+    itemId: any,
+    status: any,
+    type: "part" | "issue" = "part"
+  ) => {
+    setApproving(true);
+    try {
+      if (type === "part") {
+        try {
+          await api.put(`/all-services/${serviceId}/parts/${itemId}/approve`, {
+            status,
+          });
+        } catch (err) {
+          console.warn("part approval fallback 1", err);
+          await api.put(`/bookings/${serviceId}/parts/${itemId}`, { status });
+        }
+      } else {
+        let primaryError: any = null;
+        try {
+          console.log("homescreen: issue approve /all-services primary", { serviceId, itemId });
+          await api.put(`/all-services/${serviceId}/issues/${itemId}/status`, {
+            issueStatus: status,
+          });
+        } catch (err) {
+          console.warn("homescreen: issue primary failed", err);
+          primaryError = err;
+        }
+
+        if (primaryError) {
+          let fallbackError: any = null;
+          try {
+            console.log("homescreen: issue approve fallback /all-services/issues/{itemId}", { serviceId, itemId });
+            await api.put(`/all-services/${serviceId}/issues/${itemId}`, {
+              issueStatus: status,
+            });
+          } catch (err2) {
+            console.warn("homescreen: issue fallback 1 failed", err2);
+            fallbackError = err2;
+          }
+
+          if (fallbackError) {
+            try {
+              console.log("homescreen: issue approve fallback /all-services/issues/{itemId}/approve", { serviceId, itemId });
+              await api.put(`/all-services/${serviceId}/issues/${itemId}/approve`, {
+                issueStatus: status,
+              });
+            } catch (err3) {
+              console.warn("homescreen: issue fallback 2 failed", err3);
+              try {
+                console.log("homescreen: issue approve fallback /bookings/issues/{itemId}", { serviceId, itemId });
+                await api.put(`/bookings/${serviceId}/issues/${itemId}`, {
+                  issueStatus: status,
+                });
+              } catch (err4) {
+                console.warn("homescreen: issue fallback 3 failed", err4);
+                if (!itemId) {
+                  await api.put(`/bookings/${serviceId}/issue`, {
+                    issueStatus: status,
+                  });
+                } else {
+                  throw err4;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      console.log("homescreen: approve success", { serviceId, itemId, status, type });
+      
+      // Refresh bookings after approval
+      if (!authUser?.id && !authUser?.uid && !authUser?.email) {
+        return;
+      }
+
+      const bookingsData: any[] = await apiService.getBookings();
+      const processedBookings = bookingsData.map((booking: any) => ({
+        ...booking,
+        normalizedStatus:
+          STATUS_NORMALIZER[booking.status as keyof typeof STATUS_NORMALIZER] ||
+          booking.status,
+      }));
+
+      const userServiceBookings = processedBookings.filter((booking: any) =>
+        booking.user_id === authUser.id ||
+        booking.userId === authUser.id ||
+        booking.uid === authUser.id ||
+        booking.user_id === authUser.uid ||
+        booking.userId === authUser.uid ||
+        booking.uid === authUser.uid ||
+        booking.email?.toLowerCase() === authUser.email?.toLowerCase() ||
+        booking.customerEmail?.toLowerCase() === authUser.email?.toLowerCase()
+      ).filter((booking: any) => booking.normalizedStatus !== "SERVICE_COMPLETED");
+
+      const mappedServiceBookings = userServiceBookings.map((booking) => ({
+        ...booking,
+        bookingId:
+          booking.bookingId ||
+          booking.booking_id ||
+          booking.id?.toString() ||
+          "N/A",
+        name:
+          booking.name ||
+          booking.customerName ||
+          booking.username ||
+          booking.mobile ||
+          "",
+        phone:
+          booking.phone ||
+          booking.mobile ||
+          booking.customerPhone ||
+          "",
+        address: booking.address || booking.location || "",
+        location: booking.location || booking.address || "",
+        vehicleNumber:
+          booking.vehicleNumber ||
+          booking.registrationNumber ||
+          booking.vehicleNo ||
+          "",
+        brand:
+          booking.brand ||
+          booking.vehicleBrand ||
+          booking.make ||
+          "",
+        model:
+          booking.model ||
+          booking.vehicleModel ||
+          booking.modelName ||
+          "",
+        issue: booking.issue || booking.serviceType || "",
+        issueAmount:
+          booking.issueAmount || booking.issue_cost || booking.issueAmount,
+        issueStatus: booking.issueStatus || booking.issueStatus || "",
+        preferredDate:
+          booking.preferredDate || booking.date || booking.bookingDate || "",
+        assignedEmployeeName:
+          booking.assignedEmployeeName || booking.assignedEmployee || "",
+        serviceId:
+          booking.service_id || booking.id || booking.serviceId || null,
+      }));
+
+      setServiceBookings(mappedServiceBookings);
+
+      // Update selected booking if it's currently open
+      if (selectedServiceBooking) {
+        const refreshed = mappedServiceBookings.find(
+          (booking) =>
+            booking.bookingId === selectedServiceBooking.bookingId ||
+            booking.id === selectedServiceBooking.id ||
+            booking.serviceId === selectedServiceBooking.serviceId
+        );
+        if (refreshed) {
+          setSelectedServiceBooking(refreshed);
+        }
+      }
+    } catch (error) {
+      console.error('Error approving booking item:', error);
+    } finally {
+      setApproving(false);
     }
   };
 
@@ -248,27 +422,6 @@ export default function HomeScreen({ navigation }) {
     ).start();
   }, []);
 
-  // Fetch current user from AsyncStorage
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        // Get user from AsyncStorage (set during login/register)
-        const AsyncStorage = require('@react-native-async-storage/async-storage').default;
-        const userData = await AsyncStorage.getItem('user');
-        if (userData) {
-          const user = JSON.parse(userData);
-          setUser(user);
-          setUsername(user.username || user.name);
-        }
-      } catch (error) {
-        console.error('Error fetching user:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUser();
-  }, []);
 
   // Fetch services from API
   useEffect(() => {
@@ -286,68 +439,204 @@ export default function HomeScreen({ navigation }) {
 
   // Fetch all bookings from API with spare parts
   useEffect(() => {
-    if (!user) return;
+    if (!authUser?.id && !authUser?.uid && !authUser?.email) {
+      setServiceBookingLoading(false);
+      return;
+    }
 
     const fetchBookings = async () => {
       try {
         // Fetch bookings and enrich with service details
-        const bookingsData = await apiService.getBookings();
-        const processedData = bookingsData.map((booking) => ({
+        const bookingsData: any[] = await apiService.getBookings();
+        const processedData = bookingsData.map((booking: any) => ({
           ...booking,
-          normalizedStatus: STATUS_NORMALIZER[booking.status] || booking.status,
+          normalizedStatus:
+            STATUS_NORMALIZER[booking.status as keyof typeof STATUS_NORMALIZER] ||
+            booking.status,
         }));
 
         setAllBookings(processedData);
 
-        // Extract unique vehicles from bookings
-        const vehiclesMap = {};
-        processedData.forEach((item) => {
-          if (item.vehicleNumber && item.vehicleType) {
-            vehiclesMap[item.vehicleNumber] = {
-              vehicleNumber: item.vehicleNumber,
-              vehicleType: item.vehicleType,
-              brand: item.brand,
-              model: item.model,
-            };
-          }
+        // Fetch all services and filter user services (like profile page)
+        const [servicesRes] = await Promise.all([
+          api.get("/all-services"),
+        ]);
+
+        const servicesRaw = Array.isArray(servicesRes.data)
+          ? servicesRes.data
+          : servicesRes.data?.services || servicesRes.data?.data || [];
+
+        const userServices = servicesRaw.filter((service: any) => {
+          const serviceEmail = service.email?.toLowerCase();
+          const isUserEmail = serviceEmail === authUser.email.toLowerCase();
+          const isUserUid = service.uid === authUser.uid || service.uid === authUser.id;
+          const isBookingMatch = processedData.some(
+            (b: any) =>
+              b.bookingId === service.bookingId ||
+              b.bookingId === service.booking_id ||
+              b.id === service.serviceId ||
+              b.id === service.id
+          );
+          return isUserEmail || isUserUid || isBookingMatch;
         });
 
-        setMyVehicles(Object.values(vehiclesMap));
-
-        // Fetch spare parts for services
-        try {
-          const allParts = [];
-          for (let booking of processedData) {
-            // Try to get service details including spare parts
-            if (booking.service_id) {
-              try {
-                const serviceDetail = await apiService.getServiceById(booking.service_id);
-                if (serviceDetail && serviceDetail.parts) {
-                  allParts.push({
-                    serviceName: booking.bookingId,
-                    serviceId: booking.service_id,
-                    bookingId: booking.id,
-                    customerName: booking.name,
-                    parts: serviceDetail.parts || [],
-                  });
-                }
-              } catch (err) {
-                console.log('Could not fetch service details for booking:', booking.id);
-              }
+        // Fetch detailed service data for each user service (like profile page)
+        const servicesWithDetails = await Promise.all(
+          userServices.map(async (service: any) => {
+            try {
+              const detailRes = await api.get(`/all-services/${service.id}`);
+              console.log(`Home: service ${service.id} (${service.bookingId}) has ${detailRes.data?.issues?.length || 0} issues`);
+              return {
+                ...service,
+                parts: detailRes.data?.parts || service.parts || [],
+                issues: detailRes.data?.issues || service.issues || [],
+                issueAmount: detailRes.data?.issueAmount ?? service.issueAmount,
+                issueStatus: detailRes.data?.issueStatus || service.issueStatus,
+              };
+            } catch (err) {
+              console.warn(
+                "Home: failed service detail fetch",
+                service.id,
+                err
+              );
+              return {
+                ...service,
+                parts: service.parts || [],
+                issues: service.issues || [],
+              };
             }
-          }
-          setSpareParts(allParts);
-        } catch (err) {
-          console.error('Error fetching spare parts:', err);
-        }
+          })
+        );
+
+        // Create spares array (like profile page)
+        const spares: any[] = servicesWithDetails.map((service: any) => ({
+          serviceId: service.id || service.serviceId,
+          serviceName: service.bookingId || service.booking_id || service.orderId || "",
+          parts: service.parts || [],
+          issues: service.issues || [],
+        }));
+
+        setSpareParts(spares);
+
+        // Filter user bookings
+        const userServiceBookings = processedData.filter((booking: any) =>
+          booking.user_id === authUser.id ||
+          booking.userId === authUser.id ||
+          booking.uid === authUser.id ||
+          booking.user_id === authUser.uid ||
+          booking.userId === authUser.uid ||
+          booking.uid === authUser.uid ||
+          booking.email?.toLowerCase() === authUser.email?.toLowerCase() ||
+          booking.customerEmail?.toLowerCase() === authUser.email?.toLowerCase()
+        );
+
+        // Match bookings with service details to get issues (like profile page)
+        const mappedServiceBookings = userServiceBookings.map((booking) => {
+          const matchedService = servicesWithDetails.find(
+            (s: any) =>
+              s.bookingId === booking.bookingId || s.id === booking.id || s.bookingDocId === booking.id
+          );
+
+          console.log(`Home: booking ${booking.bookingId} matched service:`, matchedService?.id, matchedService?.bookingId);
+          console.log(`Home: booking ${booking.bookingId} getting ${matchedService?.issues?.length || 0} issues from service ${matchedService?.id}`);
+
+          return {
+            ...booking,
+            normalizedStatus: STATUS_NORMALIZER[booking.status] || booking.status,
+            issues: matchedService?.issues || booking.issues || booking.serviceIssues || [],
+            issue: booking.issue || booking.serviceType || matchedService?.issue || "",
+            issueAmount: booking.issueAmount ?? matchedService?.issueAmount,
+            issueStatus: booking.issueStatus || matchedService?.issueStatus,
+            serviceId: booking.serviceId || booking.id || booking.service_id || matchedService?.id || matchedService?.serviceId,
+            brand: booking.brand || booking.vehicleBrand || matchedService?.brand,
+            model: booking.model || booking.vehicleModel || matchedService?.model,
+            vehicleNumber:
+              booking.vehicleNumber ||
+              booking.registrationNumber ||
+              matchedService?.vehicleNumber ||
+              matchedService?.registrationNumber,
+            address: booking.address || booking.location || matchedService?.address || matchedService?.location,
+            preferredDate: booking.preferredDate || booking.date || matchedService?.preferredDate,
+            assignedEmployeeName:
+              booking.assignedEmployeeName ||
+              booking.assignedEmployee ||
+              matchedService?.assignedEmployeeName,
+          };
+        }).filter((booking) => booking.normalizedStatus !== "SERVICE_COMPLETED");
+
+        setServiceBookings(mappedServiceBookings);
 
       } catch (error) {
         console.error('Error fetching bookings:', error);
+      } finally {
+        setServiceBookingLoading(false);
       }
     };
 
     fetchBookings();
   }, [user]);
+
+  useEffect(() => {
+    if (!authUser?.id && !authUser?.uid && !authUser?.email && !authUser?.mobile && !authUser?.phone) {
+      setVehicleBookingLoading(false);
+      return;
+    }
+
+    const fetchVehicleBookings = async () => {
+      try {
+        setVehicleBookingLoading(true);
+        let data = [];
+
+        try {
+          const response = await api.get(`/vehicle-bookings/user/${authUser.id}`);
+          data = response.data;
+        } catch (error) {
+          console.warn('Could not load user vehicle bookings by user route, falling back to all vehicle bookings.', error);
+          const allVehicleBookings = await apiService.getVehicleBookings();
+          data = allVehicleBookings;
+        }
+
+        const mappedVehicleBookings = (Array.isArray(data) ? data : []).map((booking: any) => ({
+          ...booking,
+          bookingId: booking.bookingId || booking.booking_id || booking.id?.toString() || "N/A",
+          vehicleName: booking.vehicleName || booking.vehicle_name || booking.vehicle || "N/A",
+          vehicleType: booking.vehicleType || booking.vehicle_type || booking.type || "N/A",
+          createdAt: booking.createdAt || booking.created_at || booking.date || new Date().toISOString(),
+          advanceAmount: booking.advanceAmount || booking.amount || booking.advanceAmount || 0,
+          status: booking.status || booking.bookingStatus || "Pending",
+          customerName: booking.customerName || booking.customer_name || booking.customer || "",
+          customerPhone: booking.customerPhone || booking.customer_phone || booking.mobile || booking.phone || "",
+          customerEmail: booking.customerEmail || booking.customer_email || booking.email || "",
+          pickupAddress: booking.pickupAddress || booking.pickup_address || booking.address || "",
+          paymentStatus: booking.paymentStatus || booking.payment_status || "Unknown",
+          paymentId: booking.paymentId || booking.payment_id || booking.paymentId || "",
+          userId: booking.userId || booking.user_id || booking.uid || booking.customerId,
+        })).filter((booking: any) =>
+          booking.userId === authUser.id ||
+          booking.userId === authUser.uid ||
+          booking.user_id === authUser.id ||
+          booking.user_id === authUser.uid ||
+          booking.uid === authUser.id ||
+          booking.uid === authUser.uid ||
+          booking.customerEmail?.toLowerCase() === authUser.email?.toLowerCase() ||
+          booking.email?.toLowerCase() === authUser.email?.toLowerCase() ||
+          booking.customerPhone === authUser.mobile ||
+          booking.customerPhone === authUser.phone ||
+          booking.phone === authUser.mobile ||
+          booking.phone === authUser.phone
+        );
+
+        setVehicleBookings(mappedVehicleBookings);
+      } catch (error) {
+        console.error('Error fetching vehicle bookings:', error);
+      } finally {
+        setVehicleBookingLoading(false);
+      }
+    };
+
+    fetchVehicleBookings();
+  }, [user?.id]);
+
 
   // Fetch My Vehicles from API
   useEffect(() => {
@@ -503,6 +792,133 @@ export default function HomeScreen({ navigation }) {
 
         </LinearGradient>
       </View>
+
+      {/* ================= MY SERVICE BOOKINGS ================= */}
+      <View className="px-5 mb-6">
+        <View className="flex-row items-center mb-4">
+          <View className="w-1 h-5 bg-white rounded mr-2" />
+          <Ionicons name="receipt-outline" size={18} color={COLORS.primary} />
+          <Text className="text-primary text-lg font-bold ml-2">
+            My Service Bookings
+          </Text>
+        </View>
+
+        {serviceBookingLoading ? (
+          <ActivityIndicator size="small" color={COLORS.primary} />
+        ) : serviceBookings.length === 0 ? (
+          <Text className="text-textSecondary">
+            No recent service bookings found.
+          </Text>
+        ) : (
+          serviceBookings.slice(0, 3).map((item) => {
+            const hasPending = item.status === "WAITING_SPARE" || item.status === "BILL_PENDING" || item.status === "PROCESSING";
+            return (
+              <TouchableOpacity
+                key={item.id || item.bookingId}
+                onPress={() => setSelectedServiceBooking(item)}
+                className="rounded-xl p-4 mb-4"
+                style={{
+                  backgroundColor: COLORS.card,
+                  borderWidth: 1,
+                  borderColor: hasPending ? COLORS.warning : COLORS.primary,
+                }}
+              >
+                <View className="flex-row justify-between items-center">
+                  <View className="flex-1 pr-2">
+                    <Text className="text-text-primary font-bold">
+                      {item.bookingId}
+                    </Text>
+                    <Text className="text-text-secondary text-sm mt-1">
+                      {item.name} • {item.phone}
+                    </Text>
+                  </View>
+                  <View
+                    className="px-3 py-1 rounded-full"
+                    style={{
+                      backgroundColor: hasPending
+                        ? COLORS.warning + "30"
+                        : COLORS.primary + "30",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: hasPending ? COLORS.warning : COLORS.primary,
+                        fontSize: 10,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {(STATUS_LABELS[item.normalizedStatus as keyof typeof STATUS_LABELS] || item.status || "Pending").toUpperCase()}
+                    </Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
+            );
+          })
+        )}
+      </View>
+
+      {/* ================= MY VEHICLE BOOKINGS ================= */}
+      <View className="px-5 mb-6">
+        <View className="flex-row items-center mb-4">
+          <View className="w-1 h-5 bg-white rounded mr-2" />
+          <Ionicons name="car-outline" size={18} color={COLORS.primary} />
+          <Text className="text-primary text-lg font-bold ml-2">
+            My Vehicle Bookings
+          </Text>
+        </View>
+
+        {vehicleBookingLoading ? (
+          <ActivityIndicator size="small" color={COLORS.primary} />
+        ) : vehicleBookings.length === 0 ? (
+          <Text className="text-textSecondary">
+            No vehicle bookings found.
+          </Text>
+        ) : (
+          vehicleBookings.slice(0, 3).map((item) => (
+            <TouchableOpacity
+              key={item.id || item.bookingId}
+              onPress={() => setSelectedVehicleBooking(item)}
+              className="bg-card border border-gray700 p-4 mb-4 rounded-2xl"
+            >
+              <Text className="text-text-primary font-semibold">
+                Booking ID: {item.bookingId}
+              </Text>
+              <Text className="text-text-primary text-lg font-bold mt-1">
+                {item.vehicleName}
+              </Text>
+              <Text className="text-text-secondary text-sm mt-1">
+                {new Date(item.createdAt).toLocaleString()}
+              </Text>
+              <View className="flex-row justify-between items-center mt-4">
+                <Text className="bg-success/20 text-success px-3 py-1 rounded-full text-xs font-semibold">
+                  {item.status || "Booked"}
+                </Text>
+                <Text className="text-primary font-bold text-base">
+                  ₹{item.advanceAmount}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          ))
+        )}
+      </View>
+
+      {selectedServiceBooking && (
+        <BookingModal
+          visible={true}
+          booking={selectedServiceBooking}
+          spareParts={spareParts}
+          onClose={() => setSelectedServiceBooking(null)}
+          onApprove={handleApproveBooking}
+        />
+      )}
+
+      {selectedVehicleBooking && (
+        <VehicleBookingModal
+          visible={true}
+          booking={selectedVehicleBooking}
+          onClose={() => setSelectedVehicleBooking(null)}
+        />
+      )}
 
       {/* ================= SERVICES ================= */}
       <View className="px-5 mb-6">
