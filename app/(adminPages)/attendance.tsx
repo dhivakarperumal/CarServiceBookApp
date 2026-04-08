@@ -1,19 +1,19 @@
 import { Ionicons } from "@expo/vector-icons";
+import dayjs from "dayjs";
 import { useRouter } from "expo-router";
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  SafeAreaView,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-  FlatList,
+    ActivityIndicator,
+    Alert,
+    FlatList,
+    SafeAreaView,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { api } from "../../services/api";
-import dayjs from "dayjs";
 
 const StatCard = ({ title, value, icon, gradient }: any) => (
   <View className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl">
@@ -56,7 +56,9 @@ const AttendanceItem = ({ item }: { item: any }) => (
   <View className="bg-slate-900 border border-slate-800 rounded-2xl p-4 mb-3">
     <View className="flex-row justify-between items-start mb-3">
       <View className="flex-1">
-        <Text className="text-white font-black text-base">{item.name || "N/A"}</Text>
+        <Text className="text-white font-black text-base">
+          {item.name || "N/A"}
+        </Text>
         <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider mt-1">
           {item.role || "Technician"}
         </Text>
@@ -82,8 +84,8 @@ const AttendanceItem = ({ item }: { item: any }) => (
           {item.logoutTime
             ? dayjs(item.logoutTime).format("hh:mm A")
             : item.loginTime
-            ? "Active"
-            : "-- : --"}
+              ? "Active"
+              : "-- : --"}
         </Text>
       </View>
 
@@ -106,7 +108,9 @@ export default function AttendanceScreen() {
 
   const [attendanceData, setAttendanceData] = useState<any[]>([]);
   const [search, setSearch] = useState("");
-  const [selectedDate, setSelectedDate] = useState(dayjs().format("YYYY-MM-DD"));
+  const [selectedDate, setSelectedDate] = useState(
+    dayjs().format("YYYY-MM-DD"),
+  );
   const [loading, setLoading] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
@@ -144,7 +148,8 @@ export default function AttendanceScreen() {
     return attendanceData.filter((item) => {
       const text = `${item.name || ""} ${item.role || ""}`.toLowerCase();
       const matchSearch = text.includes(search.toLowerCase());
-      const matchStatus = statusFilter === "all" || item.status === statusFilter;
+      const matchStatus =
+        statusFilter === "all" || item.status === statusFilter;
       return matchSearch && matchStatus;
     });
   }, [attendanceData, search, statusFilter]);
@@ -152,7 +157,7 @@ export default function AttendanceScreen() {
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
   const paginatedData = filtered.slice(
     (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+    currentPage * itemsPerPage,
   );
 
   const stats = useMemo(() => {
@@ -160,7 +165,9 @@ export default function AttendanceScreen() {
     const present = attendanceData.filter((a) => a.status === "Present").length;
     const absent = attendanceData.filter((a) => a.status === "Absent").length;
     const late = attendanceData.filter((a) => a.status === "Late").length;
-    const onLeave = attendanceData.filter((a) => a.status === "On Leave").length;
+    const onLeave = attendanceData.filter(
+      (a) => a.status === "On Leave",
+    ).length;
 
     return { total, present, absent, late, onLeave };
   }, [attendanceData]);
@@ -169,7 +176,7 @@ export default function AttendanceScreen() {
     Alert.alert(
       "Export Attendance",
       "CSV export is not available on mobile. Please use the web version for data export.",
-      [{ text: "OK" }]
+      [{ text: "OK" }],
     );
   };
 
@@ -251,7 +258,9 @@ export default function AttendanceScreen() {
               <Ionicons name="chevron-back" size={24} color="#ffffff" />
             </TouchableOpacity>
             <View className="flex-1">
-              <Text className="text-2xl font-black text-white">Workforce Attendance</Text>
+              <Text className="text-2xl font-black text-white">
+                Workforce Attendance
+              </Text>
               <Text className="text-[10px] uppercase tracking-widest text-slate-500 mt-1 font-black">
                 Real-time personnel monitoring & analytics
               </Text>
@@ -286,7 +295,9 @@ export default function AttendanceScreen() {
             <StatCard
               title="Present"
               value={stats.present}
-              icon={<Ionicons name="checkmark-circle" size={24} color="#ffffff" />}
+              icon={
+                <Ionicons name="checkmark-circle" size={24} color="#ffffff" />
+              }
               gradient="bg-emerald-600"
             />
             <StatCard
@@ -412,7 +423,9 @@ export default function AttendanceScreen() {
             <View>
               <FlatList
                 data={paginatedData}
-                keyExtractor={(item) => item.id?.toString() || Math.random().toString()}
+                keyExtractor={(item) =>
+                  item.id?.toString() || Math.random().toString()
+                }
                 renderItem={({ item }) => <AttendanceItem item={item} />}
                 scrollEnabled={false}
                 showsVerticalScrollIndicator={false}
