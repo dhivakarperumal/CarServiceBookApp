@@ -64,9 +64,7 @@ const CustomSelect = ({ label, value, options, onSelect, error }: any) => {
           error ? "border-red-500" : "border-slate-800"
         }`}
       >
-        <Text
-          className={value ? "text-white font-bold" : "text-slate-500"}
-        >
+        <Text className={value ? "text-white font-bold" : "text-slate-500"}>
           {value || "Select option"}
         </Text>
         <Ionicons
@@ -87,9 +85,7 @@ const CustomSelect = ({ label, value, options, onSelect, error }: any) => {
               }}
               className="px-4 py-3 border-b border-slate-800 last:border-0"
             >
-              <Text className="text-white font-bold capitalize">
-                {opt}
-              </Text>
+              <Text className="text-white font-bold capitalize">{opt}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -304,11 +300,7 @@ export default function AddStaff() {
             onPress={() => router.back()}
             className="p-3 bg-slate-900 rounded-2xl border border-slate-800"
           >
-            <Ionicons
-              name="chevron-back"
-              size={24}
-              color="#ffffff"
-            />
+            <Ionicons name="chevron-back" size={24} color="#ffffff" />
           </TouchableOpacity>
           <View className="flex-1">
             <Text className="text-3xl font-black text-white">
