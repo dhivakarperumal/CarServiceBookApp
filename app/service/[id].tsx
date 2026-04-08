@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, ActivityIndicator, ImageBackground, TouchableOpacity, Image, Alert } from 'react-native';
+import { View, Text, ScrollView, ActivityIndicator, TouchableOpacity, Image, Alert } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { apiService, Service } from '../../services/api';
 import { COLORS } from '../../theme/colors';
@@ -69,11 +69,7 @@ export default function ServiceDetailsScreen() {
   const imageUri = getServiceImage((service as any)?.image || (service as any)?.images?.[0]);
 
   return (
-    <ImageBackground
-      source={{ uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQfAJ3Ai3tu58SWAJ2mK_EhozE-OIgQXcLXNg&s' }}
-      className="flex-1"
-    >
-      <View className="absolute inset-0 bg-black/85" />
+    <View className="flex-1 bg-background">
       <ScrollView className="flex-1" contentContainerStyle={{ padding: 20, paddingBottom: 60 }}>
 
         {/* Back Button */}
@@ -91,13 +87,13 @@ export default function ServiceDetailsScreen() {
           {service.name}
         </Text>
 
-        {service.price ? (
+        {/* {service.price ? (
           <Text className="text-[#0EA5E9] text-2xl font-bold mb-6">
             {service.price}
           </Text>
         ) : (
           <Text className="text-[#64748B] italic text-lg mb-6">Price on request</Text>
-        )}
+        )} */}
 
         <View className="bg-[#111827]/80 p-5 rounded-[20px] border border-[#1F2937] mb-6">
           <Text className="text-white font-semibold text-lg mb-3 border-b border-[#1F2937] pb-2">About this Service</Text>
@@ -122,6 +118,6 @@ export default function ServiceDetailsScreen() {
           </LinearGradient>
         </TouchableOpacity> */}
       </ScrollView>
-    </ImageBackground>
+    </View>
   );
 }

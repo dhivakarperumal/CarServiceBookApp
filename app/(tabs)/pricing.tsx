@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import {
     View,
     FlatList,
-    ImageBackground,
     ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -31,43 +30,39 @@ export default function PricingScreen() {
     }, []);
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.background, }}
-            edges={["left", "right"]} >
-
-            <ImageBackground
-                source={{
-                    uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQfAJ3Ai3tu58SWAJ2mK_EhozE-OIgQXcLXNg&s",
+        <SafeAreaView
+            style={{ flex: 1, backgroundColor: COLORS.background }}
+            edges={["left", "right"]}
+        >
+            <View
+                style={{
+                    flex: 1,
+                    paddingHorizontal: 16,
+                    paddingTop: 10,
                 }}
-                resizeMode="cover"
-                style={{ flex: 1 }}
             >
-                {/* Overlay */}
-                <View
-                    style={{
-                        flex: 1,
-                        backgroundColor: withOpacity(COLORS.black, 0.8),
-                        paddingHorizontal: 16,
-                        paddingTop: 8,
-                        paddingBottom: 5,
-                    }}
-                >
-                    {loading ? (
-                        <ActivityIndicator size="large" color={COLORS.primary} />
-                    ) : (
-                        <FlatList
-                            data={packages}
-                            keyExtractor={(item) => item.id.toString()}
-                            numColumns={2} // ✅ IMPORTANT
-                            columnWrapperStyle={{ justifyContent: "space-between" }} // ✅ spacing
-                            showsVerticalScrollIndicator={false}
-                            contentContainerStyle={{ paddingBottom: 5 }}
-                            renderItem={({ item }) => (
-                                <PricingCard pkg={item} />
-                            )}
-                        />
-                    )}
-                </View>
-            </ImageBackground>
+                {loading ? (
+                    <ActivityIndicator size="large" color={COLORS.primary} />
+                ) : (
+                    <FlatList
+                        data={packages}
+                        keyExtractor={(item) => item.id.toString()}
+                        numColumns={2}
+                        columnWrapperStyle={{
+                            justifyContent: "space-between",
+                            marginBottom: 12,
+                        }}
+                        showsVerticalScrollIndicator={false}
+                        contentContainerStyle={{
+                            paddingTop: 20,
+                            paddingBottom: 50,
+                        }}
+                        renderItem={({ item }) => (
+                            <PricingCard pkg={item} />
+                        )}
+                    />
+                )}
+            </View>
         </SafeAreaView>
     );
 }
