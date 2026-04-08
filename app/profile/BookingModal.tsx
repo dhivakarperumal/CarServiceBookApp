@@ -1,10 +1,10 @@
 import React from "react";
 import {
-    Modal,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
+  Modal,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { COLORS } from "../../theme/colors";
 
@@ -243,8 +243,13 @@ const BookingModal: React.FC<Props> = ({
                                 "part"
                               )
                             }
-                            className="flex-1 p-2 rounded-lg"
-                            style={{ backgroundColor: COLORS.success }}
+                            className="p-2 rounded-lg"
+                            style={{
+                              backgroundColor: COLORS.success,
+                              minWidth: 90,
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
                           >
                             <Text className="text-center text-xs font-bold text-white">
                               Approve
@@ -260,8 +265,13 @@ const BookingModal: React.FC<Props> = ({
                                 "part"
                               )
                             }
-                            className="flex-1 p-2 rounded-lg"
-                            style={{ backgroundColor: COLORS.error }}
+                            className="p-2 rounded-lg"
+                            style={{
+                              backgroundColor: COLORS.error,
+                              minWidth: 90,
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
                           >
                             <Text className="text-center text-xs font-bold text-white">
                               Reject
@@ -295,6 +305,12 @@ const BookingModal: React.FC<Props> = ({
                         {issue.issue}
                       </Text>
 
+                      {issue.issueAmount != null && (
+                        <Text className="text-text-secondary text-sm mt-1">
+                          Amount: ₹{Number(issue.issueAmount).toFixed(2)}
+                        </Text>
+                      )}
+
                       <Text
                         style={{
                           color:
@@ -320,10 +336,15 @@ const BookingModal: React.FC<Props> = ({
                                 "issue"
                               )
                             }
-                            className="flex-1 p-2 rounded-lg"
-                            style={{ backgroundColor: COLORS.success }}
+                            className="p-2 rounded-lg"
+                            style={{
+                              backgroundColor: COLORS.success,
+                              minWidth: 90,
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
                           >
-                            <Text className="text-white text-center text-xs font-bold">
+                            <Text className="text-white text-xs font-bold">
                               Approve
                             </Text>
                           </TouchableOpacity>
@@ -337,10 +358,15 @@ const BookingModal: React.FC<Props> = ({
                                 "issue"
                               )
                             }
-                            className="flex-1 p-2 rounded-lg"
-                            style={{ backgroundColor: COLORS.error }}
+                            className="p-2 rounded-lg"
+                            style={{
+                              backgroundColor: COLORS.error,
+                              minWidth: 90,
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
                           >
-                            <Text className="text-white text-center text-xs font-bold">
+                            <Text className="text-white text-xs font-bold">
                               Reject
                             </Text>
                           </TouchableOpacity>

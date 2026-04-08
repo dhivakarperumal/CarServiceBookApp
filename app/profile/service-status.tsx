@@ -172,7 +172,7 @@ const ServiceStatus: React.FC = () => {
       );
 
       const spares: SpareService[] = servicesWithDetails.map((service: any) => ({
-        serviceId: service.id,
+        serviceId: service.id || service.serviceId,
         serviceName: service.bookingId || service.booking_id || service.orderId || "",
         parts: service.parts || [],
         issues: service.issues || [],
@@ -199,7 +199,7 @@ const ServiceStatus: React.FC = () => {
             issue: b.issue || b.serviceType || matchedService?.issue || "",
             issueAmount: b.issueAmount ?? matchedService?.issueAmount,
             issueStatus: b.issueStatus || matchedService?.issueStatus,
-            serviceId: b.serviceId || b.id || b.service_id || matchedService?.id,
+            serviceId: b.serviceId || b.id || b.service_id || matchedService?.id || matchedService?.serviceId,
             brand: b.brand || b.vehicleBrand || matchedService?.brand,
             model: b.model || b.vehicleModel || matchedService?.model,
             vehicleNumber:
@@ -218,6 +218,18 @@ const ServiceStatus: React.FC = () => {
 
       console.log("ServiceStatus: processed bookings", userBookings);
       setBookings(userBookings);
+
+      if (selectedBooking) {
+        const refreshed = userBookings.find(
+          (booking) =>
+            booking.bookingId === selectedBooking.bookingId ||
+            booking.id === selectedBooking.id ||
+            booking.serviceId === selectedBooking.serviceId
+        );
+        if (refreshed) {
+          setSelectedBooking(refreshed);
+        }
+      }
     } catch (err) {
       console.log("ServiceStatus: fetch error", err);
     } finally {
