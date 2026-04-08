@@ -408,22 +408,7 @@ export default function AddBillingScreen() {
       >
         <View className="p-5 mt-6">
           <View className="mb-6">
-            <View className="flex-row items-center gap-4 ">
-              <TouchableOpacity
-                onPress={() => router.back()}
-                className="p-3 bg-card rounded-2xl border border-card"
-              >
-                <Ionicons name="chevron-back" size={24} color="#FFFFFF" />
-              </TouchableOpacity>
-              <View className="flex-1 min-w-0">
-                <Text
-                  className="text-4xl font-black text-text-primary tracking-tight"
-                  numberOfLines={1}
-                >
-                  Generate Billing
-                </Text>
-              </View>
-            </View>
+         
 
             <View className="mt-4 self-start flex-row flex-nowrap items-center rounded-full bg-slate-900/90 p-1 border border-slate-700">
               {[
