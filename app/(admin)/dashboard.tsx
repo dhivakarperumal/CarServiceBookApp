@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { apiService } from '../../services/api';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
+import { COLORS } from '../../theme/colors';
 
 const QuickAction = ({ title, icon, color, onPress }: any) => (
   <TouchableOpacity 
@@ -109,7 +110,7 @@ export default function AdminDashboard() {
   if (loading) {
     return (
       <View className="flex-1 bg-slate-950 items-center justify-center">
-        <ActivityIndicator size="large" color="#0ea5e9" />
+        <ActivityIndicator size="large" color={COLORS.primary} />
       </View>
     );
   }
@@ -118,7 +119,7 @@ export default function AdminDashboard() {
     <SafeAreaView className="flex-1 bg-slate-950">
       <ScrollView 
         className="flex-1"
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#0ea5e9" />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.primary} />}
       >
         <View className="p-4 pb-24">
    

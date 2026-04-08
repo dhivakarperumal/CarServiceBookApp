@@ -14,6 +14,7 @@ import {
 import { apiService } from "../../services/api";
 import { useRouter, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { COLORS } from "../../theme/colors";
 
 const InventoryManagement = () => {
   const router = useRouter();
@@ -104,7 +105,7 @@ const InventoryManagement = () => {
   if (loading) {
     return (
       <View className="flex-1 bg-slate-950 items-center justify-center">
-        <ActivityIndicator size="large" color="#0ea5e9" />
+        <ActivityIndicator size="large" color={COLORS.primary} />
       </View>
     );
   }
@@ -114,8 +115,8 @@ const InventoryManagement = () => {
       <Stack.Screen options={{ 
         title: "Spare Parts Inventory",
         headerShown: true,
-        headerStyle: { backgroundColor: '#020617' },
-        headerTintColor: 'white',
+        headerStyle: { backgroundColor: COLORS.background },
+        headerTintColor: COLORS.white,
         headerTitleStyle: { fontWeight: '900', fontSize: 16 }
       }} />
 
@@ -194,7 +195,7 @@ const InventoryManagement = () => {
                      <Ionicons 
                         name={item.stockQty === 0 ? "alert-circle" : "cube"} 
                         size={20} 
-                        color={item.stockQty === 0 ? "#ef4444" : item.stockQty <= (item.minStock || 5) ? "#f59e0b" : "#0ea5e9"} 
+                        color={item.stockQty === 0 ? COLORS.error : item.stockQty <= (item.minStock || 5) ? COLORS.warning : COLORS.primary} 
                      />
                   </View>
                   <View className="flex-1">

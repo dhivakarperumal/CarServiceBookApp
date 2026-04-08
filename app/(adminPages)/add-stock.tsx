@@ -15,6 +15,7 @@ import {
 import { apiService } from "../../services/api";
 import { useRouter, Stack } from "expo-router";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { COLORS } from "../../theme/colors";
 
 const AddStock = () => {
   const router = useRouter();
@@ -88,7 +89,7 @@ const AddStock = () => {
   if (loading) {
     return (
       <View className="flex-1 bg-slate-950 items-center justify-center">
-        <ActivityIndicator size="large" color="#0ea5e9" />
+        <ActivityIndicator size="large" color={COLORS.primary} />
       </View>
     );
   }
@@ -99,12 +100,12 @@ const AddStock = () => {
         options={{
           headerShown: true,
           title: "Inbound Inventory",
-          headerTitleStyle: { color: 'white', fontWeight: '900', fontSize: 16 },
-          headerStyle: { backgroundColor: '#020617' },
-          headerTintColor: 'white',
+          headerTitleStyle: { color: COLORS.white, fontWeight: '900', fontSize: 16 },
+          headerStyle: { backgroundColor: COLORS.background },
+          headerTintColor: COLORS.white,
           headerLeft: () => (
             <TouchableOpacity onPress={() => router.back()} className="ml-2 w-8 h-8 items-center justify-center">
-               <Ionicons name="arrow-back" size={20} color="white" />
+               <Ionicons name="arrow-back" size={20} color={COLORS.white} />
             </TouchableOpacity>
           )
         }} 
@@ -143,7 +144,7 @@ const AddStock = () => {
                    <Text className={`${selectedVariant ? 'text-white' : 'text-slate-600'} font-bold text-sm`}>
                       {selectedVariant ? `${selectedVariant.position} | ${selectedVariant.material} | SKU: ${selectedVariant.sku}` : "Identify Component Variant..."}
                    </Text>
-                   <Ionicons name="chevron-down" size={16} color="#475569" />
+                   <Ionicons name="chevron-down" size={16} color={COLORS.slate400} />
                 </TouchableOpacity>
              </View>
            )}
@@ -180,7 +181,7 @@ const AddStock = () => {
                    disabled={submitting}
                    className={`${submitting ? 'opacity-50' : ''} bg-sky-500 py-6 rounded-3xl items-center shadow-lg shadow-sky-500/20 active:scale-95 transition-all`}
                 >
-                   {submitting ? <ActivityIndicator color="white" /> : (
+                   {submitting ? <ActivityIndicator color={COLORS.white} /> : (
                      <Text className="text-white font-black text-sm uppercase tracking-widest">Commit Inbound Shipment →</Text>
                    )}
                 </TouchableOpacity>

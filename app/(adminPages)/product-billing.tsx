@@ -17,6 +17,7 @@ import {
 import { apiService } from "../../services/api";
 import { useRouter, Stack } from "expo-router";
 import { Ionicons, MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
+import { COLORS } from "../../theme/colors";
 
 const { width } = Dimensions.get('window');
 
@@ -189,7 +190,7 @@ const ProductBilling = () => {
   if (loading) {
     return (
       <View className="flex-1 bg-slate-950 items-center justify-center">
-        <ActivityIndicator size="large" color="#0ea5e9" />
+        <ActivityIndicator size="large" color={COLORS.primary} />
       </View>
     );
   }
@@ -199,8 +200,8 @@ const ProductBilling = () => {
       <Stack.Screen options={{ 
         title: "Storefront Billing",
         headerShown: true,
-        headerStyle: { backgroundColor: '#020617' },
-        headerTintColor: 'white',
+        headerStyle: { backgroundColor: COLORS.background },
+        headerTintColor: COLORS.white,
         headerTitleStyle: { fontWeight: '900', fontSize: 16 }
       }} />
 
@@ -226,7 +227,7 @@ const ProductBilling = () => {
                    <Ionicons 
                      name={orderType === "shop" ? "storefront-outline" : "globe-outline"} 
                      size={18} 
-                     color="#0ea5e9" 
+                     color={COLORS.primary} 
                    />
                 </View>
                 <View>

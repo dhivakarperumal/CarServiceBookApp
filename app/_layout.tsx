@@ -37,6 +37,9 @@ export default function RootLayout() {
             {/* Admin Dashboard */}
             <Stack.Screen name="(admin)" options={{ headerShown: false }} />
 
+            {/* Admin Utility Pages */}
+            <Stack.Screen name="(adminPages)" options={{ headerShown: false }} />
+
             <Stack.Screen
               name="service/[id]"
               options={({ route }) => ({

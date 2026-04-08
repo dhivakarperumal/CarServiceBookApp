@@ -28,7 +28,7 @@ const Label = ({ children, required }: any) => (
 
 const StyledInput = ({ ...props }: any) => (
   <TextInput
-    placeholderTextColor="#475569"
+    placeholderTextColor={COLORS.slate400}
     className="bg-slate-900 border border-slate-800 rounded-2xl px-5 py-4 text-white font-bold text-xs mb-4"
     {...props}
   />
@@ -36,12 +36,12 @@ const StyledInput = ({ ...props }: any) => (
 
 const StepIcon = ({ name, active, completed }: any) => (
   <View className={`w-8 h-8 rounded-full items-center justify-center border ${
-    active ? 'bg-sky-500 border-sky-400' : completed ? 'bg-emerald-500/20 border-emerald-500/40' : 'bg-slate-900 border-slate-800'
+    active ? 'bg-primary border-primary' : completed ? 'bg-emerald-500/20 border-emerald-500/40' : 'bg-slate-900 border-slate-800'
   }`}>
     <Ionicons 
       name={completed ? "checkmark" : name} 
       size={16} 
-      color={active || completed ? "white" : "#475569"} 
+      color={active || completed ? COLORS.white : COLORS.slate400} 
     />
   </View>
 );
@@ -187,14 +187,14 @@ const AdminAddVehicle = () => {
             <Label>Vehicle Type</Label>
             <View className="flex-row gap-4 mb-4">
               {['Car', 'Bike'].map(type => (
-                <TouchableOpacity 
+                 <TouchableOpacity 
                    key={type}
                    onPress={() => setForm({...form, type})}
                    className={`flex-1 flex-row items-center justify-center p-4 rounded-2xl border-2 ${
-                     form.type === type ? 'bg-sky-500 border-sky-400' : 'bg-slate-900 border-slate-800'
+                     form.type === type ? 'bg-primary border-primary' : 'bg-slate-900 border-slate-800'
                    }`}
                 >
-                  <Ionicons name={type === 'Car' ? 'car' : 'bicycle'} size={20} color={form.type === type ? 'white' : '#475569'} />
+                  <Ionicons name={type === 'Car' ? 'car' : 'bicycle'} size={20} color={form.type === type ? COLORS.white : COLORS.slate400} />
                   <Text className={`font-black uppercase text-[10px] ml-2 ${form.type === type ? 'text-white' : 'text-slate-500'}`}>{type}</Text>
                 </TouchableOpacity>
               ))}
@@ -322,8 +322,8 @@ const AdminAddVehicle = () => {
                <Switch 
                   value={form.negotiable} 
                   onValueChange={(val) => setForm({...form, negotiable: val})}
-                  trackColor={{ false: "#1e293b", true: "#0284c7" }}
-                  thumbColor={form.negotiable ? "#38bdf8" : "#94a3b8"}
+                  trackColor={{ false: COLORS.slate800, true: COLORS.primary }}
+                  thumbColor={form.negotiable ? COLORS.sky : COLORS.slate400}
                />
             </View>
 
@@ -355,7 +355,7 @@ const AdminAddVehicle = () => {
                   <Switch 
                     value={form[item.key]} 
                     onValueChange={(val) => setForm({...form, [item.key]: val})}
-                    trackColor={{ false: "#1e293b", true: "#10b981" }}
+                    trackColor={{ false: COLORS.slate800, true: COLORS.success }}
                   />
                </View>
              ))}
@@ -392,7 +392,7 @@ const AdminAddVehicle = () => {
                       <Image source={{ uri: form.images[type] }} className="w-full h-full rounded-[2rem]" />
                     ) : (
                       <>
-                        <Ionicons name="camera-outline" size={24} color="#334155" />
+                        <Ionicons name="camera-outline" size={24} color={COLORS.slate700} />
                         <Text className="text-slate-600 text-[8px] font-black uppercase mt-1">{type}</Text>
                       </>
                     )}
@@ -430,20 +430,15 @@ const AdminAddVehicle = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-slate-950">
-      <Stack.Screen 
-        options={{
-          headerShown: true,
-          title: id ? "Update Listing" : "Register Listing",
-          headerTitleStyle: { color: 'white', fontWeight: '900', fontSize: 16 },
-          headerStyle: { backgroundColor: '#020617' },
-          headerTintColor: 'white',
-          headerLeft: () => (
-            <TouchableOpacity onPress={() => router.back()} className="ml-2 w-8 h-8 items-center justify-center">
-               <Ionicons name="arrow-back" size={20} color="white" />
-            </TouchableOpacity>
-          )
-        }} 
-      />
+      <View className="flex-row items-center justify-between px-6 py-5 bg-slate-950 border-b border-white/5">
+        <TouchableOpacity onPress={() => router.back()} className="w-10 h-10 items-center justify-center bg-slate-900 rounded-xl border border-white/10">
+          <Ionicons name="arrow-back" size={20} color={COLORS.white} />
+        </TouchableOpacity>
+        <Text className="text-white font-black uppercase tracking-widest text-xs">
+          {id ? "Update Listing" : "Register Listing"}
+        </Text>
+        <View className="w-10" />
+      </View>
       <View className="flex-1">
         {/* STEPPER BAR */}
         <View className="flex-row justify-between px-6 py-4 bg-slate-950 border-b border-white/5">
@@ -488,7 +483,7 @@ const AdminAddVehicle = () => {
                className="bg-white px-10 py-4 rounded-2xl flex-row items-center"
              >
                 <Text className="text-black font-black uppercase text-[10px] mr-2">Continue</Text>
-                <Ionicons name="chevron-forward" size={18} color="black" />
+                <Ionicons name="chevron-forward" size={18} color={COLORS.black} />
              </TouchableOpacity>
            ) : (
              <TouchableOpacity 

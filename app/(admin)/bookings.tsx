@@ -7,6 +7,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { apiService } from '../../services/api';
 import { useRouter } from 'expo-router';
+import { COLORS } from '../../theme/colors';
 
 /* 🎨 CONFIG */
 const BOOKING_STATUS = ["Booked", "Call Verified", "Approved", "Cancelled", "Service Completed"];
@@ -106,7 +107,7 @@ export default function AdminBookings() {
   if (loading) {
     return (
       <View className="flex-1 bg-slate-950 items-center justify-center">
-        <ActivityIndicator size="large" color="#0ea5e9" />
+        <ActivityIndicator size="large" color={COLORS.primary} />
       </View>
     );
   }
@@ -165,7 +166,7 @@ export default function AdminBookings() {
 
       <ScrollView 
         className="flex-1 p-4"
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#0ea5e9" />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.primary} />}
       >
         {filtered.length === 0 ? (
           <View className="p-10 items-center justify-center bg-slate-900 rounded-3xl border border-slate-800 mt-4 border-dashed">

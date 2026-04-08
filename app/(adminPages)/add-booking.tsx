@@ -6,6 +6,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { apiService } from '../../services/api';
 import { useRouter } from 'expo-router';
+import { COLORS } from "../../theme/colors";
 
 /* 🎨 CONFIG */
 const VEHICLE_TYPES = ["Two Wheeler", "Four Wheeler", "Three Wheeler", "Heavy Vehicle"];
@@ -23,7 +24,7 @@ const CustomInput = ({ label, required, value, onChangeText, placeholder, ...pro
       value={value}
       onChangeText={onChangeText}
       placeholder={placeholder}
-      placeholderTextColor="#475569"
+      placeholderTextColor={COLORS.slate400}
       className="bg-slate-900 border border-white/5 rounded-2xl px-5 py-4 text-white font-bold text-xs"
       {...props}
     />
@@ -44,7 +45,7 @@ const CustomSelect = ({ label, options, value, onSelect, placeholder }: any) => 
         <Text className={value ? "text-white font-bold text-xs" : "text-slate-500 font-bold text-xs"}>
            {value || placeholder}
         </Text>
-        <Ionicons name="chevron-down" size={18} color="#475569" />
+        <Ionicons name="chevron-down" size={18} color={COLORS.slate400} />
       </TouchableOpacity>
 
       {visible && (
@@ -136,7 +137,7 @@ export default function AdminAddBooking() {
     return (
       <SafeAreaView className="flex-1 bg-slate-950 items-center justify-center p-8">
         <View className="w-20 h-20 rounded-full bg-emerald-500/20 items-center justify-center mb-6 border border-emerald-500/30">
-          <Ionicons name="checkmark-done" size={40} color="#10b981" />
+          <Ionicons name="checkmark-done" size={40} color={COLORS.success} />
         </View>
         <Text className="text-white font-black text-2xl uppercase tracking-tighter text-center mb-2">Vehicle Registered</Text>
         <Text className="text-slate-400 text-sm text-center mb-10 leading-relaxed px-4">
@@ -171,7 +172,7 @@ export default function AdminAddBooking() {
         <ScrollView className="flex-1 p-6" showsVerticalScrollIndicator={false}>
           <View className="mb-8">
             <TouchableOpacity onPress={() => router.back()} className="mb-6 w-10 h-10 items-center justify-center bg-white/5 rounded-full border border-white/5">
-              <Ionicons name="arrow-back" size={20} color="white" />
+              <Ionicons name="arrow-back" size={20} color={COLORS.white} />
             </TouchableOpacity>
             <Text className="text-white font-black text-2xl uppercase tracking-tighter">Add Service Vehicle</Text>
             <Text className="text-slate-500 text-[10px] font-black uppercase tracking-widest mt-1">Register walk-in customers & vehicles</Text>
@@ -180,7 +181,7 @@ export default function AdminAddBooking() {
           <View className="bg-slate-900/50 p-6 rounded-[32px] border border-white/5 shadow-2xl mb-24 overflow-hidden">
              
              <View className="flex-row items-center gap-2 mb-6 opacity-30">
-               <Ionicons name="person-circle-outline" size={16} color="white" />
+               <Ionicons name="person-circle-outline" size={16} color={COLORS.white} />
                <Text className="text-white font-black text-[10px] uppercase tracking-widest">Customer Details</Text>
              </View>
 
@@ -221,7 +222,7 @@ export default function AdminAddBooking() {
              <View className="h-px bg-white/5 my-6" />
 
              <View className="flex-row items-center gap-2 mb-6 opacity-30">
-               <Ionicons name="car-outline" size={16} color="white" />
+               <Ionicons name="car-outline" size={16} color={COLORS.white} />
                <Text className="text-white font-black text-[10px] uppercase tracking-widest">Vehicle Details</Text>
              </View>
 
@@ -276,7 +277,7 @@ export default function AdminAddBooking() {
                 className={`mt-6 rounded-2xl overflow-hidden ${submitting ? 'opacity-50' : ''}`}
              >
                 <View className="bg-sky-500 p-5 items-center">
-                   {submitting ? <ActivityIndicator color="white" /> : <Text className="text-white font-black uppercase tracking-widest">Add Service Vehicle →</Text>}
+                   {submitting ? <ActivityIndicator color={COLORS.white} /> : <Text className="text-white font-black uppercase tracking-widest">Add Service Vehicle →</Text>}
                 </View>
              </TouchableOpacity>
           </View>

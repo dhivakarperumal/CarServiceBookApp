@@ -6,6 +6,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { apiService } from '../../services/api';
 import { useRouter } from 'expo-router';
+import { COLORS } from "../../theme/colors";
 
 export default function AdminStaff() {
   const router = useRouter();
@@ -44,7 +45,7 @@ export default function AdminStaff() {
   if (loading) {
     return (
       <View className="flex-1 bg-slate-950 items-center justify-center">
-        <ActivityIndicator size="large" color="#0ea5e9" />
+        <ActivityIndicator size="large" color={COLORS.primary} />
       </View>
     );
   }
@@ -71,7 +72,7 @@ export default function AdminStaff() {
 
       <ScrollView 
         className="flex-1 p-4"
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#0ea5e9" />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.primary} />}
       >
         <View className="flex-row flex-wrap justify-between">
            {filtered.length === 0 ? (
@@ -106,10 +107,10 @@ export default function AdminStaff() {
       {/* FLOATING ACTION BUTTON */}
       <TouchableOpacity 
         onPress={() => Alert.alert("Coming Soon", "Add Member functionality is under development.")}
-        className="absolute bottom-8 right-8 w-14 h-14 bg-violet-600 rounded-full items-center justify-center shadow-2xl shadow-black"
+        className="absolute bottom-8 right-8 w-14 h-14 bg-primary rounded-full items-center justify-center shadow-2xl shadow-black"
         style={{ elevation: 10 }}
       >
-        <Ionicons name="add" size={32} color="white" />
+        <Ionicons name="add" size={32} color={COLORS.white} />
       </TouchableOpacity>
     </SafeAreaView>
   );

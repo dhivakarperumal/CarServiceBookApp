@@ -98,7 +98,7 @@ export default function AdminVehicles() {
   if (loading) {
     return (
       <View className="flex-1 bg-slate-950 items-center justify-center">
-        <ActivityIndicator size="large" color="#0ea5e9" />
+        <ActivityIndicator size="large" color={COLORS.primary} />
         <Text className="text-slate-500 font-black text-[10px] uppercase tracking-widest mt-4">Fetching Inventory...</Text>
       </View>
     );
@@ -107,20 +107,7 @@ export default function AdminVehicles() {
   return (
     <SafeAreaView className="flex-1 bg-slate-950">
       <View className="p-4 border-b border-white/5">
-        <View className="flex-row justify-between items-center mb-6">
-          <View>
-            <Text className="text-white font-black text-xl uppercase tracking-tighter">Fleet Console</Text>
-            <Text className="text-sky-500 text-[8px] font-black uppercase tracking-[2px]">Inventory Management</Text>
-          </View>
-          <TouchableOpacity 
-            onPress={() => router.push('/(adminPages)/add-products' as any)} // Assuming this is where to add vehicles or similar
-            className="bg-sky-500 px-6 py-3 rounded-2xl shadow-lg shadow-sky-500/20 flex-row items-center gap-2"
-          >
-            <Ionicons name="add" size={16} color="white" />
-            <Text className="text-white font-black text-[10px] uppercase">New Vehicle</Text>
-          </TouchableOpacity>
-        </View>
-
+       
         {/* STATS */}
         <View className="flex-row flex-wrap justify-between">
           <StatCard title="Total Units" value={vehicles.length} icon="car" color="#3b82f6" />
@@ -132,7 +119,7 @@ export default function AdminVehicles() {
         {/* FILTERS */}
         <View className="flex-row gap-2 mt-2">
           <View className="flex-1 bg-slate-900 border border-slate-800 rounded-2xl flex-row items-center px-4 h-12">
-            <Ionicons name="search" size={18} color="#475569" />
+            <Ionicons name="search" size={18} color={COLORS.slate400} />
             <TextInput 
               placeholder="Search title, brand..."
               placeholderTextColor="#475569"
@@ -156,7 +143,7 @@ export default function AdminVehicles() {
 
       <ScrollView 
         className="flex-1 p-4"
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#0ea5e9" />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.primary} />}
       >
         {filteredVehicles.length === 0 ? (
           <View className="py-20 items-center justify-center">
@@ -203,7 +190,7 @@ export default function AdminVehicles() {
 
                     <View className="flex-row flex-wrap gap-2 mt-2">
                        <View className="bg-slate-950 px-2 py-1 rounded-md flex-row items-center gap-1">
-                          <Ionicons name="speedometer-outline" size={10} color="#475569" />
+                          <Ionicons name="speedometer-outline" size={10} color={COLORS.slate400} />
                           <Text className="text-slate-400 font-bold text-[8px]">{vehicle.engine_cc || '---'} CC</Text>
                        </View>
                        <View className="bg-slate-950 px-2 py-1 rounded-md flex-row items-center gap-1">
@@ -218,7 +205,7 @@ export default function AdminVehicles() {
                           <Text className="text-slate-500 text-[7px] uppercase font-black">Inc. ₹2,000 Markup</Text>
                        </View>
                        <View className="flex-row gap-2">
-                          <TouchableOpacity onPress={() => router.push(`/(adminPages)/add-products?id=${vehicle.id}` as any)} className="p-2 bg-slate-800 rounded-lg">
+                          <TouchableOpacity onPress={() => router.push(`/(adminPages)/add-vehicle?id=${vehicle.id}` as any)} className="p-2 bg-slate-800 rounded-lg">
                              <Ionicons name="create-outline" size={14} color="#94a3b8" />
                           </TouchableOpacity>
                           <TouchableOpacity onPress={() => handleDelete(vehicle.id)} className="p-2 bg-slate-800 rounded-lg">
@@ -294,7 +281,7 @@ export default function AdminVehicles() {
 
                        {/* FOOTER ACTIONS */}
                        <View className="flex-row gap-3 mb-10">
-                          <TouchableOpacity className="flex-1 bg-sky-500 p-5 rounded-3xl items-center shadow-lg shadow-sky-900" onPress={() => setSelectedVehicle(null)}>
+                          <TouchableOpacity className="flex-1 bg-sky-500 p-5 rounded-3xl items-center shadow-lg shadow-sky-900" onPress={() => { setSelectedVehicle(null); router.push(`/(adminPages)/add-vehicle?id=${selectedVehicle.id}` as any); }}>
                              <Text className="text-white font-black uppercase tracking-widest text-[10px]">Edit Listing</Text>
                           </TouchableOpacity>
                           <TouchableOpacity className="flex-1 bg-slate-800 p-5 rounded-3xl items-center" onPress={() => setSelectedVehicle(null)}>

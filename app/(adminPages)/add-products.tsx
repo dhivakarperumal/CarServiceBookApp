@@ -17,6 +17,7 @@ import { useRouter, useLocalSearchParams, Stack } from "expo-router";
 import { Ionicons, MaterialIcons, FontAwesome } from "@expo/vector-icons";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import * as ImagePicker from 'expo-image-picker';
+import { COLORS } from "../../theme/colors";
 
 /* REUSABLE COMPONENTS */
 const Label = ({ children, required }: any) => (
@@ -27,7 +28,7 @@ const Label = ({ children, required }: any) => (
 
 const StyledInput = ({ ...props }: any) => (
   <TextInput
-    placeholderTextColor="#475569"
+    placeholderTextColor={COLORS.slate400}
     className="bg-slate-900 border border-slate-800 rounded-2xl px-5 py-4 text-white font-bold text-xs mb-4"
     {...props}
   />
@@ -265,12 +266,12 @@ const AdminAddProduct = () => {
         options={{
           headerShown: true,
           title: editData ? "Update Product" : "Add Products",
-          headerTitleStyle: { color: 'white', fontWeight: '900', fontSize: 16 },
-          headerStyle: { backgroundColor: '#020617' },
-          headerTintColor: 'white',
+          headerTitleStyle: { color: COLORS.white, fontWeight: '900', fontSize: 16 },
+          headerStyle: { backgroundColor: COLORS.background },
+          headerTintColor: COLORS.white,
           headerLeft: () => (
             <TouchableOpacity onPress={() => router.back()} className="ml-2 w-8 h-8 items-center justify-center">
-               <Ionicons name="arrow-back" size={20} color="white" />
+               <Ionicons name="arrow-back" size={20} color={COLORS.white} />
             </TouchableOpacity>
           )
         }} 
@@ -379,7 +380,7 @@ const AdminAddProduct = () => {
                     onPress={() => removeVariant(i)}
                     className="absolute top-2 right-2 w-6 h-6 items-center justify-center"
                   >
-                    <Ionicons name="close-circle" size={18} color="#ef4444" />
+                    <Ionicons name="close-circle" size={18} color={COLORS.error} />
                   </TouchableOpacity>
                 )}
                 <View className="flex-row gap-2">
@@ -390,7 +391,7 @@ const AdminAddProduct = () => {
                       value={v.sku}
                       onChangeText={(val) => handleVariantChange(i, 'sku', val)}
                       placeholder="SKU001"
-                      placeholderTextColor="#334155"
+                      placeholderTextColor={COLORS.slate700}
                     />
                   </View>
                   <View className="flex-1">
@@ -483,8 +484,8 @@ const AdminAddProduct = () => {
                   <Switch 
                     value={product.warrantyAvailable} 
                     onValueChange={(val) => setProduct({...product, warrantyAvailable: val})}
-                    trackColor={{ false: "#1e293b", true: "#0284c7" }}
-                    thumbColor={product.warrantyAvailable ? "#38bdf8" : "#94a3b8"}
+                    trackColor={{ false: COLORS.slate800, true: COLORS.primaryDark }}
+                    thumbColor={product.warrantyAvailable ? COLORS.sky : COLORS.slate400}
                   />
                </View>
                {product.warrantyAvailable && (
@@ -501,8 +502,8 @@ const AdminAddProduct = () => {
                   <Switch 
                     value={product.returnAvailable} 
                     onValueChange={(val) => setProduct({...product, returnAvailable: val})}
-                    trackColor={{ false: "#1e293b", true: "#22c55e" }}
-                    thumbColor={product.returnAvailable ? "#4ade80" : "#94a3b8"}
+                    trackColor={{ false: COLORS.slate800, true: COLORS.success }}
+                    thumbColor={product.returnAvailable ? COLORS.success : COLORS.slate400}
                   />
                </View>
                {product.returnAvailable && (
@@ -546,7 +547,7 @@ const AdminAddProduct = () => {
               className={`rounded-3xl overflow-hidden ${loading ? 'opacity-50' : ''}`}
             >
               <View className="bg-sky-500 py-5 items-center flex-row justify-center gap-3">
-                 {loading ? <ActivityIndicator color="white" /> : (
+                 {loading ? <ActivityIndicator color={COLORS.white} /> : (
                    <>
                     <Text className="text-white font-black uppercase tracking-widest">
                       {editData ? "Update Component →" : "Register Product →"}

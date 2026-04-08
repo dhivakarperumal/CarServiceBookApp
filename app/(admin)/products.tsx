@@ -18,6 +18,7 @@ import { api } from "../../services/api";
 import { useRouter, Stack } from "expo-router";
 import { Ionicons, FontAwesome, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { COLORS } from "../../theme/colors";
 
 const { width } = Dimensions.get('window');
 const COLUMN_WIDTH = (width - 48) / 2;

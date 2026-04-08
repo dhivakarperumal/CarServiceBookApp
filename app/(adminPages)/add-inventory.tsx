@@ -13,6 +13,7 @@ import {
 import { apiService } from "../../services/api";
 import { useRouter, Stack, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { COLORS } from "../../theme/colors";
 
 const AddInventoryItem = () => {
   const router = useRouter();
@@ -107,7 +108,7 @@ const AddInventoryItem = () => {
   if (loading) {
     return (
       <View className="flex-1 bg-slate-950 items-center justify-center">
-        <ActivityIndicator size="large" color="#0ea5e9" />
+        <ActivityIndicator size="large" color={COLORS.primary} />
       </View>
     );
   }
@@ -117,8 +118,8 @@ const AddInventoryItem = () => {
       <Stack.Screen options={{ 
         title: isEditMode ? "Edit Specifications" : "Provisioning Manifest",
         headerShown: true,
-        headerStyle: { backgroundColor: '#020617' },
-        headerTintColor: 'white',
+        headerStyle: { backgroundColor: COLORS.background },
+        headerTintColor: COLORS.white,
         headerTitleStyle: { fontWeight: '900', fontSize: 16 }
       }} />
 
