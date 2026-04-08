@@ -20,20 +20,21 @@ const BOOKING_STATUS = ["Booked", "Call Verified", "Approved", "Cancelled", "Ser
 const APPT_STATUS = ["Appointment Booked", "Confirmed", "In Progress", "Completed", "Cancelled"];
 const TIME_SLOTS = ["Morning (9AM–12PM)", "Afternoon (12PM–4PM)", "Evening (4PM–7PM)"];
 
+// Keep colors consistent with existing theme requirements
 const bookingStatusColors: any = {
-   "Approved": { bg: "#1e1b4b", text: "#818cf8", border: "#312e81" },
-   "Service Completed": { bg: "#064e3b", text: "#34d399", border: "#065f46" },
-   "Cancelled": { bg: "#450a0a", text: "#f87171", border: "#7f1d1d" },
-   "Call Verified": { bg: "#082f49", text: "#38bdf8", border: "#0c4a6e" },
-   "Booked": { bg: "#1e293b", text: "#94a3b8", border: "#334155" },
+   "Approved": { bg: "bg-indigo-950", text: "text-indigo-400", border: "border-indigo-900" },
+   "Service Completed": { bg: "bg-emerald-950", text: "text-emerald-400", border: "border-emerald-900" },
+   "Cancelled": { bg: "bg-rose-950", text: "text-rose-400", border: "border-rose-900" },
+   "Call Verified": { bg: "bg-sky-950", text: "text-sky-400", border: "border-sky-900" },
+   "Booked": { bg: "bg-slate-800", text: "text-slate-400", border: "border-slate-700" },
 };
 
 const apptStatusColors: any = {
-   "Appointment Booked": { bg: "#172554", text: "#60a5fa", border: "#1e3a8a" },
-   "Confirmed": { bg: "#064e3b", text: "#34d399", border: "#065f46" },
-   "In Progress": { bg: "#451a03", text: "#fb923c", border: "#7c2d12" },
-   "Completed": { bg: "#052e16", text: "#4ade80", border: "#14532d" },
-   "Cancelled": { bg: "#450a0a", text: "#f87171", border: "#7f1d1d" },
+   "Appointment Booked": { bg: "bg-blue-950", text: "text-blue-400", border: "border-blue-900" },
+   "Confirmed": { bg: "bg-emerald-950", text: "text-emerald-400", border: "border-emerald-900" },
+   "In Progress": { bg: "bg-orange-950", text: "text-orange-400", border: "border-orange-900" },
+   "Completed": { bg: "bg-green-950", text: "text-green-400", border: "border-green-900" },
+   "Cancelled": { bg: "bg-rose-950", text: "text-rose-400", border: "border-rose-900" },
 };
 
 /* ─── MAIN COMPONENT ─── */
@@ -94,9 +95,7 @@ export default function AdminBookings() {
       }
    };
 
-
    useEffect(() => { fetchBookings(); fetchAppointments(); }, []);
-
 
    /* ─── BOOKINGS LOGIC ─── */
    const filteredBookings = useMemo(() => bookings.filter(b => {
@@ -171,46 +170,40 @@ export default function AdminBookings() {
    /* ─── LOADING ─── */
    if (bookingLoading && apptLoading) {
       return (
-         <View style={{ flex: 1, backgroundColor: '#020617', justifyContent: 'center', alignItems: 'center' }}>
+         <View className="flex-1 bg-slate-950 items-center justify-center">
             <ActivityIndicator size="large" color={COLORS.primary} />
          </View>
       );
    }
 
    return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: '#020617' }}>
-
+      <SafeAreaView className="flex-1 bg-slate-950">
          {/* ── HEADER ── */}
-         <View style={{ borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.05)' }}>
-            <View style={{ paddingHorizontal: 24, paddingTop: 40, paddingBottom: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-               <Text style={{ color: 'white', fontSize: 22, fontWeight: '900', textTransform: 'uppercase', letterSpacing: -0.5 }}>Reservations</Text>
+         <View className="border-b border-white/5">
+            <View className="px-6 pt-10 pb-4 flex-row justify-between items-center">
+               <Text className="text-white text-[22px] font-black uppercase tracking-tight">Reservations</Text>
                <TouchableOpacity
                   onPress={() => router.push(activeTab === 'appointment' ? '/(adminPages)/add-appointment' as any : '/(adminPages)/add-booking' as any)}
-                  style={{ width: 40, height: 40, backgroundColor: COLORS.primary, borderRadius: 12, alignItems: 'center', justifyContent: 'center' }}
+                  className="w-10 h-10 rounded-xl items-center justify-center shadow-md bg-white border border-white/10"
                >
-                  <Ionicons name="add" size={24} color="white" />
+                  <Ionicons name="add" size={24} color="black" />
                </TouchableOpacity>
             </View>
 
             {/* TABS */}
-            <View style={{ paddingHorizontal: 24, paddingBottom: 16, flexDirection: 'row', gap: 12 }}>
+            <View className="px-6 pb-4 flex-row gap-3">
                {(['booking', 'appointment'] as const).map(tab => (
                   <TouchableOpacity
                      key={tab}
                      onPress={() => setActiveTab(tab)}
-                     style={{
-                        flex: 1, paddingVertical: 14, borderRadius: 16, alignItems: 'center',
-                        backgroundColor: activeTab === tab ? 'white' : 'rgba(255,255,255,0.05)',
-                        borderWidth: 1, borderColor: activeTab === tab ? 'white' : 'rgba(255,255,255,0.1)',
-                        flexDirection: 'row', justifyContent: 'center', gap: 8
-                     }}
+                     className={`flex-1 py-3.5 rounded-2xl items-center flex-row justify-center gap-2 border ${activeTab === tab ? 'bg-white border-white' : 'bg-white/5 border-white/10'}`}
                   >
                      <Ionicons
                         name={tab === 'booking' ? 'calendar-outline' : 'time-outline'}
                         size={14}
                         color={activeTab === tab ? 'black' : 'rgba(255,255,255,0.3)'}
                      />
-                     <Text style={{ color: activeTab === tab ? 'black' : 'rgba(255,255,255,0.3)', fontWeight: '900', fontSize: 10, textTransform: 'uppercase', letterSpacing: 1 }}>
+                     <Text className={`font-black text-[10px] uppercase tracking-widest ${activeTab === tab ? 'text-black' : 'text-white/30'}`}>
                         {tab === 'booking' ? `Bookings (${bookings.length})` : `Appointments (${appointments.length})`}
                      </Text>
                   </TouchableOpacity>
@@ -218,21 +211,22 @@ export default function AdminBookings() {
             </View>
 
             {/* SEARCH */}
-            <View style={{ paddingHorizontal: 24, paddingBottom: 16, flexDirection: 'row', gap: 12 }}>
-               <View style={{ flex: 1, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 16, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, height: 52, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' }}>
+            <View className="px-6 pb-4 flex-row gap-3">
+               <View className="flex-1 bg-white/5 rounded-2xl flex-row items-center px-4 h-14 border border-white/10">
                   <Ionicons name="search" size={16} color="#475569" />
                   <TextInput
                      placeholder={activeTab === 'booking' ? 'Search booking ID, name...' : 'Search APT ID, name...'}
                      placeholderTextColor="#334155"
                      value={activeTab === 'booking' ? bookingSearch : apptSearch}
                      onChangeText={activeTab === 'booking' ? setBookingSearch : setApptSearch}
-                     style={{ flex: 1, marginLeft: 12, color: 'white', fontWeight: '600', fontSize: 13 }}
+                     className="flex-1 ml-3 text-white font-semibold text-xs"
                   />
                </View>
                {activeTab === 'appointment' && (
                   <TouchableOpacity
                      onPress={() => setAssignFilter(prev => prev === 'all' ? 'unassigned' : prev === 'unassigned' ? 'assigned' : 'all')}
-                     style={{ width: 52, height: 52, backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 16, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: assignFilter !== 'all' ? COLORS.primary : 'rgba(255,255,255,0.08)' }}
+                     style={{ borderColor: assignFilter !== 'all' ? COLORS.primary : 'rgba(255,255,255,0.1)' }}
+                     className="w-[52px] h-[52px] bg-white/5 rounded-2xl items-center justify-center border"
                   >
                      <Ionicons name="people-outline" size={20} color={assignFilter !== 'all' ? COLORS.primary : '#475569'} />
                   </TouchableOpacity>
@@ -243,53 +237,53 @@ export default function AdminBookings() {
          {/* ── BOOKINGS TAB ── */}
          {activeTab === 'booking' && (
             <ScrollView
-               style={{ flex: 1 }}
+               className="flex-1"
                contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
                showsVerticalScrollIndicator={false}
                refreshControl={<RefreshControl refreshing={bookingRefreshing} onRefresh={() => { setBookingRefreshing(true); fetchBookings(); }} tintColor={COLORS.primary} />}
             >
                {filteredBookings.length === 0 ? (
-                  <View style={{ paddingVertical: 80, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: 32, borderWidth: 1, borderStyle: 'dashed', borderColor: 'rgba(255,255,255,0.08)' }}>
+                  <View className="py-20 items-center bg-white/5 rounded-[32px] border border-dashed border-white/10">
                      <MaterialCommunityIcons name="calendar-blank" size={48} color="#1e293b" />
-                     <Text style={{ color: 'rgba(255,255,255,0.15)', fontWeight: '900', fontSize: 10, textTransform: 'uppercase', marginTop: 16, letterSpacing: 2 }}>No bookings found</Text>
+                     <Text className="text-white/10 font-black text-[10px] uppercase mt-4 tracking-[2px]">No bookings found</Text>
                   </View>
                ) : filteredBookings.map(b => {
                   const sc = bookingStatusColors[b.status] || bookingStatusColors['Booked'];
                   return (
-                     <View key={b.id} style={{ marginBottom: 16, backgroundColor: '#0f172a', borderRadius: 28, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
-                        <View style={{ padding: 20 }}>
-                           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+                     <View key={b.id} className="mb-4 bg-slate-900 rounded-[28px] border border-white/5 overflow-hidden">
+                        <View className="p-5">
+                           <View className="flex-row justify-between items-start mb-4">
                               <View>
-                                 <Text style={{ color: 'rgba(255,255,255,0.25)', fontSize: 9, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 2 }}>{b.bookingId || `#${b.id}`}</Text>
-                                 <Text style={{ color: 'white', fontSize: 17, fontWeight: '900', marginTop: 2, textTransform: 'uppercase', letterSpacing: -0.3 }}>{b.name || 'Customer'}</Text>
+                                 <Text className="text-white/20 text-[9px] font-black uppercase tracking-[2px]">{b.bookingId || `#${b.id}`}</Text>
+                                 <Text className="text-white text-[17px] font-black mt-0.5 uppercase tracking-tight">{b.name || 'Customer'}</Text>
                               </View>
-                              <View style={{ backgroundColor: sc.bg, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, borderWidth: 1, borderColor: sc.border }}>
-                                 <Text style={{ color: sc.text, fontSize: 8, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1 }}>{b.status}</Text>
+                              <View className={`px-3 py-1.5 rounded-full border ${sc.bg} ${sc.border}`}>
+                                 <Text className={`text-[8px] font-black uppercase tracking-widest ${sc.text}`}>{b.status}</Text>
                               </View>
                            </View>
 
-                           <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
-                              <View style={{ backgroundColor: 'rgba(255,255,255,0.05)', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                           <View className="flex-row gap-2 flex-wrap">
+                              <View className="bg-white/5 px-2.5 py-1.5 rounded-xl flex-row items-center gap-1.5">
                                  <Ionicons name="car-outline" size={12} color={COLORS.primary} />
-                                 <Text style={{ color: '#94a3b8', fontSize: 10, fontWeight: '700', textTransform: 'uppercase' }}>{b.brand} {b.model}</Text>
+                                 <Text className="text-slate-400 text-[10px] font-bold uppercase">{b.brand} {b.model}</Text>
                               </View>
-                              <View style={{ backgroundColor: 'rgba(255,255,255,0.05)', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                              <View className="bg-white/5 px-2.5 py-1.5 rounded-xl flex-row items-center gap-1.5">
                                  <Ionicons name="call-outline" size={12} color="#818cf8" />
-                                 <Text style={{ color: '#94a3b8', fontSize: 10, fontWeight: '700' }}>{b.phone}</Text>
+                                 <Text className="text-slate-400 text-[10px] font-bold">{b.phone}</Text>
                               </View>
                            </View>
                         </View>
 
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 14, backgroundColor: 'rgba(0,0,0,0.3)', borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.04)' }}>
-                           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                        <View className="flex-row justify-between items-center px-5 py-3.5 bg-black/30 border-t border-white/5">
+                           <View className="flex-row items-center gap-1.5">
                               <Ionicons name="time-outline" size={13} color="#475569" />
-                              <Text style={{ color: '#475569', fontSize: 9, fontWeight: '900', textTransform: 'uppercase' }}>{new Date(b.created_at || b.createdAt).toLocaleDateString('en-GB')}</Text>
+                              <Text className="text-slate-600 text-[9px] font-black uppercase">{new Date(b.created_at || b.createdAt).toLocaleDateString('en-GB')}</Text>
                            </View>
                            <TouchableOpacity
                               onPress={() => setStatusPopup({ type: 'status', booking: b })}
-                              style={{ backgroundColor: 'white', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 14 }}
+                              className="bg-white px-4 py-2.5 rounded-xl"
                            >
-                              <Text style={{ color: 'black', fontSize: 9, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1 }}>Update Status</Text>
+                              <Text className="text-black text-[9px] font-black uppercase tracking-widest">Update Status</Text>
                            </TouchableOpacity>
                         </View>
                      </View>
@@ -301,85 +295,86 @@ export default function AdminBookings() {
          {/* ── APPOINTMENTS TAB ── */}
          {activeTab === 'appointment' && (
             <ScrollView
-               style={{ flex: 1 }}
+               className="flex-1"
                contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
                showsVerticalScrollIndicator={false}
                refreshControl={<RefreshControl refreshing={apptRefreshing} onRefresh={() => { setApptRefreshing(true); fetchAppointments(); }} tintColor={COLORS.primary} />}
             >
                {filteredAppts.length === 0 ? (
-                  <View style={{ paddingVertical: 80, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: 32, borderWidth: 1, borderStyle: 'dashed', borderColor: 'rgba(255,255,255,0.08)' }}>
+                  <View className="py-20 items-center bg-white/5 rounded-[32px] border border-dashed border-white/10">
                      <MaterialCommunityIcons name="calendar-clock" size={48} color="#1e293b" />
-                     <Text style={{ color: 'rgba(255,255,255,0.15)', fontWeight: '900', fontSize: 10, textTransform: 'uppercase', marginTop: 16, letterSpacing: 2 }}>No appointments found</Text>
+                     <Text className="text-white/10 font-black text-[10px] uppercase mt-4 tracking-[2px]">No appointments found</Text>
                   </View>
                ) : filteredAppts.map(apt => {
                   const sc = apptStatusColors[apt.status || apt.serviceStatus || apt.appointmentStatus || 'Appointment Booked'] || apptStatusColors['Appointment Booked'];
                   const isAssigned = !!(apt.assignedEmployeeName || apt.assignedEmployeeId);
                   return (
-                     <View key={apt.id || apt._id} style={{ marginBottom: 16, backgroundColor: '#0f172a', borderRadius: 28, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
-                        <View style={{ padding: 20 }}>
+                     <View key={apt.id || apt._id} className="mb-4 bg-slate-900 rounded-[28px] border border-white/5 overflow-hidden">
+                        <View className="p-5">
                            {/* Row 1: ID + Status */}
-                           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>
+                           <View className="flex-row justify-between items-start mb-3.5">
                               <View>
-                                 <Text style={{ color: 'white', fontSize: 10, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 2 }}>{apt.appointmentId || `APT-${apt.id}`}</Text>
-                                 <Text style={{ color: 'white', fontSize: 17, fontWeight: '900', marginTop: 2, textTransform: 'uppercase', letterSpacing: -0.3 }}>{apt.name}</Text>
-                                 <Text style={{ color: '#475569', fontSize: 10, fontWeight: '700', marginTop: 2 }}>{apt.phone}</Text>
+                                 <Text className="text-white/50 text-[10px] font-black uppercase tracking-widest">{apt.appointmentId || `APT-${apt.id}`}</Text>
+                                 <Text className="text-white text-[17px] font-black mt-0.5 uppercase tracking-tight">{apt.name}</Text>
+                                 <Text className="text-slate-500 text-[10px] font-bold mt-0.5">{apt.phone}</Text>
                               </View>
-                              <View style={{ alignItems: 'flex-end', gap: 6 }}>
-                                 <View style={{ backgroundColor: sc.bg, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20, borderWidth: 1, borderColor: sc.border }}>
-                                    <Text style={{ color: sc.text, fontSize: 7, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1 }}>{(apt.status || apt.serviceStatus || apt.appointmentStatus || 'Appointment Booked')}</Text>
+                              <View className="items-end gap-1.5">
+                                 <View className={`px-2.5 py-1 rounded-full border ${sc.bg} ${sc.border}`}>
+                                    <Text className={`text-[7px] font-black uppercase tracking-widest ${sc.text}`}>{(apt.status || apt.serviceStatus || apt.appointmentStatus || 'Appointment Booked')}</Text>
                                  </View>
                                  {apt.emergencyService && (
-                                    <View style={{ backgroundColor: '#450a0a', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8, borderWidth: 1, borderColor: '#7f1d1d' }}>
-                                       <Text style={{ color: '#f87171', fontSize: 7, fontWeight: '900', textTransform: 'uppercase' }}>URGENT</Text>
+                                    <View className="bg-rose-950 px-2 py-1 rounded-lg border border-rose-900">
+                                       <Text className="text-rose-500 text-[7px] font-black uppercase">URGENT</Text>
                                     </View>
                                  )}
                               </View>
                            </View>
 
                            {/* Row 2: Vehicle + Reg */}
-                           <View style={{ backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 16, padding: 14, marginBottom: 12, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                           <View className="bg-white/5 rounded-2xl p-3.5 mb-3 flex-row justify-between items-center">
+                              <View className="flex-row items-center gap-2.5">
                                  <Ionicons name="car-outline" size={16} color={COLORS.primary} />
                                  <View>
-                                    <Text style={{ color: 'white', fontSize: 12, fontWeight: '700' }}>{apt.brand} {apt.model}</Text>
-                                    <Text style={{ color: '#475569', fontSize: 9, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1 }}>{apt.registrationNumber || apt.vehicleNumber || 'NO REG'}</Text>
+                                    <Text className="text-white text-xs font-bold uppercase">{apt.brand} {apt.model}</Text>
+                                    <Text className="text-slate-500 text-[9px] font-bold uppercase tracking-widest">{apt.registrationNumber || apt.vehicleNumber || 'NO REG'}</Text>
                                  </View>
                               </View>
-                              <View style={{ backgroundColor: 'rgba(14,165,233,0.1)', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 10, borderWidth: 1, borderColor: 'rgba(14,165,233,0.2)' }}>
-                                 <Text style={{ color: 'white', fontSize: 10, fontWeight: '900' }}>{apt.serviceType}</Text>
+                              <View className="bg-sky-500/10 px-2.5 py-1.5 rounded-xl border border-sky-500/20">
+                                 <Text className="text-white text-[10px] font-black">{apt.serviceType}</Text>
                               </View>
                            </View>
 
                            {/* Row 3: Schedule */}
-                           <View style={{ flexDirection: 'row', gap: 10, marginBottom: 12 }}>
-                              <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                           <View className="flex-row gap-2.5 mb-3">
+                              <View className="flex-1 flex-row items-center gap-1.5">
                                  <Ionicons name="calendar-outline" size={13} color="#64748b" />
-                                 <Text style={{ color: '#64748b', fontSize: 10, fontWeight: '700' }}>{apt.preferredDate ? new Date(apt.preferredDate).toLocaleDateString('en-GB') : 'N/A'}</Text>
+                                 <Text className="text-slate-500 text-[10px] font-bold">{apt.preferredDate ? new Date(apt.preferredDate).toLocaleDateString('en-GB') : 'N/A'}</Text>
                               </View>
-                              <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                              <View className="flex-1 flex-row items-center gap-1.5">
                                  <Ionicons name="time-outline" size={13} color="#64748b" />
-                                 <Text style={{ color: '#64748b', fontSize: 10, fontWeight: '700' }} numberOfLines={1}>{apt.preferredTimeSlot || 'N/A'}</Text>
+                                 <Text className="text-slate-500 text-[10px] font-bold" numberOfLines={1}>{apt.preferredTimeSlot || 'N/A'}</Text>
                               </View>
                            </View>
 
                            {/* Row 4: Mechanic Assignment */}
-                           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                              <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: isAssigned ? 'rgba(14,165,233,0.15)' : 'rgba(255,255,255,0.05)', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: isAssigned ? 'rgba(14,165,233,0.3)' : 'rgba(255,255,255,0.08)' }}>
+                           <View className="flex-row items-center gap-2">
+                              <View className={`w-7 h-7 rounded-full items-center justify-center border ${isAssigned ? 'bg-sky-500/15 border-sky-500/30' : 'bg-white/5 border-white/10'}`}>
                                  <Ionicons name={isAssigned ? 'person-outline' : 'person-add-outline'} size={13} color={isAssigned ? COLORS.primary : '#475569'} />
                               </View>
-                              <Text style={{ color: isAssigned ? '#94a3b8' : '#475569', fontSize: 11, fontWeight: isAssigned ? '700' : '600', fontStyle: isAssigned ? 'normal' : 'italic' }}>
+                              <Text className={`text-[11px] ${isAssigned ? 'text-slate-400 font-bold' : 'text-slate-600 font-semibold italic'}`}>
                                  {isAssigned ? apt.assignedEmployeeName : 'Unassigned'}
                               </Text>
                            </View>
                         </View>
 
                         {/* Footer Actions */}
-                        <View style={{ flexDirection: 'row', paddingHorizontal: 20, paddingVertical: 14, backgroundColor: 'rgba(0,0,0,0.3)', borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.04)', gap: 10 }}>
+                        <View className="flex-row px-5 py-3.5 bg-black/30 border-t border-white/5 gap-2.5">
                            <TouchableOpacity
                               onPress={() => openApptModal(apt)}
-                              style={{ flex: 1, backgroundColor: COLORS.primary, paddingVertical: 12, borderRadius: 14, alignItems: 'center' }}
+                              style={{ backgroundColor: COLORS.primary }}
+                              className="flex-1 py-3 rounded-xl items-center"
                            >
-                              <Text style={{ color: 'white', fontSize: 9, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1.5 }}>Manage / Assign</Text>
+                              <Text className="text-white text-[9px] font-black uppercase tracking-widest">Manage / Assign</Text>
                            </TouchableOpacity>
                         </View>
                      </View>
@@ -392,21 +387,21 @@ export default function AdminBookings() {
           BOOKING STATUS MODAL
       ──────────────────────────── */}
          <Modal visible={!!statusPopup} transparent animationType="slide">
-            <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.85)', justifyContent: 'flex-end' }}>
-               <View style={{ backgroundColor: '#0f172a', borderTopLeftRadius: 40, borderTopRightRadius: 40, padding: 32, paddingBottom: 52, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.08)' }}>
-                  <View style={{ width: 48, height: 5, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 4, alignSelf: 'center', marginBottom: 32 }} />
+            <View className="flex-1 bg-black/80 justify-end">
+               <View className="bg-slate-900 rounded-t-[40px] p-8 pb-12 border-t border-white/10">
+                  <View className="w-12 h-1.5 bg-white/10 rounded-full self-center mb-8" />
 
                   {statusPopup?.type === 'status' && (
                      <>
-                        <Text style={{ color: 'white', fontSize: 20, fontWeight: '900', textTransform: 'uppercase', textAlign: 'center', marginBottom: 24 }}>Update Status</Text>
-                        <View style={{ gap: 10 }}>
+                        <Text className="text-white text-xl font-black uppercase text-center mb-6">Update Status</Text>
+                        <View className="gap-2.5">
                            {BOOKING_STATUS.map(s => (
                               <TouchableOpacity
                                  key={s}
                                  onPress={() => handleBookingStatusChange(statusPopup.booking, s)}
-                                 style={{ padding: 18, borderRadius: 18, backgroundColor: statusPopup.booking.status === s ? 'white' : 'rgba(255,255,255,0.05)', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderWidth: 1, borderColor: statusPopup.booking.status === s ? 'white' : 'rgba(255,255,255,0.06)' }}
+                                 className={`p-4 rounded-2xl flex-row justify-between items-center border ${statusPopup.booking.status === s ? 'bg-white border-white' : 'bg-white/5 border-white/5'}`}
                               >
-                                 <Text style={{ color: statusPopup.booking.status === s ? 'black' : 'rgba(255,255,255,0.4)', fontWeight: '900', fontSize: 10, textTransform: 'uppercase', letterSpacing: 1 }}>{s}</Text>
+                                 <Text className={`font-black text-[10px] uppercase tracking-widest ${statusPopup.booking.status === s ? 'text-black' : 'text-white/40'}`}>{s}</Text>
                                  {statusPopup.booking.status === s && <Ionicons name="checkmark-circle" size={20} color="black" />}
                               </TouchableOpacity>
                            ))}
@@ -416,32 +411,32 @@ export default function AdminBookings() {
 
                   {statusPopup?.type === 'approved' && (
                      <>
-                        <Text style={{ color: 'white', fontSize: 20, fontWeight: '900', textTransform: 'uppercase', textAlign: 'center', marginBottom: 8 }}>Authorize Booking</Text>
-                        <Text style={{ color: 'rgba(255,255,255,0.2)', fontSize: 9, textTransform: 'uppercase', letterSpacing: 2, textAlign: 'center', marginBottom: 24 }}>Enter a tracking reference</Text>
-                        <View style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', marginBottom: 16 }}>
-                           <TextInput placeholder="TRACK NUMBER" placeholderTextColor="#334155" value={trackNumber} onChangeText={setTrackNumber} style={{ padding: 20, color: 'white', fontWeight: '900', fontSize: 16, textAlign: 'center', textTransform: 'uppercase' }} />
+                        <Text className="text-white text-xl font-black uppercase text-center mb-2">Authorize Booking</Text>
+                        <Text className="text-white/20 text-[9px] uppercase tracking-[2px] text-center mb-6">Enter a tracking reference</Text>
+                        <View className="bg-white/5 rounded-2xl border border-white/10 mb-4 h-[72px]">
+                           <TextInput placeholder="TRACK NUMBER" placeholderTextColor="#334155" value={trackNumber} onChangeText={setTrackNumber} className="flex-1 px-5 color-white font-black text-base text-center uppercase" />
                         </View>
-                        <TouchableOpacity onPress={() => updateBookingStatus(statusPopup!.booking, 'Approved', { trackNumber })} style={{ backgroundColor: 'white', padding: 20, borderRadius: 20, alignItems: 'center' }}>
-                           <Text style={{ color: 'black', fontWeight: '900', textTransform: 'uppercase', letterSpacing: 2, fontSize: 11 }}>Confirm Approval</Text>
+                        <TouchableOpacity onPress={() => updateBookingStatus(statusPopup!.booking, 'Approved', { trackNumber })} className="bg-white p-5 rounded-2xl items-center">
+                           <Text className="text-black font-black uppercase tracking-widest text-[11px]">Confirm Approval</Text>
                         </TouchableOpacity>
                      </>
                   )}
 
                   {statusPopup?.type === 'cancel' && (
                      <>
-                        <Text style={{ color: 'white', fontSize: 20, fontWeight: '900', textTransform: 'uppercase', textAlign: 'center', marginBottom: 8 }}>Cancel Booking</Text>
-                        <Text style={{ color: '#f87171', fontSize: 9, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 2, textAlign: 'center', marginBottom: 24 }}>Reason Required</Text>
-                        <View style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)', marginBottom: 16 }}>
-                           <TextInput placeholder="DETAILED REASON" placeholderTextColor="#334155" value={cancelReason} onChangeText={setCancelReason} multiline numberOfLines={4} style={{ padding: 20, color: 'white', fontWeight: '600', fontSize: 13, minHeight: 100, textAlignVertical: 'top' }} />
+                        <Text className="text-white text-xl font-black uppercase text-center mb-2">Cancel Booking</Text>
+                        <Text className="text-rose-400 text-[9px] font-black uppercase tracking-widest text-center mb-6">Reason Required</Text>
+                        <View className="bg-white/5 rounded-2xl border border-white/10 mb-4 min-h-[100px]">
+                           <TextInput placeholder="DETAILED REASON" placeholderTextColor="#334155" value={cancelReason} onChangeText={setCancelReason} multiline numberOfLines={4} className="flex-1 p-5 text-white font-semibold text-xs leading-relaxed" style={{ textAlignVertical: 'top' }} />
                         </View>
-                        <TouchableOpacity onPress={() => updateBookingStatus(statusPopup!.booking, 'Cancelled', { cancelReason })} style={{ backgroundColor: '#ef4444', padding: 20, borderRadius: 20, alignItems: 'center' }}>
-                           <Text style={{ color: 'white', fontWeight: '900', textTransform: 'uppercase', letterSpacing: 2, fontSize: 11 }}>Confirm Cancellation</Text>
+                        <TouchableOpacity onPress={() => updateBookingStatus(statusPopup!.booking, 'Cancelled', { cancelReason })} className="bg-rose-500 p-5 rounded-2xl items-center">
+                           <Text className="text-white font-black uppercase tracking-widest text-[11px]">Confirm Cancellation</Text>
                         </TouchableOpacity>
                      </>
                   )}
 
-                  <TouchableOpacity onPress={() => { setStatusPopup(null); setTrackNumber(''); setCancelReason(''); }} style={{ marginTop: 20, padding: 14, alignItems: 'center' }}>
-                     <Text style={{ color: 'rgba(255,255,255,0.2)', fontWeight: '900', fontSize: 9, textTransform: 'uppercase', letterSpacing: 2 }}>Dismiss</Text>
+                  <TouchableOpacity onPress={() => { setStatusPopup(null); setTrackNumber(''); setCancelReason(''); }} className="mt-5 p-3 items-center">
+                     <Text className="text-white/20 font-black text-[9px] uppercase tracking-widest">Dismiss</Text>
                   </TouchableOpacity>
                </View>
             </View>
@@ -451,48 +446,47 @@ export default function AdminBookings() {
           APPOINTMENT MANAGE/ASSIGN MODAL
       ──────────────────────────── */}
          <Modal visible={!!selectedAppt} transparent animationType="slide">
-            <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.9)', justifyContent: 'flex-end' }}>
-               <View style={{ backgroundColor: '#0f172a', borderTopLeftRadius: 40, borderTopRightRadius: 40, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.08)', height: '92%', width: '100%' }}>
+            <View className="flex-1 bg-black/90 justify-end">
+               <View className="bg-slate-900 rounded-t-[40px] border-t border-white/10 h-[92%] w-full">
                   {/* Modal Header */}
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 28, paddingTop: 28, paddingBottom: 20, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.06)' }}>
-                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
-                        <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: 'rgba(14,165,233,0.15)', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(14,165,233,0.2)' }}>
+                  <View className="flex-row justify-between items-center px-7 pt-7 pb-5 border-b border-white/5">
+                     <View className="flex-row items-center gap-3.5">
+                        <View className="w-11 h-11 rounded-2xl bg-sky-500/15 items-center justify-center border border-sky-500/20">
                            <Ionicons name="construct-outline" size={20} color={COLORS.primary} />
                         </View>
                         <View>
-                           <Text style={{ color: 'white', fontSize: 16, fontWeight: '900', textTransform: 'uppercase' }}>Appointment</Text>
-                           <Text style={{ color: 'white', fontSize: 10, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 2, marginTop: 2 }}>{selectedAppt?.appointmentId || `APT-${selectedAppt?.id}`}</Text>
+                           <Text className="text-white text-base font-black uppercase tracking-tight">Appointment</Text>
+                           <Text className="text-white/50 text-[10px] font-black uppercase tracking-widest mt-0.5">{selectedAppt?.appointmentId || `APT-${selectedAppt?.id}`}</Text>
                         </View>
                      </View>
-                     <TouchableOpacity onPress={() => { setSelectedAppt(null); setPendingChanges({}); }} style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.08)', alignItems: 'center', justifyContent: 'center' }}>
+                     <TouchableOpacity onPress={() => { setSelectedAppt(null); setPendingChanges({}); }} className="w-9 h-9 rounded-full bg-white/10 items-center justify-center">
                         <Ionicons name="close" size={18} color="white" />
                      </TouchableOpacity>
                   </View>
 
-                  <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 28, paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
-
+                  <ScrollView className="flex-1" contentContainerStyle={{ padding: 28, paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
                      {/* Customer Info */}
-                     <Text style={{ color: 'rgba(255,255,255,0.25)', fontSize: 9, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 2, marginBottom: 12 }}>Customer Info</Text>
-                     <View style={{ backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 20, padding: 16, marginBottom: 24, gap: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)' }}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-                           <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: 'rgba(255,255,255,0.05)', alignItems: 'center', justifyContent: 'center' }}><Ionicons name="person-outline" size={14} color="#64748b" /></View>
-                           <Text style={{ color: 'white', fontSize: 14, fontWeight: '700' }}>{selectedAppt?.name}</Text>
+                     <Text className="text-white/20 text-[9px] font-black uppercase tracking-[2px] mb-3">Customer Info</Text>
+                     <View className="bg-white/5 rounded-2xl p-4 mb-6 gap-3 border border-white/5">
+                        <View className="flex-row items-center gap-3">
+                           <View className="w-8 h-8 rounded-full bg-white/5 items-center justify-center"><Ionicons name="person-outline" size={14} color="#64748b" /></View>
+                           <Text className="text-white text-sm font-bold">{selectedAppt?.name}</Text>
                         </View>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-                           <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: 'rgba(255,255,255,0.05)', alignItems: 'center', justifyContent: 'center' }}><Ionicons name="call-outline" size={14} color="#818cf8" /></View>
-                           <Text style={{ color: '#94a3b8', fontSize: 13, fontWeight: '600' }}>{selectedAppt?.phone}</Text>
+                        <View className="flex-row items-center gap-3">
+                           <View className="w-8 h-8 rounded-full bg-white/5 items-center justify-center"><Ionicons name="call-outline" size={14} color="#818cf8" /></View>
+                           <Text className="text-slate-400 text-[13px] font-semibold">{selectedAppt?.phone}</Text>
                         </View>
                         {selectedAppt?.address && (
-                           <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 12 }}>
-                              <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: 'rgba(255,255,255,0.05)', alignItems: 'center', justifyContent: 'center', marginTop: 2 }}><Ionicons name="location-outline" size={14} color="#34d399" /></View>
-                              <Text style={{ color: '#94a3b8', fontSize: 12, flex: 1, lineHeight: 18 }}>{selectedAppt?.address}, {selectedAppt?.city} {selectedAppt?.pincode}</Text>
+                           <View className="flex-row items-start gap-3">
+                              <View className="w-8 h-8 rounded-full bg-white/5 items-center justify-center mt-0.5"><Ionicons name="location-outline" size={14} color="#34d399" /></View>
+                              <Text className="text-slate-400 text-xs flex-1 leading-5">{selectedAppt?.address}, {selectedAppt?.city} {selectedAppt?.pincode}</Text>
                            </View>
                         )}
                      </View>
 
                      {/* Vehicle Details */}
-                     <Text style={{ color: 'rgba(255,255,255,0.25)', fontSize: 9, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 2, marginBottom: 12 }}>Vehicle Details</Text>
-                     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 24 }}>
+                     <Text className="text-white/20 text-[9px] font-black uppercase tracking-[2px] mb-3">Vehicle Details</Text>
+                     <View className="flex-row flex-wrap gap-2 mb-6">
                         {[
                            { l: 'Type', v: selectedAppt?.vehicleType },
                            { l: 'Brand', v: selectedAppt?.brand },
@@ -501,18 +495,18 @@ export default function AdminBookings() {
                            { l: 'Fuel', v: selectedAppt?.fuelType },
                            { l: 'Year', v: selectedAppt?.yearOfManufacture },
                         ].map(item => (
-                           <View key={item.l} style={{ width: '48%', backgroundColor: 'rgba(255,255,255,0.04)', padding: 14, borderRadius: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)' }}>
-                              <Text style={{ color: 'rgba(255,255,255,0.2)', fontSize: 8, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>{item.l}</Text>
-                              <Text style={{ color: 'white', fontSize: 13, fontWeight: '700' }}>{item.v || 'N/A'}</Text>
+                           <View key={item.l} className="w-[48%] bg-white/5 p-3.5 rounded-2xl border border-white/5">
+                              <Text className="text-white/20 text-[8px] font-black uppercase tracking-widest mb-1">{item.l}</Text>
+                              <Text className="text-white text-[13px] font-bold">{item.v || 'N/A'}</Text>
                            </View>
                         ))}
                      </View>
 
                      {/* Status Update */}
-                     <Text style={{ color: 'rgba(255,255,255,0.25)', fontSize: 9, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 2, marginBottom: 12 }}>Service Management</Text>
-                     <View style={{ backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 20, padding: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)', marginBottom: 16 }}>
-                        <Text style={{ color: 'rgba(255,255,255,0.4)', fontSize: 9, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 10 }}>Current Status</Text>
-                        <View style={{ gap: 8 }}>
+                     <Text className="text-white/20 text-[9px] font-black uppercase tracking-widest mb-3">Service Management</Text>
+                     <View className="bg-white/5 rounded-[20px] p-5 border border-white/5 mb-4">
+                        <Text className="text-white/40 text-[9px] font-black uppercase tracking-widest mb-2.5">Current Status</Text>
+                        <View className="gap-2">
                            {APPT_STATUS.map(s => {
                               const active = currentStatus === s;
                               return (
@@ -523,9 +517,9 @@ export default function AdminBookings() {
                                        if (s === 'Cancelled') { update.assignedEmployeeId = null; update.assignedEmployeeName = null; }
                                        setPendingChanges((prev: any) => ({ ...prev, ...update }));
                                     }}
-                                    style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 14, borderRadius: 14, backgroundColor: active ? 'white' : 'rgba(255,255,255,0.04)', borderWidth: 1, borderColor: active ? 'white' : 'rgba(255,255,255,0.06)' }}
+                                    className={`flex-row justify-between items-center p-3.5 rounded-2xl border ${active ? 'bg-white border-white' : 'bg-white/5 border-white/5'}`}
                                  >
-                                    <Text style={{ color: active ? 'black' : 'rgba(255,255,255,0.35)', fontWeight: '900', fontSize: 10, textTransform: 'uppercase', letterSpacing: 1 }}>{s}</Text>
+                                    <Text className={`font-black text-[10px] uppercase tracking-widest ${active ? 'text-black' : 'text-white/30'}`}>{s}</Text>
                                     {active && <Ionicons name="checkmark-circle" size={18} color="black" />}
                                  </TouchableOpacity>
                               );
@@ -534,23 +528,23 @@ export default function AdminBookings() {
                      </View>
 
                      {/* Assign Technician */}
-                     <View style={{ backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 20, padding: 20, borderWidth: 1, borderColor: canAssign ? 'rgba(14,165,233,0.2)' : 'rgba(255,255,255,0.06)', marginBottom: 16 }}>
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                           <Text style={{ color: 'rgba(255,255,255,0.4)', fontSize: 9, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1 }}>Assign Technician</Text>
+                     <View className={`bg-white/5 rounded-[20px] p-5 border mb-4 ${canAssign ? 'border-sky-500/20' : 'border-white/5'}`}>
+                        <View className="flex-row justify-between items-center mb-3">
+                           <Text className="text-white/40 text-[9px] font-black uppercase tracking-widest">Assign Technician</Text>
                            {!canAssign && (
-                              <View style={{ backgroundColor: '#451a03', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 }}>
-                                 <Text style={{ color: '#fb923c', fontSize: 7, fontWeight: '900', textTransform: 'uppercase' }}>Invalid status for assignment</Text>
+                              <View className="bg-orange-950 px-2 py-1 rounded-lg border border-orange-900">
+                                 <Text className="text-orange-400 text-[7px] font-black uppercase tracking-widest">Invalid status for assignment</Text>
                               </View>
                            )}
                         </View>
-                        <View style={{ gap: 8, opacity: canAssign ? 1 : 0.4 }}>
+                        <View className={`gap-2 ${canAssign ? 'opacity-100' : 'opacity-40'}`}>
                            {/* Unassigned option */}
                            <TouchableOpacity
                               disabled={!canAssign}
                               onPress={() => setPendingChanges((prev: any) => ({ ...prev, assignedEmployeeId: null, assignedEmployeeName: null }))}
-                              style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 14, borderRadius: 14, backgroundColor: !(pendingChanges.assignedEmployeeId ?? (selectedAppt?.assignedEmployeeId || selectedAppt?.assignedEmployee?._id)) ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.04)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)' }}
+                              className={`flex-row justify-between items-center p-3.5 rounded-2xl border ${!(pendingChanges.assignedEmployeeId ?? (selectedAppt?.assignedEmployeeId || selectedAppt?.assignedEmployee?._id)) ? 'bg-white/10 border-white/10' : 'bg-white/5 border-white/5'}`}
                            >
-                              <Text style={{ color: 'rgba(255,255,255,0.5)', fontWeight: '700', fontSize: 11, fontStyle: 'italic' }}>Unassigned</Text>
+                              <Text className="text-white/50 font-bold text-[11px] italic">Unassigned</Text>
                               {!(pendingChanges.assignedEmployeeId ?? (selectedAppt?.assignedEmployeeId || selectedAppt?.assignedEmployee?._id)) && <Ionicons name="checkmark-circle" size={16} color="rgba(255,255,255,0.5)" />}
                            </TouchableOpacity>
                            {technicians.map((t: any) => {
@@ -561,13 +555,13 @@ export default function AdminBookings() {
                                     key={tId}
                                     disabled={!canAssign}
                                     onPress={() => setPendingChanges((prev: any) => ({ ...prev, assignedEmployeeId: tId, assignedEmployeeName: t.name }))}
-                                    style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 14, borderRadius: 14, backgroundColor: selected ? 'rgba(14,165,233,0.15)' : 'rgba(255,255,255,0.04)', borderWidth: 1, borderColor: selected ? 'rgba(14,165,233,0.3)' : 'rgba(255,255,255,0.06)' }}
+                                    className={`flex-row justify-between items-center p-3.5 rounded-2xl border ${selected ? 'bg-sky-500/15 border-sky-500/30' : 'bg-white/5 border-white/5'}`}
                                  >
-                                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                                       <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: 'rgba(14,165,233,0.1)', alignItems: 'center', justifyContent: 'center' }}>
-                                          <Text style={{ color: COLORS.primary, fontSize: 11, fontWeight: '900' }}>{t.name?.charAt(0)?.toUpperCase()}</Text>
+                                    <View className="flex-row items-center gap-2.5">
+                                       <View className="w-7 h-7 rounded-full bg-sky-500/10 items-center justify-center">
+                                          <Text style={{ color: COLORS.primary }} className="text-[11px] font-black">{t.name?.charAt(0)?.toUpperCase()}</Text>
                                        </View>
-                                       <Text style={{ color: selected ? COLORS.primary : 'rgba(255,255,255,0.6)', fontWeight: '700', fontSize: 12 }}>{t.name}</Text>
+                                       <Text className={`font-bold text-xs uppercase ${selected ? 'text-sky-500' : 'text-white/60'}`}>{t.name}</Text>
                                     </View>
                                     {selected && <Ionicons name="checkmark-circle" size={18} color={COLORS.primary} />}
                                  </TouchableOpacity>
@@ -577,18 +571,18 @@ export default function AdminBookings() {
                      </View>
 
                      {/* Time Slot */}
-                     <View style={{ backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 20, padding: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.06)', marginBottom: 16 }}>
-                        <Text style={{ color: 'rgba(255,255,255,0.4)', fontSize: 9, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12 }}>Time Slot</Text>
-                        <View style={{ gap: 8 }}>
+                     <View className="bg-white/5 rounded-[20px] p-5 border border-white/5 mb-4">
+                        <Text className="text-white/40 text-[9px] font-black uppercase tracking-widest mb-3">Time Slot</Text>
+                        <View className="gap-2">
                            {TIME_SLOTS.map(slot => {
                               const active = (pendingChanges.preferredTimeSlot ?? selectedAppt?.preferredTimeSlot) === slot;
                               return (
                                  <TouchableOpacity
                                     key={slot}
                                     onPress={() => setPendingChanges((prev: any) => ({ ...prev, preferredTimeSlot: slot }))}
-                                    style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 14, borderRadius: 14, backgroundColor: active ? 'white' : 'rgba(255,255,255,0.04)', borderWidth: 1, borderColor: active ? 'white' : 'rgba(255,255,255,0.06)' }}
+                                    className={`flex-row justify-between items-center p-3.5 rounded-2xl border ${active ? 'bg-white border-white' : 'bg-white/5 border-white/5'}`}
                                  >
-                                    <Text style={{ color: active ? 'black' : 'rgba(255,255,255,0.35)', fontWeight: '700', fontSize: 11 }}>{slot}</Text>
+                                    <Text className={`font-black text-[11px] uppercase tracking-widest ${active ? 'text-black' : 'text-white/30'}`}>{slot}</Text>
                                     {active && <Ionicons name="checkmark-circle" size={18} color="black" />}
                                  </TouchableOpacity>
                               );
@@ -598,29 +592,29 @@ export default function AdminBookings() {
 
                      {/* Issue Description */}
                      {selectedAppt?.otherIssue && (
-                        <View style={{ backgroundColor: 'rgba(251,191,36,0.05)', borderRadius: 20, padding: 20, borderWidth: 1, borderColor: 'rgba(251,191,36,0.1)', marginBottom: 16 }}>
-                           <Text style={{ color: '#f59e0b', fontSize: 9, fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>Customer Problem</Text>
-                           <Text style={{ color: '#fbbf24', fontSize: 13, fontStyle: 'italic', lineHeight: 20 }}>"{selectedAppt.otherIssue}"</Text>
+                        <View className="bg-amber-500/5 rounded-[20px] p-5 border border-amber-500/10 mb-4">
+                           <Text className="text-amber-500 text-[9px] font-black uppercase tracking-widest mb-2">Customer Problem</Text>
+                           <Text className="text-amber-400 text-[13px] italic leading-5">"{selectedAppt.otherIssue}"</Text>
                         </View>
                      )}
                   </ScrollView>
 
                   {/* Footer Actions */}
-                  <View style={{ flexDirection: 'row', paddingHorizontal: 28, paddingVertical: 20, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.06)', gap: 12 }}>
+                  <View className="flex-row px-7 py-5 border-t border-white/5 gap-3">
                      <TouchableOpacity
                         onPress={() => { setSelectedAppt(null); setPendingChanges({}); }}
-                        style={{ flex: 1, paddingVertical: 18, borderRadius: 20, alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' }}
+                        className="flex-1 py-4.5 rounded-2xl items-center bg-white/5 border border-white/10"
                      >
-                        <Text style={{ color: 'rgba(255,255,255,0.4)', fontWeight: '900', textTransform: 'uppercase', letterSpacing: 1, fontSize: 10 }}>Cancel</Text>
+                        <Text className="text-white/40 font-black text-[10px] uppercase tracking-widest py-1">Cancel</Text>
                      </TouchableOpacity>
                      <TouchableOpacity
                         onPress={handleSaveChanges}
                         disabled={saving || Object.keys(pendingChanges).length === 0}
-                        style={{ flex: 2, paddingVertical: 18, borderRadius: 20, alignItems: 'center', backgroundColor: Object.keys(pendingChanges).length === 0 ? 'rgba(255,255,255,0.1)' : 'white', opacity: saving ? 0.6 : 1 }}
+                        className={`flex-2 py-4.5 rounded-2xl items-center ${Object.keys(pendingChanges).length === 0 ? 'bg-white/10' : 'bg-white'} ${saving ? 'opacity-60' : 'opacity-100'}`}
                      >
                         {saving
-                           ? <ActivityIndicator size="small" color="black" />
-                           : <Text style={{ color: Object.keys(pendingChanges).length === 0 ? 'rgba(255,255,255,0.2)' : 'black', fontWeight: '900', textTransform: 'uppercase', letterSpacing: 2, fontSize: 10 }}>Save Changes</Text>
+                           ? <ActivityIndicator size="small" color="black" className="py-0.5" />
+                           : <Text className={`font-black text-[10px] uppercase tracking-[2px] py-1 ${Object.keys(pendingChanges).length === 0 ? 'text-white/20' : 'text-black'}`}>Save Changes</Text>
                         }
                      </TouchableOpacity>
                   </View>
