@@ -53,26 +53,54 @@ const QuickAction = ({ title, icon, color, onPress }: any) => {
 
 const StatCard = ({ title, value, gradient, isSmall = false }: any) => (
   <View
-    className={`${isSmall ? "w-[48%]" : "w-full"} mb-4 rounded-3xl overflow-hidden shadow-2xl shadow-black`}
+    className={`${isSmall ? "w-[48%]" : "w-full"} mb-4 rounded-3xl overflow-hidden`}
+    style={{
+      shadowColor: "#000",
+      shadowOpacity: 0.35,
+      shadowRadius: 20,
+      elevation: 8,
+    }}
   >
     <LinearGradient
       colors={gradient}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
-      className="p-5"
+      className="p-5 relative"
     >
-      <Text className="text-white opacity-70 text-[9px] font-black uppercase tracking-widest">
+      {/* Gradient Glow Overlay */}
+      <View
+        className="absolute -top-10 -right-10 w-32 h-32 rounded-full opacity-20"
+        style={{
+          backgroundColor: "#ffffff",
+        }}
+      />
+
+      {/* Glass Highlight */}
+      <View className="absolute inset-0 bg-white/5 rounded-3xl" />
+
+      {/* Title */}
+      <Text className="text-white/70 text-[9px] font-black uppercase tracking-widest">
         {title}
       </Text>
-      <Text className="text-white text-2xl font-black mt-1">
+
+      {/* Value */}
+      <Text className="text-white text-3xl font-black mt-1">
         {value || "0"}
       </Text>
-      <View className="flex-row items-center justify-between mt-3">
-        <Text className="text-white opacity-60 text-[8px] font-bold">
+
+      {/* Footer */}
+      <View className="flex-row items-center justify-between mt-4">
+        <Text className="text-white/60 text-[8px] font-bold uppercase tracking-wider">
           vs last week
         </Text>
-        <Ionicons name="trending-up" size={14} color="rgba(255,255,255,0.6)" />
+
+        <View className="flex-row items-center gap-1">
+          <Ionicons name="trending-up" size={14} color="rgba(255,255,255,0.8)" />
+        </View>
       </View>
+
+      {/* Bottom Accent Line */}
+      <View className="absolute bottom-0 left-0 right-0 h-[3px] bg-white/20" />
     </LinearGradient>
   </View>
 );
@@ -247,39 +275,39 @@ export default function AdminDashboard() {
           <StatCard
             title="Today's Active Bookings"
             value={stats.todayBookings}
-            gradient={["#1d4ed8", "#3b82f6"]}
+            gradient={["#2563eb", "#1e3a8a"]}
           />
 
           <View className="flex-row flex-wrap justify-between">
             <StatCard
               title="Today's New Customers"
               value={stats.todayCustomers}
-              gradient={["#1e40af", "#3b82f6"]}
+              gradient={["#7c3aed", "#4c1d95"]}
               isSmall
             />
             <StatCard
               title="Pending Queue"
               value={recentBookings.length}
-              gradient={["#b45309", "#f59e0b"]}
+              gradient={["#059669", "#064e3b"]}
               isSmall
             />
 
             <StatCard
               title="Total Billing"
               value={`₹${stats.totalBilling.toLocaleString()}`}
-              gradient={["#065f46", "#10b981"]}
+              gradient={["#f59e0b", "#78350f"]}
             />
 
             <StatCard
               title="Net Earnings"
               value={`₹${stats.totalEarnings.toLocaleString()}`}
-              gradient={["#064e3b", "#059669"]}
+              gradient={["#db2777", "#831843"]}
               isSmall
             />
             <StatCard
               title="Global Services"
               value={stats.totalServices}
-              gradient={["#4c1d95", "#8b5cf6"]}
+              gradient={["#14b8a6", "#134e4a"]}
               isSmall
             />
 
@@ -299,7 +327,7 @@ export default function AdminDashboard() {
             <StatCard
               title="Inventory Items"
               value={stats.totalProducts}
-              gradient={["#111827", "#334155"]}
+              gradient={["#4ade80", "#166534"]}
               isSmall
             />
             <StatCard
@@ -312,26 +340,26 @@ export default function AdminDashboard() {
             <StatCard
               title="Delivery Status"
               value={stats.deliveryOrders}
-              gradient={["#0f172a", "#334155"]}
+              gradient={["#6366f1", "#312e81"]}
               isSmall
             />
             <StatCard
               title="Vehicle bookings"
               value={stats.totalVehicleBookings}
-              gradient={["#0f172a", "#334155"]}
+              gradient={["#10b981", "#064e3b"]}
               isSmall
             />
 
             <StatCard
               title="Fleet: Cars"
               value={stats.totalCars}
-              gradient={["#111827", "#1f2937"]}
+              gradient={["#fde047", "#854d0e"]}
               isSmall
             />
             <StatCard
               title="Fleet: Bikes"
               value={stats.totalBikes}
-              gradient={["#111827", "#1f2937"]}
+              gradient={["#a855f7", "#581c87"]}
               isSmall
             />
           </View>
