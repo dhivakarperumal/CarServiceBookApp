@@ -154,6 +154,8 @@ const BookingForm = ({ currentUser, router }: any) => {
       Alert.alert("Success", "Your service booking was successful!");
       setFormData({ name: currentUser.username || currentUser.name || "", email: currentUser.email || "", phone: currentUser.mobile || "", altPhone: "", brand: "", model: "", issue: "", otherIssue: "", vehicleNumber: "", address: "", location: "", preferredDate: new Date().toISOString().split('T')[0] });
       setLocationQuery(""); setCoords({ lat: null, lng: null });
+      // Navigate to service status page
+      router.push('/profile/service-status');
     } catch (error) { Alert.alert("Error", "Booking failed."); } finally { setSubmitting(false); }
   };
 
@@ -394,6 +396,8 @@ const AppointmentForm = ({ currentUser, router }: any) => {
       });
       setLocationQuery("");
       setCoords({ lat: null, lng: null });
+      // Navigate to service status page
+      router.push('/profile/service-status');
     } catch (err: any) {
       console.error("Appointment Error Full:", err);
       if (err.response) {

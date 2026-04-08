@@ -1,24 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
-  ActivityIndicator,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  SafeAreaView,
-} from 'react-native';
-import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import {
+    ActivityIndicator,
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    SafeAreaView,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from 'react-native';
 // @ts-ignore
 import RazorpayCheckout from 'react-native-razorpay';
-import { apiService, api } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
+import { api } from '../services/api';
 import { COLORS } from '../theme/colors';
 
 const indianStates = [
@@ -193,7 +193,7 @@ export default function CheckoutScreen() {
       }
 
       Alert.alert('Order Successful!', `Your order #${newOrderId} has been placed.`);
-      router.replace('/(tabs)/home');
+      router.replace('/profile/orders');
     } catch (err) {
       console.error("Submit order error", err);
       Alert.alert('Error', 'Could not save your order. Please try again.');
