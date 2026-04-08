@@ -79,6 +79,25 @@ export default function AdminSettings() {
                      </View>
                   </TouchableOpacity>
 
+                  {/* ── All Billings Ledger ── */}
+                  <TouchableOpacity
+                     onPress={() => router.push('/(adminPages)/billings' as any)}
+                     className="flex-row items-center justify-between p-5 bg-slate-900 border border-slate-800 rounded-3xl mt-4 shadow-2xl"
+                  >
+                     <View className="flex-row items-center gap-4 flex-1">
+                        <View className="w-12 h-12 bg-emerald-950 rounded-2xl items-center justify-center border border-emerald-900 shadow-lg shadow-emerald-500/10">
+                           <Ionicons name="document-text-outline" size={24} color="#10b981" />
+                        </View>
+                        <View>
+                           <Text className="text-white font-black text-sm uppercase tracking-tighter">Billings Ledger</Text>
+                           <Text className="text-gray-500 text-[8px] font-black uppercase tracking-widest mt-1">Full Invoicing History & Stats</Text>
+                        </View>
+                     </View>
+                     <View className="bg-slate-800 p-2 rounded-full">
+                        <Ionicons name="chevron-forward" size={16} color="#475569" />
+                     </View>
+                  </TouchableOpacity>
+
                   {/* ── Spare Parts Inventory ── */}
                   <TouchableOpacity
                      onPress={() => router.push('/(adminPages)/inventory' as any)}
@@ -129,6 +148,25 @@ export default function AdminSettings() {
                         <View>
                            <Text className="text-white font-black text-sm uppercase tracking-tighter">Service Areas</Text>
                            <Text className="text-gray-500 text-[8px] font-black uppercase tracking-widest mt-1">Manage Coverage & Pincodes</Text>
+                        </View>
+                     </View>
+                     <View className="bg-slate-800 p-2 rounded-full">
+                        <Ionicons name="chevron-forward" size={16} color="#475569" />
+                     </View>
+                  </TouchableOpacity>
+
+                  {/* ── Customer Reviews ── */}
+                  <TouchableOpacity
+                     onPress={() => router.push('/(adminPages)/reviews' as any)}
+                     className="flex-row items-center justify-between p-5 bg-slate-900 border border-slate-800 rounded-3xl mt-4 shadow-2xl"
+                  >
+                     <View className="flex-row items-center gap-4 flex-1">
+                        <View className="w-12 h-12 bg-sky-950 rounded-2xl items-center justify-center border border-sky-900">
+                           <Ionicons name="star-outline" size={24} color="#0ea5e9" />
+                        </View>
+                        <View>
+                           <Text className="text-white font-black text-sm uppercase tracking-tighter">Customer Reviews</Text>
+                           <Text className="text-gray-500 text-[8px] font-black uppercase tracking-widest mt-1">Manage Ratings & Feedback</Text>
                         </View>
                      </View>
                      <View className="bg-slate-800 p-2 rounded-full">
