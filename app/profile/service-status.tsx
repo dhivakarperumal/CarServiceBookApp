@@ -82,6 +82,7 @@ const STATUS_NORMALIZER: Record<string, string> = {
   "Bill Pending": "BILL_PENDING",
   "Bill Completed": "BILL_COMPLETED",
   "Service Completed": "SERVICE_COMPLETED",
+  "Completed": "SERVICE_COMPLETED",
   "Cancelled": "CANCELLED",
   "Assigned": "ASSIGNED",
 };
@@ -225,6 +226,8 @@ const ServiceStatus: React.FC = () => {
             s.booking_id === b.bookingId ||
             s.booking_id === b.booking_id
         );
+
+        console.log(`ServiceStatus: booking ${b.bookingId} matched service:`, matchedService?.id, matchedService?.bookingId);
 
         return {
           ...b,
