@@ -206,11 +206,20 @@ export default function AdminAssignServices() {
       if (!selectedEmployee) return Alert.alert("Error", "Mechanic not found");
 
       const bookingId = selectedBooking.id || selectedBooking._id;
-      await api.put(`/bookings/assign/${bookingId}`, {
-        assignedEmployeeId: selectedEmployee.id || selectedEmployee._id,
-        assignedEmployeeName: selectedEmployee.name,
-        status: "Assigned"
-      });
+      
+      if (selectedBooking.isAppointment) {
+        await api.put(`/appointments/${bookingId}`, {
+          assignedEmployeeId: selectedEmployee.id || selectedEmployee._id,
+          assignedEmployeeName: selectedEmployee.name,
+          status: "In Progress"
+        });
+      } else {
+        await api.put(`/bookings/assign/${bookingId}`, {
+          assignedEmployeeId: selectedEmployee.id || selectedEmployee._id,
+          assignedEmployeeName: selectedEmployee.name,
+          status: "Assigned"
+        });
+      }
 
       Alert.alert("Success", `Mechanic ${selectedEmployee.name} assigned successfully`);
       setModalVisible(false);
@@ -429,12 +438,15 @@ export default function AdminAssignServices() {
                    <Text className="text-white/40 text-[9px] font-black uppercase mb-3 ml-2">Select Approved Protocol</Text>
                    <ScrollView style={{ maxHeight: 200 }} className="bg-white/5 border border-white/10 rounded-2xl p-2">
                      {bookings
-                      .filter(b => !(b.assignedEmployeeId || b.assignedEmployeeName || b.assigned_employee_id) && ((b.serviceStatus || b.status || "").toLowerCase() === "approved" || (b.serviceStatus || b.status || "").toLowerCase() === "confirmed"))
+                      .filter(b => !(b.assignedEmployeeId || b.assignedEmployeeName || b.assigned_employee_id) && !(b.serviceStatus || b.status || b.appointmentStatus || "").toLowerCase().includes("completed"))
                       .map(b => (
                         <TouchableOpacity key={b.id || b._id} onPress={() => setSelectedBooking(b)} className={`p-4 rounded-xl mb-1 ${selectedBooking?.id === (b.id || b._id) ? "bg-white" : ""}`}>
-                          <Text className={`font-bold text-xs uppercase ${selectedBooking?.id === (b.id || b._id) ? "text-black" : "text-white"}`}>{b.brand} {b.model} - {b.name}</Text>
+                          <Text className={`font-bold text-xs uppercase ${selectedBooking?.id === (b.id || b._id) ? "text-black" : "text-white"}`}>{b.brand || "Unknown Brand"} {b.model || ""} - {b.name || "No Name"} ({b.appointmentId || b.bookingId || "ID-"+(b.id || b._id)})</Text>
                         </TouchableOpacity>
                       ))}
+                     {bookings.filter(b => !(b.assignedEmployeeId || b.assignedEmployeeName || b.assigned_employee_id) && !(b.serviceStatus || b.status || b.appointmentStatus || "").toLowerCase().includes("completed")).length === 0 && (
+                        <Text className="text-white/20 p-5 text-center text-[10px] font-black uppercase">No Unassigned Protocols</Text>
+                     )}
                    </ScrollView>
                 </View>
               )}
