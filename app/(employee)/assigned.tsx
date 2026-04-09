@@ -68,7 +68,9 @@ const StatusBadge = ({ status }: { status: string }) => {
   const styles = getStatusClasses(status);
 
   return (
-    <View className={`px-3 py-1 rounded-full border ${styles.container}`}>
+    <View
+      className={`self-start px-3 py-1 rounded-full border ${styles.container}`}
+    >
       <Text
         className={`text-[10px] font-black uppercase tracking-wider ${styles.text}`}
       >
@@ -306,26 +308,28 @@ export default function AssignedHistory() {
                   key={item.id}
                   onPress={() => toggleExpanded(item.id)}
                   activeOpacity={0.7}
-                  className="rounded-3xl border border-card bg-card/90 p-6 mb-5 shadow-xl backdrop-blur-lg"
+                  className="rounded-3xl border border-slate-700/40 bg-slate-950/95 p-6 mb-5 shadow-2xl backdrop-blur-lg"
                 >
                   {/* Header Row - Always Visible */}
                   <View className="flex-row justify-between items-start">
-                    <View className="flex-1">
-                      <View className="flex-row items-center gap-2 mb-2">
-                        <StatusBadge
-                          status={item.serviceStatus || item.status}
-                        />
+                    <View className="flex-1 pr-3">
+                      <View className="flex-row items-center gap-3 mb-3">
+                        <Text className="text-2xl font-black text-text-primary">
+                          {item.customer_name ||
+                            item.name ||
+                            `${item.brand} ${item.model}`}
+                        </Text>
                         <Text className="text-[12px] font-black uppercase tracking-widest text-text-primary">
                           ID: {item.bookingId || item.id}
                         </Text>
                       </View>
-                      <Text className="text-xl font-black text-text-primary">
-                        {item.brand} {item.model}
-                      </Text>
+                      <StatusBadge status={item.serviceStatus || item.status} />
                     </View>
                     <Ionicons
-                      name={isExpanded ? "chevron-up" : "chevron-down"}
-                      size={24}
+                      name={
+                        isExpanded ? "chevron-up-circle" : "chevron-down-circle"
+                      }
+                      size={28}
                       color="#0EA5E9"
                     />
                   </View>
@@ -333,8 +337,13 @@ export default function AssignedHistory() {
                   {/* Expanded Details */}
                   {isExpanded && (
                     <View className="mt-6 pt-6 border-t border-card">
-                      {/* Vehicle Plate */}
-                      <Text className="text-sm font-black mt-2 uppercase tracking-wider text-primary mb-6">
+                      <Text className="text-[10px] font-black uppercase tracking-wider text-text-muted mb-2">
+                        Brand / Model
+                      </Text>
+                      <Text className="text-xl font-black text-text-primary mb-4">
+                        {item.brand} {item.model}
+                      </Text>
+                      <Text className="text-sm font-black uppercase tracking-wider text-primary mb-6">
                         {item.vehicle_number ||
                           item.vehicleNumber ||
                           "NO PLATE"}
