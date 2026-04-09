@@ -2,18 +2,19 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Dimensions,
-    SafeAreaView,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  SafeAreaView,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
 import { api } from "../../services/api";
+import { Picker } from "@react-native-picker/picker";
 
 const { width } = Dimensions.get("window");
 
@@ -148,24 +149,7 @@ export default function AssignedHistory() {
     <SafeAreaView className="flex-1 bg-background">
       <ScrollView className="flex-1 p-5" showsVerticalScrollIndicator={false}>
         {/* HEADER */}
-        <View className="bg-card/90 p-6 rounded-3xl border border-card mb-6 shadow-xl backdrop-blur-lg">
-          {/* Header */}
-          <View className="flex-row items-center gap-4 mb-6">
-            <View className="w-14 h-14 bg-gradient-to-br from-primary/30 to-primary/10 rounded-2xl items-center justify-center border border-primary/20 shadow-md">
-              <Ionicons name="time" size={26} color="#0EA5E9" />
-            </View>
-
-            <View className="flex-1">
-              <Text className="text-[22px] font-extrabold tracking-tight text-text-primary">
-                Job History
-              </Text>
-
-              <Text className="text-xs font-medium mt-1 text-text-secondary">
-                Assigned service logs
-              </Text>
-            </View>
-          </View>
-
+        <View className="mb-6">
           {/* Stats */}
           <View className="flex-row gap-4">
             {/* Total Tasks */}
@@ -228,42 +212,30 @@ export default function AssignedHistory() {
           </View>
 
           {/* Filters */}
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            className="mt-2"
-            contentContainerStyle={{ paddingHorizontal: 2 }}
-          >
-            <View className="flex-row items-center gap-3">
-              {[
-                "all",
-                "Assigned",
-                "Service Going on",
-                "Bill Pending",
-                "Service Completed",
-              ].map((f) => (
-                <TouchableOpacity
-                  key={f}
-                  onPress={() => setFilterStatus(f)}
-                  className={`px-5 py-3 rounded-2xl border shadow-sm ${
-                    filterStatus === f
-                      ? "bg-primary border-primary"
-                      : "bg-slate-800 border-slate-700"
-                  }`}
-                >
-                  <Text
-                    className={`text-[10px] font-black uppercase tracking-widest ${
-                      filterStatus === f
-                        ? "text-text-primary"
-                        : "text-text-secondary"
-                    }`}
-                  >
-                    {f === "all" ? "Any Status" : f}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+          <View className="mt-3 self-start">
+            <View className="bg-slate-800 border border-slate-700 rounded-2xl px-3 py-1 shadow-sm min-w-[200px]">
+              <Picker
+                selectedValue={filterStatus}
+                onValueChange={(itemValue) => setFilterStatus(itemValue)}
+                dropdownIconColor="#94A3B8"
+                style={{ color: "white" }}
+              >
+                {[
+                  "all",
+                  "Assigned",
+                  "Service Going on",
+                  "Bill Pending",
+                  "Service Completed",
+                ].map((f) => (
+                  <Picker.Item
+                    key={f}
+                    label={f === "all" ? "All" : f}
+                    value={f}
+                  />
+                ))}
+              </Picker>
             </View>
-          </ScrollView>
+          </View>
         </View>
 
         {/* LIST */}
@@ -341,11 +313,7 @@ export default function AssignedHistory() {
                       </Text>
 
                       <View className="flex-row items-center gap-1 mt-2">
-                        <Ionicons
-                          name="call-outline"
-                          size={12}
-                          color="#fff"
-                        />
+                        <Ionicons name="call-outline" size={12} color="#fff" />
                         <Text className="text-md font-bold text-text-primary">
                           {item.phone || item.mobile || "N/A"}
                         </Text>
@@ -378,11 +346,7 @@ export default function AssignedHistory() {
                 {/* Bottom Row */}
                 <View className="flex-row items-center justify-between pt-6 border-t border-card">
                   <View className="flex-row items-center gap-2">
-                    <Ionicons
-                      name="calendar-outline"
-                      size={14}
-                      color="#fff"
-                    />
+                    <Ionicons name="calendar-outline" size={14} color="#fff" />
                     <Text className="text-[11px] font-bold text-text-primary">
                       {item.created_at
                         ? new Date(item.created_at).toLocaleDateString()
