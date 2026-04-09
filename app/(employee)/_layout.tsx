@@ -2,11 +2,11 @@ import { Ionicons } from "@expo/vector-icons";
 import { Redirect, Tabs, useRouter } from "expo-router";
 import React from "react";
 import {
-    ActivityIndicator,
-    Image,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Image,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import EmployeeHeaderDropdown from "../../components/EmployeeHeaderDropdown";
 import { useAuth } from "../../contexts/AuthContext";
@@ -40,6 +40,7 @@ export default function EmployeeAdminLayout() {
       subtitle: "Service requests and status",
     },
     billing: { title: "Billing", subtitle: "Invoices, payments, and receipts" },
+    completed: { title: "Completed", subtitle: "Completed work archive" },
   };
 
   const renderHeaderTitle = (routeName: string) => {
@@ -142,6 +143,15 @@ export default function EmployeeAdminLayout() {
           title: "Billing",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="receipt" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="completed"
+        options={{
+          title: "Completed",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="checkmark-done" size={size} color={color} />
           ),
         }}
       />
