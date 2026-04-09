@@ -20,10 +20,10 @@ export default function EmployeeDashboard() {
   const router = useRouter();
   const { user: userProfile, logout } = useAuth();
   const [stats, setStats] = useState({
-    pending: 0,
+    todayCount: 0,
+    totalCount: 0,
     inProgress: 0,
     completed: 0,
-    totalStaff: 0,
   });
   const [myTasks, setMyTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -119,54 +119,64 @@ export default function EmployeeDashboard() {
   const fetchMyTasks = async () => {
     try {
       setLoading(true);
+      const todayStr = new Date().toDateString();
+      // 🔥 Fetching from all-services to pick up both bookings and appointments
       const res = await api.get("/all-services");
       const allServices = res.data || [];
 
       const myDisplayName =
-        userProfile?.username || (userProfile as any)?.name || "";
+        userProfile?.username ||
+        (userProfile as any)?.displayName ||
+        (userProfile as any)?.name ||
+        "";
       const filtered = allServices.filter(
         (b: any) =>
           (b.assignedEmployeeName || "").toLowerCase() ===
             myDisplayName.toLowerCase() && b.status !== "Cancelled",
       );
 
-      setMyTasks(filtered.slice(0, 5));
+      const tasksForToday = filtered.filter((b: any) => {
+        const dStr = b.created_at || b.createdAt || b.preferredDate;
+        return dStr && new Date(dStr).toDateString() === todayStr;
+      });
+
+      setMyTasks(tasksForToday);
 
       const normalize = (s: any) => (s || "").toLowerCase().trim();
 
-      setStats({
-        pending: filtered.filter((b: any) => {
-          const s = normalize(b.status || b.serviceStatus);
-          return (
-            ["assigned", "approved", "booked", "pending"].includes(s) ||
-            s === ""
-          );
-        }).length,
+      const activeTasks = filtered.filter((b: any) => {
+        const s = normalize(b.status || b.serviceStatus);
+        return !["service completed", "completed", "cancelled"].includes(s);
+      });
 
-        inProgress: filtered.filter((b: any) => {
-          const s = normalize(b.status || b.serviceStatus);
-          return [
+      const todayAssigned = activeTasks.filter((b: any) => {
+        const dStr = b.created_at || b.createdAt || b.preferredDate;
+        return dStr && new Date(dStr).toDateString() === todayStr;
+      });
+
+      setStats({
+        todayCount: todayAssigned.length,
+        totalCount: activeTasks.length,
+        inProgress: activeTasks.filter((b: any) =>
+          [
             "processing",
             "service going on",
             "waiting for spare",
             "call verified",
-          ].includes(s);
-        }).length,
-
-        completed: filtered.filter((b: any) => {
-          const s = normalize(b.status || b.serviceStatus);
-          return [
+          ].includes(normalize(b.status || b.serviceStatus)),
+        ).length,
+        completed: filtered.filter((b: any) =>
+          [
             "service completed",
             "completed",
             "bill pending",
             "bill completed",
-          ].includes(s);
-        }).length,
-
-        totalStaff: 0,
+          ].includes(normalize(b.status || b.serviceStatus)),
+        ).length,
       });
     } catch (err) {
       console.error("Error fetching tasks:", err);
+      Alert.alert("Error", "Failed to load your tasks");
     } finally {
       setLoading(false);
     }
@@ -175,51 +185,59 @@ export default function EmployeeDashboard() {
   const onRefresh = async () => {
     setRefreshing(true);
     try {
+      const todayStr = new Date().toDateString();
       const res = await api.get("/all-services");
       const allServices = res.data || [];
 
       const myDisplayName =
-        userProfile?.username || (userProfile as any)?.name || "";
+        userProfile?.username ||
+        (userProfile as any)?.displayName ||
+        (userProfile as any)?.name ||
+        "";
       const filtered = allServices.filter(
         (b: any) =>
           (b.assignedEmployeeName || "").toLowerCase() ===
             myDisplayName.toLowerCase() && b.status !== "Cancelled",
       );
 
-      setMyTasks(filtered.slice(0, 5));
+      const tasksForToday = filtered.filter((b: any) => {
+        const dStr = b.created_at || b.createdAt || b.preferredDate;
+        return dStr && new Date(dStr).toDateString() === todayStr;
+      });
+
+      setMyTasks(tasksForToday);
 
       const normalize = (s: any) => (s || "").toLowerCase().trim();
 
-      setStats({
-        pending: filtered.filter((b: any) => {
-          const s = normalize(b.status || b.serviceStatus);
-          return (
-            ["assigned", "approved", "booked", "pending"].includes(s) ||
-            s === ""
-          );
-        }).length,
+      const activeTasks = filtered.filter((b: any) => {
+        const s = normalize(b.status || b.serviceStatus);
+        return !["service completed", "completed", "cancelled"].includes(s);
+      });
 
-        inProgress: filtered.filter((b: any) => {
-          const s = normalize(b.status || b.serviceStatus);
-          return [
+      const todayAssigned = activeTasks.filter((b: any) => {
+        const dStr = b.created_at || b.createdAt || b.preferredDate;
+        return dStr && new Date(dStr).toDateString() === todayStr;
+      });
+
+      setStats({
+        todayCount: todayAssigned.length,
+        totalCount: activeTasks.length,
+        inProgress: activeTasks.filter((b: any) =>
+          [
             "processing",
             "service going on",
             "waiting for spare",
             "call verified",
-          ].includes(s);
-        }).length,
-
-        completed: filtered.filter((b: any) => {
-          const s = normalize(b.status || b.serviceStatus);
-          return [
+          ].includes(normalize(b.status || b.serviceStatus)),
+        ).length,
+        completed: filtered.filter((b: any) =>
+          [
             "service completed",
             "completed",
             "bill pending",
             "bill completed",
-          ].includes(s);
-        }).length,
-
-        totalStaff: 0,
+          ].includes(normalize(b.status || b.serviceStatus)),
+        ).length,
       });
     } catch (err) {
       console.error("Error refreshing tasks:", err);
@@ -315,10 +333,10 @@ export default function EmployeeDashboard() {
                 <Ionicons name="time-outline" size={22} color="#0EA5E9" />
               </View>
               <Text className="text-xs text-text-muted font-semibold uppercase tracking-[0.28em] mb-2">
-                Pending
+                Daily / Total Workload
               </Text>
               <Text className="text-3xl font-black text-text-primary">
-                {stats.pending}
+                {stats.todayCount} / {stats.totalCount}
               </Text>
             </View>
             <View className="flex-1 bg-slate-900/90 p-5 rounded-[28px] border border-slate-800 shadow-lg">
@@ -355,7 +373,7 @@ export default function EmployeeDashboard() {
           <View className="flex-row items-center">
             <Ionicons name="clipboard-outline" size={20} color="#0EA5E9" />
             <Text className="text-lg font-black text-text-primary ml-2">
-              Assigned Tasks
+              Today's Work
             </Text>
           </View>
           <TouchableOpacity
@@ -371,9 +389,11 @@ export default function EmployeeDashboard() {
           <ActivityIndicator size="large" color="#0EA5E9" className="my-8" />
         ) : myTasks.length === 0 ? (
           <View className="bg-card p-8 rounded-3xl border border-card justify-center items-center mb-6">
-            <Ionicons name="clipboard-outline" size={40} color="#64748B" />
-            <Text className="text-text-muted mt-2">
-              No tasks currently assigned to you.
+            <Text className="text-text-secondary font-black mt-4">
+              No Work Today
+            </Text>
+            <Text className="text-text-muted text-xs text-center mt-2 leading-4">
+              No tasks assigned for today.
             </Text>
           </View>
         ) : (
@@ -423,7 +443,7 @@ export default function EmployeeDashboard() {
                   </View>
 
                   {/* ACTION BUTTONS */}
-                  <View className="flex-row mt-4 pt-4 border-t border-slate-800 gap-3">
+                  {/* <View className="flex-row mt-4 pt-4 border-t border-slate-800 gap-3">
                     {(task.status === "Assigned" ||
                       task.status === "Pending" ||
                       task.status === "Approved" ||
@@ -472,7 +492,7 @@ export default function EmployeeDashboard() {
                         </Text>
                       </TouchableOpacity>
                     )}
-                  </View>
+                  </View> */}
                 </View>
               );
             })}
