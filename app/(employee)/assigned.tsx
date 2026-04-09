@@ -35,6 +35,10 @@ const getStatusClasses = (status: string): StatusStyle => {
       container: "bg-primary-dark/20 border-primary-dark/30",
       text: "text-primary-dark",
     },
+    Approved: {
+      container: "bg-primary-dark/20 border-primary-dark/30",
+      text: "text-primary-dark",
+    },
     "Service Going on": {
       container: "bg-primary/20 border-primary/30",
       text: "text-primary",
@@ -88,6 +92,8 @@ export default function AssignedHistory() {
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [dateFilter, setDateFilter] = useState("all");
+  const [dateRange, setDateRange] = useState({ start: "", end: "" });
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -167,9 +173,48 @@ export default function AssignedHistory() {
         (item.name || item.customer_name || "").toLowerCase().includes(text) ||
         (item.bookingId || item.id || "").toString().includes(text);
 
-      return matchesStatus && matchesSearch;
+      let matchesDate = true;
+      const bDateStr = item.created_at || item.createdAt;
+      if (dateFilter !== "all") {
+        if (!bDateStr) {
+          matchesDate = false;
+        } else {
+          const bDate = new Date(bDateStr);
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+
+          if (dateFilter === "today") {
+            matchesDate = bDate.toDateString() === today.toDateString();
+          } else if (dateFilter === "yesterday") {
+            const yesterday = new Date(today);
+            yesterday.setDate(today.getDate() - 1);
+            matchesDate = bDate.toDateString() === yesterday.toDateString();
+          } else if (dateFilter === "week") {
+            const lastWeek = new Date(today);
+            lastWeek.setDate(today.getDate() - 7);
+            matchesDate = bDate >= lastWeek;
+          } else if (dateFilter === "month") {
+            const lastMonth = new Date(today);
+            lastMonth.setMonth(today.getMonth() - 1);
+            matchesDate = bDate >= lastMonth;
+          } else if (dateFilter === "custom") {
+            const start = dateRange.start ? new Date(dateRange.start) : null;
+            const end = dateRange.end ? new Date(dateRange.end) : null;
+            if (end) end.setHours(23, 59, 59, 999);
+            if (start && end) {
+              matchesDate = bDate >= start && bDate <= end;
+            } else if (start) {
+              matchesDate = bDate >= start;
+            } else if (end) {
+              matchesDate = bDate <= end;
+            }
+          }
+        }
+      }
+
+      return matchesStatus && matchesSearch && matchesDate;
     });
-  }, [services, search, filterStatus]);
+  }, [services, search, filterStatus, dateFilter, dateRange]);
 
   if (loading) {
     return (
@@ -260,8 +305,8 @@ export default function AssignedHistory() {
           </View>
 
           {/* Filters */}
-          <View className="mt-3 self-start">
-            <View className="bg-slate-800 border border-slate-700 rounded-2xl px-3 py-1 shadow-sm min-w-[200px]">
+          <View className="flex-row gap-3 mt-3">
+            <View className="bg-slate-800 border border-slate-700 rounded-2xl px-3 py-1 shadow-sm flex-1">
               <Picker
                 selectedValue={filterStatus}
                 onValueChange={(itemValue) => setFilterStatus(itemValue)}
@@ -271,6 +316,9 @@ export default function AssignedHistory() {
                 {[
                   "all",
                   "Assigned",
+                  "Approved",
+                  "Processing",
+                  "Waiting for Spare",
                   "Service Going on",
                   "Bill Pending",
                   "Service Completed",
@@ -283,7 +331,59 @@ export default function AssignedHistory() {
                 ))}
               </Picker>
             </View>
+
+            <View className="bg-slate-800 border border-slate-700 rounded-2xl px-3 py-1 shadow-sm flex-1">
+              <Picker
+                selectedValue={dateFilter}
+                onValueChange={(itemValue) => setDateFilter(itemValue)}
+                dropdownIconColor="#94A3B8"
+                style={{ color: "white" }}
+              >
+                {[
+                  { value: "all", label: "All Time" },
+                  { value: "today", label: "Today" },
+                  { value: "yesterday", label: "Yesterday" },
+                  { value: "week", label: "This Week" },
+                  { value: "month", label: "This Month" },
+                  { value: "custom", label: "Custom Range" },
+                ].map((option) => (
+                  <Picker.Item
+                    key={option.value}
+                    label={option.label}
+                    value={option.value}
+                  />
+                ))}
+              </Picker>
+            </View>
           </View>
+
+          {dateFilter === "custom" && (
+            <View className="bg-slate-800 border border-slate-700 rounded-2xl p-4 mt-4 space-y-3">
+              <Text className="text-xs font-black uppercase tracking-widest text-text-muted">
+                Custom Date Range
+              </Text>
+              <View className="flex-row gap-3 flex-wrap">
+                <TextInput
+                  placeholder="Start YYYY-MM-DD"
+                  placeholderTextColor="#94A3B8"
+                  value={dateRange.start}
+                  onChangeText={(value) =>
+                    setDateRange((prev) => ({ ...prev, start: value }))
+                  }
+                  className="flex-1 px-4 py-3 bg-slate-900 border border-slate-700 rounded-2xl text-text-primary"
+                />
+                <TextInput
+                  placeholder="End YYYY-MM-DD"
+                  placeholderTextColor="#94A3B8"
+                  value={dateRange.end}
+                  onChangeText={(value) =>
+                    setDateRange((prev) => ({ ...prev, end: value }))
+                  }
+                  className="flex-1 px-4 py-3 bg-slate-900 border border-slate-700 rounded-2xl text-text-primary"
+                />
+              </View>
+            </View>
+          )}
         </View>
 
         {/* LIST */}
