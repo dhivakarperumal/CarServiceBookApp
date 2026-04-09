@@ -497,7 +497,7 @@ export default function ServiceCenter() {
               return (
                 <View
                   key={item.id}
-                  className="bg-card rounded-3xl border border-card p-6 mb-5"
+                  className="rounded-3xl border border-slate-700/40 bg-slate-950/95 p-6 mb-5 shadow-2xl backdrop-blur-lg"
                 >
                   <TouchableOpacity
                     onPress={() => toggleExpanded(item.id)}
@@ -506,8 +506,21 @@ export default function ServiceCenter() {
                   >
                     <View className="flex-row justify-between items-start">
                       <View className="flex-1 pr-3">
+                        <View className="flex-row flex-wrap items-center gap-2 ">
+                          <Text
+                            numberOfLines={1}
+                            className="flex-shrink text-2xl font-black text-text-primary"
+                          >
+                            {item.name ||
+                              item.customer_name ||
+                              `${item.brand} ${item.model}`}
+                          </Text>
+                          <Text className="text-[12px] font-black uppercase tracking-widest text-text-primary">
+                            ID: {item.bookingId || `SER-${item.id}`}
+                          </Text>
+                        </View>
                         <View
-                          className={`px-3 py-1 rounded-full border ${getStatusColor(
+                          className={`self-start px-3 py-1 mt-3 rounded-full border ${getStatusColor(
                             item.serviceStatus || "Booked",
                           )}`}
                         >
@@ -515,16 +528,14 @@ export default function ServiceCenter() {
                             {item.serviceStatus || "Booked"}
                           </Text>
                         </View>
-                        <Text className="text-[14px] font-black text-text-primary uppercase tracking-widest mt-3">
-                          ID: {item.bookingId || `SER-${item.id}`}
-                        </Text>
-                        <Text className="text-2xl font-black text-text-primary mt-3">
-                          {item.brand} {item.model}
-                        </Text>
                       </View>
                       <Ionicons
-                        name={isExpanded ? "chevron-up" : "chevron-down"}
-                        size={24}
+                        name={
+                          isExpanded
+                            ? "chevron-up-circle"
+                            : "chevron-down-circle"
+                        }
+                        size={28}
                         color="#0EA5E9"
                       />
                     </View>
@@ -533,7 +544,13 @@ export default function ServiceCenter() {
                   {isExpanded && (
                     <>
                       <View className="mb-6">
-                        <Text className="text-sm font-black text-primary mt-1 uppercase mb-2">
+                        <Text className="text-[10px] font-black uppercase tracking-wider text-text-muted mb-2">
+                          Brand / Model
+                        </Text>
+                        <Text className="text-xl font-black text-text-primary">
+                          {item.brand} {item.model}
+                        </Text>
+                        <Text className="text-sm font-black text-primary mt-4 uppercase mb-2">
                           {item.vehicleNumber ||
                             item.vehicle_number ||
                             "NO PLATE"}
@@ -690,7 +707,7 @@ export default function ServiceCenter() {
                             </Text>
                           </TouchableOpacity>
                         ) : (
-                          <View className="flex-1 flex-row gap-3">
+                          <View className="flex-1 flex-row gap-3 flex-wrap items-center">
                             <TouchableOpacity
                               onPress={() => {
                                 setActiveServiceForStatus(item);
@@ -730,7 +747,8 @@ export default function ServiceCenter() {
                                     params: { serviceId: item.id },
                                   })
                                 }
-                                className="bg-success py-4 px-6 rounded-2xl items-center justify-center"
+                                style={{ minWidth: 90 }}
+                                className="bg-success py-4 px-4 rounded-2xl items-center justify-center"
                               >
                                 <Ionicons
                                   name="cart"
@@ -746,7 +764,8 @@ export default function ServiceCenter() {
                                   params: { serviceId: item.id },
                                 })
                               }
-                              className="bg-warning py-4 px-6 rounded-2xl items-center justify-center"
+                              style={{ minWidth: 90 }}
+                              className="bg-warning py-4 px-4 rounded-2xl items-center justify-center"
                             >
                               <Ionicons
                                 name="receipt"
