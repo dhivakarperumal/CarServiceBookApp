@@ -80,6 +80,9 @@ export default function ServiceCenter() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState("");
+  const [dateFilter, setDateFilter] = useState("all");
+  const [dateDropdownOpen, setDateDropdownOpen] = useState(false);
+  const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
   const [expandedItems, setExpandedItems] = useState<(string | number)[]>([]);
 
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
@@ -206,6 +209,41 @@ export default function ServiceCenter() {
         if (s.assignedEmployeeId) return false;
       }
 
+      // Date Filter
+      if (dateFilter !== "all") {
+        const now = new Date();
+        const createdAt =
+          s.createdAt || s.date || s.bookingDate || s.created_at;
+        const serviceDate = createdAt ? new Date(createdAt) : null;
+        if (!serviceDate) return false;
+        const serviceDay = new Date(
+          serviceDate.getFullYear(),
+          serviceDate.getMonth(),
+          serviceDate.getDate(),
+        );
+        const today = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate(),
+        );
+
+        if (dateFilter === "today") {
+          if (serviceDay.getTime() !== today.getTime()) return false;
+        } else if (dateFilter === "week") {
+          const weekStart = new Date(today);
+          weekStart.setDate(today.getDate() - today.getDay());
+          const weekEnd = new Date(weekStart);
+          weekEnd.setDate(weekStart.getDate() + 6);
+          if (serviceDay < weekStart || serviceDay > weekEnd) return false;
+        } else if (dateFilter === "month") {
+          if (
+            serviceDate.getMonth() !== now.getMonth() ||
+            serviceDate.getFullYear() !== now.getFullYear()
+          )
+            return false;
+        }
+      }
+
       // Search Filter
       const text =
         `${s.bookingId || ""} ${s.name || s.customer_name || ""} ${s.phone || s.mobile || ""} ${s.brand || ""} ${s.model || ""} ${s.vehicleNumber || s.vehicle_number || ""}`.toLowerCase();
@@ -213,7 +251,24 @@ export default function ServiceCenter() {
 
       return true;
     });
-  }, [services, mainTab, subTab, search, userProfile]);
+  }, [services, mainTab, subTab, search, userProfile, dateFilter]);
+
+  const stats = useMemo(() => {
+    const total = filteredList.length;
+    const processing = filteredList.filter((s: any) => {
+      const sStat = (s.serviceStatus || s.status || "").toLowerCase();
+      return (
+        sStat === "processing" ||
+        sStat === "waiting for spare" ||
+        sStat === "service going on"
+      );
+    }).length;
+    const completed = filteredList.filter((s: any) => {
+      const sStat = (s.serviceStatus || s.status || "").toLowerCase();
+      return sStat.includes("completed") || sStat.includes("bill completed");
+    }).length;
+    return { total, processing, completed };
+  }, [filteredList]);
 
   const handleStatusChange = async (service: any, newStatus: string) => {
     if (!service.assignedEmployeeId) {
@@ -342,31 +397,77 @@ export default function ServiceCenter() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <SafeAreaView className="relative flex-1 bg-background">
       {/* HEADER */}
-      <View className="bg-card p-6 pb-4 border-b border-card">
-        <View className="flex-row items-center justify-between mb-4">
-          <View>
-            <Text className="text-2xl font-black text-text-primary">
-              Service Board
+      <View className="bg-card px-5 pt-5 pb-6 border-b border-card">
+        {/* Quick Stats */}
+        <View className="mb-5">
+          <View className="flex-row items-center justify-between mb-4">
+            <Text className="text-xs uppercase tracking-[0.28em] text-text-muted font-semibold">
+              Summary
             </Text>
-            <Text className="text-text-secondary text-[10px] font-black uppercase tracking-wider">
-              Track vehicle flow
-            </Text>
+            <Text className="text-[10px] text-text-muted">Updated now</Text>
           </View>
-          <TouchableOpacity
-            onPress={() => router.push("/(employee)/add-billing" as any)}
-            className="bg-primary rounded-xl px-4 py-2.5 flex-row items-center gap-1"
-          >
-            <Ionicons name="add" size={18} color="#FFFFFF" />
-            <Text className="text-text-primary font-black text-xs">
-              NEW INVOICE
-            </Text>
-          </TouchableOpacity>
+
+          <View className="flex-row gap-3">
+            <View className="flex-1 rounded-[28px] bg-slate-950/95 border border-card p-4">
+              <View className="flex-row items-center justify-between mb-3">
+                <Text className="text-[10px] uppercase tracking-[0.3em] text-text-muted font-semibold">
+                  Total Assigned
+                </Text>
+                <View className="bg-primary/10 rounded-full p-2">
+                  <Ionicons
+                    name="clipboard-outline"
+                    size={18}
+                    color="#0EA5E9"
+                  />
+                </View>
+              </View>
+              <Text className="text-3xl font-black text-text-primary">
+                {stats.total}
+              </Text>
+            </View>
+
+            <View className="flex-1 rounded-[28px] bg-slate-950/95 border border-card p-4">
+              <View className="flex-row items-center justify-between mb-3">
+                <Text className="text-[10px] uppercase tracking-[0.3em] text-text-muted font-semibold">
+                  In Progress
+                </Text>
+                <View className="bg-primary/10 rounded-full p-2">
+                  <Ionicons
+                    name="construct-outline"
+                    size={18}
+                    color="#0EA5E9"
+                  />
+                </View>
+              </View>
+              <Text className="text-3xl font-black text-text-primary">
+                {stats.processing}
+              </Text>
+            </View>
+
+            <View className="flex-1 rounded-[28px] bg-slate-950/95 border border-card p-4">
+              <View className="flex-row items-center justify-between mb-3">
+                <Text className="text-[10px] uppercase tracking-[0.3em] text-text-muted font-semibold">
+                  Finished
+                </Text>
+                <View className="bg-success/10 rounded-full p-2">
+                  <Ionicons
+                    name="checkmark-circle-outline"
+                    size={18}
+                    color="#10B981"
+                  />
+                </View>
+              </View>
+              <Text className="text-3xl font-black text-text-primary">
+                {stats.completed}
+              </Text>
+            </View>
+          </View>
         </View>
 
         {/* SEARCH */}
-        <View className="relative mb-4">
+        <View className="relative mb-5">
           <View className="absolute left-4 top-3.5 z-10">
             <Ionicons name="search" size={18} color="#64748b" />
           </View>
@@ -375,63 +476,105 @@ export default function ServiceCenter() {
             placeholderTextColor="#64748b"
             value={search}
             onChangeText={setSearch}
-            className="w-full bg-background border border-card rounded-2xl pl-12 pr-4 py-3.5 text-text-primary font-bold text-sm"
+            className="w-full bg-slate-950/95 border border-card rounded-[28px] pl-12 pr-4 py-4 text-text-primary font-semibold text-sm"
           />
         </View>
 
-        {/* MAIN TABS */}
-        <View className="flex-row bg-background p-1 rounded-2xl border border-card">
-          <TouchableOpacity
-            onPress={() => setMainTab("booked")}
-            className={`flex-1 py-3 items-center rounded-xl ${mainTab === "booked" ? "bg-primary" : ""}`}
-          >
-            <Text
-              className={`font-black text-[10px] uppercase tracking-widest ${mainTab === "booked" ? "text-text-primary" : "text-text-muted"}`}
+        {/* FILTER DROPDOWNS */}
+        <View className="flex-row gap-3">
+          <View className="flex-1">
+            <TouchableOpacity
+              onPress={() => {
+                setDateDropdownOpen(!dateDropdownOpen);
+                setCategoryDropdownOpen(false);
+              }}
+              className="bg-slate-950/95 border border-card rounded-[28px] px-4 py-4 flex-row items-center justify-between"
             >
-              Appointment (
-              {
-                services.filter(
-                  (s) =>
-                    !s.addVehicle &&
-                    (isMechanic
-                      ? (s.assignedEmployeeName || "").toLowerCase() ===
-                        (userProfile?.username || "").toLowerCase()
-                      : true),
-                ).length
-              }
-              )
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => setMainTab("addVehicle")}
-            className={`flex-1 py-3 items-center rounded-xl ${mainTab === "addVehicle" ? "bg-primary" : ""}`}
-          >
-            <Text
-              className={`font-black text-[10px] uppercase tracking-widest ${mainTab === "addVehicle" ? "text-text-primary" : "text-text-muted"}`}
+              <Text className="text-sm font-bold text-text-primary">
+                {dateFilter === "today"
+                  ? "Today"
+                  : dateFilter === "week"
+                    ? "This Week"
+                    : dateFilter === "month"
+                      ? "This Month"
+                      : "All"}
+              </Text>
+              <Ionicons name="chevron-down" size={18} color="#64748B" />
+            </TouchableOpacity>
+            {dateDropdownOpen && (
+              <View className="bg-slate-950/95 border border-card rounded-[28px] mt-2 overflow-hidden">
+                {[
+                  { key: "all", label: "All" },
+                  { key: "today", label: "Today" },
+                  { key: "week", label: "This Week" },
+                  { key: "month", label: "This Month" },
+                ].map((option) => (
+                  <TouchableOpacity
+                    key={option.key}
+                    onPress={() => {
+                      setDateFilter(option.key);
+                      setDateDropdownOpen(false);
+                    }}
+                    className="px-4 py-4 border-b border-card"
+                  >
+                    <Text className="text-text-primary text-sm">
+                      {option.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+          </View>
+
+          <View className="flex-1">
+            <TouchableOpacity
+              onPress={() => {
+                setCategoryDropdownOpen(!categoryDropdownOpen);
+                setDateDropdownOpen(false);
+              }}
+              className="bg-slate-950/95 border border-card rounded-[28px] px-4 py-4 flex-row items-center justify-between"
             >
-              Direct Visit (
-              {
-                services.filter(
-                  (s) =>
-                    !!s.addVehicle &&
-                    (isMechanic
-                      ? (s.assignedEmployeeName || "").toLowerCase() ===
-                        (userProfile?.username || "").toLowerCase()
-                      : true),
-                ).length
-              }
-              )
-            </Text>
-          </TouchableOpacity>
+              <Text className="text-sm font-bold text-text-primary">
+                {mainTab === "booked"
+                  ? "Appointments"
+                  : mainTab === "addVehicle"
+                    ? "Booking"
+                    : "All"}
+              </Text>
+              <Ionicons name="chevron-down" size={18} color="#64748B" />
+            </TouchableOpacity>
+            {categoryDropdownOpen && (
+              <View className="bg-slate-950/95 border border-card rounded-[28px] mt-2 overflow-hidden">
+                {[
+                  { key: "all", label: "All" },
+                  { key: "booked", label: "Appointments" },
+                  { key: "addVehicle", label: "Booking" },
+                ].map((option) => (
+                  <TouchableOpacity
+                    key={option.key}
+                    onPress={() => {
+                      setMainTab(option.key);
+                      setCategoryDropdownOpen(false);
+                    }}
+                    className="px-4 py-4 border-b border-card"
+                  >
+                    <Text className="text-text-primary text-sm">
+                      {option.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+          </View>
         </View>
       </View>
 
       <ScrollView
         className="flex-1"
         contentContainerStyle={{
-          paddingHorizontal: 20,
+          paddingHorizontal: 5,
           paddingTop: 20,
-          paddingBottom: 100,
+          paddingBottom: 180,
         }}
         showsVerticalScrollIndicator={false}
         refreshControl={
@@ -440,29 +583,6 @@ export default function ServiceCenter() {
       >
         {/* SUB TABS */}
         <View className="flex-row gap-3">
-          <TouchableOpacity
-            onPress={() => setSubTab("assigned")}
-            className={`px-6 py-2 rounded-full border ${subTab === "assigned" ? "bg-primary border-primary" : "bg-card border-card"}`}
-          >
-            <Text
-              className={`text-[10px] font-black uppercase tracking-widest ${subTab === "assigned" ? "text-text-primary" : "text-text-muted"}`}
-            >
-              My Tasks (
-              {
-                services.filter(
-                  (s) =>
-                    (s.serviceStatus === "Processing" ||
-                      s.serviceStatus === "Waiting for Spare") &&
-                    s.assignedEmployeeId &&
-                    (isMechanic
-                      ? (s.assignedEmployeeName || "").toLowerCase() ===
-                        (userProfile?.username || "").toLowerCase()
-                      : true),
-                ).length
-              }
-              )
-            </Text>
-          </TouchableOpacity>
           {!isMechanic && (
             <TouchableOpacity
               onPress={() => setSubTab("unassigned")}
@@ -479,7 +599,7 @@ export default function ServiceCenter() {
         </View>
 
         {/* SERVICE CARDS */}
-        <View className="px-5 pb-24">
+        <View className="px-0 pb-24">
           {filteredList.length === 0 ? (
             <View className="bg-card rounded-3xl p-12 items-center border border-card border-dashed mt-10">
               <Ionicons name="car-outline" size={48} color="#64748B" />
@@ -796,6 +916,19 @@ export default function ServiceCenter() {
           )}
         </View>
       </ScrollView>
+
+      {/* FIXED NEW INVOICE BUTTON */}
+      <View className="absolute right-5 bottom-6 z-30">
+        <TouchableOpacity
+          onPress={() => router.push("/(employee)/add-billing" as any)}
+          className="flex-row items-center gap-2 bg-primary px-5 py-4 rounded-full shadow-2xl"
+        >
+          <Ionicons name="add" size={20} color="#FFFFFF" />
+          <Text className="text-text-primary font-black text-sm uppercase">
+            New Invoice
+          </Text>
+        </TouchableOpacity>
+      </View>
 
       {/* ASSIGN MODAL */}
       <Modal visible={modalVisible} transparent={true} animationType="fade">
