@@ -86,6 +86,7 @@ export default function AssignedHistory() {
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetchAssignedServices();
@@ -139,6 +140,16 @@ export default function AssignedHistory() {
     }
   };
 
+  const toggleExpanded = (itemId: string) => {
+    const newExpanded = new Set(expandedItems);
+    if (newExpanded.has(itemId)) {
+      newExpanded.delete(itemId);
+    } else {
+      newExpanded.add(itemId);
+    }
+    setExpandedItems(newExpanded);
+  };
+
   const filteredServices = useMemo(() => {
     return services.filter((item) => {
       const statusValue = item.serviceStatus || item.status;
@@ -173,7 +184,11 @@ export default function AssignedHistory() {
     <SafeAreaView className="flex-1 bg-background">
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 20, paddingBottom: 100 }}
+        contentContainerStyle={{
+          paddingHorizontal: 20,
+          paddingTop: 20,
+          paddingBottom: 100,
+        }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -284,127 +299,159 @@ export default function AssignedHistory() {
           </View>
         ) : (
           <View className="pb-20">
-            {filteredServices.map((item) => (
-              <View
-                key={item.id}
-                className="rounded-3xl border border-card bg-card/90 p-6 mb-5 shadow-xl backdrop-blur-lg"
-              >
-                {/* Top Row */}
-                <View className="flex-row justify-between items-start mb-6">
-                  <StatusBadge status={item.serviceStatus || item.status} />
-
-                  <Text className="text-[14px] font-black uppercase tracking-widest text-text-primary">
-                    ID: {item.bookingId || item.id}
-                  </Text>
-                </View>
-
-                {/* Vehicle Info */}
-                <View className="mb-6">
-                  <Text className="text-2xl font-black leading-tight text-text-primary">
-                    {item.brand} {item.model}
-                  </Text>
-
-                  <Text className="text-sm font-black mt-1 uppercase tracking-wider text-primary">
-                    {item.vehicle_number || item.vehicleNumber || "NO PLATE"}
-                  </Text>
-                </View>
-
-                {/* Info Blocks */}
-                <View className="space-y-5 mb-6">
-                  {/* Issue */}
-                  <View className="flex-row items-start gap-4">
-                    <View className="w-11 h-11 rounded-2xl flex items-center justify-center border border-warning/20 bg-warning/10 shadow-sm">
-                      <Ionicons name="alert-circle" size={20} color="#F59E0B" />
-                    </View>
-
+            {filteredServices.map((item) => {
+              const isExpanded = expandedItems.has(item.id);
+              return (
+                <TouchableOpacity
+                  key={item.id}
+                  onPress={() => toggleExpanded(item.id)}
+                  activeOpacity={0.7}
+                  className="rounded-3xl border border-card bg-card/90 p-6 mb-5 shadow-xl backdrop-blur-lg"
+                >
+                  {/* Header Row - Always Visible */}
+                  <View className="flex-row justify-between items-start">
                     <View className="flex-1">
-                      <Text className="text-[12px] font-black uppercase tracking-wider text-text-muted">
-                        Reported Issue
-                      </Text>
-
-                      <Text className="text-md font-bold leading-snug mt-1 text-text-primary">
-                        {item.carIssue || item.issue || "General Inspection"}
-                      </Text>
-                    </View>
-                  </View>
-
-                  {/* Customer */}
-                  <View className="flex-row items-center gap-4 pt-5 border-t border-card">
-                    <View className="w-11 h-11 rounded-2xl flex items-center justify-center border border-primary/20 bg-primary/10 shadow-sm">
-                      <Ionicons name="person" size={18} color="#0EA5E9" />
-                    </View>
-
-                    <View className="flex-1">
-                      <Text className="text-[12px] font-black uppercase tracking-wider text-text-muted">
-                        Customer
-                      </Text>
-
-                      <Text className="text-md font-black mt-1 truncate text-text-primary">
-                        {item.customer_name || item.name}
-                      </Text>
-
-                      <View className="flex-row items-center gap-1 mt-2">
-                        <Ionicons name="call-outline" size={12} color="#fff" />
-                        <Text className="text-md font-bold text-text-primary">
-                          {item.phone || item.mobile || "N/A"}
+                      <View className="flex-row items-center gap-2 mb-2">
+                        <StatusBadge
+                          status={item.serviceStatus || item.status}
+                        />
+                        <Text className="text-[12px] font-black uppercase tracking-widest text-text-primary">
+                          ID: {item.bookingId || item.id}
                         </Text>
                       </View>
+                      <Text className="text-xl font-black text-text-primary">
+                        {item.brand} {item.model}
+                      </Text>
                     </View>
+                    <Ionicons
+                      name={isExpanded ? "chevron-up" : "chevron-down"}
+                      size={24}
+                      color="#0EA5E9"
+                    />
                   </View>
 
-                  {/* Parts Cost */}
-                  {(item.parts_cost > 0 || item.partsTotal > 0) && (
-                    <View className="flex-row items-center justify-between p-4 rounded-2xl border border-success/20 bg-success/10 shadow-sm">
-                      <View className="flex-row items-center gap-3">
-                        <View className="w-9 h-9 rounded-xl items-center justify-center bg-success shadow">
-                          <Text className="text-white font-black text-xs">
-                            ₹
+                  {/* Expanded Details */}
+                  {isExpanded && (
+                    <View className="mt-6 pt-6 border-t border-card">
+                      {/* Vehicle Plate */}
+                      <Text className="text-sm font-black mt-2 uppercase tracking-wider text-primary mb-6">
+                        {item.vehicle_number ||
+                          item.vehicleNumber ||
+                          "NO PLATE"}
+                      </Text>
+
+                      {/* Info Blocks */}
+                      <View className="space-y-5 mb-6">
+                        {/* Issue */}
+                        <View className="flex-row items-start gap-4">
+                          <View className="w-11 h-11 rounded-2xl flex items-center justify-center border border-warning/20 bg-warning/10 shadow-sm">
+                            <Ionicons
+                              name="alert-circle"
+                              size={20}
+                              color="#F59E0B"
+                            />
+                          </View>
+
+                          <View className="flex-1">
+                            <Text className="text-[12px] font-black uppercase tracking-wider text-text-muted">
+                              Reported Issue
+                            </Text>
+
+                            <Text className="text-md font-bold leading-snug mt-1 text-text-primary">
+                              {item.carIssue ||
+                                item.issue ||
+                                "General Inspection"}
+                            </Text>
+                          </View>
+                        </View>
+
+                        {/* Customer */}
+                        <View className="flex-row items-center gap-4 pt-5 border-t border-card">
+                          <View className="w-11 h-11 rounded-2xl flex items-center justify-center border border-primary/20 bg-primary/10 shadow-sm">
+                            <Ionicons name="person" size={18} color="#0EA5E9" />
+                          </View>
+
+                          <View className="flex-1">
+                            <Text className="text-[12px] font-black uppercase tracking-wider text-text-muted">
+                              Customer
+                            </Text>
+
+                            <Text className="text-md font-black mt-1 truncate text-text-primary">
+                              {item.customer_name || item.name}
+                            </Text>
+
+                            <View className="flex-row items-center gap-1 mt-2">
+                              <Ionicons
+                                name="call-outline"
+                                size={12}
+                                color="#fff"
+                              />
+                              <Text className="text-md font-bold text-text-primary">
+                                {item.phone || item.mobile || "N/A"}
+                              </Text>
+                            </View>
+                          </View>
+                        </View>
+
+                        {/* Parts Cost */}
+                        {(item.parts_cost > 0 || item.partsTotal > 0) && (
+                          <View className="flex-row items-center justify-between p-4 rounded-2xl border border-success/20 bg-success/10 shadow-sm mt-5">
+                            <View className="flex-row items-center gap-3">
+                              <View className="w-9 h-9 rounded-xl items-center justify-center bg-success shadow">
+                                <Text className="text-white font-black text-xs">
+                                  ₹
+                                </Text>
+                              </View>
+
+                              <Text className="text-[10px] font-black uppercase tracking-wider text-success">
+                                Parts Cost
+                              </Text>
+                            </View>
+
+                            <Text className="text-lg font-black text-success">
+                              ₹{item.parts_cost || item.partsTotal}
+                            </Text>
+                          </View>
+                        )}
+                      </View>
+
+                      {/* Bottom Row */}
+                      <View className="flex-row items-center justify-between pt-6 border-t border-card">
+                        <View className="flex-row items-center gap-2">
+                          <Ionicons
+                            name="calendar-outline"
+                            size={14}
+                            color="#fff"
+                          />
+                          <Text className="text-[11px] font-bold text-text-primary">
+                            {item.created_at
+                              ? new Date(item.created_at).toLocaleDateString()
+                              : "N/A"}
                           </Text>
                         </View>
 
-                        <Text className="text-[10px] font-black uppercase tracking-wider text-success">
-                          Parts Cost
-                        </Text>
-                      </View>
+                        <TouchableOpacity
+                          onPress={() =>
+                            router.push(
+                              `/(employee)/service-details?id=${item.id}` as any,
+                            )
+                          }
+                          className="px-4 py-2 rounded-xl bg-primary/10 border border-primary/20"
+                        >
+                          <View className="flex-row items-center gap-1">
+                            <Text className="text-[11px] font-black uppercase tracking-widest text-primary">
+                              View Details
+                            </Text>
 
-                      <Text className="text-lg font-black text-success">
-                        ₹{item.parts_cost || item.partsTotal}
-                      </Text>
+                            <Ionicons name="eye" size={14} color="#0EA5E9" />
+                          </View>
+                        </TouchableOpacity>
+                      </View>
                     </View>
                   )}
-                </View>
-
-                {/* Bottom Row */}
-                <View className="flex-row items-center justify-between pt-6 border-t border-card">
-                  <View className="flex-row items-center gap-2">
-                    <Ionicons name="calendar-outline" size={14} color="#fff" />
-                    <Text className="text-[11px] font-bold text-text-primary">
-                      {item.created_at
-                        ? new Date(item.created_at).toLocaleDateString()
-                        : "N/A"}
-                    </Text>
-                  </View>
-
-                  {/* Premium View Details Button */}
-                  <TouchableOpacity
-                    onPress={() =>
-                      router.push(
-                        `/(employee)/service-details?id=${item.id}` as any,
-                      )
-                    }
-                    className="px-4 py-2 rounded-xl bg-primary/10 border border-primary/20"
-                  >
-                    <View className="flex-row items-center gap-1">
-                      <Text className="text-[11px] font-black uppercase tracking-widest text-primary">
-                        View Details
-                      </Text>
-
-                      <Ionicons name="eye" size={14} color="#0EA5E9" />
-                    </View>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ))}
+                </TouchableOpacity>
+              );
+            })}
           </View>
         )}
       </ScrollView>

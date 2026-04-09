@@ -20,9 +20,7 @@ export function TabBarProvider({ children }: { children: React.ReactNode }) {
 export function useTabBarVisibility() {
   const context = useContext(TabBarContext);
   if (!context) {
-    throw new Error(
-      "useTabBarVisibility must be used within TabBarProvider"
-    );
+    throw new Error("useTabBarVisibility must be used within TabBarProvider");
   }
   return context;
 }

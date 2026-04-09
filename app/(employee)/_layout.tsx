@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Redirect, Tabs, useRouter } from "expo-router";
-import React, { useState } from "react";
+import React from "react";
 import {
     ActivityIndicator,
     Image,
@@ -10,7 +10,6 @@ import {
 } from "react-native";
 import EmployeeHeaderDropdown from "../../components/EmployeeHeaderDropdown";
 import { useAuth } from "../../contexts/AuthContext";
-import { TabBarProvider, useTabBarVisibility } from "../../contexts/TabBarContext";
 
 export default function EmployeeAdminLayout() {
   const router = useRouter();
