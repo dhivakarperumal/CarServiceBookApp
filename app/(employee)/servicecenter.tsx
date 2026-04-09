@@ -406,7 +406,7 @@ export default function ServiceCenter() {
         <View className="mb-4">
           <View className="flex-row gap-3">
             {/* TOTAL ASSIGNED */}
-            <View className="flex-1 rounded-[28px] bg-slate-950/95 border border-warning p-4">
+            <View className="flex-1 rounded-[28px] bg-slate-950/95 border border-text-muted p-4">
               <Text className="text-[10px] uppercase tracking-[0.3em] text-text-muted font-semibold mb-4">
                 Total Assigned
               </Text>
@@ -427,7 +427,7 @@ export default function ServiceCenter() {
             </View>
 
             {/* IN PROGRESS */}
-            <View className="flex-1 rounded-[28px] bg-slate-950/95 border border-error p-4">
+            <View className="flex-1 rounded-[28px] bg-slate-950/95 border border-text-muted p-4">
               <Text className="text-[10px] uppercase tracking-[0.3em] text-text-muted font-semibold mb-4">
                 In Progress
               </Text>
@@ -448,7 +448,7 @@ export default function ServiceCenter() {
             </View>
 
             {/* FINISHED */}
-            <View className="flex-1 rounded-[28px] bg-slate-950/95 border border-success p-4">
+            <View className="flex-1 rounded-[28px] bg-slate-950/95 border border-text-muted p-4">
               <Text className="text-[10px] uppercase tracking-[0.3em] text-text-muted font-semibold mb-4">
                 Finished
               </Text>
@@ -486,7 +486,7 @@ export default function ServiceCenter() {
 
         {/* FILTER PICKERS */}
         <View className="flex-row gap-3">
-          <View className="flex-1 rounded-[20px] bg-slate-700 border border-card overflow-hidden">
+          <View className="flex-1 bg-slate-800 border border-slate-700 rounded-2xl px-3 py-1 shadow-sm overflow-hidden">
             <Picker
               selectedValue={dateFilter}
               onValueChange={(value) => setDateFilter(value)}
@@ -501,7 +501,7 @@ export default function ServiceCenter() {
             </Picker>
           </View>
 
-          <View className="flex-1 rounded-[20px] bg-slate-700 border border-card overflow-hidden">
+          <View className="flex-1 bg-slate-800 border border-slate-700 rounded-2xl px-3 py-1 shadow-sm overflow-hidden">
             <Picker
               selectedValue={mainTab}
               onValueChange={(value) => setMainTab(value)}

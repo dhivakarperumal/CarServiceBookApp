@@ -249,7 +249,7 @@ export default function EmployeeBilling() {
 
           {/* Filters */}
           <View className="flex-row gap-3 mt-2">
-            <View className="flex-1 rounded-[15px] bg-slate-700 border border-card overflow-hidden">
+            <View className="flex-1 bg-slate-800 border border-slate-700 rounded-2xl px-3 py-1 shadow-sm overflow-hidden">
               <Picker
                 selectedValue={statusFilter}
                 onValueChange={(value) => setStatusFilter(value)}
