@@ -421,13 +421,14 @@ export default function ServiceCenter() {
 
       <ScrollView
         className="flex-1"
+        contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 20, paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
         {/* SUB TABS */}
-        <View className="flex-row p-5 gap-3">
+        <View className="flex-row gap-3">
           <TouchableOpacity
             onPress={() => setSubTab("assigned")}
             className={`px-6 py-2 rounded-full border ${subTab === "assigned" ? "bg-primary border-primary" : "bg-card border-card"}`}

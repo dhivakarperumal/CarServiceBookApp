@@ -28,8 +28,11 @@ export default function EmployeeProfile() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <View className="p-5 flex-1">
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 20, paddingBottom: 100 }}
+      >
+        <View className="flex-1">
           {/* Profile Header */}
           <View className="bg-card border border-card rounded-3xl p-6 items-center shadow-lg mt-6">
             <View className="w-28 h-28 rounded-full bg-primary/20 border-2 border-primary items-center justify-center mb-4">

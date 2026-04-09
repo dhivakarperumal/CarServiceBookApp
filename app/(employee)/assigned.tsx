@@ -172,7 +172,8 @@ export default function AssignedHistory() {
   return (
     <SafeAreaView className="flex-1 bg-background">
       <ScrollView
-        className="flex-1 p-5"
+        className="flex-1"
+        contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 20, paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
