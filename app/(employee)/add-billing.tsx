@@ -2,16 +2,16 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  SafeAreaView,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    SafeAreaView,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
 import { api } from "../../services/api";
@@ -75,15 +75,17 @@ export default function AddBillingScreen() {
   }, [userProfile?.id]);
 
   useEffect(() => {
-    if (directServiceId && services.length > 0) {
+    if (directServiceId && !loading) {
       const match = services.find(
         (s) => s.id.toString() === directServiceId.toString(),
       );
       if (match) {
         selectService(match);
+      } else {
+        fetchDirectService(directServiceId);
       }
     }
-  }, [directServiceId, services]);
+  }, [directServiceId, services, loading]);
 
   useEffect(() => {
     setInvoiceNo(generateInvoiceNo(billingCount));
@@ -196,6 +198,33 @@ export default function AddBillingScreen() {
     } catch (err) {
       console.error(err);
       Alert.alert("Error", "Failed to load service components");
+    }
+  };
+
+  const fetchDirectService = async (id: string) => {
+    try {
+      const res = await api.get(`/all-services/${id}`);
+      const service = res.data;
+
+      // Check if assigned to this mechanic
+      const mechanicName =
+        userProfile?.username ||
+        (userProfile as any)?.displayName ||
+        (userProfile as any)?.name ||
+        "";
+
+      if (
+        (service.assignedEmployeeName || "").toLowerCase() !==
+        mechanicName.toLowerCase()
+      ) {
+        Alert.alert("Error", "Service not assigned to you");
+        return;
+      }
+
+      selectService(service);
+    } catch (err) {
+      console.error(err);
+      Alert.alert("Error", "Failed to load service");
     }
   };
 

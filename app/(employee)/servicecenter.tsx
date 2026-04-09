@@ -400,7 +400,7 @@ export default function ServiceCenter() {
       {/* HEADER */}
       <View
         className="bg-card px-5 pt-5 pb-4 border-b border-card"
-        style={{ flex: 0.20, minHeight: height * 0.20 }}
+        style={{ flex: 0.2, minHeight: height * 0.2 }}
       >
         {/* Quick Stats */}
         <View className="mb-2">
@@ -735,6 +735,38 @@ export default function ServiceCenter() {
                         </View>
                       )}
 
+                      {/* STATUS UPDATE */}
+                      {item.assignedEmployeeId && (
+                        <TouchableOpacity
+                          onPress={() => {
+                            setActiveServiceForStatus(item);
+                            setStatusModalVisible(true);
+                          }}
+                          className="bg-background border border-card rounded-2xl overflow-hidden mb-3"
+                        >
+                          <View className="flex-row items-center px-4 py-2">
+                            <Ionicons
+                              name="construct"
+                              size={14}
+                              color="#64748B"
+                            />
+                            <Text className="text-[10px] font-black text-text-muted ml-2 uppercase">
+                              Status
+                            </Text>
+                          </View>
+                          <View className="px-4 pb-3 flex-row justify-between items-center">
+                            <Text className="text-text-primary font-bold text-sm">
+                              {item.serviceStatus || "Booked"}
+                            </Text>
+                            <Ionicons
+                              name="chevron-down"
+                              size={14}
+                              color="#64748B"
+                            />
+                          </View>
+                        </TouchableOpacity>
+                      )}
+
                       {/* FOOTER ACTIONS */}
                       <View className="flex-row gap-3">
                         <TouchableOpacity
@@ -766,37 +798,7 @@ export default function ServiceCenter() {
                             </Text>
                           </TouchableOpacity>
                         ) : (
-                          <View className="flex-1 flex-row gap-3 flex-wrap items-center">
-                            <TouchableOpacity
-                              onPress={() => {
-                                setActiveServiceForStatus(item);
-                                setStatusModalVisible(true);
-                              }}
-                              style={{ minWidth: 120 }}
-                              className="bg-background border border-card rounded-2xl overflow-hidden"
-                            >
-                              <View className="flex-row items-center px-4 py-2">
-                                <Ionicons
-                                  name="construct"
-                                  size={14}
-                                  color="#64748B"
-                                />
-                                <Text className="text-[10px] font-black text-text-muted ml-2 uppercase">
-                                  Status
-                                </Text>
-                              </View>
-                              <View className="px-4 pb-3 flex-row justify-between items-center">
-                                <Text className="text-text-primary font-bold text-sm">
-                                  {item.serviceStatus || "Booked"}
-                                </Text>
-                                <Ionicons
-                                  name="chevron-down"
-                                  size={14}
-                                  color="#64748B"
-                                />
-                              </View>
-                            </TouchableOpacity>
-
+                          <View className="flex-1 flex-row gap-3 items-center">
                             {(item.serviceStatus === "Processing" ||
                               item.serviceStatus === "Waiting for Spare") && (
                               <TouchableOpacity
@@ -819,8 +821,10 @@ export default function ServiceCenter() {
                             <TouchableOpacity
                               onPress={() =>
                                 router.push({
-                                  pathname: "/(employee)/billing",
-                                  params: { serviceId: item.id },
+                                  pathname: "/(employee)/add-billing",
+                                  params: {
+                                    directServiceId: item.id.toString(),
+                                  },
                                 })
                               }
                               style={{ minWidth: 90 }}
