@@ -403,7 +403,7 @@ export default function ServiceCenter() {
         style={{ flex: 0.2, minHeight: height * 0.2 }}
       >
         {/* Quick Stats */}
-        <View className="mb-2">
+        <View className="mb-4">
           <View className="flex-row gap-3">
             {/* TOTAL ASSIGNED */}
             <View className="flex-1 rounded-[28px] bg-slate-950/95 border border-card p-4">
@@ -480,13 +480,13 @@ export default function ServiceCenter() {
             placeholderTextColor="#64748b"
             value={search}
             onChangeText={setSearch}
-            className="w-full bg-slate-950/95 border border-card rounded-[28px] pl-12 pr-4 py-4 text-text-primary font-semibold text-sm"
+            className="w-full bg-slate-700 border border-card rounded-[28px] pl-12 pr-4 py-4 text-text-primary font-semibold text-sm"
           />
         </View>
 
         {/* FILTER PICKERS */}
         <View className="flex-row gap-3">
-          <View className="flex-1 rounded-[20px] bg-slate-950/95 border border-card overflow-hidden">
+          <View className="flex-1 rounded-[20px] bg-slate-700 border border-card overflow-hidden">
             <Picker
               selectedValue={dateFilter}
               onValueChange={(value) => setDateFilter(value)}
@@ -501,7 +501,7 @@ export default function ServiceCenter() {
             </Picker>
           </View>
 
-          <View className="flex-1 rounded-[20px] bg-slate-950/95 border border-card overflow-hidden">
+          <View className="flex-1 rounded-[20px] bg-slate-700 border border-card overflow-hidden">
             <Picker
               selectedValue={mainTab}
               onValueChange={(value) => setMainTab(value)}
