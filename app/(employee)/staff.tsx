@@ -3,15 +3,15 @@ import * as Location from "expo-location";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Modal,
-    RefreshControl,
-    SafeAreaView,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Modal,
+  RefreshControl,
+  SafeAreaView,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
 import { api } from "../../services/api";
@@ -288,68 +288,65 @@ export default function EmployeeDashboard() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        <View className="flex-row items-center justify-between mb-8">
-          <View className="flex-row items-center flex-1 pr-4">
-            <View className="w-14 h-14 rounded-2xl bg-card items-center justify-center mr-4">
-              <Ionicons name="person" size={24} color="#FFFFFF" />
+        <View className="rounded-[32px] border border-slate-800 bg-slate-950/95 p-6 shadow-2xl mb-8">
+          <View className="flex-row items-center justify-between mb-6">
+            <View className="flex-row items-center flex-1 pr-4">
+              <View className="w-16 h-16 rounded-3xl bg-primary/20 items-center justify-center mr-4 shadow-inner">
+                <Ionicons name="person" size={26} color="#0EA5E9" />
+              </View>
+              <View>
+                <Text className="text-2xl font-extrabold text-text-primary tracking-tight">
+                  Hello, {userProfile?.username?.split(" ")[0] || "Technician"}!
+                </Text>
+                <Text className="text-text-secondary font-medium capitalize text-xs mt-1">
+                  {userProfile?.role || "Staff"} • Workshop Dashboard
+                </Text>
+              </View>
             </View>
-            <View>
-              <Text className="text-xl font-bold text-text-primary">
-                Hello, {userProfile?.username?.split(" ")[0] || "Technician"}!
-              </Text>
-              <Text className="text-text-secondary font-medium capitalize text-xs">
-                {userProfile?.role || "Staff"} • Workspace
-              </Text>
-            </View>
+            <TouchableOpacity className="p-3 bg-slate-900 border border-slate-800 rounded-3xl shadow-sm">
+              <Ionicons name="calendar-outline" size={20} color="#8b96a7" />
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity className="p-2 bg-card rounded-xl border border-card">
-            <Ionicons name="calendar-outline" size={20} color="#64748B" />
-          </TouchableOpacity>
-        </View>
 
-        {/* Quick Stats */}
-        <View className="flex-row justify-between mb-8 space-x-2">
-          <View className="flex-1 bg-card p-4 rounded-2xl border border-card mx-1">
-            <Ionicons
-              name="time-outline"
-              size={24}
-              color="#0EA5E9"
-              className="mb-2"
-            />
-            <Text className="text-xs text-text-muted font-medium mt-1">
-              Pending
-            </Text>
-            <Text className="text-xl font-bold text-text-primary">
-              {stats.pending}
-            </Text>
-          </View>
-          <View className="flex-1 bg-card p-4 rounded-2xl border border-card mx-1">
-            <Ionicons
-              name="construct-outline"
-              size={24}
-              color="#0EA5E9"
-              className="mb-2"
-            />
-            <Text className="text-xs text-text-muted font-medium mt-1">
-              In Progress
-            </Text>
-            <Text className="text-xl font-bold text-text-primary">
-              {stats.inProgress}
-            </Text>
-          </View>
-          <View className="flex-1 bg-card p-4 rounded-2xl border border-card mx-1">
-            <Ionicons
-              name="checkmark-circle-outline"
-              size={24}
-              color="#10B981"
-              className="mb-2"
-            />
-            <Text className="text-xs text-text-muted font-medium mt-1">
-              Completed
-            </Text>
-            <Text className="text-xl font-bold text-text-primary">
-              {stats.completed}
-            </Text>
+          {/* Quick Stats */}
+          <View className="flex-row justify-between gap-3">
+            <View className="flex-1 bg-slate-900/90 p-5 rounded-[28px] border border-slate-800 shadow-lg">
+              <View className="w-12 h-12 rounded-2xl bg-primary/10 items-center justify-center mb-4">
+                <Ionicons name="time-outline" size={22} color="#0EA5E9" />
+              </View>
+              <Text className="text-xs text-text-muted font-semibold uppercase tracking-[0.28em] mb-2">
+                Pending
+              </Text>
+              <Text className="text-3xl font-black text-text-primary">
+                {stats.pending}
+              </Text>
+            </View>
+            <View className="flex-1 bg-slate-900/90 p-5 rounded-[28px] border border-slate-800 shadow-lg">
+              <View className="w-12 h-12 rounded-2xl bg-primary/10 items-center justify-center mb-4">
+                <Ionicons name="construct-outline" size={22} color="#0EA5E9" />
+              </View>
+              <Text className="text-xs text-text-muted font-semibold uppercase tracking-[0.28em] mb-2">
+                In Progress
+              </Text>
+              <Text className="text-3xl font-black text-text-primary">
+                {stats.inProgress}
+              </Text>
+            </View>
+            <View className="flex-1 bg-slate-900/90 p-5 rounded-[28px] border border-slate-800 shadow-lg">
+              <View className="w-12 h-12 rounded-2xl bg-success/10 items-center justify-center mb-4">
+                <Ionicons
+                  name="checkmark-circle-outline"
+                  size={22}
+                  color="#10B981"
+                />
+              </View>
+              <Text className="text-xs text-text-muted font-semibold uppercase tracking-[0.28em] mb-2">
+                Completed
+              </Text>
+              <Text className="text-3xl font-black text-text-primary">
+                {stats.completed}
+              </Text>
+            </View>
           </View>
         </View>
 
@@ -426,7 +423,7 @@ export default function EmployeeDashboard() {
                   </View>
 
                   {/* ACTION BUTTONS */}
-                  <View className="flex-row mt-4 pt-4 border-t border-card gap-2">
+                  <View className="flex-row mt-4 pt-4 border-t border-slate-800 gap-3">
                     {(task.status === "Assigned" ||
                       task.status === "Pending" ||
                       task.status === "Approved" ||
@@ -435,9 +432,9 @@ export default function EmployeeDashboard() {
                         onPress={() =>
                           updateServiceStatus(task, "Service Going on")
                         }
-                        className="bg-primary flex-1 py-2.5 rounded-xl items-center"
+                        className="bg-gradient-to-r from-primary to-sky-500 flex-1 py-3 rounded-3xl items-center shadow-lg"
                       >
-                        <Text className="text-text-primary text-[11px] font-black uppercase tracking-widest">
+                        <Text className="text-white text-[11px] font-black uppercase tracking-[0.24em]">
                           Start
                         </Text>
                       </TouchableOpacity>
@@ -449,9 +446,9 @@ export default function EmployeeDashboard() {
                         onPress={() =>
                           updateServiceStatus(task, "Service Completed")
                         }
-                        className="bg-success flex-1 py-2.5 rounded-xl items-center"
+                        className="bg-gradient-to-r from-emerald-500 to-teal-500 flex-1 py-3 rounded-3xl items-center shadow-lg"
                       >
-                        <Text className="text-text-primary text-[11px] font-black uppercase tracking-widest">
+                        <Text className="text-white text-[11px] font-black uppercase tracking-[0.24em]">
                           Done
                         </Text>
                       </TouchableOpacity>
@@ -468,9 +465,9 @@ export default function EmployeeDashboard() {
                             `/(employee)/servicecenter?id=${task.id}` as any,
                           )
                         }
-                        className="bg-primary border border-card flex-1 py-3 rounded-xl items-center"
+                        className="bg-slate-900/90 border border-slate-800 flex-1 py-3 rounded-3xl items-center shadow-sm"
                       >
-                        <Text className="text-text-primary text-[13px] font-black uppercase tracking-widest">
+                        <Text className="text-text-primary text-[13px] font-black uppercase tracking-[0.24em]">
                           Manage
                         </Text>
                       </TouchableOpacity>
@@ -490,47 +487,47 @@ export default function EmployeeDashboard() {
         {/* NEW SERVICE ENTRY */}
         <TouchableOpacity
           onPress={() => router.push("/(employee)/servicecenter" as any)}
-          className="flex-row items-center justify-between p-5 bg-card rounded-2xl border border-card mb-4"
+          className="flex-row items-center justify-between p-5 bg-slate-950/95 rounded-[28px] border border-slate-800 mb-4 shadow-lg"
         >
           <View className="flex-row items-center">
-            <View className="w-12 h-12 bg-warning/20 rounded-xl items-center justify-center mr-4">
-              <Ionicons name="construct" size={22} color="#F59E0B" />
+            <View className="w-14 h-14 bg-amber-500/10 rounded-3xl items-center justify-center mr-4 shadow-inner">
+              <Ionicons name="construct" size={24} color="#F59E0B" />
             </View>
 
             <View>
-              <Text className="text-text-primary font-bold text-sm">
+              <Text className="text-text-primary font-extrabold text-sm">
                 New Service Entry
               </Text>
-              <Text className="text-text-muted text-[10px] uppercase tracking-widest">
+              <Text className="text-text-muted text-[10px] uppercase tracking-[0.3em] mt-1">
                 Create new service booking
               </Text>
             </View>
           </View>
 
-          <Ionicons name="chevron-forward" size={18} color="#64748B" />
+          <Ionicons name="chevron-forward" size={18} color="#8b96a7" />
         </TouchableOpacity>
 
         {/* ADD SERVICE PARTS */}
         <TouchableOpacity
           onPress={() => router.push("/(employee)/billing" as any)}
-          className="flex-row items-center justify-between p-5 bg-card rounded-2xl border border-card mb-4"
+          className="flex-row items-center justify-between p-5 bg-slate-950/95 rounded-[28px] border border-slate-800 mb-4 shadow-lg"
         >
           <View className="flex-row items-center">
-            <View className="w-12 h-12 bg-primary/20 rounded-xl items-center justify-center mr-4">
-              <Ionicons name="clipboard" size={22} color="#0EA5E9" />
+            <View className="w-14 h-14 bg-primary/10 rounded-3xl items-center justify-center mr-4 shadow-inner">
+              <Ionicons name="clipboard" size={24} color="#0EA5E9" />
             </View>
 
             <View>
-              <Text className="text-text-primary font-bold text-sm">
+              <Text className="text-text-primary font-extrabold text-sm">
                 Add Service Parts
               </Text>
-              <Text className="text-text-muted text-[10px] uppercase tracking-widest">
+              <Text className="text-text-muted text-[10px] uppercase tracking-[0.3em] mt-1">
                 Manage spare parts
               </Text>
             </View>
           </View>
 
-          <Ionicons name="chevron-forward" size={18} color="#64748B" />
+          <Ionicons name="chevron-forward" size={18} color="#8b96a7" />
         </TouchableOpacity>
 
         {/* LOGOUT */}
@@ -539,24 +536,24 @@ export default function EmployeeDashboard() {
             await logout();
             router.replace("/(auth)/login");
           }}
-          className="flex-row items-center justify-between p-5 bg-card rounded-2xl border border-card mt-2 mb-10"
+          className="flex-row items-center justify-between p-5 bg-slate-950/95 rounded-[28px] border border-slate-800 mt-2 mb-10 shadow-lg"
         >
           <View className="flex-row items-center">
-            <View className="w-12 h-12 bg-error/20 rounded-xl items-center justify-center mr-4">
-              <Ionicons name="log-out" size={22} color="#EF4444" />
+            <View className="w-14 h-14 bg-red-500/10 rounded-3xl items-center justify-center mr-4 shadow-inner">
+              <Ionicons name="log-out" size={24} color="#EF4444" />
             </View>
 
             <View>
-              <Text className="text-error font-bold text-sm">
+              <Text className="text-error font-extrabold text-sm">
                 Logout Account
               </Text>
-              <Text className="text-text-muted text-[10px] uppercase tracking-widest">
+              <Text className="text-text-muted text-[10px] uppercase tracking-[0.3em] mt-1">
                 Sign out of dashboard
               </Text>
             </View>
           </View>
 
-          <Ionicons name="chevron-forward" size={18} color="#64748B" />
+          <Ionicons name="chevron-forward" size={18} color="#8b96a7" />
         </TouchableOpacity>
       </ScrollView>
 
