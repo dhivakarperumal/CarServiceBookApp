@@ -2,19 +2,19 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Dimensions,
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    RefreshControl,
-    SafeAreaView,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  RefreshControl,
+  SafeAreaView,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
 import { api } from "../../services/api";
@@ -80,11 +80,18 @@ export default function ServiceCenter() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState("");
+  const [expandedItems, setExpandedItems] = useState<(string | number)[]>([]);
 
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState("");
   const [assigning, setAssigning] = useState(false);
+
+  const toggleExpanded = (id: string | number) => {
+    setExpandedItems((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
+    );
+  };
 
   // Status Selection Modal
   const [statusModalVisible, setStatusModalVisible] = useState(false);
@@ -421,7 +428,11 @@ export default function ServiceCenter() {
 
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 20, paddingBottom: 100 }}
+        contentContainerStyle={{
+          paddingHorizontal: 20,
+          paddingTop: 20,
+          paddingBottom: 100,
+        }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -480,247 +491,289 @@ export default function ServiceCenter() {
               </Text>
             </View>
           ) : (
-            filteredList.map((item) => (
-              <View
-                key={item.id}
-                className="bg-card rounded-3xl border border-card p-6 mb-5"
-              >
-                <View className="flex-row justify-between items-start mb-5">
-                  <View
-                    className={`px-3 py-1 rounded-full border ${getStatusColor(item.serviceStatus || "Booked")}`}
-                  >
-                    <Text className="text-[10px] font-black uppercase tracking-widest">
-                      {item.serviceStatus || "Booked"}
-                    </Text>
-                  </View>
-                  <Text className="text-[14px] font-black text-text-primary uppercase tracking-widest">
-                    ID: {item.bookingId || `SER-${item.id}`}
-                  </Text>
-                </View>
+            filteredList.map((item) => {
+              const isExpanded = expandedItems.includes(item.id);
 
-                <View className="mb-4">
-                  <Text className="text-2xl font-black text-text-primary">
-                    {item.brand} {item.model}
-                  </Text>
-                  <Text className="text-sm font-black text-primary mt-1 uppercase">
-                    {item.vehicleNumber || item.vehicle_number || "NO PLATE"}
-                  </Text>
-                  <Text className="text-sm text-text-secondary font-medium mt-2">
-                    Customer: {item.name || item.customer_name} •{" "}
-                    {item.phone || item.mobile}
-                  </Text>
-                </View>
-
-                {/* PROGRESS BAR */}
-                <View className="flex-row items-center gap-1 mb-6 mt-2">
-                  {STATUS_STEPS.map((step, idx) => {
-                    const currentIdx = STATUS_STEPS.indexOf(
-                      item.serviceStatus || "Booked",
-                    );
-                    const active = idx <= currentIdx;
-                    return (
-                      <View
-                        key={step}
-                        className={`h-1.5 flex-1 rounded-full ${active ? "bg-primary" : "bg-card"}`}
-                      />
-                    );
-                  })}
-                </View>
-
-                {/* ISSUES SECTION */}
-                <View className="bg-background rounded-2xl p-4 border border-card mb-5">
-                  <View className="flex-row justify-between items-center mb-3">
-                    <Text className="text-[12px] font-black text-text-muted uppercase tracking-widest">
-                      Job Details / Issues
-                    </Text>
-                    {item.assignedEmployeeId && (
-                      <TouchableOpacity
-                        onPress={() => openIssueEditor(item)}
-                        className="flex-row items-center gap-1 p-2 bg-primary rounded-md"
-                      >
-                        <Ionicons name="add" size={14} color="#FFFFFF" />
-                        <Text className="text-[10px] font-black text-text-primary  uppercase tracking-widest">
-                          Add Issues
-                        </Text>
-                      </TouchableOpacity>
-                    )}
-                  </View>
-                  {item.issues?.length > 0 || item.carIssue ? (
-                    <View className="gap-2">
-                      {(item.issues?.length > 0
-                        ? item.issues
-                        : [
-                            {
-                              issue: item.carIssue || item.issue,
-                              issueAmount: item.issueAmount || 0,
-                              status: item.issueStatus || "pending",
-                            },
-                          ]
-                      ).map((iss: any, idx: number) => (
-                        <View
-                          key={idx}
-                          className="bg-card p-3 rounded-xl border border-card"
-                        >
-                          <Text className="text-xs font-bold text-text-secondary leading-snug">
-                            {iss.issue}
-                          </Text>
-                          <View className="flex-row justify-between items-center mt-2 pt-2 border-t border-card">
-                            <Text className="text-[10px] font-black text-success">
-                              ₹{Number(iss.issueAmount || 0).toFixed(2)}
-                            </Text>
-                            <Text className="text-[8px] font-black text-text-muted uppercase tracking-widest">
-                              {iss.issueStatus || iss.status || "pending"}
-                            </Text>
-                          </View>
-                        </View>
-                      ))}
-                    </View>
-                  ) : (
-                    <Text className="text-[12px] text-text-muted italic">
-                      No job issues recorded yet.
-                    </Text>
-                  )}
-                </View>
-
-                {/* SPARE PARTS */}
-                {item.parts?.length > 0 && (
-                  <View className="bg-background rounded-2xl p-4 border border-card mb-6">
-                    <Text className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-3">
-                      Assigned Parts
-                    </Text>
-                    <View className="gap-2">
-                      {item.parts.map((part: any, idx: number) => (
-                        <View
-                          key={part.id || idx}
-                          className="flex-row justify-between items-center bg-card p-2.5 rounded-xl border border-card"
-                        >
-                          <View>
-                            <Text className="text-md font-bold text-text-primary">
-                              {part.partName}
-                            </Text>
-                            <Text className="text-[12px] text-text-primary">
-                              Qty: {part.qty || 1}
-                            </Text>
-                          </View>
-                          <View className="items-end">
-                            <Text className="text-md font-black text-text-primary">
-                              ₹{Number(part.total || 0).toFixed(2)}
-                            </Text>
-                            <View
-                              className={`px-2 py-1 rounded-md mt-2 border ${part.status === "approved" ? "bg-success border-success" : "bg-warning border-warning"}`}
-                            >
-                              <Text
-                                className={`text-[10px] font-black uppercase ${part.status === "approved" ? "text-text-primary" : "text-text-primary"}`}
-                              >
-                                {part.status || "pending"}
-                              </Text>
-                            </View>
-                          </View>
-                        </View>
-                      ))}
-                    </View>
-                  </View>
-                )}
-
-                {/* FOOTER ACTIONS */}
-                <View className="flex-row gap-3">
+              return (
+                <View
+                  key={item.id}
+                  className="bg-card rounded-3xl border border-card p-6 mb-5"
+                >
                   <TouchableOpacity
-                    onPress={() =>
-                      router.push(
-                        `/(employee)/service-details?id=${item.id}` as any,
-                      )
-                    }
-                    className="bg-primary/10 p-4 px-6 rounded-2xl items-center justify-center"
+                    onPress={() => toggleExpanded(item.id)}
+                    activeOpacity={0.8}
+                    className="mb-4"
                   >
-                    <Ionicons name="eye" size={20} color="#0EA5E9" />
-                  </TouchableOpacity>
-
-                  {!item.assignedEmployeeId ? (
-                    <TouchableOpacity
-                      onPress={() => {
-                        setSelectedBooking(item);
-                        setModalVisible(true);
-                      }}
-                      className="flex-1 bg-primary py-3.5 rounded-2xl items-center justify-center flex-row"
-                    >
-                      <Ionicons name="person-add" size={16} color="#FFFFFF" />
-                      <Text className="text-text-primary font-black text-xs ml-2">
-                        ASSIGN MECHANIC
-                      </Text>
-                    </TouchableOpacity>
-                  ) : (
-                    <View className="flex-1 flex-row gap-3">
-                      <TouchableOpacity
-                        onPress={() => {
-                          setActiveServiceForStatus(item);
-                          setStatusModalVisible(true);
-                        }}
-                        className="flex-1 bg-background border border-card rounded-2xl overflow-hidden"
-                      >
-                        <View className="flex-row items-center px-4 py-2">
-                          <Ionicons
-                            name="construct"
-                            size={14}
-                            color="#64748B"
-                          />
-                          <Text className="text-[10px] font-black text-text-muted ml-2 uppercase">
-                            Status
-                          </Text>
-                        </View>
-                        <View className="px-4 pb-3 flex-row justify-between items-center">
-                          <Text className="text-text-primary font-bold text-sm">
+                    <View className="flex-row justify-between items-start">
+                      <View className="flex-1 pr-3">
+                        <View
+                          className={`px-3 py-1 rounded-full border ${getStatusColor(
+                            item.serviceStatus || "Booked",
+                          )}`}
+                        >
+                          <Text className="text-[10px] font-black uppercase tracking-widest">
                             {item.serviceStatus || "Booked"}
                           </Text>
-                          <Ionicons
-                            name="chevron-down"
-                            size={14}
-                            color="#64748B"
-                          />
                         </View>
-                      </TouchableOpacity>
+                        <Text className="text-[14px] font-black text-text-primary uppercase tracking-widest mt-3">
+                          ID: {item.bookingId || `SER-${item.id}`}
+                        </Text>
+                        <Text className="text-2xl font-black text-text-primary mt-3">
+                          {item.brand} {item.model}
+                        </Text>
+                      </View>
+                      <Ionicons
+                        name={isExpanded ? "chevron-up" : "chevron-down"}
+                        size={24}
+                        color="#0EA5E9"
+                      />
+                    </View>
+                  </TouchableOpacity>
 
-                      {(item.serviceStatus === "Processing" ||
-                        item.serviceStatus === "Waiting for Spare") && (
+                  {isExpanded && (
+                    <>
+                      <View className="mb-6">
+                        <Text className="text-sm font-black text-primary mt-1 uppercase mb-2">
+                          {item.vehicleNumber ||
+                            item.vehicle_number ||
+                            "NO PLATE"}
+                        </Text>
+                        <Text className="text-sm text-text-secondary font-medium">
+                          Customer: {item.name || item.customer_name} •{" "}
+                          {item.phone || item.mobile}
+                        </Text>
+                      </View>
+
+                      {/* PROGRESS BAR */}
+                      <View className="flex-row items-center gap-1 mb-6 mt-2">
+                        {STATUS_STEPS.map((step, idx) => {
+                          const currentIdx = STATUS_STEPS.indexOf(
+                            item.serviceStatus || "Booked",
+                          );
+                          const active = idx <= currentIdx;
+                          return (
+                            <View
+                              key={step}
+                              className={`h-1.5 flex-1 rounded-full ${
+                                active ? "bg-primary" : "bg-card"
+                              }`}
+                            />
+                          );
+                        })}
+                      </View>
+
+                      {/* ISSUES SECTION */}
+                      <View className="bg-background rounded-2xl p-4 border border-card mb-5">
+                        <View className="flex-row justify-between items-center mb-3">
+                          <Text className="text-[12px] font-black text-text-muted uppercase tracking-widest">
+                            Job Details / Issues
+                          </Text>
+                          {item.assignedEmployeeId && (
+                            <TouchableOpacity
+                              onPress={() => openIssueEditor(item)}
+                              className="flex-row items-center gap-1 p-2 bg-primary rounded-md"
+                            >
+                              <Ionicons name="add" size={14} color="#FFFFFF" />
+                              <Text className="text-[10px] font-black text-text-primary uppercase tracking-widest">
+                                Add Issues
+                              </Text>
+                            </TouchableOpacity>
+                          )}
+                        </View>
+                        {item.issues?.length > 0 || item.carIssue ? (
+                          <View className="gap-2">
+                            {(item.issues?.length > 0
+                              ? item.issues
+                              : [
+                                  {
+                                    issue: item.carIssue || item.issue,
+                                    issueAmount: item.issueAmount || 0,
+                                    status: item.issueStatus || "pending",
+                                  },
+                                ]
+                            ).map((iss: any, idx: number) => (
+                              <View
+                                key={idx}
+                                className="bg-card p-3 rounded-xl border border-card"
+                              >
+                                <Text className="text-xs font-bold text-text-secondary leading-snug">
+                                  {iss.issue}
+                                </Text>
+                                <View className="flex-row justify-between items-center mt-2 pt-2 border-t border-card">
+                                  <Text className="text-[10px] font-black text-success">
+                                    ₹{Number(iss.issueAmount || 0).toFixed(2)}
+                                  </Text>
+                                  <Text className="text-[8px] font-black text-text-muted uppercase tracking-widest">
+                                    {iss.issueStatus || iss.status || "pending"}
+                                  </Text>
+                                </View>
+                              </View>
+                            ))}
+                          </View>
+                        ) : (
+                          <Text className="text-[12px] text-text-muted italic">
+                            No job issues recorded yet.
+                          </Text>
+                        )}
+                      </View>
+
+                      {/* SPARE PARTS */}
+                      {item.parts?.length > 0 && (
+                        <View className="bg-background rounded-2xl p-4 border border-card mb-6">
+                          <Text className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-3">
+                            Assigned Parts
+                          </Text>
+                          <View className="gap-2">
+                            {item.parts.map((part: any, idx: number) => (
+                              <View
+                                key={part.id || idx}
+                                className="flex-row justify-between items-center bg-card p-2.5 rounded-xl border border-card"
+                              >
+                                <View>
+                                  <Text className="text-md font-bold text-text-primary">
+                                    {part.partName}
+                                  </Text>
+                                  <Text className="text-[12px] text-text-primary">
+                                    Qty: {part.qty || 1}
+                                  </Text>
+                                </View>
+                                <View className="items-end">
+                                  <Text className="text-md font-black text-text-primary">
+                                    ₹{Number(part.total || 0).toFixed(2)}
+                                  </Text>
+                                  <View
+                                    className={`px-2 py-1 rounded-md mt-2 border ${
+                                      part.status === "approved"
+                                        ? "bg-success border-success"
+                                        : "bg-warning border-warning"
+                                    }`}
+                                  >
+                                    <Text className="text-[10px] font-black uppercase text-text-primary">
+                                      {part.status || "pending"}
+                                    </Text>
+                                  </View>
+                                </View>
+                              </View>
+                            ))}
+                          </View>
+                        </View>
+                      )}
+
+                      {/* FOOTER ACTIONS */}
+                      <View className="flex-row gap-3">
                         <TouchableOpacity
                           onPress={() =>
-                            router.push({
-                              pathname: "/(employee)/add-parts",
-                              params: { serviceId: item.id },
-                            })
+                            router.push(
+                              `/(employee)/service-details?id=${item.id}` as any,
+                            )
                           }
-                          className="bg-success p-4 px-6 rounded-2xl items-center justify-center"
+                          className="bg-primary/10 py-4 px-6 rounded-2xl items-center justify-center"
                         >
-                          <Ionicons name="cart" size={20} color="#FFFFFF" />
+                          <Ionicons name="eye" size={20} color="#0EA5E9" />
                         </TouchableOpacity>
+
+                        {!item.assignedEmployeeId ? (
+                          <TouchableOpacity
+                            onPress={() => {
+                              setSelectedBooking(item);
+                              setModalVisible(true);
+                            }}
+                            className="flex-1 bg-primary py-4 rounded-2xl items-center justify-center flex-row"
+                          >
+                            <Ionicons
+                              name="person-add"
+                              size={16}
+                              color="#FFFFFF"
+                            />
+                            <Text className="text-text-primary font-black text-xs ml-2">
+                              ASSIGN MECHANIC
+                            </Text>
+                          </TouchableOpacity>
+                        ) : (
+                          <View className="flex-1 flex-row gap-3">
+                            <TouchableOpacity
+                              onPress={() => {
+                                setActiveServiceForStatus(item);
+                                setStatusModalVisible(true);
+                              }}
+                              style={{ minWidth: 120 }}
+                              className="bg-background border border-card rounded-2xl overflow-hidden"
+                            >
+                              <View className="flex-row items-center px-4 py-2">
+                                <Ionicons
+                                  name="construct"
+                                  size={14}
+                                  color="#64748B"
+                                />
+                                <Text className="text-[10px] font-black text-text-muted ml-2 uppercase">
+                                  Status
+                                </Text>
+                              </View>
+                              <View className="px-4 pb-3 flex-row justify-between items-center">
+                                <Text className="text-text-primary font-bold text-sm">
+                                  {item.serviceStatus || "Booked"}
+                                </Text>
+                                <Ionicons
+                                  name="chevron-down"
+                                  size={14}
+                                  color="#64748B"
+                                />
+                              </View>
+                            </TouchableOpacity>
+
+                            {(item.serviceStatus === "Processing" ||
+                              item.serviceStatus === "Waiting for Spare") && (
+                              <TouchableOpacity
+                                onPress={() =>
+                                  router.push({
+                                    pathname: "/(employee)/add-parts",
+                                    params: { serviceId: item.id },
+                                  })
+                                }
+                                className="bg-success py-4 px-6 rounded-2xl items-center justify-center"
+                              >
+                                <Ionicons
+                                  name="cart"
+                                  size={20}
+                                  color="#FFFFFF"
+                                />
+                              </TouchableOpacity>
+                            )}
+                            <TouchableOpacity
+                              onPress={() =>
+                                router.push({
+                                  pathname: "/(employee)/billing",
+                                  params: { serviceId: item.id },
+                                })
+                              }
+                              className="bg-warning py-4 px-6 rounded-2xl items-center justify-center"
+                            >
+                              <Ionicons
+                                name="receipt"
+                                size={20}
+                                color="#FFFFFF"
+                              />
+                            </TouchableOpacity>
+                          </View>
+                        )}
+                      </View>
+
+                      {item.assignedEmployeeName && (
+                        <View className="flex-row items-center gap-2 mt-4 pt-4 border-t border-card">
+                          <Ionicons name="settings" size={12} color="#64748B" />
+                          <Text className="text-xs font-bold text-text-secondary">
+                            Assigned to:{" "}
+                            <Text className="text-primary">
+                              {item.assignedEmployeeName}
+                            </Text>
+                          </Text>
+                        </View>
                       )}
-                      <TouchableOpacity
-                        onPress={() =>
-                          router.push({
-                            pathname: "/(employee)/billing",
-                            params: { serviceId: item.id },
-                          })
-                        }
-                        className="bg-warning p-4 px-6 rounded-2xl items-center justify-center"
-                      >
-                        <Ionicons name="receipt" size={20} color="#FFFFFF" />
-                      </TouchableOpacity>
-                    </View>
+                    </>
                   )}
                 </View>
-
-                {item.assignedEmployeeName && (
-                  <View className="flex-row items-center gap-2 mt-4 pt-4 border-t border-card">
-                    <Ionicons name="settings" size={12} color="#64748B" />
-                    <Text className="text-xs font-bold text-text-secondary">
-                      Assigned to:{" "}
-                      <Text className="text-primary">
-                        {item.assignedEmployeeName}
-                      </Text>
-                    </Text>
-                  </View>
-                )}
-              </View>
-            ))
+              );
+            })
           )}
         </View>
       </ScrollView>
