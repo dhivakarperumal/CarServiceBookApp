@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { Picker } from "@react-native-picker/picker";
 import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
@@ -19,7 +20,7 @@ import {
 import { useAuth } from "../../contexts/AuthContext";
 import { api } from "../../services/api";
 
-const { width } = Dimensions.get("window");
+const { width, height } = Dimensions.get("window");
 
 const BOOKING_STATUS = [
   "Booked",
@@ -73,7 +74,7 @@ export default function ServiceCenter() {
   const userRole = (userProfile?.role || "").toLowerCase();
   const isMechanic = userRole === "mechanic" || userRole === "staff";
 
-  const [mainTab, setMainTab] = useState("booked"); // booked | addVehicle
+  const [mainTab, setMainTab] = useState("all"); // all | booked | addVehicle
   const [subTab, setSubTab] = useState(isMechanic ? "assigned" : "unassigned");
   const [services, setServices] = useState<any[]>([]);
   const [employees, setEmployees] = useState<any[]>([]);
@@ -81,8 +82,6 @@ export default function ServiceCenter() {
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState("");
   const [dateFilter, setDateFilter] = useState("all");
-  const [dateDropdownOpen, setDateDropdownOpen] = useState(false);
-  const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
   const [expandedItems, setExpandedItems] = useState<(string | number)[]>([]);
 
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
@@ -399,16 +398,12 @@ export default function ServiceCenter() {
   return (
     <SafeAreaView className="relative flex-1 bg-background">
       {/* HEADER */}
-      <View className="bg-card px-5 pt-5 pb-6 border-b border-card">
+      <View
+        className="bg-card px-5 pt-5 pb-4 border-b border-card"
+        style={{ flex: 0.20, minHeight: height * 0.20 }}
+      >
         {/* Quick Stats */}
-        <View className="mb-5">
-          <View className="flex-row items-center justify-between mb-4">
-            <Text className="text-xs uppercase tracking-[0.28em] text-text-muted font-semibold">
-              Summary
-            </Text>
-            <Text className="text-[10px] text-text-muted">Updated now</Text>
-          </View>
-
+        <View className="mb-2">
           <View className="flex-row gap-3">
             <View className="flex-1 rounded-[28px] bg-slate-950/95 border border-card p-4">
               <View className="flex-row items-center justify-between mb-3">
@@ -480,97 +475,41 @@ export default function ServiceCenter() {
           />
         </View>
 
-        {/* FILTER DROPDOWNS */}
+        {/* FILTER PICKERS */}
         <View className="flex-row gap-3">
-          <View className="flex-1">
-            <TouchableOpacity
-              onPress={() => {
-                setDateDropdownOpen(!dateDropdownOpen);
-                setCategoryDropdownOpen(false);
-              }}
-              className="bg-slate-950/95 border border-card rounded-[28px] px-4 py-4 flex-row items-center justify-between"
+          <View className="flex-1 rounded-[28px] bg-slate-950/95 border border-card overflow-hidden">
+            <Picker
+              selectedValue={dateFilter}
+              onValueChange={(value) => setDateFilter(value)}
+              dropdownIconColor="#64748B"
+              style={{ color: "#FFFFFF" }}
+              itemStyle={{ color: "#FFFFFF", fontSize: 14 }}
             >
-              <Text className="text-sm font-bold text-text-primary">
-                {dateFilter === "today"
-                  ? "Today"
-                  : dateFilter === "week"
-                    ? "This Week"
-                    : dateFilter === "month"
-                      ? "This Month"
-                      : "All"}
-              </Text>
-              <Ionicons name="chevron-down" size={18} color="#64748B" />
-            </TouchableOpacity>
-            {dateDropdownOpen && (
-              <View className="bg-slate-950/95 border border-card rounded-[28px] mt-2 overflow-hidden">
-                {[
-                  { key: "all", label: "All" },
-                  { key: "today", label: "Today" },
-                  { key: "week", label: "This Week" },
-                  { key: "month", label: "This Month" },
-                ].map((option) => (
-                  <TouchableOpacity
-                    key={option.key}
-                    onPress={() => {
-                      setDateFilter(option.key);
-                      setDateDropdownOpen(false);
-                    }}
-                    className="px-4 py-4 border-b border-card"
-                  >
-                    <Text className="text-text-primary text-sm">
-                      {option.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            )}
+              <Picker.Item label="All" value="all" />
+              <Picker.Item label="Today" value="today" />
+              <Picker.Item label="This Week" value="week" />
+              <Picker.Item label="This Month" value="month" />
+            </Picker>
           </View>
 
-          <View className="flex-1">
-            <TouchableOpacity
-              onPress={() => {
-                setCategoryDropdownOpen(!categoryDropdownOpen);
-                setDateDropdownOpen(false);
-              }}
-              className="bg-slate-950/95 border border-card rounded-[28px] px-4 py-4 flex-row items-center justify-between"
+          <View className="flex-1 rounded-[28px] bg-slate-950/95 border border-card overflow-hidden">
+            <Picker
+              selectedValue={mainTab}
+              onValueChange={(value) => setMainTab(value)}
+              dropdownIconColor="#64748B"
+              style={{ color: "#FFFFFF" }}
+              itemStyle={{ color: "#FFFFFF", fontSize: 14 }}
             >
-              <Text className="text-sm font-bold text-text-primary">
-                {mainTab === "booked"
-                  ? "Appointments"
-                  : mainTab === "addVehicle"
-                    ? "Booking"
-                    : "All"}
-              </Text>
-              <Ionicons name="chevron-down" size={18} color="#64748B" />
-            </TouchableOpacity>
-            {categoryDropdownOpen && (
-              <View className="bg-slate-950/95 border border-card rounded-[28px] mt-2 overflow-hidden">
-                {[
-                  { key: "all", label: "All" },
-                  { key: "booked", label: "Appointments" },
-                  { key: "addVehicle", label: "Booking" },
-                ].map((option) => (
-                  <TouchableOpacity
-                    key={option.key}
-                    onPress={() => {
-                      setMainTab(option.key);
-                      setCategoryDropdownOpen(false);
-                    }}
-                    className="px-4 py-4 border-b border-card"
-                  >
-                    <Text className="text-text-primary text-sm">
-                      {option.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            )}
+              <Picker.Item label="All" value="all" />
+              <Picker.Item label="Appointments" value="booked" />
+              <Picker.Item label="Booking" value="addVehicle" />
+            </Picker>
           </View>
         </View>
       </View>
 
       <ScrollView
-        className="flex-1"
+        style={{ flex: 0.78 }}
         contentContainerStyle={{
           paddingHorizontal: 5,
           paddingTop: 20,
