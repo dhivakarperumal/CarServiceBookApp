@@ -406,7 +406,7 @@ export default function ServiceCenter() {
         <View className="mb-4">
           <View className="flex-row gap-3">
             {/* TOTAL ASSIGNED */}
-            <View className="flex-1 rounded-[28px] bg-slate-950/95 border border-card p-4">
+            <View className="flex-1 rounded-[28px] bg-slate-950/95 border border-warning p-4">
               <Text className="text-[10px] uppercase tracking-[0.3em] text-text-muted font-semibold mb-4">
                 Total Assigned
               </Text>
@@ -427,7 +427,7 @@ export default function ServiceCenter() {
             </View>
 
             {/* IN PROGRESS */}
-            <View className="flex-1 rounded-[28px] bg-slate-950/95 border border-card p-4">
+            <View className="flex-1 rounded-[28px] bg-slate-950/95 border border-error p-4">
               <Text className="text-[10px] uppercase tracking-[0.3em] text-text-muted font-semibold mb-4">
                 In Progress
               </Text>
@@ -448,7 +448,7 @@ export default function ServiceCenter() {
             </View>
 
             {/* FINISHED */}
-            <View className="flex-1 rounded-[28px] bg-slate-950/95 border border-card p-4">
+            <View className="flex-1 rounded-[28px] bg-slate-950/95 border border-success p-4">
               <Text className="text-[10px] uppercase tracking-[0.3em] text-text-muted font-semibold mb-4">
                 Finished
               </Text>
@@ -480,7 +480,7 @@ export default function ServiceCenter() {
             placeholderTextColor="#64748b"
             value={search}
             onChangeText={setSearch}
-            className="w-full bg-slate-700 border border-card rounded-[28px] pl-12 pr-4 py-4 text-text-primary font-semibold text-sm"
+            className="w-full pl-12 pr-4 py-4 border border-slate-700 bg-slate-800/80 rounded-2xl text-text-primary font-bold shadow-lg"
           />
         </View>
 

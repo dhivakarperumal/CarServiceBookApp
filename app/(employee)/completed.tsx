@@ -167,7 +167,7 @@ const CompletedHistory = () => {
                   {item.name || "Customer"}
                 </Text>
 
-                <Text className="text-[10px] text-text-muted uppercase tracking-widest">
+                <Text className="text-[13px] text-text-primary uppercase tracking-widest">
                   ID : {item.bookingId || item.id}
                 </Text>
               </View>
@@ -183,7 +183,7 @@ const CompletedHistory = () => {
               <View className="flex-row items-center mb-2">
                 <Ionicons name="car-outline" size={16} color="#94A3B8" />
 
-                <Text className="text-text-muted ml-2 text-xs">
+                <Text className="text-text-muted ml-2 text-sm">
                   {item.brand} {item.model}
                 </Text>
               </View>
@@ -191,7 +191,7 @@ const CompletedHistory = () => {
               <View className="flex-row items-center mb-2">
                 <Ionicons name="calendar-outline" size={16} color="#94A3B8" />
 
-                <Text className="text-text-muted ml-2 text-xs">
+                <Text className="text-text-muted ml-2 text-sm">
                   {new Date(item.updatedAt || item.created_at).toDateString()}
                 </Text>
               </View>
@@ -199,7 +199,7 @@ const CompletedHistory = () => {
               <View className="flex-row items-center">
                 <Ionicons name="cash-outline" size={16} color="#10B981" />
 
-                <Text className="text-success ml-2 text-sm font-black">
+                <Text className="text-success ml-2 text-md font-black">
                   ₹{item.grandTotal}
                 </Text>
               </View>
