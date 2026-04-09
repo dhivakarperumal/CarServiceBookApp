@@ -404,62 +404,69 @@ export default function ServiceCenter() {
       >
         {/* Quick Stats */}
         <View className="mb-2">
-          <View className="flex-row gap-3">
-            <View className="flex-1 rounded-[28px] bg-slate-950/95 border border-card p-4">
-              <View className="flex-row items-center justify-between mb-3">
-                <Text className="text-[10px] uppercase tracking-[0.3em] text-text-muted font-semibold">
-                  Total Assigned
-                </Text>
-                <View className="bg-primary/10 rounded-full p-2">
-                  <Ionicons
-                    name="clipboard-outline"
-                    size={18}
-                    color="#0EA5E9"
-                  />
-                </View>
-              </View>
-              <Text className="text-3xl font-black text-text-primary">
-                {stats.total}
-              </Text>
-            </View>
+  <View className="flex-row gap-3">
 
-            <View className="flex-1 rounded-[28px] bg-slate-950/95 border border-card p-4">
-              <View className="flex-row items-center justify-between mb-3">
-                <Text className="text-[10px] uppercase tracking-[0.3em] text-text-muted font-semibold">
-                  In Progress
-                </Text>
-                <View className="bg-primary/10 rounded-full p-2">
-                  <Ionicons
-                    name="construct-outline"
-                    size={18}
-                    color="#0EA5E9"
-                  />
-                </View>
-              </View>
-              <Text className="text-3xl font-black text-text-primary">
-                {stats.processing}
-              </Text>
-            </View>
+    {/* TOTAL ASSIGNED */}
+    <View className="flex-1 rounded-[28px] bg-slate-950/95 border border-card p-4">
 
-            <View className="flex-1 rounded-[28px] bg-slate-950/95 border border-card p-4">
-              <View className="flex-row items-center justify-between mb-3">
-                <Text className="text-[10px] uppercase tracking-[0.3em] text-text-muted font-semibold">
-                  Finished
-                </Text>
-                <View className="bg-success/10 rounded-full p-2">
-                  <Ionicons
-                    name="checkmark-circle-outline"
-                    size={18}
-                    color="#10B981"
-                  />
-                </View>
-              </View>
-              <Text className="text-3xl font-black text-text-primary">
-                {stats.completed}
-              </Text>
-            </View>
-          </View>
+      <Text className="text-[10px] uppercase tracking-[0.3em] text-text-muted font-semibold mb-4">
+        Total Assigned
+      </Text>
+
+      <View className="flex-row items-center justify-between">
+        <Text className="text-3xl font-black text-text-primary">
+          {stats.total}
+        </Text>
+
+        <View className="h-10 w-10 rounded-full bg-primary/10 items-center justify-center">
+          <Ionicons name="clipboard-outline" size={18} color="#0EA5E9" />
         </View>
+      </View>
+
+    </View>
+
+
+    {/* IN PROGRESS */}
+    <View className="flex-1 rounded-[28px] bg-slate-950/95 border border-card p-4">
+
+      <Text className="text-[10px] uppercase tracking-[0.3em] text-text-muted font-semibold mb-4">
+        In Progress
+      </Text>
+
+      <View className="flex-row items-center justify-between">
+        <Text className="text-3xl font-black text-text-primary">
+          {stats.processing}
+        </Text>
+
+        <View className="h-10 w-10 rounded-full bg-primary/10 items-center justify-center">
+          <Ionicons name="construct-outline" size={18} color="#0EA5E9" />
+        </View>
+      </View>
+
+    </View>
+
+
+    {/* FINISHED */}
+    <View className="flex-1 rounded-[28px] bg-slate-950/95 border border-card p-4">
+
+      <Text className="text-[10px] uppercase tracking-[0.3em] text-text-muted font-semibold mb-4">
+        Finished
+      </Text>
+
+      <View className="flex-row items-center justify-between">
+        <Text className="text-3xl font-black text-text-primary">
+          {stats.completed}
+        </Text>
+
+        <View className="h-10 w-10 rounded-full bg-success/10 items-center justify-center">
+          <Ionicons name="checkmark-circle-outline" size={18} color="#10B981" />
+        </View>
+      </View>
+
+    </View>
+
+  </View>
+</View>
 
         {/* SEARCH */}
         <View className="relative mb-5">
@@ -477,7 +484,7 @@ export default function ServiceCenter() {
 
         {/* FILTER PICKERS */}
         <View className="flex-row gap-3">
-          <View className="flex-1 rounded-[28px] bg-slate-950/95 border border-card overflow-hidden">
+          <View className="flex-1 rounded-[20px] bg-slate-950/95 border border-card overflow-hidden">
             <Picker
               selectedValue={dateFilter}
               onValueChange={(value) => setDateFilter(value)}
@@ -492,7 +499,7 @@ export default function ServiceCenter() {
             </Picker>
           </View>
 
-          <View className="flex-1 rounded-[28px] bg-slate-950/95 border border-card overflow-hidden">
+          <View className="flex-1 rounded-[20px] bg-slate-950/95 border border-card overflow-hidden">
             <Picker
               selectedValue={mainTab}
               onValueChange={(value) => setMainTab(value)}
