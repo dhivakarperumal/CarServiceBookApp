@@ -3,14 +3,15 @@ import * as Location from "expo-location";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Modal,
-  SafeAreaView,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    Modal,
+    RefreshControl,
+    SafeAreaView,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
 import { api } from "../../services/api";
@@ -26,6 +27,7 @@ export default function EmployeeDashboard() {
   });
   const [myTasks, setMyTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [showAttendanceModal, setShowAttendanceModal] = useState(false);
   const [isPunchingIn, setIsPunchingIn] = useState(false);
   const [myStaffRecord, setMyStaffRecord] = useState<any>(null);
@@ -170,6 +172,62 @@ export default function EmployeeDashboard() {
     }
   };
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      const res = await api.get("/all-services");
+      const allServices = res.data || [];
+
+      const myDisplayName =
+        userProfile?.username || (userProfile as any)?.name || "";
+      const filtered = allServices.filter(
+        (b: any) =>
+          (b.assignedEmployeeName || "").toLowerCase() ===
+            myDisplayName.toLowerCase() && b.status !== "Cancelled",
+      );
+
+      setMyTasks(filtered.slice(0, 5));
+
+      const normalize = (s: any) => (s || "").toLowerCase().trim();
+
+      setStats({
+        pending: filtered.filter((b: any) => {
+          const s = normalize(b.status || b.serviceStatus);
+          return (
+            ["assigned", "approved", "booked", "pending"].includes(s) ||
+            s === ""
+          );
+        }).length,
+
+        inProgress: filtered.filter((b: any) => {
+          const s = normalize(b.status || b.serviceStatus);
+          return [
+            "processing",
+            "service going on",
+            "waiting for spare",
+            "call verified",
+          ].includes(s);
+        }).length,
+
+        completed: filtered.filter((b: any) => {
+          const s = normalize(b.status || b.serviceStatus);
+          return [
+            "service completed",
+            "completed",
+            "bill pending",
+            "bill completed",
+          ].includes(s);
+        }).length,
+
+        totalStaff: 0,
+      });
+    } catch (err) {
+      console.error("Error refreshing tasks:", err);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   const updateServiceStatus = async (task: any, newStatus: string) => {
     try {
       const updateData: any = {
@@ -218,7 +276,12 @@ export default function EmployeeDashboard() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <ScrollView className="flex-1 p-5 pb-20">
+      <ScrollView
+        className="flex-1 p-5 pb-20"
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         <View className="flex-row items-center justify-between mb-8">
           <View className="flex-row items-center flex-1 pr-4">
             <View className="w-14 h-14 rounded-2xl bg-card items-center justify-center mr-4">

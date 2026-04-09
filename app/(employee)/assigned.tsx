@@ -1,10 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
+import { Picker } from "@react-native-picker/picker";
 import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
   Dimensions,
+  RefreshControl,
   SafeAreaView,
   ScrollView,
   Text,
@@ -14,7 +16,6 @@ import {
 } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
 import { api } from "../../services/api";
-import { Picker } from "@react-native-picker/picker";
 
 const { width } = Dimensions.get("window");
 
@@ -82,6 +83,7 @@ export default function AssignedHistory() {
   const router = useRouter();
   const [services, setServices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
 
@@ -112,6 +114,28 @@ export default function AssignedHistory() {
       Alert.alert("Error", "Failed to load your assigned services");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      const res = await api.get("/all-services");
+      const mechanicName =
+        userProfile?.username ||
+        (userProfile as any)?.displayName ||
+        (userProfile as any)?.name ||
+        "";
+      const filtered = (res.data || []).filter(
+        (s: any) =>
+          (s.assignedEmployeeName || "").toLowerCase() ===
+          mechanicName.toLowerCase(),
+      );
+      setServices(filtered);
+    } catch (err) {
+      console.error("Refresh failed", err);
+    } finally {
+      setRefreshing(false);
     }
   };
 
@@ -147,7 +171,13 @@ export default function AssignedHistory() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <ScrollView className="flex-1 p-5" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        className="flex-1 p-5"
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         {/* HEADER */}
         <View className="mb-6">
           {/* Stats */}

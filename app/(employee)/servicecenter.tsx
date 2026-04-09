@@ -2,18 +2,19 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Dimensions,
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  SafeAreaView,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    Dimensions,
+    KeyboardAvoidingView,
+    Modal,
+    Platform,
+    RefreshControl,
+    SafeAreaView,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
 import { api } from "../../services/api";
@@ -77,6 +78,7 @@ export default function ServiceCenter() {
   const [services, setServices] = useState<any[]>([]);
   const [employees, setEmployees] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState("");
 
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
@@ -131,6 +133,39 @@ export default function ServiceCenter() {
       Alert.alert("Error", "Failed to fetch data");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      const [servRes, empRes] = await Promise.all([
+        api.get("/all-services"),
+        api.get("/staff"),
+      ]);
+
+      const servicesWithDetails = [];
+      const servicesRaw = servRes.data || [];
+
+      for (const service of servicesRaw) {
+        try {
+          const detailRes = await api.get(`/all-services/${service.id}`);
+          servicesWithDetails.push({
+            ...service,
+            parts: detailRes.data?.parts || [],
+            issues: detailRes.data?.issues || [],
+          });
+        } catch (err) {
+          servicesWithDetails.push({ ...service, parts: [], issues: [] });
+        }
+      }
+
+      setServices(servicesWithDetails);
+      setEmployees(empRes.data || []);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setRefreshing(false);
     }
   };
 
@@ -384,7 +419,13 @@ export default function ServiceCenter() {
         </View>
       </View>
 
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        className="flex-1"
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         {/* SUB TABS */}
         <View className="flex-row p-5 gap-3">
           <TouchableOpacity

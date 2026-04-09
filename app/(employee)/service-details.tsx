@@ -2,14 +2,15 @@ import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-   ActivityIndicator,
-   Alert,
-   Linking,
-   SafeAreaView,
-   ScrollView,
-   Text,
-   TouchableOpacity,
-   View,
+    ActivityIndicator,
+    Alert,
+    Linking,
+    RefreshControl,
+    SafeAreaView,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { api } from "../../services/api";
 import { COLORS } from "../../theme/colors";
@@ -19,6 +20,7 @@ export default function ServiceDetails() {
   const { id } = useLocalSearchParams();
   const [service, setService] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     fetchDetails();
@@ -33,6 +35,18 @@ export default function ServiceDetails() {
       Alert.alert("Error", "Failed to load service details");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      const res = await api.get(`/all-services/${id}`);
+      setService(res.data);
+    } catch (err) {
+      console.error("Refresh failed", err);
+    } finally {
+      setRefreshing(false);
     }
   };
 
@@ -51,7 +65,13 @@ export default function ServiceDetails() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <ScrollView className="flex-1 p-5" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        className="flex-1 p-5"
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         {/* TOP BADGE & STATUS */}
         <View className="items-center mb-8">
           <View className="bg-primary/20 px-6 py-2 rounded-full border border-primary/30 mb-3 shadow-lg">

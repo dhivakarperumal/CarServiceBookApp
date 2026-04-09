@@ -2,15 +2,16 @@ import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Dimensions,
-  SafeAreaView,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    Dimensions,
+    RefreshControl,
+    SafeAreaView,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
 import { api } from "../../services/api";
@@ -66,6 +67,7 @@ export default function EmployeeBilling() {
   const { serviceId } = useLocalSearchParams();
   const [bills, setBills] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
@@ -116,6 +118,38 @@ export default function EmployeeBilling() {
     }
   };
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      const [billRes, bookRes] = await Promise.all([
+        api.get("/billings"),
+        api.get("/bookings"),
+      ]);
+
+      const mechanicName =
+        userProfile?.username || (userProfile as any)?.name || "";
+      const assignedBookings = (bookRes.data || []).filter(
+        (b: any) =>
+          (b.assignedEmployeeName || "").toLowerCase() ===
+          mechanicName.toLowerCase(),
+      );
+
+      const assignedBookingIds = new Set(
+        assignedBookings.map((b: any) => b.bookingId),
+      );
+
+      const myBills = (billRes.data || []).filter((bill: any) =>
+        assignedBookingIds.has(bill.bookingId),
+      );
+
+      setBills(myBills);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   const filteredBills = useMemo(() => {
     return bills.filter((b) => {
       const text =
@@ -141,7 +175,13 @@ export default function EmployeeBilling() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <ScrollView className="flex-1 p-5" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        className="flex-1 p-5"
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         {/* HEADER */}
         <View className="bg-card p-6 rounded-3xl border border-card mb-6">
           <View className="flex-row items-center gap-3 mb-4">
