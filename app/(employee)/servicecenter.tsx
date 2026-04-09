@@ -404,69 +404,71 @@ export default function ServiceCenter() {
       >
         {/* Quick Stats */}
         <View className="mb-2">
-  <View className="flex-row gap-3">
+          <View className="flex-row gap-3">
+            {/* TOTAL ASSIGNED */}
+            <View className="flex-1 rounded-[28px] bg-slate-950/95 border border-card p-4">
+              <Text className="text-[10px] uppercase tracking-[0.3em] text-text-muted font-semibold mb-4">
+                Total Assigned
+              </Text>
 
-    {/* TOTAL ASSIGNED */}
-    <View className="flex-1 rounded-[28px] bg-slate-950/95 border border-card p-4">
+              <View className="flex-row items-center justify-between">
+                <Text className="text-3xl font-black text-text-primary">
+                  {stats.total}
+                </Text>
 
-      <Text className="text-[10px] uppercase tracking-[0.3em] text-text-muted font-semibold mb-4">
-        Total Assigned
-      </Text>
+                <View className="h-10 w-10 rounded-full bg-primary/10 items-center justify-center">
+                  <Ionicons
+                    name="clipboard-outline"
+                    size={18}
+                    color="#0EA5E9"
+                  />
+                </View>
+              </View>
+            </View>
 
-      <View className="flex-row items-center justify-between">
-        <Text className="text-3xl font-black text-text-primary">
-          {stats.total}
-        </Text>
+            {/* IN PROGRESS */}
+            <View className="flex-1 rounded-[28px] bg-slate-950/95 border border-card p-4">
+              <Text className="text-[10px] uppercase tracking-[0.3em] text-text-muted font-semibold mb-4">
+                In Progress
+              </Text>
 
-        <View className="h-10 w-10 rounded-full bg-primary/10 items-center justify-center">
-          <Ionicons name="clipboard-outline" size={18} color="#0EA5E9" />
+              <View className="flex-row items-center justify-between">
+                <Text className="text-3xl font-black text-text-primary">
+                  {stats.processing}
+                </Text>
+
+                <View className="h-10 w-10 rounded-full bg-primary/10 items-center justify-center">
+                  <Ionicons
+                    name="construct-outline"
+                    size={18}
+                    color="#0EA5E9"
+                  />
+                </View>
+              </View>
+            </View>
+
+            {/* FINISHED */}
+            <View className="flex-1 rounded-[28px] bg-slate-950/95 border border-card p-4">
+              <Text className="text-[10px] uppercase tracking-[0.3em] text-text-muted font-semibold mb-4">
+                Finished
+              </Text>
+
+              <View className="flex-row items-center justify-between">
+                <Text className="text-3xl font-black text-text-primary">
+                  {stats.completed}
+                </Text>
+
+                <View className="h-10 w-10 rounded-full bg-success/10 items-center justify-center">
+                  <Ionicons
+                    name="checkmark-circle-outline"
+                    size={18}
+                    color="#10B981"
+                  />
+                </View>
+              </View>
+            </View>
+          </View>
         </View>
-      </View>
-
-    </View>
-
-
-    {/* IN PROGRESS */}
-    <View className="flex-1 rounded-[28px] bg-slate-950/95 border border-card p-4">
-
-      <Text className="text-[10px] uppercase tracking-[0.3em] text-text-muted font-semibold mb-4">
-        In Progress
-      </Text>
-
-      <View className="flex-row items-center justify-between">
-        <Text className="text-3xl font-black text-text-primary">
-          {stats.processing}
-        </Text>
-
-        <View className="h-10 w-10 rounded-full bg-primary/10 items-center justify-center">
-          <Ionicons name="construct-outline" size={18} color="#0EA5E9" />
-        </View>
-      </View>
-
-    </View>
-
-
-    {/* FINISHED */}
-    <View className="flex-1 rounded-[28px] bg-slate-950/95 border border-card p-4">
-
-      <Text className="text-[10px] uppercase tracking-[0.3em] text-text-muted font-semibold mb-4">
-        Finished
-      </Text>
-
-      <View className="flex-row items-center justify-between">
-        <Text className="text-3xl font-black text-text-primary">
-          {stats.completed}
-        </Text>
-
-        <View className="h-10 w-10 rounded-full bg-success/10 items-center justify-center">
-          <Ionicons name="checkmark-circle-outline" size={18} color="#10B981" />
-        </View>
-      </View>
-
-    </View>
-
-  </View>
-</View>
 
         {/* SEARCH */}
         <View className="relative mb-5">
@@ -625,24 +627,6 @@ export default function ServiceCenter() {
                           Customer: {item.name || item.customer_name} •{" "}
                           {item.phone || item.mobile}
                         </Text>
-                      </View>
-
-                      {/* PROGRESS BAR */}
-                      <View className="flex-row items-center gap-1 mb-6 mt-2">
-                        {STATUS_STEPS.map((step, idx) => {
-                          const currentIdx = STATUS_STEPS.indexOf(
-                            item.serviceStatus || "Booked",
-                          );
-                          const active = idx <= currentIdx;
-                          return (
-                            <View
-                              key={step}
-                              className={`h-1.5 flex-1 rounded-full ${
-                                active ? "bg-primary" : "bg-card"
-                              }`}
-                            />
-                          );
-                        })}
                       </View>
 
                       {/* ISSUES SECTION */}
