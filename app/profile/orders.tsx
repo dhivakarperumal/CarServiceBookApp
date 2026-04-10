@@ -67,11 +67,8 @@ export default function Orders() {
 
   return (
     <SafeAreaView className="flex-1 bg-background px-4">
-
       {orders.length === 0 ? (
-        <Text className="text-text-secondary mt-6">
-          No orders found
-        </Text>
+        <Text className="text-text-secondary mt-6">No orders found</Text>
       ) : (
         <ScrollView className="mt-4">
           {orders.map((order: any) => {
@@ -111,15 +108,21 @@ export default function Orders() {
       )}
 
       {/* MODAL */}
-      <Modal visible={!!selectedOrder} animationType="slide">
-        {selectedOrder && (
-          <OrderModal
-            order={selectedOrder}
-            onClose={() => setSelectedOrder(null)}
-          />
-        )}
+      <Modal visible={!!selectedOrder} animationType="slide" transparent>
+        <View className="flex-1 justify-end bg-black/60">
+          <View
+            style={{ height: "75%", paddingBottom: 20 }}
+            className="bg-background rounded-t-3xl overflow-hidden"
+          >
+            {selectedOrder && (
+              <OrderModal
+                order={selectedOrder}
+                onClose={() => setSelectedOrder(null)}
+              />
+            )}
+          </View>
+        </View>
       </Modal>
-
     </SafeAreaView>
   );
 }
@@ -141,7 +144,6 @@ function OrderModal({ order, onClose }: any) {
 
   return (
     <SafeAreaView className="flex-1 bg-background px-4">
-
       {/* HEADER */}
       <View className="flex-row justify-between items-center mt-4">
         <View className="flex-row items-center gap-2">
@@ -157,7 +159,6 @@ function OrderModal({ order, onClose }: any) {
       </View>
 
       <ScrollView className="mt-4">
-
         {/* ORDER INFO */}
         <Text className="text-primary font-bold">
           Order ID: {order.orderId}
@@ -175,9 +176,7 @@ function OrderModal({ order, onClose }: any) {
               className="flex-row justify-between border-b border-white/10 py-3"
             >
               <View>
-                <Text className="text-white font-semibold">
-                  {item.name}
-                </Text>
+                <Text className="text-white font-semibold">{item.name}</Text>
 
                 {/* ✅ QUANTITY */}
                 <Text className="text-text-secondary text-xs mt-1">
@@ -195,9 +194,7 @@ function OrderModal({ order, onClose }: any) {
         {/* TOTAL */}
         <View className="flex-row justify-between mt-4">
           <Text className="text-white font-bold">Total</Text>
-          <Text className="text-primary font-bold text-lg">
-            ₹{order.total}
-          </Text>
+          <Text className="text-primary font-bold text-lg">₹{order.total}</Text>
         </View>
 
         {/* ================= SHIPPING DETAILS ================= */}
@@ -207,9 +204,7 @@ function OrderModal({ order, onClose }: any) {
           </Text>
 
           <View className="bg-card p-4 rounded-xl border border-white/10">
-            <Text className="text-white font-bold">
-              {shipping.name}
-            </Text>
+            <Text className="text-white font-bold">{shipping.name}</Text>
 
             <Text className="text-text-secondary text-sm mt-1">
               📞 {shipping.phone}
@@ -251,14 +246,11 @@ function OrderModal({ order, onClose }: any) {
             <View>
               {STATUS_STEPS.map((step, index) => (
                 <View key={step} className="flex-row items-start mb-4">
-
                   {/* CIRCLE + LINE */}
                   <View className="items-center mr-3">
                     <View
                       className={`w-7 h-7 rounded-full items-center justify-center ${
-                        index <= currentStep
-                          ? "bg-primary"
-                          : "bg-gray-700"
+                        index <= currentStep ? "bg-primary" : "bg-gray-700"
                       }`}
                     >
                       <Text className="text-black text-xs font-bold">
@@ -269,9 +261,7 @@ function OrderModal({ order, onClose }: any) {
                     {index !== STATUS_STEPS.length - 1 && (
                       <View
                         className={`w-[2px] h-6 mt-1 ${
-                          index < currentStep
-                            ? "bg-primary"
-                            : "bg-gray-700"
+                          index < currentStep ? "bg-primary" : "bg-gray-700"
                         }`}
                       />
                     )}
@@ -292,7 +282,6 @@ function OrderModal({ order, onClose }: any) {
             </View>
           )}
         </View>
-
       </ScrollView>
     </SafeAreaView>
   );
