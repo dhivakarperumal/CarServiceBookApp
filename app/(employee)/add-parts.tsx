@@ -2,14 +2,14 @@ import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    SafeAreaView,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  Alert,
+  SafeAreaView,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
 import { api } from "../../services/api";
@@ -140,17 +140,24 @@ export default function AddServiceParts() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <View className="bg-card p-6 pb-4 mt-6 border-b border-card flex-row items-center justify-between">
-        <TouchableOpacity
-          onPress={() => router.back()}
-          className="w-10 h-10 items-center justify-center rounded-full bg-background"
-        >
-          <Ionicons name="arrow-back" size={20} color="#FFFFFF" />
-        </TouchableOpacity>
-        <Text className="text-xl font-black text-text-primary">
-          Add Spare Parts
-        </Text>
-        <View className="w-10" />
+      <View className="p-5 mt-6">
+        <View className="flex-row items-center gap-4">
+          <TouchableOpacity
+            onPress={() => router.back()}
+            className="p-3 bg-card rounded-2xl border border-card"
+          >
+            <Ionicons name="chevron-back" size={24} color="#FFFFFF" />
+          </TouchableOpacity>
+
+          <View className="flex-1 min-w-0">
+            <Text
+              className="text-4xl font-black text-text-primary tracking-tight"
+              numberOfLines={1}
+            >
+              Add Spare Parts
+            </Text>
+          </View>
+        </View>
       </View>
 
       <ScrollView className="flex-1 p-5" showsVerticalScrollIndicator={false}>

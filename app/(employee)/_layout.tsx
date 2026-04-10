@@ -165,6 +165,7 @@ export default function EmployeeAdminLayout() {
         name="service-details"
         options={{
           href: null,
+          headerShown: false,
         }}
       />
       <Tabs.Screen

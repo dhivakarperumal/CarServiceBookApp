@@ -2,15 +2,15 @@ import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Linking,
-    RefreshControl,
-    SafeAreaView,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Linking,
+  RefreshControl,
+  SafeAreaView,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { api } from "../../services/api";
 import { COLORS } from "../../theme/colors";
@@ -65,6 +65,25 @@ export default function ServiceDetails() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
+      <View className="p-5 mt-6">
+        <View className="flex-row items-center gap-4">
+          <TouchableOpacity
+            onPress={() => router.back()}
+            className="p-3 bg-card rounded-2xl border border-card"
+          >
+            <Ionicons name="chevron-back" size={24} color="#FFFFFF" />
+          </TouchableOpacity>
+
+          <View className="flex-1 min-w-0">
+            <Text
+              className="text-4xl font-black text-text-primary tracking-tight"
+              numberOfLines={1}
+            >
+              Service Details
+            </Text>
+          </View>
+        </View>
+      </View>
       <ScrollView
         className="flex-1"
         contentContainerStyle={{

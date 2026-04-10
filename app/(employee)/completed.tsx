@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
 import { api } from "../../services/api";
+import { Picker } from "@react-native-picker/picker";
 
 const CompletedHistory = () => {
   const { user } = useAuth();
@@ -25,6 +26,7 @@ const CompletedHistory = () => {
 
   const [services, setServices] = useState<any[]>([]);
   const [search, setSearch] = useState("");
+  const [dateFilter, setDateFilter] = useState("all");
   const [issueModalVisible, setIssueModalVisible] = useState(false);
   const [selectedServiceDetail, setSelectedServiceDetail] = useState<any>(null);
   const [activeModalTab, setActiveModalTab] = useState("issues");
@@ -129,13 +131,45 @@ const CompletedHistory = () => {
     return services.filter((item: any) => {
       const txt = search.toLowerCase();
 
-      return (
+      const matchesSearch =
         (item.name || "").toLowerCase().includes(txt) ||
         (item.vehicleNumber || "").toLowerCase().includes(txt) ||
-        (item.brand + " " + item.model).toLowerCase().includes(txt)
-      );
+        (item.brand + " " + item.model).toLowerCase().includes(txt);
+
+      let matchesDate = true;
+
+      if (dateFilter !== "all") {
+        const bDate = new Date(item.updatedAt || item.created_at);
+        const today = new Date();
+
+        today.setHours(0, 0, 0, 0);
+
+        if (dateFilter === "today") {
+          matchesDate = bDate.toDateString() === today.toDateString();
+        }
+
+        if (dateFilter === "yesterday") {
+          const yesterday = new Date(today);
+          yesterday.setDate(today.getDate() - 1);
+          matchesDate = bDate.toDateString() === yesterday.toDateString();
+        }
+
+        if (dateFilter === "week") {
+          const lastWeek = new Date(today);
+          lastWeek.setDate(today.getDate() - 7);
+          matchesDate = bDate >= lastWeek;
+        }
+
+        if (dateFilter === "month") {
+          const lastMonth = new Date(today);
+          lastMonth.setMonth(today.getMonth() - 1);
+          matchesDate = bDate >= lastMonth;
+        }
+      }
+
+      return matchesSearch && matchesDate;
     });
-  }, [services, search]);
+  }, [services, search, dateFilter]);
 
   return (
     <View className="flex-1 bg-[#020617] px-5 pt-8">
@@ -153,6 +187,21 @@ const CompletedHistory = () => {
           onChangeText={setSearch}
           className="flex-1 ml-3 text-white"
         />
+      </View>
+
+      <View className="bg-slate-700 rounded-2xl border border-card mb-6 overflow-hidden">
+        <Picker
+          selectedValue={dateFilter}
+          dropdownIconColor="#fff"
+          style={{ color: "white" }}
+          onValueChange={(value) => setDateFilter(value)}
+        >
+          <Picker.Item label="All Time History" value="all" />
+          <Picker.Item label="Today's Completed" value="today" />
+          <Picker.Item label="Yesterday Jobs" value="yesterday" />
+          <Picker.Item label="Past Week" value="week" />
+          <Picker.Item label="Past Month" value="month" />
+        </Picker>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
