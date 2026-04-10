@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -35,6 +35,13 @@ const PricingCard: React.FC<Props> = ({ pkg }) => {
                 {pkg.title}
             </Text>
 
+            <Text className="text-primary text-xs mb-2">
+                Place:{" "}
+                <Text className="text-white font-semibold">
+                    {pkg.place === "home" ? "Home & Shop" : "Shop"}
+                </Text>
+            </Text>
+
             {/* ✅ PRICE → BIG + WHITE */}
             <Text className="text-white text-3xl font-extrabold mb-3">
                 ₹{pkg.price}
@@ -60,12 +67,15 @@ const PricingCard: React.FC<Props> = ({ pkg }) => {
             </View>
 
             <TouchableOpacity
-                onPress={() => router.push("/booking")}
+                onPress={() => router.push({
+                    pathname: "/booking",
+                    params: { selectedPackage: JSON.stringify(pkg) }
+                })}
                 activeOpacity={0.8}
                 className="rounded-full overflow-hidden w-[90%] self-center"
             >
                 <LinearGradient
-                    colors={GRADIENT} 
+                    colors={GRADIENT}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
                     style={{ borderRadius: 25 }}
@@ -76,7 +86,7 @@ const PricingCard: React.FC<Props> = ({ pkg }) => {
                     </Text>
                 </LinearGradient>
             </TouchableOpacity>
-        </View>
+        </View >
     );
 };
 

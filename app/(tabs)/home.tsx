@@ -821,70 +821,73 @@ export default function HomeScreen({ navigation }: any) {
       </View>
 
       {/* ================= MY SERVICE BOOKINGS ================= */}
-      <View className="px-5 mb-6">
-        <View className="flex-row items-center mb-4">
-          <View className="w-1 h-5 bg-white rounded mr-2" />
-          <Ionicons name="receipt-outline" size={18} color={COLORS.primary} />
-          <Text className="text-primary text-lg font-bold ml-2">
-            My Service Bookings
-          </Text>
-        </View>
+      {!serviceBookingLoading && serviceBookings.length > 0 && (
+        <View className="px-5 mb-6">
+          <View className="flex-row items-center mb-4">
+            <View className="w-1 h-5 bg-white rounded mr-2" />
+            <Ionicons name="receipt-outline" size={18} color={COLORS.primary} />
+            <Text className="text-primary text-lg font-bold ml-2">
+              My Service Bookings
+            </Text>
+          </View>
 
-        {serviceBookingLoading ? (
-          <ActivityIndicator size="small" color={COLORS.primary} />
-        ) : serviceBookings.length === 0 ? (
-          <Text className="text-textSecondary">
-            No recent service bookings found.
-          </Text>
-        ) : (
-          serviceBookings.map((item) => {
-            const hasPending = item.status === "WAITING_SPARE" || item.status === "BILL_PENDING" || item.status === "PROCESSING";
-            return (
-              <TouchableOpacity
-                key={item.id || item.bookingId}
-                onPress={() => setSelectedServiceBooking(item)}
-                className="rounded-xl p-4 mb-4"
-                style={{
-                  backgroundColor: COLORS.card,
-                  borderWidth: 1,
-                  borderColor: hasPending ? COLORS.warning : COLORS.primary,
-                }}
-              >
-                <View className="flex-row justify-between items-center">
-                  <View className="flex-1 pr-2">
-                    <Text className="text-text-primary font-bold">
-                      {item.bookingId}
-                    </Text>
-                    <Text className="text-text-secondary text-sm mt-1">
-                      {item.name} • {item.phone}
-                    </Text>
-                  </View>
-                  <View
-                    className="px-3 py-1 rounded-full"
-                    style={{
-                      backgroundColor: hasPending
-                        ? COLORS.warning + "30"
-                        : COLORS.primary + "30",
-                    }}
-                  >
-                    <Text
+          {serviceBookingLoading ? (
+            <ActivityIndicator size="small" color={COLORS.primary} />
+          ) : serviceBookings.length === 0 ? (
+            <Text className="text-textSecondary">
+              No recent service bookings found.
+            </Text>
+          ) : (
+            serviceBookings.map((item) => {
+              const hasPending = item.status === "WAITING_SPARE" || item.status === "BILL_PENDING" || item.status === "PROCESSING";
+              return (
+                <TouchableOpacity
+                  key={item.id || item.bookingId}
+                  onPress={() => setSelectedServiceBooking(item)}
+                  className="rounded-xl p-4 mb-4"
+                  style={{
+                    backgroundColor: COLORS.card,
+                    borderWidth: 1,
+                    borderColor: hasPending ? COLORS.warning : COLORS.primary,
+                  }}
+                >
+                  <View className="flex-row justify-between items-center">
+                    <View className="flex-1 pr-2">
+                      <Text className="text-text-primary font-bold">
+                        {item.bookingId}
+                      </Text>
+                      <Text className="text-text-secondary text-sm mt-1">
+                        {item.name} • {item.phone}
+                      </Text>
+                    </View>
+                    <View
+                      className="px-3 py-1 rounded-full"
                       style={{
-                        color: hasPending ? COLORS.warning : COLORS.primary,
-                        fontSize: 10,
-                        fontWeight: "bold",
+                        backgroundColor: hasPending
+                          ? COLORS.warning + "30"
+                          : COLORS.primary + "30",
                       }}
                     >
-                      {(STATUS_LABELS[item.normalizedStatus as keyof typeof STATUS_LABELS] || item.status || "Pending").toUpperCase()}
-                    </Text>
+                      <Text
+                        style={{
+                          color: hasPending ? COLORS.warning : COLORS.primary,
+                          fontSize: 10,
+                          fontWeight: "bold",
+                        }}
+                      >
+                        {(STATUS_LABELS[item.normalizedStatus as keyof typeof STATUS_LABELS] || item.status || "Pending").toUpperCase()}
+                      </Text>
+                    </View>
                   </View>
-                </View>
-              </TouchableOpacity>
-            );
-          })
-        )}
-      </View>
+                </TouchableOpacity>
+              );
+            })
+          )}
+        </View>
+      )}
 
       {/* ================= MY VEHICLE BOOKINGS ================= */}
+      {!vehicleBookingLoading && vehicleBookings.length > 0 && (
       <View className="px-5 mb-6">
         <View className="flex-row items-center mb-4">
           <View className="w-1 h-5 bg-white rounded mr-2" />
@@ -928,6 +931,7 @@ export default function HomeScreen({ navigation }: any) {
           ))
         )}
       </View>
+      )}
 
       {selectedServiceBooking && (
         <BookingModal
@@ -1085,6 +1089,7 @@ export default function HomeScreen({ navigation }: any) {
 
 
       {/* ================= CUSTOMER REVIEWS ================= */}
+      {reviews.length > 0 && (
       <View className="px-5 mb-6">
         <View className="flex-row items-center mb-4">
           <View className="w-1 h-5 bg-white rounded mr-2" />
@@ -1145,6 +1150,7 @@ export default function HomeScreen({ navigation }: any) {
           )}
         />
       </View>
+      )}
 
 
       {/* ================= CONTACT ================= */}
