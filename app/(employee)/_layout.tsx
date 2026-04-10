@@ -90,8 +90,8 @@ export default function EmployeeAdminLayout() {
           backgroundColor: "#0f172a",
           borderTopColor: "#334155",
           borderTopWidth: 1,
-          height: 68,
-          paddingBottom: 13,
+          height: 80,
+          paddingBottom: 20,
           paddingTop: 8,
         },
         tabBarItemStyle: {
