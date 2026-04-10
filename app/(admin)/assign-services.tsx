@@ -24,21 +24,29 @@ const StatCard = ({
   iconName,
   IconComponent,
   gradientColors,
+  onPress,
+  isActive,
 }: any) => (
-  <View
-    style={{ backgroundColor: COLORS.card }}
-    className="mr-4 p-6 rounded-3xl border border-white/5 w-48 shadow-xl"
+  <TouchableOpacity
+    onPress={onPress}
+    activeOpacity={0.7}
+    style={{ 
+      backgroundColor: COLORS.card,
+      borderColor: isActive ? gradientColors[0] : "rgba(255,255,255,0.05)",
+      borderWidth: 1
+    }}
+    className="mr-4 p-6 rounded-3xl w-48 shadow-xl"
   >
     <View className="flex-row justify-between items-start mb-6">
-      <View className="w-12 h-12 rounded-2xl items-center justify-center bg-white/5">
-        <IconComponent name={iconName} size={24} color={gradientColors[0]} />
+      <View className={`w-12 h-12 rounded-2xl items-center justify-center ${isActive ? 'bg-white/10' : 'bg-white/5'}`}>
+        <IconComponent name={iconName} size={24} color={isActive ? gradientColors[0] : "#64748B"} />
       </View>
-      <Text className="text-white/50 font-black text-[8px] uppercase tracking-widest leading-none">
+      <Text className={`font-black text-[8px] uppercase tracking-widest leading-none ${isActive ? 'text-white' : 'text-white/50'}`}>
         {title}
       </Text>
     </View>
-    <Text className="text-white text-3xl font-black">{value}</Text>
-  </View>
+    <Text className={`text-3xl font-black ${isActive ? 'text-white' : 'text-white/80'}`}>{value}</Text>
+  </TouchableOpacity>
 );
 
 export default function AdminAssignServices() {
@@ -56,7 +64,6 @@ export default function AdminAssignServices() {
   const [modalVisible, setModalVisible] = useState(false);
   const [globalModalVisible, setGlobalModalVisible] = useState(false);
 
-  const [mainTab, setMainTab] = useState("all");
   const [tab, setTab] = useState("unassigned");
   const [dateFilter, setDateFilter] = useState("All");
   const [searchText, setSearchText] = useState("");
@@ -110,18 +117,9 @@ export default function AdminAssignServices() {
     }
   };
 
-  const currentMainList = useMemo(() => {
-    return bookings.filter((b) => {
-      const bStatus = (b.status || "").toLowerCase();
-      if (mainTab === "all") return true;
-      const isAddVehicle =
-        b.addVehicle === 1 || b.addVehicle === "1" || b.uid === "admin-created";
-      return mainTab === "booked" ? !isAddVehicle : isAddVehicle;
-    });
-  }, [bookings, mainTab]);
 
   const dateFilteredList = useMemo(() => {
-    return currentMainList.filter((b) => {
+    return bookings.filter((b) => {
       const search = searchText.toLowerCase();
       const matchSearch =
         b.name?.toLowerCase().includes(search) ||
@@ -167,7 +165,7 @@ export default function AdminAssignServices() {
       }
       return true;
     });
-  }, [currentMainList, searchText, dateFilter]);
+  }, [bookings, searchText, dateFilter]);
 
   const stats = useMemo(() => {
     const list = dateFilteredList;
@@ -178,7 +176,10 @@ export default function AdminAssignServices() {
             b.assignedEmployeeId ||
             b.assignedEmployeeName ||
             b.assigned_employee_id
-          ),
+          ) && 
+          !(b.serviceStatus || b.status || b.appointmentStatus || "")
+            .toLowerCase()
+            .includes("completed"),
       ).length,
       assigned: list.filter(
         (b) =>
@@ -224,8 +225,10 @@ export default function AdminAssignServices() {
         b.assigned_employee_id
       );
 
-      if (tab === "unassigned") return !hasAssignee;
-      if (tab === "assigned") return hasAssignee && !s.includes("completed");
+      const isCompleted = s.includes("completed");
+
+      if (tab === "unassigned") return !hasAssignee && !isCompleted;
+      if (tab === "assigned") return hasAssignee && !isCompleted;
       if (tab === "approved")
         return (
           s === "approved" ||
@@ -233,7 +236,7 @@ export default function AdminAssignServices() {
           s.includes("booked") ||
           s.includes("assigned")
         );
-      if (tab === "completed") return s.includes("completed");
+      if (tab === "completed") return isCompleted;
       return true;
     });
   }, [dateFilteredList, tab]);
@@ -342,58 +345,25 @@ export default function AdminAssignServices() {
           className="px-6 mb-10"
         >
           <StatCard
-            title="Open Orders"
+            title="Unassigned"
             value={stats.unassigned}
             iconName="user-slash"
+            isActive={tab === "unassigned"}
+            onPress={() => setTab("unassigned")}
             IconComponent={FontAwesome5Wrapper}
             gradientColors={[COLORS.primary]}
           />
           <StatCard
-            title="Active Jobs"
+            title="Assigned"
             value={stats.assigned}
             iconName="user-check"
+            isActive={tab === "assigned"}
+            onPress={() => setTab("assigned")}
             IconComponent={FontAwesome5Wrapper}
             gradientColors={[COLORS.primaryDark]}
           />
-          <StatCard
-            title="Verified"
-            value={stats.approved}
-            iconName="clipboard-check"
-            IconComponent={FontAwesome5Wrapper}
-            gradientColors={[COLORS.accent]}
-          />
-          <StatCard
-            title="Closed"
-            value={stats.completed}
-            iconName="check-circle"
-            IconComponent={FontAwesome5Wrapper}
-            gradientColors={[COLORS.success]}
-          />
         </ScrollView>
 
-        {/* MAIN TABS */}
-        <View className="px-6 mb-8 flex-row gap-2 bg-white/5 p-2 rounded-3xl border border-white/10">
-          {[
-            { id: "all", label: "Global" },
-            { id: "booked", label: "Portal" },
-            { id: "addVehicle", label: "Walk-ins" },
-          ].map((t) => (
-            <TouchableOpacity
-              key={t.id}
-              onPress={() => {
-                setMainTab(t.id);
-                setCurrentPage(1);
-              }}
-              className={`flex-1 py-4 rounded-3xl items-center ${mainTab === t.id ? "bg-primary" : "bg-white/5"}`}
-            >
-              <Text
-                className={`font-black text-[10px] uppercase tracking-widest ${mainTab === t.id ? "text-text-primary" : "text-white/40"}`}
-              >
-                {t.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
 
         {/* SEARCH & FILTERS */}
         <View className="px-6 mb-8 gap-4">
@@ -417,11 +387,8 @@ export default function AdminAssignServices() {
             className="flex-row "
           >
             {[
-              { id: "unassigned", label: `Open (${stats.unassigned})` },
-              { id: "assigned", label: `Active (${stats.assigned})` },
-              { id: "approved", label: `Verified (${stats.approved})` },
-              { id: "completed", label: `Closed (${stats.completed})` },
-              { id: "all", label: `Full (${stats.total})` },
+              { id: "unassigned", label: `Unassigned (${stats.unassigned})` },
+              { id: "assigned", label: `Assigned (${stats.assigned})` },
             ].map((s) => (
               <TouchableOpacity
                 key={s.id}
@@ -429,10 +396,10 @@ export default function AdminAssignServices() {
                   setTab(s.id);
                   setCurrentPage(1);
                 }}
-                className={`px-6 py-3 rounded-2xl border ${tab === s.id ? "bg-primary/10 border-primary" : "bg-white/5 border-white/10"}`}
+                className={`px-6 py-3 rounded-2xl border ${tab === s.id ? "bg-primary/20 border-primary" : "bg-white/5 border-white/10"}`}
               >
                 <Text
-                  className={`text-[9px] font-black uppercase tracking-widest ${tab === s.id ? "text-text-primary" : "text-white/40"}`}
+                  className={`text-[9px] font-black uppercase tracking-widest ${tab === s.id ? "text-primary" : "text-white/40"}`}
                 >
                   {s.label}
                 </Text>
@@ -559,41 +526,34 @@ export default function AdminAssignServices() {
                       </TouchableOpacity>
                     )}
                   </View>
-                  {(item.assignedEmployeeName ||
-                    item.assignedEmployeeId ||
-                    item.assignedEmployee) && (
-                    <View className="flex-row items-center gap-4 mt-2 p-4 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
-                      <Ionicons name="construct" size={16} color="#10B981" />
-                      <View>
-                        <Text className="text-emerald-500/40 text-[8px] font-black uppercase">
-                          Assigned Technician
-                        </Text>
-                        <Text className="text-emerald-500 text-xs font-black uppercase">
-                          {item.assignedEmployeeName ||
-                            item.assignedEmployee?.name ||
-                            "Service Personnel"}
-                        </Text>
-                      </View>
-                    </View>
-                  )}
                 </View>
-
                 {!item.assignedEmployeeId &&
                 !item.assignedEmployeeName &&
                 !item.assignedEmployee?._id ? (
-                  <TouchableOpacity
-                    onPress={() => openAssignModal(item)}
-                    className="w-full bg-primary py-5 rounded-2xl items-center shadow-xl shadow-primary/20 active:scale-[0.98]"
-                  >
-                    <Text className="text-background font-black text-[10px] uppercase tracking-widest">
-                      Assign Mechanic
-                    </Text>
-                  </TouchableOpacity>
+                  <View className="flex-row justify-end items-center mt-2">
+                    <TouchableOpacity
+                      onPress={() => openAssignModal(item)}
+                      className="bg-primary px-8 py-4 rounded-2xl items-center shadow-xl shadow-primary/20 active:scale-[0.98]"
+                    >
+                      <View className="flex-row items-center gap-2">
+                        <Ionicons name="person-add" size={14} color={COLORS.background} />
+                        <Text className="text-background font-black text-[10px] uppercase tracking-widest">
+                          Assign Mechanic
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  </View>
                 ) : (
-                  <View className="w-full bg-white/5 py-4 rounded-xl items-center border border-white/10">
-                    <Text className="text-white/20 font-black text-[10px] uppercase">
+                  <View className="w-full bg-white/5 py-4 px-6 rounded-xl flex-row justify-between items-center border border-white/10">
+                    <Text className="text-white/20 font-black text-[8px] uppercase">
                       Secure Allocation Locked
                     </Text>
+                    <View className="flex-row items-center gap-2">
+                       <Ionicons name="construct" size={14} color="#10B981" />
+                       <Text className="text-emerald-500 font-black text-[10px] uppercase tracking-widest">
+                         {item.assignedEmployeeName || item.assignedEmployee?.name || "Service Team"}
+                       </Text>
+                    </View>
                   </View>
                 )}
               </View>

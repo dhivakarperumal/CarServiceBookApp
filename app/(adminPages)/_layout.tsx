@@ -58,6 +58,7 @@ export default function AdminPagesLayout() {
        <Stack.Screen name="add-vehicle" options={{ title: 'ADD VEHICLE' }} />
        <Stack.Screen name="add-car-service" options={{ title: 'ADD CAR SERVICE' }} />
        <Stack.Screen name="add-pricing" options={{ title: 'ADD PRICING' }} />
+       <Stack.Screen name="completed-history" options={{ headerShown: false }} />
     </Stack>
   );
 }
