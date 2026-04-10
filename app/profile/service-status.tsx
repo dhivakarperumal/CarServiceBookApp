@@ -74,19 +74,19 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 const STATUS_NORMALIZER: Record<string, string> = {
-  "Booked": "BOOKED",
+  Booked: "BOOKED",
   "Appointment Booked": "APPOINTMENT_BOOKED",
   "Call Verified": "CALL_VERIFIED",
-  "Approved": "APPROVED",
-  "Processing": "PROCESSING",
+  Approved: "APPROVED",
+  Processing: "PROCESSING",
   "Waiting for Spare": "WAITING_SPARE",
   "Service Going on": "SERVICE_GOING",
   "Bill Pending": "BILL_PENDING",
   "Bill Completed": "BILL_COMPLETED",
   "Service Completed": "SERVICE_COMPLETED",
-  "Completed": "SERVICE_COMPLETED",
-  "Cancelled": "CANCELLED",
-  "Assigned": "ASSIGNED",
+  Completed: "SERVICE_COMPLETED",
+  Cancelled: "CANCELLED",
+  Assigned: "ASSIGNED",
 };
 
 /* ===== COMPONENT ===== */
@@ -161,7 +161,7 @@ const ServiceStatus: React.FC = () => {
             b.bookingId === service.bookingId ||
             b.bookingId === service.booking_id ||
             b.id === service.serviceId ||
-            b.id === service.id
+            b.id === service.id,
         );
         return isUserEmail || isUserUid || isBookingMatch;
       });
@@ -172,7 +172,9 @@ const ServiceStatus: React.FC = () => {
         userServices.map(async (service: any) => {
           try {
             const detailRes = await api.get(`/all-services/${service.id}`);
-            console.log(`ServiceStatus: service ${service.id} (${service.bookingId}) has ${detailRes.data?.issues?.length || 0} issues`);
+            console.log(
+              `ServiceStatus: service ${service.id} (${service.bookingId}) has ${detailRes.data?.issues?.length || 0} issues`,
+            );
             return {
               ...service,
               parts:
@@ -198,7 +200,7 @@ const ServiceStatus: React.FC = () => {
             console.warn(
               "ServiceStatus: failed service detail fetch",
               service.id,
-              err
+              err,
             );
             return {
               ...service,
@@ -208,15 +210,18 @@ const ServiceStatus: React.FC = () => {
               issueStatus: null,
             };
           }
-        })
+        }),
       );
 
-      const spares: SpareService[] = servicesWithDetails.map((service: any) => ({
-        serviceId: service.id || service.serviceId,
-        serviceName: service.bookingId || service.booking_id || service.orderId || "",
-        parts: service.parts || [],
-        issues: service.issues || [],
-      }));
+      const spares: SpareService[] = servicesWithDetails.map(
+        (service: any) => ({
+          serviceId: service.id || service.serviceId,
+          serviceName:
+            service.bookingId || service.booking_id || service.orderId || "",
+          parts: service.parts || [],
+          issues: service.issues || [],
+        }),
+      );
 
       // console.log("ServiceStatus: processed spare parts", spares);
       setSpareParts(spares);
@@ -224,7 +229,7 @@ const ServiceStatus: React.FC = () => {
       const regularBookings = bookingsRaw.filter(
         (b: any) =>
           b.email?.toLowerCase() === user.email.toLowerCase() ||
-          b.uid === user.uid
+          b.uid === user.uid,
       );
 
       // 🔥 MERGE HERE
@@ -235,14 +240,22 @@ const ServiceStatus: React.FC = () => {
         const bookingId = b.bookingId || b.booking_id;
         const serviceId = b.serviceId || b.service_id;
 
-        const matchedService = servicesWithDetails.find((s: any) =>
-          (bookingId && (s.bookingId === bookingId || s.booking_id === bookingId)) ||
-          (serviceId && (s.id === serviceId || s.serviceId === serviceId)) ||
-          (bookingId && s.bookingDocId === bookingId)
+        const matchedService = servicesWithDetails.find(
+          (s: any) =>
+            (bookingId &&
+              (s.bookingId === bookingId || s.booking_id === bookingId)) ||
+            (serviceId && (s.id === serviceId || s.serviceId === serviceId)) ||
+            (bookingId && s.bookingDocId === bookingId),
         );
 
-        console.log(`ServiceStatus: booking ${b.bookingId} matched service:`, matchedService?.id, matchedService?.bookingId);
-        console.log(`ServiceStatus: booking ${b.bookingId} getting ${matchedService?.issues?.length || 0} issues from service ${matchedService?.id}`);
+        console.log(
+          `ServiceStatus: booking ${b.bookingId} matched service:`,
+          matchedService?.id,
+          matchedService?.bookingId,
+        );
+        console.log(
+          `ServiceStatus: booking ${b.bookingId} getting ${matchedService?.issues?.length || 0} issues from service ${matchedService?.id}`,
+        );
 
         return {
           ...b,
@@ -251,7 +264,12 @@ const ServiceStatus: React.FC = () => {
           issue: b.issue || b.serviceType || matchedService?.issue || "",
           issueAmount: b.issueAmount ?? matchedService?.issueAmount,
           issueStatus: b.issueStatus || matchedService?.issueStatus,
-          serviceId: b.serviceId || b.service_id || matchedService?.id || matchedService?.serviceId || null,
+          serviceId:
+            b.serviceId ||
+            b.service_id ||
+            matchedService?.id ||
+            matchedService?.serviceId ||
+            null,
           brand: b.brand || b.vehicleBrand || matchedService?.brand,
           model: b.model || b.vehicleModel || matchedService?.model,
           vehicleNumber:
@@ -259,8 +277,13 @@ const ServiceStatus: React.FC = () => {
             b.registrationNumber ||
             matchedService?.vehicleNumber ||
             matchedService?.registrationNumber,
-          address: b.address || b.location || matchedService?.address || matchedService?.location,
-          preferredDate: b.preferredDate || b.date || matchedService?.preferredDate,
+          address:
+            b.address ||
+            b.location ||
+            matchedService?.address ||
+            matchedService?.location,
+          preferredDate:
+            b.preferredDate || b.date || matchedService?.preferredDate,
           assignedEmployeeName:
             b.assignedEmployeeName ||
             b.assignedEmployee ||
@@ -276,7 +299,7 @@ const ServiceStatus: React.FC = () => {
           (booking) =>
             booking.bookingId === selectedBooking.bookingId ||
             booking.id === selectedBooking.id ||
-            booking.serviceId === selectedBooking.serviceId
+            booking.serviceId === selectedBooking.serviceId,
         );
         if (refreshed) {
           setSelectedBooking(refreshed);
@@ -297,7 +320,7 @@ const ServiceStatus: React.FC = () => {
     serviceId: number,
     itemId: string | null,
     status: "approved" | "rejected",
-    type: "part" | "issue" = "part"
+    type: "part" | "issue" = "part",
   ) => {
     const normalizedItemId = itemId || null;
     // console.log("ServiceStatus: handleApprove", { serviceId, itemId: normalizedItemId, status, type });
@@ -315,7 +338,10 @@ const ServiceStatus: React.FC = () => {
       } else {
         let primaryError: any = null;
         try {
-          console.log("ServiceStatus: issue approve /all-services primary", { serviceId, itemId });
+          console.log("ServiceStatus: issue approve /all-services primary", {
+            serviceId,
+            itemId,
+          });
           await api.put(`/all-services/${serviceId}/issues/${itemId}/status`, {
             issueStatus: status,
           });
@@ -327,7 +353,10 @@ const ServiceStatus: React.FC = () => {
         if (primaryError) {
           let fallbackError: any = null;
           try {
-            console.log("ServiceStatus: issue approve fallback /all-services/issues/{itemId}", { serviceId, itemId });
+            console.log(
+              "ServiceStatus: issue approve fallback /all-services/issues/{itemId}",
+              { serviceId, itemId },
+            );
             await api.put(`/all-services/${serviceId}/issues/${itemId}`, {
               issueStatus: status,
             });
@@ -338,14 +367,23 @@ const ServiceStatus: React.FC = () => {
 
           if (fallbackError) {
             try {
-              console.log("ServiceStatus: issue approve fallback /all-services/issues/{itemId}/approve", { serviceId, itemId });
-              await api.put(`/all-services/${serviceId}/issues/${itemId}/approve`, {
-                issueStatus: status,
-              });
+              console.log(
+                "ServiceStatus: issue approve fallback /all-services/issues/{itemId}/approve",
+                { serviceId, itemId },
+              );
+              await api.put(
+                `/all-services/${serviceId}/issues/${itemId}/approve`,
+                {
+                  issueStatus: status,
+                },
+              );
             } catch (err3) {
               console.warn("ServiceStatus: issue fallback 2 failed", err3);
               try {
-                console.log("ServiceStatus: issue approve fallback /bookings/issues/{itemId}", { serviceId, itemId });
+                console.log(
+                  "ServiceStatus: issue approve fallback /bookings/issues/{itemId}",
+                  { serviceId, itemId },
+                );
                 await api.put(`/bookings/${serviceId}/issues/${itemId}`, {
                   issueStatus: status,
                 });
@@ -365,7 +403,33 @@ const ServiceStatus: React.FC = () => {
       }
 
       // console.log("ServiceStatus: approve success", { serviceId, itemId, status, type });
-      await fetchData();
+      setSpareParts((prev) =>
+        prev.map((service) => {
+          if (service.serviceId !== serviceId) return service;
+
+          if (type === "part") {
+            return {
+              ...service,
+              parts: service.parts.map((p) =>
+                p.id === itemId ? { ...p, status } : p,
+              ),
+            };
+          }
+
+          if (type === "issue") {
+            return {
+              ...service,
+              issues: service.issues?.map((i: any) =>
+                i.id === itemId || i._id === itemId
+                  ? { ...i, issueStatus: status }
+                  : i,
+              ),
+            };
+          }
+
+          return service;
+        }),
+      );
       if (selectedBooking) {
         setSelectedBooking((prev) => {
           if (!prev) return null;
@@ -373,7 +437,7 @@ const ServiceStatus: React.FC = () => {
             ...prev,
             issueStatus: type === "issue" ? status : prev.issueStatus,
             issues: prev.issues?.map((issue) =>
-              issue.id === itemId ? { ...issue, issueStatus: status } : issue
+              issue.id === itemId ? { ...issue, issueStatus: status } : issue,
             ),
           } as Booking;
         });
@@ -389,11 +453,12 @@ const ServiceStatus: React.FC = () => {
 
   const renderItem = ({ item }: { item: Booking }) => {
     const bookingSpares = spareParts.find(
-      (sp) => sp.serviceId === item.serviceId || sp.serviceId === item.id
+      (sp) => sp.serviceId === item.serviceId || sp.serviceId === item.id,
     );
 
-    const hasPending =
-      bookingSpares?.parts?.some((p) => p.status === "pending");
+    const hasPending = bookingSpares?.parts?.some(
+      (p) => p.status === "pending",
+    );
 
     return (
       <TouchableOpacity
@@ -409,7 +474,6 @@ const ServiceStatus: React.FC = () => {
         }}
       >
         <View className="flex-row justify-between items-center">
-
           {/* LEFT CONTENT */}
           <View className="flex-1 pr-2">
             <Text className="text-text-primary font-bold">
@@ -419,7 +483,6 @@ const ServiceStatus: React.FC = () => {
             <Text className="text-text-secondary text-sm mt-1">
               {item.name} • {item.phone}
             </Text>
-
           </View>
 
           {/* RIGHT STATUS BADGE */}
@@ -438,13 +501,13 @@ const ServiceStatus: React.FC = () => {
                 fontWeight: "bold",
               }}
             >
-              {(STATUS_LABELS[item.normalizedStatus || ""] ||
+              {(
+                STATUS_LABELS[item.normalizedStatus || ""] ||
                 item.status ||
                 "PENDING"
               ).toUpperCase()}
             </Text>
           </View>
-
         </View>
       </TouchableOpacity>
     );
@@ -461,7 +524,10 @@ const ServiceStatus: React.FC = () => {
   }
 
   return (
-    <SafeAreaView edges={["left", "right"]} className="flex-1 bg-background px-4">
+    <SafeAreaView
+      edges={["left", "right"]}
+      className="flex-1 bg-background px-4"
+    >
       <Text className="text-primary mt-5 text-2xl font-bold mb-4">
         My Service Bookings
       </Text>
@@ -526,7 +592,7 @@ const ServiceStatus: React.FC = () => {
                     {part.status.toUpperCase()}
                   </Text>
                 </View>
-              ))
+              )),
             )}
           </ScrollView>
 
@@ -552,7 +618,6 @@ const ServiceStatus: React.FC = () => {
       )}
     </SafeAreaView>
   );
-
 };
 
 export default ServiceStatus;

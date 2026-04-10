@@ -276,7 +276,7 @@ const Header: React.FC = () => {
           </TouchableOpacity>
 
           {/* 🔷 RIGHT SIDE */}
-          <View className="flex-row items-center gap-3">
+          <View className="flex-row items-center gap-6">
 
             {/* 🛒 CART */}
             <View className="relative">
@@ -365,7 +365,7 @@ const Header: React.FC = () => {
         />
 
         {/* MENU BOX */}
-        <View className="absolute top-20 right-5 w-[320px] max-h-[70%] bg-card rounded-2xl border border-primary/30 py-2 shadow-lg">
+        <View className="absolute top-20 right-5 w-[220px] max-h-[70%] bg-card rounded-2xl border border-primary/30 py-2 shadow-lg">
 
           {/* PROFILE */}
           <TouchableOpacity
