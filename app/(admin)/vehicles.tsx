@@ -333,7 +333,7 @@ export default function AdminVehicles() {
                         >
                           <Ionicons
                             name="create-outline"
-                            size={14}
+                            size={16}
                             color={COLORS.textMuted}
                           />
                         </TouchableOpacity>
@@ -343,7 +343,7 @@ export default function AdminVehicles() {
                         >
                           <Ionicons
                             name="trash-outline"
-                            size={14}
+                            size={16}
                             color="#ef4444"
                           />
                         </TouchableOpacity>
