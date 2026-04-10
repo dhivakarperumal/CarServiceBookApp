@@ -275,7 +275,7 @@ export default function AddServiceParts() {
                 <View
                   style={{
                     position: "absolute",
-                    top: 60,
+                    top: 80,
                     left: 0,
                     right: 0,
                     zIndex: 999,
@@ -327,17 +327,6 @@ export default function AddServiceParts() {
                 </View>
               )}
 
-              {focusedPartIndex === i && (
-                <TouchableOpacity
-                  onPress={addPartRow}
-                  className="flex-row items-center justify-center p-4 mt-20 rounded-2xl border border-card border-dashed"
-                >
-                  <Ionicons name="add-circle" size={20} color="#10B981" />
-                  <Text className="text-success font-black ml-2 uppercase text-xs tracking-widest">
-                    Add Another Spare
-                  </Text>
-                </TouchableOpacity>
-              )}
             </View>
 
             <View className="flex-row gap-4">

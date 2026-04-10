@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import EmployeeHeaderDropdown from "../../components/EmployeeHeaderDropdown";
 import { useAuth } from "../../contexts/AuthContext";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function EmployeeAdminLayout() {
   const router = useRouter();
@@ -81,6 +82,8 @@ export default function EmployeeAdminLayout() {
     </View>
   );
 
+  const insets = useSafeAreaInsets();
+
   return (
     <Tabs
       screenOptions={({ route }) => ({
@@ -90,8 +93,8 @@ export default function EmployeeAdminLayout() {
           backgroundColor: "#0f172a",
           borderTopColor: "#334155",
           borderTopWidth: 1,
-          height: 80,
-          paddingBottom: 20,
+          height: 80 + insets.bottom,
+          paddingBottom: 20 + insets.bottom,
           paddingTop: 8,
         },
         tabBarItemStyle: {

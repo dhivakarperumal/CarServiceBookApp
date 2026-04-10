@@ -1,5 +1,6 @@
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AuthProvider } from "../contexts/AuthContext";
 import { CartProvider } from "../contexts/CartContext";
 import { FavoriteProvider } from "../contexts/FavoriteContext";
@@ -8,9 +9,10 @@ import './global.css';
 
 export default function RootLayout() {
   return (
-    <AuthProvider>
-      <CartProvider>
-        <FavoriteProvider>
+    <SafeAreaProvider>
+      <AuthProvider>
+        <CartProvider>
+          <FavoriteProvider>
           <Stack
             screenOptions={{
               headerStyle: {
@@ -83,5 +85,6 @@ export default function RootLayout() {
         </FavoriteProvider>
       </CartProvider>
     </AuthProvider>
+    </SafeAreaProvider>
   );
 }
