@@ -235,7 +235,7 @@ export default function AddServiceParts() {
         {parts.map((p, i) => (
           <View
             key={i}
-            className="bg-card border border-card rounded-3xl p-5 mb-4 shadow-sm"
+            className="bg-card border border-card rounded-3xl p-5 mb-4 shadow-sm overflow-visible"
           >
             <View className="flex-row justify-between items-center mb-4">
               <Text className="text-[10px] font-black text-text-muted uppercase tracking-widest">
@@ -270,13 +270,23 @@ export default function AddServiceParts() {
                 }}
                 className="bg-background border border-card rounded-2xl p-4 text-text-primary font-bold mb-4"
               />
-              
+
               {focusedPartIndex === i && showProductList && (
-                <View className="absolute top-[60px] left-0 right-0 z-50 bg-slate-900 border border-slate-700 rounded-2xl max-h-[200px] overflow-hidden shadow-2xl">
+                <View
+                  style={{
+                    position: "absolute",
+                    top: 60,
+                    left: 0,
+                    right: 0,
+                    zIndex: 999,
+                    elevation: 10, // ✅ VERY IMPORTANT (Android)
+                  }}
+                  className="bg-slate-900 border border-slate-700 rounded-2xl max-h-[200px] shadow-2xl"
+                >
                   <ScrollView nestedScrollEnabled={true}>
                     {products
-                      .filter((prod) => 
-                        !p.partName || 
+                      .filter((prod) =>
+                        !p.partName ||
                         prod.name.toLowerCase().includes(p.partName.toLowerCase())
                       )
                       .slice(0, 100)
@@ -308,13 +318,25 @@ export default function AddServiceParts() {
                       </View>
                     )}
                   </ScrollView>
-                  <TouchableOpacity 
+                  <TouchableOpacity
                     onPress={() => setShowProductList(false)}
                     className="p-3 bg-slate-800 items-center border-t border-slate-700"
                   >
                     <Text className="text-text-muted text-[10px] font-black uppercase tracking-widest">Close List</Text>
                   </TouchableOpacity>
                 </View>
+              )}
+
+              {focusedPartIndex === i && (
+                <TouchableOpacity
+                  onPress={addPartRow}
+                  className="flex-row items-center justify-center p-4 mt-20 rounded-2xl border border-card border-dashed"
+                >
+                  <Ionicons name="add-circle" size={20} color="#10B981" />
+                  <Text className="text-success font-black ml-2 uppercase text-xs tracking-widest">
+                    Add Another Spare
+                  </Text>
+                </TouchableOpacity>
               )}
             </View>
 
