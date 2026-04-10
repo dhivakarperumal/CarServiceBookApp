@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as Location from 'expo-location';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, KeyboardAvoidingView, Modal, Platform, ScrollView, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useAuth } from '../../contexts/AuthContext';
@@ -92,12 +92,33 @@ const BookingForm = ({ currentUser, router }: any) => {
   const [locationLoading, setLocationLoading] = useState(false);
   const searchTimeoutRef = useRef<any>(null);
   const [serviceType, setServiceType] = useState<"home" | "shop">("home");
+  const params = useLocalSearchParams();
+  const [selectedPackage, setSelectedPackage] = useState(null);
+  const isShopOnly = selectedPackage?.place === "shop";
 
   useEffect(() => {
     if (currentUser) {
       setFormData(prev => ({ ...prev, name: currentUser.username || currentUser.name || prev.name, email: currentUser.email || prev.email, phone: currentUser.mobile || prev.phone }));
     }
   }, [currentUser]);
+
+  useEffect(() => {
+    if (params?.selectedPackage) {
+      const pkg = JSON.parse(params.selectedPackage);
+
+      setSelectedPackage(pkg);
+
+      // ✅ set default service type
+      setServiceType(pkg.place === "shop" ? "shop" : "home");
+
+      // ✅ set package info
+      setFormData(prev => ({
+        ...prev,
+        issue: "Others",
+        otherIssue: `Package: ${pkg.title} - Price: ₹${pkg.price}`
+      }));
+    }
+  }, [params?.selectedPackage]);
 
   const searchLocation = async (query: string) => {
     setLocationQuery(query);
@@ -186,18 +207,22 @@ const BookingForm = ({ currentUser, router }: any) => {
 
         {/* HOME */}
         <TouchableOpacity
-          onPress={() => setServiceType("home")}
+          onPress={() => !isShopOnly && setServiceType("home")}
           className="flex-row items-center gap-2"
+          disabled={isShopOnly}
         >
           <View
-            className={`w-5 h-5 rounded-full border-2 items-center justify-center ${serviceType === "home" ? "border-primary" : "border-gray400"
-              }`}
+            className={`w-5 h-5 rounded-full border-2 items-center justify-center 
+      ${serviceType === "home" ? "border-primary" : "border-gray400"}
+      ${isShopOnly ? "opacity-40" : ""}
+    `}
           >
             {serviceType === "home" && (
               <View className="w-2 h-2 rounded-full bg-primary" />
             )}
           </View>
-          <Text className={serviceType === "home" ? "text-text-primary font-bold" : "text-gray400"}>
+
+          <Text className={`${serviceType === "home" ? "text-text-primary font-bold" : "text-gray400"} ${isShopOnly ? "opacity-40" : ""}`}>
             Home Service
           </Text>
         </TouchableOpacity>
