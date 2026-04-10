@@ -396,10 +396,10 @@ export default function VehiclesScreen() {
             </View>
 
             {/* List */}
-            {loading ? (
-               <View className="flex-1 justify-center items-center">
+            {loading && vehicles.length === 0 ? (
+               <View className="flex-1 justify-center items-center py-20">
                   <ActivityIndicator size="large" color="#38bdf8" />
-                  <Text className="text-gray-400 mt-4">Loading vehicles...</Text>
+                  <Text className="text-gray-400 mt-4 font-bold tracking-widest text-[10px] uppercase">Retrieving vehicles...</Text>
                </View>
             ) : (
                <FlatList

@@ -163,14 +163,6 @@ export default function ProductsScreen() {
     return isNaN(num) ? '0.00' : num.toFixed(2);
   };
 
-  if (loading) {
-    return (
-      <View className="flex-1 justify-center items-center bg-[#0B1120]">
-        <ActivityIndicator size="large" color={COLORS.primary} />
-        <Text className="text-[#94A3B8] mt-3 text-sm">Loading products...</Text>
-      </View>
-    );
-  }
 
   const renderItem = ({ item }: { item: ApiProduct }) => {
     const imageUri = getProductImage(item.images);
@@ -284,20 +276,27 @@ export default function ProductsScreen() {
           </ScrollView>
         </View>
 
-        <FlatList
-          data={filteredProducts}
-          keyExtractor={(item) => String(item.docId)}
-          renderItem={renderItem}
-          numColumns={2}
-          columnWrapperStyle={{ justifyContent: 'space-between' }}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 40 }}
-          ListEmptyComponent={() => (
-            <View className="flex-1 items-center pt-15">
-              <Text className="text-[#94A3B8] text-sm">No products available at the moment</Text>
-            </View>
-          )}
-        />
+        {loading && products.length === 0 ? (
+          <View className="flex-1 justify-center items-center py-20">
+            <ActivityIndicator size="large" color={COLORS.primary} />
+            <Text className="text-[#94A3B8] mt-3 text-sm">Loading products...</Text>
+          </View>
+        ) : (
+          <FlatList
+            data={filteredProducts}
+            keyExtractor={(item) => String(item.docId)}
+            renderItem={renderItem}
+            numColumns={2}
+            columnWrapperStyle={{ justifyContent: 'space-between' }}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 40 }}
+            ListEmptyComponent={() => (
+              <View className="flex-1 items-center pt-15">
+                <Text className="text-[#94A3B8] text-sm">No products available at the moment</Text>
+              </View>
+            )}
+          />
+        )}
       </View>
       <Modal visible={showFilters} animationType="slide">
         <View className="flex-1 bg-[#0a0a0b]">

@@ -405,6 +405,3 @@ export default function AddServiceParts() {
     </SafeAreaView>
   );
 }
-    </SafeAreaView>
-  );
-}

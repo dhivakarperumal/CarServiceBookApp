@@ -41,8 +41,10 @@ export default function PricingScreen() {
                     paddingTop: 10,
                 }}
             >
-                {loading ? (
-                    <ActivityIndicator size="large" color={COLORS.primary} />
+                {loading && packages.length === 0 ? (
+                    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                        <ActivityIndicator size="large" color={COLORS.primary} />
+                    </View>
                 ) : (
                     <FlatList
                         data={packages}
