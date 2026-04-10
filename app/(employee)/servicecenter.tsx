@@ -81,7 +81,7 @@ export default function ServiceCenter() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState("");
-  const [dateFilter, setDateFilter] = useState("all");
+  const [dateFilter, setDateFilter] = useState("today");
   const [expandedItems, setExpandedItems] = useState<(string | number)[]>([]);
 
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
@@ -178,65 +178,64 @@ export default function ServiceCenter() {
     }
   };
 
-const filteredList = useMemo(() => {
-  const mechanicName =
-    userProfile?.username ||
-    (userProfile as any)?.displayName ||
-    (userProfile as any)?.name ||
-    "";
+  const filteredList = useMemo(() => {
+    const mechanicName =
+      userProfile?.username ||
+      (userProfile as any)?.displayName ||
+      (userProfile as any)?.name ||
+      "";
 
-  return services.filter((s) => {
-    const text =
-      `${s.bookingId || ""} ${s.name || ""} ${s.phone || ""} ${s.brand || ""} ${s.model || ""} ${s.vehicleNumber || ""}`.toLowerCase();
+    return services.filter((s) => {
+      const text =
+        `${s.bookingId || ""} ${s.name || ""} ${s.phone || ""} ${s.brand || ""} ${s.model || ""} ${s.vehicleNumber || ""}`.toLowerCase();
 
-    // SEARCH FILTER
-    if (search && !text.includes(search.toLowerCase())) return false;
+      // SEARCH FILTER
+      if (search && !text.includes(search.toLowerCase())) return false;
 
-    // MECHANIC FILTER
-    if (subTab === "assigned") {
-      if (!s.assignedEmployeeId) return false;
+      // MECHANIC FILTER
+      if (subTab === "assigned") {
+        if (!s.assignedEmployeeId) return false;
 
-      if (
-        isMechanic &&
-        (s.assignedEmployeeName || "").toLowerCase() !==
-          mechanicName.toLowerCase()
-      )
-        return false;
-    }
-
-    if (subTab === "unassigned") {
-      if (s.assignedEmployeeId) return false;
-    }
-
-    // DATE FILTER (Same as Web)
-    const bDateStr = s.created_at || s.createdAt;
-    if (dateFilter !== "all") {
-      if (!bDateStr) return false;
-
-      const bookingDate = new Date(bDateStr);
-      const today = new Date();
-
-      if (dateFilter === "today") {
-        if (bookingDate.toDateString() !== today.toDateString())
+        if (
+          isMechanic &&
+          (s.assignedEmployeeName || "").toLowerCase() !==
+            mechanicName.toLowerCase()
+        )
           return false;
       }
 
-      if (dateFilter === "week") {
-        const lastWeek = new Date();
-        lastWeek.setDate(today.getDate() - 7);
-        if (bookingDate < lastWeek) return false;
+      if (subTab === "unassigned") {
+        if (s.assignedEmployeeId) return false;
       }
 
-      if (dateFilter === "month") {
-        const lastMonth = new Date();
-        lastMonth.setMonth(today.getMonth() - 1);
-        if (bookingDate < lastMonth) return false;
-      }
-    }
+      // DATE FILTER (Same as Web)
+      const bDateStr = s.created_at || s.createdAt;
+      if (dateFilter !== "all") {
+        if (!bDateStr) return false;
 
-    return true;
-  });
-}, [services, search, dateFilter, subTab, userProfile]);
+        const bookingDate = new Date(bDateStr);
+        const today = new Date();
+
+        if (dateFilter === "today") {
+          if (bookingDate.toDateString() !== today.toDateString()) return false;
+        }
+
+        if (dateFilter === "week") {
+          const lastWeek = new Date();
+          lastWeek.setDate(today.getDate() - 7);
+          if (bookingDate < lastWeek) return false;
+        }
+
+        if (dateFilter === "month") {
+          const lastMonth = new Date();
+          lastMonth.setMonth(today.getMonth() - 1);
+          if (bookingDate < lastMonth) return false;
+        }
+      }
+
+      return true;
+    });
+  }, [services, search, dateFilter, subTab, userProfile]);
 
   const stats = useMemo(() => {
     const total = filteredList.length;
@@ -383,138 +382,135 @@ const filteredList = useMemo(() => {
 
   return (
     <SafeAreaView className="relative flex-1 bg-background">
-      {/* HEADER */}
-      <View
-        className="bg-card px-5 pt-5 pb-4 border-b border-card"
-        style={{ flex: 0.2, minHeight: height * 0.2 }}
-      >
-        {/* Quick Stats */}
-        <View className="mb-4">
-          <View className="flex-row gap-3">
-            {/* TOTAL ASSIGNED */}
-            <View className="flex-1 rounded-[28px] bg-slate-950/95 border border-text-muted p-4">
-              <Text className="text-[10px] uppercase tracking-[0.3em] text-text-muted font-semibold mb-4">
-                Total Assigned
-              </Text>
-
-              <View className="flex-row items-center justify-between">
-                <Text className="text-3xl font-black text-text-primary">
-                  {stats.total}
-                </Text>
-
-                <View className="h-10 w-10 rounded-full bg-primary/10 items-center justify-center">
-                  <Ionicons
-                    name="clipboard-outline"
-                    size={18}
-                    color="#0EA5E9"
-                  />
-                </View>
-              </View>
-            </View>
-
-            {/* IN PROGRESS */}
-            <View className="flex-1 rounded-[28px] bg-slate-950/95 border border-text-muted p-4">
-              <Text className="text-[10px] uppercase tracking-[0.3em] text-text-muted font-semibold mb-4">
-                In Progress
-              </Text>
-
-              <View className="flex-row items-center justify-between">
-                <Text className="text-3xl font-black text-text-primary">
-                  {stats.processing}
-                </Text>
-
-                <View className="h-10 w-10 rounded-full bg-primary/10 items-center justify-center">
-                  <Ionicons
-                    name="construct-outline"
-                    size={18}
-                    color="#0EA5E9"
-                  />
-                </View>
-              </View>
-            </View>
-
-            {/* FINISHED */}
-            <View className="flex-1 rounded-[28px] bg-slate-950/95 border border-text-muted p-4">
-              <Text className="text-[10px] uppercase tracking-[0.3em] text-text-muted font-semibold mb-4">
-                Finished
-              </Text>
-
-              <View className="flex-row items-center justify-between">
-                <Text className="text-3xl font-black text-text-primary">
-                  {stats.completed}
-                </Text>
-
-                <View className="h-10 w-10 rounded-full bg-success/10 items-center justify-center">
-                  <Ionicons
-                    name="checkmark-circle-outline"
-                    size={18}
-                    color="#10B981"
-                  />
-                </View>
-              </View>
-            </View>
-          </View>
-        </View>
-
-        {/* SEARCH */}
-        <View className="relative mb-5">
-          <View className="absolute left-4 top-3.5 z-10">
-            <Ionicons name="search" size={18} color="#64748b" />
-          </View>
-          <TextInput
-            placeholder="Search bookings, vehicles..."
-            placeholderTextColor="#64748b"
-            value={search}
-            onChangeText={setSearch}
-            className="w-full pl-12 pr-4 py-4 border border-slate-700 bg-slate-800/80 rounded-2xl text-text-primary font-bold shadow-lg"
-          />
-        </View>
-
-        {/* FILTER PICKERS */}
-        <View className="flex-row gap-3">
-          <View className="flex-1 bg-slate-800 border border-slate-700 rounded-2xl px-3 py-1 shadow-sm overflow-hidden">
-            <Picker
-              selectedValue={dateFilter}
-              onValueChange={(value) => setDateFilter(value)}
-              dropdownIconColor="#64748B"
-              style={{ color: "#FFFFFF" }}
-              itemStyle={{ color: "#FFFFFF", fontSize: 14 }}
-            >
-              <Picker.Item label="All" value="all" />
-              <Picker.Item label="Today" value="today" />
-              <Picker.Item label="This Week" value="week" />
-              <Picker.Item label="This Month" value="month" />
-            </Picker>
-          </View>
-
-          <View className="flex-1 bg-slate-800 border border-slate-700 rounded-2xl px-3 py-1 shadow-sm overflow-hidden">
-            <Picker
-              selectedValue={mainTab}
-              onValueChange={(value) => setMainTab(value)}
-              dropdownIconColor="#64748B"
-              style={{ color: "#FFFFFF" }}
-              itemStyle={{ color: "#FFFFFF", fontSize: 14 }}
-            >
-              <Picker.Item label="All" value="all" />
-              <Picker.Item label="Appointments" value="booked" />
-              <Picker.Item label="Booking" value="addVehicle" />
-            </Picker>
-          </View>
-        </View>
-      </View>
-
       <ScrollView
-        style={{ flex: 0.78 }}
         contentContainerStyle={{
-          paddingHorizontal: 5,
-          paddingTop: 20,
-          paddingBottom: 180,
+          paddingBottom: 200,
         }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
+        {/* HEADER */}
+        <View
+          className="bg-card px-5 pt-5 pb-4 border-b border-card"
+          style={{ flex: 0.2, minHeight: height * 0.2 }}
+        >
+          {/* Quick Stats */}
+          <View className="mb-4">
+            <View className="flex-row gap-3">
+              {/* TOTAL ASSIGNED */}
+              <View className="flex-1 rounded-[28px] bg-slate-950/95 border border-text-muted p-4">
+                <Text className="text-[10px] uppercase tracking-[0.3em] text-text-muted font-semibold mb-4">
+                  Total Assigned
+                </Text>
+
+                <View className="flex-row items-center justify-between">
+                  <Text className="text-3xl font-black text-text-primary">
+                    {stats.total}
+                  </Text>
+
+                  <View className="h-10 w-10 rounded-full bg-primary/10 items-center justify-center">
+                    <Ionicons
+                      name="clipboard-outline"
+                      size={18}
+                      color="#0EA5E9"
+                    />
+                  </View>
+                </View>
+              </View>
+
+              {/* IN PROGRESS */}
+              <View className="flex-1 rounded-[28px] bg-slate-950/95 border border-text-muted p-4">
+                <Text className="text-[10px] uppercase tracking-[0.3em] text-text-muted font-semibold mb-4">
+                  In Progress
+                </Text>
+
+                <View className="flex-row items-center justify-between">
+                  <Text className="text-3xl font-black text-text-primary">
+                    {stats.processing}
+                  </Text>
+
+                  <View className="h-10 w-10 rounded-full bg-primary/10 items-center justify-center">
+                    <Ionicons
+                      name="construct-outline"
+                      size={18}
+                      color="#0EA5E9"
+                    />
+                  </View>
+                </View>
+              </View>
+
+              {/* FINISHED */}
+              <View className="flex-1 rounded-[28px] bg-slate-950/95 border border-text-muted p-4">
+                <Text className="text-[10px] uppercase tracking-[0.3em] text-text-muted font-semibold mb-4">
+                  Finished
+                </Text>
+
+                <View className="flex-row items-center justify-between">
+                  <Text className="text-3xl font-black text-text-primary">
+                    {stats.completed}
+                  </Text>
+
+                  <View className="h-10 w-10 rounded-full bg-success/10 items-center justify-center">
+                    <Ionicons
+                      name="checkmark-circle-outline"
+                      size={18}
+                      color="#10B981"
+                    />
+                  </View>
+                </View>
+              </View>
+            </View>
+          </View>
+
+          {/* SEARCH */}
+          <View className="relative mb-5">
+            <View className="absolute left-4 top-3.5 z-10">
+              <Ionicons name="search" size={18} color="#64748b" />
+            </View>
+            <TextInput
+              placeholder="Search bookings, vehicles..."
+              placeholderTextColor="#64748b"
+              value={search}
+              onChangeText={setSearch}
+              className="w-full pl-12 pr-4 py-4 border border-slate-700 bg-slate-800/80 rounded-2xl text-text-primary font-bold shadow-lg"
+            />
+          </View>
+
+          {/* FILTER PICKERS */}
+          <View className="flex-row gap-3">
+            <View className="flex-1 bg-slate-800 border border-slate-700 rounded-2xl px-3 py-1 shadow-sm overflow-hidden">
+              <Picker
+                selectedValue={dateFilter}
+                onValueChange={(value) => setDateFilter(value)}
+                dropdownIconColor="#64748B"
+                style={{ color: "#FFFFFF" }}
+                itemStyle={{ color: "#FFFFFF", fontSize: 14 }}
+              >
+                <Picker.Item label="All" value="all" />
+                <Picker.Item label="Today" value="today" />
+                <Picker.Item label="This Week" value="week" />
+                <Picker.Item label="This Month" value="month" />
+              </Picker>
+            </View>
+
+            <View className="flex-1 bg-slate-800 border border-slate-700 rounded-2xl px-3 py-1 shadow-sm overflow-hidden">
+              <Picker
+                selectedValue={mainTab}
+                onValueChange={(value) => setMainTab(value)}
+                dropdownIconColor="#64748B"
+                style={{ color: "#FFFFFF" }}
+                itemStyle={{ color: "#FFFFFF", fontSize: 14 }}
+              >
+                <Picker.Item label="All" value="all" />
+                <Picker.Item label="Appointments" value="booked" />
+                <Picker.Item label="Booking" value="addVehicle" />
+              </Picker>
+            </View>
+          </View>
+        </View>
+
         {/* SUB TABS */}
         <View className="flex-row gap-3">
           {!isMechanic && (
@@ -533,7 +529,7 @@ const filteredList = useMemo(() => {
         </View>
 
         {/* SERVICE CARDS */}
-        <View className="px-0 pb-24">
+        <View className="px-3 pb-24 mt-3">
           {filteredList.length === 0 ? (
             <View className="bg-card rounded-3xl p-12 items-center border border-card border-dashed mt-10">
               <Ionicons name="car-outline" size={48} color="#64748B" />
@@ -835,273 +831,273 @@ const filteredList = useMemo(() => {
             })
           )}
         </View>
-      </ScrollView>
 
-      {/* FIXED NEW INVOICE BUTTON */}
-      <View className="absolute right-5 bottom-6 z-30">
-        <TouchableOpacity
-          onPress={() => router.push("/(employee)/add-billing" as any)}
-          className="flex-row items-center gap-2 bg-primary px-5 py-4 rounded-full shadow-2xl"
-        >
-          <Ionicons name="add" size={20} color="#FFFFFF" />
-          <Text className="text-text-primary font-black text-sm uppercase">
-            New Invoice
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* ASSIGN MODAL */}
-      <Modal visible={modalVisible} transparent={true} animationType="fade">
-        <View className="flex-1 bg-black/60 justify-center p-6">
-          <View className="bg-card rounded-3xl p-8 border border-card">
-            <Text className="text-2xl font-black text-text-primary text-center mb-2">
-              Assign Mechanic
+        {/* FIXED NEW INVOICE BUTTON */}
+        <View className="absolute right-5 bottom-6 z-30">
+          <TouchableOpacity
+            onPress={() => router.push("/(employee)/add-billing" as any)}
+            className="flex-row items-center gap-2 bg-primary px-5 py-4 rounded-full shadow-2xl"
+          >
+            <Ionicons name="add" size={20} color="#FFFFFF" />
+            <Text className="text-text-primary font-black text-sm uppercase">
+              New Invoice
             </Text>
-            <Text className="text-text-muted text-center text-xs font-medium mb-8 uppercase tracking-widest">
-              Select staff for this vehicle
-            </Text>
+          </TouchableOpacity>
+        </View>
 
-            <View className="bg-background border border-card rounded-2xl p-2 mb-8">
-              {employees.map((emp) => (
-                <TouchableOpacity
-                  key={emp.id}
-                  onPress={() => setSelectedEmployeeId(emp.id.toString())}
-                  className={`flex-row items-center p-4 rounded-xl mb-1 ${selectedEmployeeId === emp.id.toString() ? "bg-primary" : ""}`}
-                >
-                  <View
-                    className={`w-8 h-8 rounded-full items-center justify-center mr-3 ${selectedEmployeeId === emp.id.toString() ? "bg-white/20" : "bg-card"}`}
+        {/* ASSIGN MODAL */}
+        <Modal visible={modalVisible} transparent={true} animationType="fade">
+          <View className="flex-1 bg-black/60 justify-center p-6">
+            <View className="bg-card rounded-3xl p-8 border border-card">
+              <Text className="text-2xl font-black text-text-primary text-center mb-2">
+                Assign Mechanic
+              </Text>
+              <Text className="text-text-muted text-center text-xs font-medium mb-8 uppercase tracking-widest">
+                Select staff for this vehicle
+              </Text>
+
+              <View className="bg-background border border-card rounded-2xl p-2 mb-8">
+                {employees.map((emp) => (
+                  <TouchableOpacity
+                    key={emp.id}
+                    onPress={() => setSelectedEmployeeId(emp.id.toString())}
+                    className={`flex-row items-center p-4 rounded-xl mb-1 ${selectedEmployeeId === emp.id.toString() ? "bg-primary" : ""}`}
                   >
-                    <Ionicons
-                      name="person"
-                      size={16}
-                      color={
-                        selectedEmployeeId === emp.id.toString()
-                          ? "#FFFFFF"
-                          : "#64748B"
-                      }
-                    />
-                  </View>
-                  <View>
-                    <Text
-                      className={`font-bold ${selectedEmployeeId === emp.id.toString() ? "text-text-primary" : "text-text-secondary"}`}
+                    <View
+                      className={`w-8 h-8 rounded-full items-center justify-center mr-3 ${selectedEmployeeId === emp.id.toString() ? "bg-white/20" : "bg-card"}`}
                     >
-                      {emp.name}
-                    </Text>
-                    <Text
-                      className={`text-[10px] ${selectedEmployeeId === emp.id.toString() ? "text-text-primary/70" : "text-text-muted"}`}
-                    >
-                      {emp.role || "Staff"}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              ))}
-            </View>
+                      <Ionicons
+                        name="person"
+                        size={16}
+                        color={
+                          selectedEmployeeId === emp.id.toString()
+                            ? "#FFFFFF"
+                            : "#64748B"
+                        }
+                      />
+                    </View>
+                    <View>
+                      <Text
+                        className={`font-bold ${selectedEmployeeId === emp.id.toString() ? "text-text-primary" : "text-text-secondary"}`}
+                      >
+                        {emp.name}
+                      </Text>
+                      <Text
+                        className={`text-[10px] ${selectedEmployeeId === emp.id.toString() ? "text-text-primary/70" : "text-text-muted"}`}
+                      >
+                        {emp.role || "Staff"}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </View>
 
-            <View className="flex-row gap-4">
-              <TouchableOpacity
-                onPress={() => {
-                  setModalVisible(false);
-                  setSelectedEmployeeId("");
-                }}
-                className="flex-1 py-4 bg-card rounded-2xl items-center"
+              <View className="flex-row gap-4">
+                <TouchableOpacity
+                  onPress={() => {
+                    setModalVisible(false);
+                    setSelectedEmployeeId("");
+                  }}
+                  className="flex-1 py-4 bg-card rounded-2xl items-center"
+                >
+                  <Text className="text-text-secondary font-bold">Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={assignEmployee}
+                  disabled={!selectedEmployeeId || assigning}
+                  className={`flex-1 py-4 bg-primary rounded-2xl items-center ${!selectedEmployeeId || assigning ? "opacity-50" : ""}`}
+                >
+                  {assigning ? (
+                    <ActivityIndicator color="#FFFFFF" />
+                  ) : (
+                    <Text className="text-text-primary font-bold">
+                      Assign Now
+                    </Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
+        {/* ISSUE MODAL */}
+        <Modal
+          visible={issueModalVisible}
+          transparent={true}
+          animationType="slide"
+        >
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : undefined}
+            className="flex-1 bg-black/60 justify-end"
+          >
+            <View className="bg-card rounded-t-3xl p-8 pb-12 border-t border-card">
+              <View className="flex-row justify-between items-center mb-6">
+                <View>
+                  <Text className="text-2xl font-black text-text-primary">
+                    Manage Issues
+                  </Text>
+                  <Text className="text-text-muted text-[10px] font-black uppercase tracking-widest mt-1">
+                    Itemized service reporting
+                  </Text>
+                </View>
+                <TouchableOpacity onPress={() => setIssueModalVisible(false)}>
+                  <Ionicons name="close" size={28} color="#64748B" />
+                </TouchableOpacity>
+              </View>
+
+              <ScrollView
+                className="max-h-[50vh] mb-6"
+                showsVerticalScrollIndicator={false}
               >
-                <Text className="text-text-secondary font-bold">Cancel</Text>
-              </TouchableOpacity>
+                {issueEntries.map((entry, idx) => (
+                  <View
+                    key={idx}
+                    className="bg-background border border-card rounded-3xl p-5 mb-4"
+                  >
+                    <View className="flex-row justify-between items-center mb-4">
+                      <Text className="text-[10px] font-black text-text-muted uppercase tracking-widest">
+                        Task #{idx + 1}
+                      </Text>
+                      <TouchableOpacity
+                        onPress={() => {
+                          const copy = [...issueEntries];
+                          copy.splice(idx, 1);
+                          setIssueEntries(copy);
+                        }}
+                      >
+                        <Ionicons name="trash" size={16} color="#EF4444" />
+                      </TouchableOpacity>
+                    </View>
+
+                    <TextInput
+                      value={entry.issue}
+                      onChangeText={(t) => {
+                        const copy = [...issueEntries];
+                        copy[idx].issue = t;
+                        setIssueEntries(copy);
+                      }}
+                      placeholder="Describe car issue..."
+                      placeholderTextColor="#64748B"
+                      multiline
+                      className="bg-card border border-card rounded-2xl p-4 text-text-primary font-bold text-sm min-h-[80px]"
+                    />
+
+                    <View className="flex-row gap-4 mt-4 items-center">
+                      <View className="flex-1 relative">
+                        <Text className="absolute left-4 top-3.5 z-10 text-success font-black">
+                          ₹
+                        </Text>
+                        <TextInput
+                          value={entry.issueAmount?.toString()}
+                          onChangeText={(t) => {
+                            const copy = [...issueEntries];
+                            copy[idx].issueAmount = t;
+                            setIssueEntries(copy);
+                          }}
+                          placeholder="0.00"
+                          placeholderTextColor="#64748B"
+                          keyboardType="numeric"
+                          className="bg-card border border-card rounded-2xl pl-8 pr-4 py-3.5 text-text-primary font-black"
+                        />
+                      </View>
+                      <View
+                        className={`px-4 py-3 rounded-2xl border ${entry.issueStatus === "approved" ? "bg-success border-success" : "bg-card border-card"}`}
+                      >
+                        <Text
+                          className={`text-[10px] font-black uppercase tracking-widest ${entry.issueStatus === "approved" ? "text-text-primary" : "text-text-muted"}`}
+                        >
+                          {entry.issueStatus || "pending"}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                ))}
+
+                <TouchableOpacity
+                  onPress={() =>
+                    setIssueEntries([
+                      ...issueEntries,
+                      { issue: "", issueAmount: "", issueStatus: "pending" },
+                    ])
+                  }
+                  className="flex-row items-center justify-center p-4 rounded-2xl border border-card border-dashed"
+                >
+                  <Ionicons name="add-circle" size={20} color="#64748B" />
+                  <Text className="text-text-muted font-bold ml-2 uppercase text-[10px] tracking-widest">
+                    Add another task
+                  </Text>
+                </TouchableOpacity>
+              </ScrollView>
+
               <TouchableOpacity
-                onPress={assignEmployee}
-                disabled={!selectedEmployeeId || assigning}
-                className={`flex-1 py-4 bg-primary rounded-2xl items-center ${!selectedEmployeeId || assigning ? "opacity-50" : ""}`}
+                onPress={saveIssues}
+                disabled={savingIssues}
+                className={`w-full py-4 bg-primary rounded-2xl items-center ${savingIssues ? "opacity-30" : ""}`}
               >
-                {assigning ? (
+                {savingIssues ? (
                   <ActivityIndicator color="#FFFFFF" />
                 ) : (
-                  <Text className="text-text-primary font-bold">
-                    Assign Now
+                  <Text className="text-text-primary font-black uppercase tracking-widest">
+                    Save All Changes
                   </Text>
                 )}
               </TouchableOpacity>
             </View>
-          </View>
-        </View>
-      </Modal>
+          </KeyboardAvoidingView>
+        </Modal>
 
-      {/* ISSUE MODAL */}
-      <Modal
-        visible={issueModalVisible}
-        transparent={true}
-        animationType="slide"
-      >
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
-          className="flex-1 bg-black/60 justify-end"
+        {/* STATUS SELECT MODAL */}
+        <Modal
+          visible={statusModalVisible}
+          transparent={true}
+          animationType="fade"
         >
-          <View className="bg-card rounded-t-3xl p-8 pb-12 border-t border-card">
-            <View className="flex-row justify-between items-center mb-6">
-              <View>
-                <Text className="text-2xl font-black text-text-primary">
-                  Manage Issues
-                </Text>
-                <Text className="text-text-muted text-[10px] font-black uppercase tracking-widest mt-1">
-                  Itemized service reporting
-                </Text>
-              </View>
-              <TouchableOpacity onPress={() => setIssueModalVisible(false)}>
-                <Ionicons name="close" size={28} color="#64748B" />
-              </TouchableOpacity>
-            </View>
+          <View className="flex-1 bg-black/60 justify-center p-6">
+            <View className="bg-card rounded-3xl p-8 border border-card">
+              <Text className="text-2xl font-black text-text-primary text-center mb-6">
+                Update Status
+              </Text>
 
-            <ScrollView
-              className="max-h-[50vh] mb-6"
-              showsVerticalScrollIndicator={false}
-            >
-              {issueEntries.map((entry, idx) => (
-                <View
-                  key={idx}
-                  className="bg-background border border-card rounded-3xl p-5 mb-4"
-                >
-                  <View className="flex-row justify-between items-center mb-4">
-                    <Text className="text-[10px] font-black text-text-muted uppercase tracking-widest">
-                      Task #{idx + 1}
-                    </Text>
+              <View className="bg-background border border-card rounded-3xl overflow-hidden max-h-[60vh]">
+                <ScrollView showsVerticalScrollIndicator={false}>
+                  {["Processing", "Waiting for Spare"].map((s) => (
                     <TouchableOpacity
+                      key={s}
                       onPress={() => {
-                        const copy = [...issueEntries];
-                        copy.splice(idx, 1);
-                        setIssueEntries(copy);
+                        handleStatusChange(activeServiceForStatus, s);
+                        setStatusModalVisible(false);
                       }}
-                    >
-                      <Ionicons name="trash" size={16} color="#EF4444" />
-                    </TouchableOpacity>
-                  </View>
-
-                  <TextInput
-                    value={entry.issue}
-                    onChangeText={(t) => {
-                      const copy = [...issueEntries];
-                      copy[idx].issue = t;
-                      setIssueEntries(copy);
-                    }}
-                    placeholder="Describe car issue..."
-                    placeholderTextColor="#64748B"
-                    multiline
-                    className="bg-card border border-card rounded-2xl p-4 text-text-primary font-bold text-sm min-h-[80px]"
-                  />
-
-                  <View className="flex-row gap-4 mt-4 items-center">
-                    <View className="flex-1 relative">
-                      <Text className="absolute left-4 top-3.5 z-10 text-success font-black">
-                        ₹
-                      </Text>
-                      <TextInput
-                        value={entry.issueAmount?.toString()}
-                        onChangeText={(t) => {
-                          const copy = [...issueEntries];
-                          copy[idx].issueAmount = t;
-                          setIssueEntries(copy);
-                        }}
-                        placeholder="0.00"
-                        placeholderTextColor="#64748B"
-                        keyboardType="numeric"
-                        className="bg-card border border-card rounded-2xl pl-8 pr-4 py-3.5 text-text-primary font-black"
-                      />
-                    </View>
-                    <View
-                      className={`px-4 py-3 rounded-2xl border ${entry.issueStatus === "approved" ? "bg-success border-success" : "bg-card border-card"}`}
+                      className={`p-5 border-b border-card flex-row items-center justify-between ${activeServiceForStatus?.serviceStatus === s ? "bg-primary" : ""}`}
                     >
                       <Text
-                        className={`text-[10px] font-black uppercase tracking-widest ${entry.issueStatus === "approved" ? "text-text-primary" : "text-text-muted"}`}
+                        className={`font-black uppercase tracking-widest text-xs ${activeServiceForStatus?.serviceStatus === s ? "text-text-primary" : "text-text-secondary"}`}
                       >
-                        {entry.issueStatus || "pending"}
+                        {s}
                       </Text>
-                    </View>
-                  </View>
-                </View>
-              ))}
+                      {activeServiceForStatus?.serviceStatus === s && (
+                        <Ionicons
+                          name="checkmark-circle"
+                          size={16}
+                          color="#FFFFFF"
+                        />
+                      )}
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
 
               <TouchableOpacity
-                onPress={() =>
-                  setIssueEntries([
-                    ...issueEntries,
-                    { issue: "", issueAmount: "", issueStatus: "pending" },
-                  ])
-                }
-                className="flex-row items-center justify-center p-4 rounded-2xl border border-card border-dashed"
+                onPress={() => setStatusModalVisible(false)}
+                className="mt-6 w-full py-4 bg-card rounded-2xl items-center"
               >
-                <Ionicons name="add-circle" size={20} color="#64748B" />
-                <Text className="text-text-muted font-bold ml-2 uppercase text-[10px] tracking-widest">
-                  Add another task
+                <Text className="text-text-secondary font-bold uppercase tracking-widest text-[10px]">
+                  Close
                 </Text>
               </TouchableOpacity>
-            </ScrollView>
-
-            <TouchableOpacity
-              onPress={saveIssues}
-              disabled={savingIssues}
-              className={`w-full py-4 bg-primary rounded-2xl items-center ${savingIssues ? "opacity-30" : ""}`}
-            >
-              {savingIssues ? (
-                <ActivityIndicator color="#FFFFFF" />
-              ) : (
-                <Text className="text-text-primary font-black uppercase tracking-widest">
-                  Save All Changes
-                </Text>
-              )}
-            </TouchableOpacity>
-          </View>
-        </KeyboardAvoidingView>
-      </Modal>
-
-      {/* STATUS SELECT MODAL */}
-      <Modal
-        visible={statusModalVisible}
-        transparent={true}
-        animationType="fade"
-      >
-        <View className="flex-1 bg-black/60 justify-center p-6">
-          <View className="bg-card rounded-3xl p-8 border border-card">
-            <Text className="text-2xl font-black text-text-primary text-center mb-6">
-              Update Status
-            </Text>
-
-            <View className="bg-background border border-card rounded-3xl overflow-hidden max-h-[60vh]">
-              <ScrollView showsVerticalScrollIndicator={false}>
-                {["Processing", "Waiting for Spare"].map((s) => (
-                  <TouchableOpacity
-                    key={s}
-                    onPress={() => {
-                      handleStatusChange(activeServiceForStatus, s);
-                      setStatusModalVisible(false);
-                    }}
-                    className={`p-5 border-b border-card flex-row items-center justify-between ${activeServiceForStatus?.serviceStatus === s ? "bg-primary" : ""}`}
-                  >
-                    <Text
-                      className={`font-black uppercase tracking-widest text-xs ${activeServiceForStatus?.serviceStatus === s ? "text-text-primary" : "text-text-secondary"}`}
-                    >
-                      {s}
-                    </Text>
-                    {activeServiceForStatus?.serviceStatus === s && (
-                      <Ionicons
-                        name="checkmark-circle"
-                        size={16}
-                        color="#FFFFFF"
-                      />
-                    )}
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
             </View>
-
-            <TouchableOpacity
-              onPress={() => setStatusModalVisible(false)}
-              className="mt-6 w-full py-4 bg-card rounded-2xl items-center"
-            >
-              <Text className="text-text-secondary font-bold uppercase tracking-widest text-[10px]">
-                Close
-              </Text>
-            </TouchableOpacity>
           </View>
-        </View>
-      </Modal>
+        </Modal>
+      </ScrollView>
     </SafeAreaView>
   );
 }
