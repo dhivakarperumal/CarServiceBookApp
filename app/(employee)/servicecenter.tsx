@@ -178,79 +178,65 @@ export default function ServiceCenter() {
     }
   };
 
-  const filteredList = useMemo(() => {
-    const mechanicName =
-      userProfile?.username ||
-      (userProfile as any)?.displayName ||
-      (userProfile as any)?.name ||
-      "";
+const filteredList = useMemo(() => {
+  const mechanicName =
+    userProfile?.username ||
+    (userProfile as any)?.displayName ||
+    (userProfile as any)?.name ||
+    "";
 
-    return services.filter((s) => {
-      // Main Tab Filter
-      const isDirect = !!s.addVehicle;
-      if (mainTab === "booked" && isDirect) return false;
-      if (mainTab === "addVehicle" && !isDirect) return false;
+  return services.filter((s) => {
+    const text =
+      `${s.bookingId || ""} ${s.name || ""} ${s.phone || ""} ${s.brand || ""} ${s.model || ""} ${s.vehicleNumber || ""}`.toLowerCase();
 
-      // Sub Tab Filter
-      if (subTab === "assigned") {
-        if (!s.assignedEmployeeId) return false;
-        if (
-          isMechanic &&
-          (s.assignedEmployeeName || "").toLowerCase() !==
-            mechanicName.toLowerCase()
-        )
+    // SEARCH FILTER
+    if (search && !text.includes(search.toLowerCase())) return false;
+
+    // MECHANIC FILTER
+    if (subTab === "assigned") {
+      if (!s.assignedEmployeeId) return false;
+
+      if (
+        isMechanic &&
+        (s.assignedEmployeeName || "").toLowerCase() !==
+          mechanicName.toLowerCase()
+      )
+        return false;
+    }
+
+    if (subTab === "unassigned") {
+      if (s.assignedEmployeeId) return false;
+    }
+
+    // DATE FILTER (Same as Web)
+    const bDateStr = s.created_at || s.createdAt;
+    if (dateFilter !== "all") {
+      if (!bDateStr) return false;
+
+      const bookingDate = new Date(bDateStr);
+      const today = new Date();
+
+      if (dateFilter === "today") {
+        if (bookingDate.toDateString() !== today.toDateString())
           return false;
-
-        // Status Filter: Only show active jobs
-        const validStatuses = ["Processing", "Waiting for Spare"];
-        if (!validStatuses.includes(s.serviceStatus || "")) return false;
-      } else {
-        if (s.assignedEmployeeId) return false;
       }
 
-      // Date Filter
-      if (dateFilter !== "all") {
-        const now = new Date();
-        const createdAt =
-          s.createdAt || s.date || s.bookingDate || s.created_at;
-        const serviceDate = createdAt ? new Date(createdAt) : null;
-        if (!serviceDate) return false;
-        const serviceDay = new Date(
-          serviceDate.getFullYear(),
-          serviceDate.getMonth(),
-          serviceDate.getDate(),
-        );
-        const today = new Date(
-          now.getFullYear(),
-          now.getMonth(),
-          now.getDate(),
-        );
-
-        if (dateFilter === "today") {
-          if (serviceDay.getTime() !== today.getTime()) return false;
-        } else if (dateFilter === "week") {
-          const weekStart = new Date(today);
-          weekStart.setDate(today.getDate() - today.getDay());
-          const weekEnd = new Date(weekStart);
-          weekEnd.setDate(weekStart.getDate() + 6);
-          if (serviceDay < weekStart || serviceDay > weekEnd) return false;
-        } else if (dateFilter === "month") {
-          if (
-            serviceDate.getMonth() !== now.getMonth() ||
-            serviceDate.getFullYear() !== now.getFullYear()
-          )
-            return false;
-        }
+      if (dateFilter === "week") {
+        const lastWeek = new Date();
+        lastWeek.setDate(today.getDate() - 7);
+        if (bookingDate < lastWeek) return false;
       }
 
-      // Search Filter
-      const text =
-        `${s.bookingId || ""} ${s.name || s.customer_name || ""} ${s.phone || s.mobile || ""} ${s.brand || ""} ${s.model || ""} ${s.vehicleNumber || s.vehicle_number || ""}`.toLowerCase();
-      if (search && !text.includes(search.toLowerCase())) return false;
+      if (dateFilter === "month") {
+        const lastMonth = new Date();
+        lastMonth.setMonth(today.getMonth() - 1);
+        if (bookingDate < lastMonth) return false;
+      }
+    }
 
-      return true;
-    });
-  }, [services, mainTab, subTab, search, userProfile, dateFilter]);
+    return true;
+  });
+}, [services, search, dateFilter, subTab, userProfile]);
 
   const stats = useMemo(() => {
     const total = filteredList.length;

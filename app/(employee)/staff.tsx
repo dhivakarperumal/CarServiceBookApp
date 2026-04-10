@@ -378,10 +378,13 @@ export default function EmployeeDashboard() {
           </View>
           <TouchableOpacity
             onPress={() => router.push("/(employee)/assigned" as any)}
+            className="flex-row items-center gap-1.5 bg-primary/10 px-3 py-1.5 rounded-2xl"
           >
-            <Text className="text-xs font-black uppercase text-primary">
+            <Text className="text-xs font-black uppercase text-primary tracking-wider">
               View All
             </Text>
+
+            <Ionicons name="arrow-forward" size={14} color="#0EA5E9" />
           </TouchableOpacity>
         </View>
 
