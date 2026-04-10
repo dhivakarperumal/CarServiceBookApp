@@ -117,6 +117,15 @@ const BookingForm = ({ currentUser, router }: any) => {
         issue: "Others",
         otherIssue: `Package: ${pkg.title} - Price: ₹${pkg.price}`
       }));
+    } else {
+      // Reset when no package selected (e.g., coming from home quick service)
+      setSelectedPackage(null);
+      setServiceType("home");
+      setFormData(prev => ({
+        ...prev,
+        issue: "",
+        otherIssue: ""
+      }));
     }
   }, [params?.selectedPackage]);
 
