@@ -27,6 +27,8 @@ export default function AddServiceParts() {
   const [fetching, setFetching] = useState(true);
 
   const [parts, setParts] = useState([{ partName: "", qty: "1", price: "0" }]);
+  const [focusedPartIndex, setFocusedPartIndex] = useState<number | null>(null);
+  const [showProductList, setShowProductList] = useState(false);
 
   useEffect(() => {
     loadInitialData();
@@ -246,21 +248,75 @@ export default function AddServiceParts() {
               )}
             </View>
 
-            <TextInput
-              placeholder="Enter Part Name..."
-              placeholderTextColor="#64748B"
-              value={p.partName}
-              onChangeText={(t) => {
-                const selected = products.find(
-                  (prod) => prod.name.toLowerCase() === t.toLowerCase(),
-                );
-                const copy = [...parts];
-                copy[i].partName = t;
-                if (selected) copy[i].price = selected.offerPrice.toString();
-                setParts(copy);
-              }}
-              className="bg-background border border-card rounded-2xl p-4 text-text-primary font-bold mb-4"
-            />
+            <View className="relative">
+              <TextInput
+                placeholder="Enter Part Name..."
+                placeholderTextColor="#64748B"
+                value={p.partName}
+                onFocus={() => {
+                  setFocusedPartIndex(i);
+                  setShowProductList(true);
+                }}
+                onChangeText={(t) => {
+                  const copy = [...parts];
+                  copy[i].partName = t;
+                  const selected = products.find(
+                    (prod) => prod.name.toLowerCase() === t.toLowerCase()
+                  );
+                  if (selected) copy[i].price = selected.offerPrice.toString();
+                  setParts(copy);
+                  setFocusedPartIndex(i);
+                  setShowProductList(true);
+                }}
+                className="bg-background border border-card rounded-2xl p-4 text-text-primary font-bold mb-4"
+              />
+              
+              {focusedPartIndex === i && showProductList && (
+                <View className="absolute top-[60px] left-0 right-0 z-50 bg-slate-900 border border-slate-700 rounded-2xl max-h-[200px] overflow-hidden shadow-2xl">
+                  <ScrollView nestedScrollEnabled={true}>
+                    {products
+                      .filter((prod) => 
+                        !p.partName || 
+                        prod.name.toLowerCase().includes(p.partName.toLowerCase())
+                      )
+                      .slice(0, 100)
+                      .map((prod, idx) => (
+                        <TouchableOpacity
+                          key={idx}
+                          onPress={() => {
+                            const copy = [...parts];
+                            copy[i].partName = prod.name;
+                            copy[i].price = prod.offerPrice.toString();
+                            setParts(copy);
+                            setShowProductList(false);
+                            setFocusedPartIndex(null);
+                          }}
+                          className="p-4 border-b border-slate-800 flex-row justify-between items-center"
+                        >
+                          <View className="flex-1 mr-2">
+                            <Text className="text-text-primary font-bold text-sm">{prod.name}</Text>
+                            <Text className="text-text-muted text-[10px] uppercase font-bold mt-1">
+                              {prod.category || "General"}
+                            </Text>
+                          </View>
+                          <Text className="text-success font-black text-sm">₹{prod.offerPrice}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    {p.partName && !products.some(pr => pr.name.toLowerCase().includes(p.partName.toLowerCase())) && (
+                      <View className="p-4 items-center">
+                        <Text className="text-text-muted text-xs italic">No matching products - Manual Entry</Text>
+                      </View>
+                    )}
+                  </ScrollView>
+                  <TouchableOpacity 
+                    onPress={() => setShowProductList(false)}
+                    className="p-3 bg-slate-800 items-center border-t border-slate-700"
+                  >
+                    <Text className="text-text-muted text-[10px] font-black uppercase tracking-widest">Close List</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
 
             <View className="flex-row gap-4">
               <View className="flex-1">
