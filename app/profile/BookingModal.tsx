@@ -150,8 +150,8 @@ const BookingModal: React.FC<Props> = ({
                   {/* NUMBER CIRCLE */}
                   <View
                     className={`w-10 h-10 rounded-full items-center justify-center border-2 ${isCompleted
-                        ? "bg-primary border-primary"
-                        : "bg-card border-gray700"
+                      ? "bg-primary border-primary"
+                      : "bg-card border-gray700"
                       }`}
                   >
                     <Text
@@ -334,7 +334,7 @@ const BookingModal: React.FC<Props> = ({
                       </Text>
 
                       {/* ✅ APPROVE / REJECT FIX */}
-                      {status === "pending" && bookingSpare?.serviceId && (
+                      {/* {status === "pending" && bookingSpare?.serviceId && (
                         <View className="flex-row gap-2 mt-2">
                           <TouchableOpacity
                             onPress={() =>
@@ -380,7 +380,7 @@ const BookingModal: React.FC<Props> = ({
                             </Text>
                           </TouchableOpacity>
                         </View>
-                      )}
+                      )} */}
                     </View>
                   );
                 })}
@@ -429,7 +429,7 @@ const BookingModal: React.FC<Props> = ({
                       </Text>
 
                       {/* ✅ ISSUE APPROVAL FIX */}
-                      {status === "pending" && effectiveServiceId && issueId && (
+                      {/* {status === "pending" && effectiveServiceId && issueId && (
                         <View className="flex-row gap-2 mt-2">
                           <TouchableOpacity
                             onPress={() =>
@@ -475,7 +475,7 @@ const BookingModal: React.FC<Props> = ({
                             </Text>
                           </TouchableOpacity>
                         </View>
-                      )}
+                      )} */}
                     </View>
                   );
                 })}
@@ -500,6 +500,156 @@ const BookingModal: React.FC<Props> = ({
                 No issue details available for this booking.
               </Text>
             )}
+
+            {/* ===== COMMON APPROVE / REJECT (LIKE WEB) ===== */}
+            {(() => {
+              const hasPendingSpares = bookingSpare?.parts?.some(
+                (p) => p.status === "pending"
+              );
+
+              const hasPendingIssues = booking.issues?.length
+                ? booking.issues.some(
+                  (i) => (i.issueStatus || "pending") === "pending"
+                )
+                : (booking.issueStatus || "pending") === "pending";
+
+              if (!hasPendingSpares && !hasPendingIssues) return null;
+
+              return (
+                <View
+                  className="mt-6 p-4 rounded-lg"
+                  style={{
+                    backgroundColor: COLORS.card,
+                    borderWidth: 1,
+                    borderColor: COLORS.gray700,
+                  }}
+                >
+                  <Text className="text-primary font-bold text-center mb-3">
+                    Approve or Reject All
+                  </Text>
+
+                  <View className="flex-row justify-center gap-3">
+
+                    {/* ✅ APPROVE ALL */}
+                    <TouchableOpacity
+                      onPress={() => {
+                        // SPARES
+                        if (hasPendingSpares && bookingSpare?.serviceId) {
+                          bookingSpare.parts
+                            .filter((p) => p.status === "pending")
+                            .forEach((p) => {
+                              onApprove(
+                                bookingSpare.serviceId,
+                                p.id,
+                                "approved",
+                                "part"
+                              );
+                            });
+                        }
+
+                        // ISSUES
+                        if (hasPendingIssues && effectiveServiceId) {
+                          if (booking.issues?.length) {
+                            booking.issues
+                              .filter(
+                                (i) =>
+                                  (i.issueStatus || "pending") === "pending"
+                              )
+                              .forEach((i) => {
+                                const id =
+                                  i.id || i._id || i.issueId || i.issue_id;
+                                if (id) {
+                                  onApprove(
+                                    effectiveServiceId,
+                                    id,
+                                    "approved",
+                                    "issue"
+                                  );
+                                }
+                              });
+                          } else {
+                            onApprove(
+                              effectiveServiceId,
+                              "",
+                              "approved",
+                              "issue"
+                            );
+                          }
+                        }
+                      }}
+                      style={{
+                        backgroundColor: COLORS.success,
+                        padding: 12,
+                        borderRadius: 10,
+                        minWidth: 120,
+                        alignItems: "center",
+                      }}
+                    >
+                      <Text className="text-white font-bold">Approve All</Text>
+                    </TouchableOpacity>
+
+                    {/* ❌ REJECT ALL */}
+                    <TouchableOpacity
+                      onPress={() => {
+                        // SPARES
+                        if (hasPendingSpares && bookingSpare?.serviceId) {
+                          bookingSpare.parts
+                            .filter((p) => p.status === "pending")
+                            .forEach((p) => {
+                              onApprove(
+                                bookingSpare.serviceId,
+                                p.id,
+                                "rejected",
+                                "part"
+                              );
+                            });
+                        }
+
+                        // ISSUES
+                        if (hasPendingIssues && effectiveServiceId) {
+                          if (booking.issues?.length) {
+                            booking.issues
+                              .filter(
+                                (i) =>
+                                  (i.issueStatus || "pending") === "pending"
+                              )
+                              .forEach((i) => {
+                                const id =
+                                  i.id || i._id || i.issueId || i.issue_id;
+                                if (id) {
+                                  onApprove(
+                                    effectiveServiceId,
+                                    id,
+                                    "rejected",
+                                    "issue"
+                                  );
+                                }
+                              });
+                          } else {
+                            onApprove(
+                              effectiveServiceId,
+                              "",
+                              "rejected",
+                              "issue"
+                            );
+                          }
+                        }
+                      }}
+                      style={{
+                        backgroundColor: COLORS.error,
+                        padding: 12,
+                        borderRadius: 10,
+                        minWidth: 120,
+                        alignItems: "center",
+                      }}
+                    >
+                      <Text className="text-white font-bold">Reject All</Text>
+                    </TouchableOpacity>
+
+                  </View>
+                </View>
+              );
+            })()}
 
             {/* STATUS */}
             <StatusTracker currentStatus={booking.status} />
