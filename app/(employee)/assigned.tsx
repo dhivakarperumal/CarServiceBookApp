@@ -216,17 +216,6 @@ export default function AssignedHistory() {
     });
   }, [services, search, filterStatus, dateFilter, dateRange]);
 
-  if (loading) {
-    return (
-      <View className="flex-1 bg-background justify-center items-center">
-        <ActivityIndicator size="large" color="#0EA5E9" />
-        <Text className="text-[10px] font-black uppercase tracking-widest mt-4 text-text-secondary">
-          Syncing your service history...
-        </Text>
-      </View>
-    );
-  }
-
   return (
     <SafeAreaView className="flex-1 bg-background">
       <ScrollView
@@ -387,7 +376,14 @@ export default function AssignedHistory() {
         </View>
 
         {/* LIST */}
-        {filteredServices.length === 0 ? (
+        {loading && services.length === 0 ? (
+          <View className="py-20 justify-center items-center">
+            <ActivityIndicator size="large" color="#0EA5E9" />
+            <Text className="text-[10px] font-black uppercase tracking-widest mt-4 text-text-secondary">
+              Syncing your service history...
+            </Text>
+          </View>
+        ) : filteredServices.length === 0 ? (
           <View className="rounded-[2rem] p-12 items-center border border-dashed bg-card border-card">
             <View className="w-20 h-20 rounded-full items-center justify-center mb-4 border bg-background border-card">
               <Ionicons name="car-outline" size={40} color="#64748B" />

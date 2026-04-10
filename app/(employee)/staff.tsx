@@ -388,7 +388,7 @@ export default function EmployeeDashboard() {
           </TouchableOpacity>
         </View>
 
-        {loading ? (
+        {loading && myTasks.length === 0 ? (
           <ActivityIndicator size="large" color="#0EA5E9" className="my-8" />
         ) : myTasks.length === 0 ? (
           <View className="bg-card p-8 rounded-3xl border border-card justify-center items-center mb-6">

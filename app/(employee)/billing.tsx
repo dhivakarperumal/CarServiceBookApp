@@ -170,17 +170,6 @@ export default function EmployeeBilling() {
     });
   }, [bills, search, statusFilter]);
 
-  if (loading) {
-    return (
-      <View className="flex-1 bg-background justify-center items-center">
-        <ActivityIndicator size="large" color="#0EA5E9" />
-        <Text className="text-text-secondary mt-4 font-medium">
-          Fetching billing records...
-        </Text>
-      </View>
-    );
-  }
-
   return (
     <SafeAreaView className="flex-1 bg-background">
       <ScrollView
@@ -277,7 +266,14 @@ export default function EmployeeBilling() {
         </View>
 
         {/* LIST */}
-        {filteredBills.length === 0 ? (
+        {loading && bills.length === 0 ? (
+          <View className="py-20 justify-center items-center">
+            <ActivityIndicator size="large" color="#0EA5E9" />
+            <Text className="text-text-secondary mt-4 font-medium italic">
+              Synchronizing records...
+            </Text>
+          </View>
+        ) : filteredBills.length === 0 ? (
           <View className="bg-card rounded-[2rem] p-12 items-center border border-card border-dashed">
             <Ionicons name="alert-circle-outline" size={48} color="#64748B" />
             <Text className="text-text-primary text-lg font-black mt-4">

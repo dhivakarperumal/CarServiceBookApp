@@ -129,17 +129,6 @@ export default function AddServiceParts() {
     }
   };
 
-  if (fetching) {
-    return (
-      <View className="flex-1 bg-background justify-center items-center">
-        <ActivityIndicator size="large" color="#10b981" />
-        <Text className="text-text-secondary mt-4 font-bold tracking-widest text-[10px] uppercase">
-          Loading inventory...
-        </Text>
-      </View>
-    );
-  }
-
   return (
     <SafeAreaView className="flex-1 bg-background">
       <View className="p-5 mt-6">
@@ -163,228 +152,259 @@ export default function AddServiceParts() {
       </View>
 
       <ScrollView className="flex-1 p-5" showsVerticalScrollIndicator={false}>
-        {/* VEHICLE SELECTION */}
-        {!selectedService ? (
-          <View className="mb-6">
-            <Text className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-3 px-1">
-              Search Linked Vehicle
+        {fetching && services.length === 0 ? (
+          <View className="py-20 justify-center items-center">
+            <ActivityIndicator size="large" color="#10b981" />
+            <Text className="text-text-secondary mt-4 font-bold tracking-widest text-[10px] uppercase">
+              Loading inventory...
             </Text>
-            <View className="relative">
-              <View className="absolute left-4 top-3.5 z-10">
-                <Ionicons name="search" size={18} color="#64748b" />
-              </View>
-              <TextInput
-                placeholder="Booking ID / Mobile / Plate..."
-                placeholderTextColor="#64748B"
-                value={search}
-                onChangeText={setSearch}
-                className="bg-card border border-card rounded-2xl pl-12 pr-4 py-3.5 text-text-primary font-bold"
-              />
-            </View>
-
-            {filteredServices.length > 0 && (
-              <View className="bg-card border border-card rounded-2xl mt-2 overflow-hidden">
-                {filteredServices.map((s) => (
-                  <TouchableOpacity
-                    key={s.id}
-                    onPress={() => {
-                      setSelectedService(s);
-                      setSearch("");
-                    }}
-                    className="p-4 border-b border-card/50"
-                  >
-                    <Text className="text-text-primary font-bold">
-                      {s.bookingId || `ID: ${s.id}`}
-                    </Text>
-                    <Text className="text-text-muted text-xs">
-                      {s.name} • {s.brand} {s.model}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            )}
           </View>
         ) : (
-          <View className="bg-success/10 border border-success/20 p-5 rounded-3xl mb-6 flex-row items-center justify-between">
-            <View className="flex-1">
-              <Text className="text-[10px] font-black text-success uppercase tracking-widest mb-1">
-                Vehicle Match
-              </Text>
-              <Text className="text-text-primary font-black text-lg">
-                {selectedService.brand} {selectedService.model}
-              </Text>
-              <Text className="text-success/70 text-xs font-bold">
-                {selectedService.vehicleNumber ||
-                  selectedService.vehicle_number ||
-                  "NO PLATE"}
-              </Text>
-            </View>
-            <TouchableOpacity
-              onPress={() => setSelectedService(null)}
-              className="bg-success/20 p-2 rounded-xl"
-            >
-              <Ionicons name="close" size={18} color="#10b981" />
-            </TouchableOpacity>
-          </View>
-        )}
-
-        {/* PARTS LIST */}
-        <Text className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-4 px-1">
-          Spare Parts List
-        </Text>
-        {parts.map((p, i) => (
-          <View
-            key={i}
-            className="bg-card border border-card rounded-3xl p-5 mb-4 shadow-sm"
-          >
-            <View className="flex-row justify-between items-center mb-4">
-              <Text className="text-[10px] font-black text-text-muted uppercase tracking-widest">
-                Part #{i + 1}
-              </Text>
-              {parts.length > 1 && (
-                <TouchableOpacity onPress={() => removePartRow(i)}>
-                  <Ionicons name="trash" size={16} color="#EF4444" />
-                </TouchableOpacity>
-              )}
-            </View>
-
-            <View className="relative">
-              <TextInput
-                placeholder="Enter Part Name..."
-                placeholderTextColor="#64748B"
-                value={p.partName}
-                onFocus={() => {
-                  setFocusedPartIndex(i);
-                  setShowProductList(true);
-                }}
-                onChangeText={(t) => {
-                  const copy = [...parts];
-                  copy[i].partName = t;
-                  const selected = products.find(
-                    (prod) => prod.name.toLowerCase() === t.toLowerCase()
-                  );
-                  if (selected) copy[i].price = selected.offerPrice.toString();
-                  setParts(copy);
-                  setFocusedPartIndex(i);
-                  setShowProductList(true);
-                }}
-                className="bg-background border border-card rounded-2xl p-4 text-text-primary font-bold mb-4"
-              />
-              
-              {focusedPartIndex === i && showProductList && (
-                <View className="absolute top-[60px] left-0 right-0 z-50 bg-slate-900 border border-slate-700 rounded-2xl max-h-[200px] overflow-hidden shadow-2xl">
-                  <ScrollView nestedScrollEnabled={true}>
-                    {products
-                      .filter((prod) => 
-                        !p.partName || 
-                        prod.name.toLowerCase().includes(p.partName.toLowerCase())
-                      )
-                      .slice(0, 100)
-                      .map((prod, idx) => (
-                        <TouchableOpacity
-                          key={idx}
-                          onPress={() => {
-                            const copy = [...parts];
-                            copy[i].partName = prod.name;
-                            copy[i].price = prod.offerPrice.toString();
-                            setParts(copy);
-                            setShowProductList(false);
-                            setFocusedPartIndex(null);
-                          }}
-                          className="p-4 border-b border-slate-800 flex-row justify-between items-center"
-                        >
-                          <View className="flex-1 mr-2">
-                            <Text className="text-text-primary font-bold text-sm">{prod.name}</Text>
-                            <Text className="text-text-muted text-[10px] uppercase font-bold mt-1">
-                              {prod.category || "General"}
-                            </Text>
-                          </View>
-                          <Text className="text-success font-black text-sm">₹{prod.offerPrice}</Text>
-                        </TouchableOpacity>
-                      ))}
-                    {p.partName && !products.some(pr => pr.name.toLowerCase().includes(p.partName.toLowerCase())) && (
-                      <View className="p-4 items-center">
-                        <Text className="text-text-muted text-xs italic">No matching products - Manual Entry</Text>
-                      </View>
-                    )}
-                  </ScrollView>
-                  <TouchableOpacity 
-                    onPress={() => setShowProductList(false)}
-                    className="p-3 bg-slate-800 items-center border-t border-slate-700"
-                  >
-                    <Text className="text-text-muted text-[10px] font-black uppercase tracking-widest">Close List</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-            </View>
-
-            <View className="flex-row gap-4">
-              <View className="flex-1">
-                <Text className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-2 ml-1">
-                  Quantity
-                </Text>
-                <TextInput
-                  keyboardType="numeric"
-                  value={p.qty}
-                  onChangeText={(t) => handlePartChange(i, "qty", t)}
-                  className="bg-background border border-card rounded-2xl p-3.5 text-text-primary font-black text-center"
-                />
-              </View>
-              <View className="flex-[2]">
-                <Text className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-2 ml-1">
-                  Price (₹)
+          <>
+            {/* VEHICLE SELECTION */}
+            {!selectedService ? (
+              <View className="mb-6">
+                <Text className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-3 px-1">
+                  Search Linked Vehicle
                 </Text>
                 <View className="relative">
-                  <Text className="absolute left-4 top-3.5 z-10 text-success font-black">
-                    ₹
-                  </Text>
+                  <View className="absolute left-4 top-3.5 z-10">
+                    <Ionicons name="search" size={18} color="#64748b" />
+                  </View>
                   <TextInput
-                    keyboardType="numeric"
-                    value={p.price}
-                    onChangeText={(t) => handlePartChange(i, "price", t)}
-                    className="bg-background border border-card rounded-2xl pl-8 pr-4 py-3.5 text-text-primary font-black"
+                    placeholder="Booking ID / Mobile / Plate..."
+                    placeholderTextColor="#64748B"
+                    value={search}
+                    onChangeText={setSearch}
+                    className="bg-card border border-card rounded-2xl pl-12 pr-4 py-3.5 text-text-primary font-bold"
                   />
                 </View>
+
+                {filteredServices.length > 0 && (
+                  <View className="bg-card border border-card rounded-2xl mt-2 overflow-hidden">
+                    {filteredServices.map((s) => (
+                      <TouchableOpacity
+                        key={s.id}
+                        onPress={() => {
+                          setSelectedService(s);
+                          setSearch("");
+                        }}
+                        className="p-4 border-b border-card/50"
+                      >
+                        <Text className="text-text-primary font-bold">
+                          {s.bookingId || `ID: ${s.id}`}
+                        </Text>
+                        <Text className="text-text-muted text-xs">
+                          {s.name} • {s.brand} {s.model}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
               </View>
-            </View>
-          </View>
-        ))}
-
-        <TouchableOpacity
-          onPress={addPartRow}
-          className="flex-row items-center justify-center p-5 rounded-3xl border border-card border-dashed mb-10"
-        >
-          <Ionicons name="add-circle" size={24} color="#10B981" />
-          <Text className="text-success font-black ml-2 uppercase text-xs tracking-widest">
-            Add Another Spare
-          </Text>
-        </TouchableOpacity>
-
-        <View className="pb-20">
-          <View className="bg-card p-8 rounded-3xl border border-card mb-6">
-            <Text className="text-text-muted font-black uppercase text-[10px] tracking-widest text-center mb-2">
-              Total Parts Valuation
-            </Text>
-            <Text className="text-text-primary text-4xl font-black text-center">
-              ₹{totalPartsCost.toLocaleString()}
-            </Text>
-          </View>
-
-          <TouchableOpacity
-            onPress={handleSave}
-            disabled={loading}
-            className={`w-full py-5 bg-success rounded-2xl items-center shadow-lg shadow-success/20 ${loading ? "opacity-50" : ""}`}
-          >
-            {loading ? (
-              <ActivityIndicator color="#FFFFFF" />
             ) : (
-              <Text className="text-text-primary font-black uppercase tracking-widest text-base">
-                Confirm & Save Parts
-              </Text>
+              <View className="bg-success/10 border border-success/20 p-5 rounded-3xl mb-6 flex-row items-center justify-between">
+                <View className="flex-1">
+                  <Text className="text-[10px] font-black text-success uppercase tracking-widest mb-1">
+                    Vehicle Match
+                  </Text>
+                  <Text className="text-text-primary font-black text-lg">
+                    {selectedService.brand} {selectedService.model}
+                  </Text>
+                  <Text className="text-success/70 text-xs font-bold">
+                    {selectedService.vehicleNumber ||
+                      selectedService.vehicle_number ||
+                      "NO PLATE"}
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  onPress={() => setSelectedService(null)}
+                  className="bg-success/20 p-2 rounded-xl"
+                >
+                  <Ionicons name="close" size={18} color="#10b981" />
+                </TouchableOpacity>
+              </View>
             )}
-          </TouchableOpacity>
-        </View>
+
+            {/* PARTS LIST */}
+            <Text className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-4 px-1">
+              Spare Parts List
+            </Text>
+            {parts.map((p, i) => (
+              <View
+                key={i}
+                className="bg-card border border-card rounded-3xl p-5 mb-4 shadow-sm"
+              >
+                <View className="flex-row justify-between items-center mb-4">
+                  <Text className="text-[10px] font-black text-text-muted uppercase tracking-widest">
+                    Part #{i + 1}
+                  </Text>
+                  {parts.length > 1 && (
+                    <TouchableOpacity onPress={() => removePartRow(i)}>
+                      <Ionicons name="trash" size={16} color="#EF4444" />
+                    </TouchableOpacity>
+                  )}
+                </View>
+
+                <View className="relative">
+                  <TextInput
+                    placeholder="Enter Part Name..."
+                    placeholderTextColor="#64748B"
+                    value={p.partName}
+                    onFocus={() => {
+                      setFocusedPartIndex(i);
+                      setShowProductList(true);
+                    }}
+                    onChangeText={(t) => {
+                      const copy = [...parts];
+                      copy[i].partName = t;
+                      const selected = products.find(
+                        (prod) => prod.name.toLowerCase() === t.toLowerCase(),
+                      );
+                      if (selected)
+                        copy[i].price = selected.offerPrice.toString();
+                      setParts(copy);
+                      setFocusedPartIndex(i);
+                      setShowProductList(true);
+                    }}
+                    className="bg-background border border-card rounded-2xl p-4 text-text-primary font-bold mb-4"
+                  />
+
+                  {focusedPartIndex === i && showProductList && (
+                    <View className="absolute top-[60px] left-0 right-0 z-50 bg-slate-900 border border-slate-700 rounded-2xl max-h-[200px] overflow-hidden shadow-2xl">
+                      <ScrollView nestedScrollEnabled={true}>
+                        {products
+                          .filter(
+                            (prod) =>
+                              !p.partName ||
+                              prod.name
+                                .toLowerCase()
+                                .includes(p.partName.toLowerCase()),
+                          )
+                          .slice(0, 100)
+                          .map((prod, idx) => (
+                            <TouchableOpacity
+                              key={idx}
+                              onPress={() => {
+                                const copy = [...parts];
+                                copy[i].partName = prod.name;
+                                copy[i].price = prod.offerPrice.toString();
+                                setParts(copy);
+                                setShowProductList(false);
+                                setFocusedPartIndex(null);
+                              }}
+                              className="p-4 border-b border-slate-800 flex-row justify-between items-center"
+                            >
+                              <View className="flex-1 mr-2">
+                                <Text className="text-text-primary font-bold text-sm">
+                                  {prod.name}
+                                </Text>
+                                <Text className="text-text-muted text-[10px] uppercase font-bold mt-1">
+                                  {prod.category || "General"}
+                                </Text>
+                              </View>
+                              <Text className="text-success font-black text-sm">
+                                ₹{prod.offerPrice}
+                              </Text>
+                            </TouchableOpacity>
+                          ))}
+                        {p.partName &&
+                          !products.some((pr) =>
+                            pr.name
+                              .toLowerCase()
+                              .includes(p.partName.toLowerCase()),
+                          ) && (
+                            <View className="p-4 items-center">
+                              <Text className="text-text-muted text-xs italic">
+                                No matching products - Manual Entry
+                              </Text>
+                            </View>
+                          )}
+                      </ScrollView>
+                      <TouchableOpacity
+                        onPress={() => setShowProductList(false)}
+                        className="p-3 bg-slate-800 items-center border-t border-slate-700"
+                      >
+                        <Text className="text-text-muted text-[10px] font-black uppercase tracking-widest">
+                          Close List
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                </View>
+
+                <View className="flex-row gap-4">
+                  <View className="flex-1">
+                    <Text className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-2 ml-1">
+                      Quantity
+                    </Text>
+                    <TextInput
+                      keyboardType="numeric"
+                      value={p.qty}
+                      onChangeText={(t) => handlePartChange(i, "qty", t)}
+                      className="bg-background border border-card rounded-2xl p-3.5 text-text-primary font-black text-center"
+                    />
+                  </View>
+                  <View className="flex-[2]">
+                    <Text className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-2 ml-1">
+                      Price (₹)
+                    </Text>
+                    <View className="relative">
+                      <Text className="absolute left-4 top-3.5 z-10 text-success font-black">
+                        ₹
+                      </Text>
+                      <TextInput
+                        keyboardType="numeric"
+                        value={p.price}
+                        onChangeText={(t) => handlePartChange(i, "price", t)}
+                        className="bg-background border border-card rounded-2xl pl-8 pr-4 py-3.5 text-text-primary font-black"
+                      />
+                    </View>
+                  </View>
+                </View>
+              </View>
+            ))}
+
+            <TouchableOpacity
+              onPress={addPartRow}
+              className="flex-row items-center justify-center p-5 rounded-3xl border border-card border-dashed mb-10"
+            >
+              <Ionicons name="add-circle" size={24} color="#10B981" />
+              <Text className="text-success font-black ml-2 uppercase text-xs tracking-widest">
+                Add Another Spare
+              </Text>
+            </TouchableOpacity>
+
+            <View className="pb-20">
+              <View className="bg-card p-8 rounded-3xl border border-card mb-6">
+                <Text className="text-text-muted font-black uppercase text-[10px] tracking-widest text-center mb-2">
+                  Total Parts Valuation
+                </Text>
+                <Text className="text-text-primary text-4xl font-black text-center">
+                  ₹{totalPartsCost.toLocaleString()}
+                </Text>
+              </View>
+
+              <TouchableOpacity
+                onPress={handleSave}
+                disabled={loading}
+                className={`w-full py-5 bg-success rounded-2xl items-center shadow-lg shadow-success/20 ${loading ? "opacity-50" : ""}`}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#FFFFFF" />
+                ) : (
+                  <Text className="text-text-primary font-black uppercase tracking-widest text-base">
+                    Confirm & Save Parts
+                  </Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
       </ScrollView>
+    </SafeAreaView>
+  );
+}
     </SafeAreaView>
   );
 }

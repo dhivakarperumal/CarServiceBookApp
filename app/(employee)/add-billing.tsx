@@ -1,4 +1,4 @@
-﻿import { Ionicons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
@@ -418,17 +418,6 @@ export default function AddBillingScreen() {
     }
   };
 
-  if (loading) {
-    return (
-      <View className="flex-1 bg-background justify-center items-center">
-        <ActivityIndicator size="large" color="#0EA5E9" />
-        <Text className="text-text-secondary mt-4 font-medium tracking-widest text-[10px] uppercase">
-          Preparing invoice engine...
-        </Text>
-      </View>
-    );
-  }
-
   return (
     <SafeAreaView className="flex-1 bg-background">
       <KeyboardAvoidingView
@@ -490,125 +479,136 @@ export default function AddBillingScreen() {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          <View className="flex-row flex-wrap gap-4 mb-6">
-            <View className="flex-1 min-w-[280px] bg-card rounded-[2rem] p-5 border border-card shadow-xl shadow-slate-900/20">
-              <SectionTitle title="Quick Search" />
-              <TextInput
-                placeholder="Search Booking ID / Phone"
-                placeholderTextColor="#64748B"
-                value={search}
-                onChangeText={setSearch}
-                className="w-full bg-background border border-slate-800 rounded-2xl px-4 py-4 text-text-primary font-semibold"
-              />
-            </View>
-
-            <View className="flex-1 min-w-[280px] bg-card rounded-[2rem] p-5 border border-card shadow-xl shadow-slate-900/20">
-              <SectionTitle title="Verification Queue" />
-              <Text className="text-[10px] uppercase tracking-widest text-text-muted mb-4">
-                Jobs pulled from https://cars.qtechx.com/api/all-services/
+          {loading && services.length === 0 ? (
+            <View className="py-20 justify-center items-center">
+              <ActivityIndicator size="large" color="#0EA5E9" />
+              <Text className="text-text-secondary mt-4 font-medium tracking-widest text-[10px] uppercase">
+                Preparing invoice engine...
               </Text>
-
-              {filteredServices.length === 0 ? (
-                <View className="rounded-3xl border border-slate-800 bg-slate-950/80 px-4 py-5">
-                  <Text className="text-[10px] text-text-muted uppercase tracking-widest">
-                    No pending billing jobs found.
-                  </Text>
-                  <Text className="text-sm font-black text-text-primary mt-2">
-                    Try searching by Booking ID, phone, or vehicle model.
-                  </Text>
+            </View>
+          ) : (
+            <>
+              <View className="flex-row flex-wrap gap-4 mb-6">
+                <View className="flex-1 min-w-[280px] bg-card rounded-[2rem] p-5 border border-card shadow-xl shadow-slate-900/20">
+                  <SectionTitle title="Quick Search" />
+                  <TextInput
+                    placeholder="Search Booking ID / Phone"
+                    placeholderTextColor="#64748B"
+                    value={search}
+                    onChangeText={setSearch}
+                    className="w-full bg-background border border-slate-800 rounded-2xl px-4 py-4 text-text-primary font-semibold"
+                  />
                 </View>
-              ) : (
-                <View className="rounded-3xl border border-slate-800 bg-slate-950/80 overflow-hidden">
-                  <TouchableOpacity
-                    activeOpacity={0.8}
-                    onPress={() => setServiceDropdownOpen((prev) => !prev)}
-                    className="flex-row items-center justify-between px-4 py-4 bg-slate-900/80 border-b border-slate-800"
-                  >
-                    <Text
-                      className={`text-sm font-black ${selectedService ? "text-text-primary" : "text-text-muted"}`}
-                    >
-                      {selectedService
-                        ? `${selectedService.bookingId || `Job ${selectedService.id}`} | ${selectedService.name}`
-                        : "-- Select Assigned Job --"}
-                    </Text>
-                    <Ionicons
-                      name={serviceDropdownOpen ? "chevron-up" : "chevron-down"}
-                      size={18}
-                      color="#94A3B8"
-                    />
-                  </TouchableOpacity>
 
-                  {serviceDropdownOpen && (
-                    <ScrollView
-                      className="max-h-56 bg-slate-950/90"
-                      showsVerticalScrollIndicator
-                    >
-                      {filteredServices.map((service) => (
-                        <TouchableOpacity
-                          key={service.id}
-                          onPress={() => {
-                            if (selectedService?.id === service.id) {
-                              setSelectedService(null);
-                              setParts([]);
-                              setIssues([]);
-                              setServiceDropdownOpen(false);
-                              return;
-                            }
-                            selectService(service);
-                          }}
-                          className={`px-4 py-4 border-b border-slate-800 ${selectedService?.id === service.id ? "bg-slate-900" : "bg-slate-950/70"}`}
+                <View className="flex-1 min-w-[280px] bg-card rounded-[2rem] p-5 border border-card shadow-xl shadow-slate-900/20">
+                  <SectionTitle title="Verification Queue" />
+                  <Text className="text-[10px] uppercase tracking-widest text-text-muted mb-4">
+                    Jobs pulled from https://cars.qtechx.com/api/all-services/
+                  </Text>
+
+                  {filteredServices.length === 0 ? (
+                    <View className="rounded-3xl border border-slate-800 bg-slate-950/80 px-4 py-5">
+                      <Text className="text-[10px] text-text-muted uppercase tracking-widest">
+                        No pending billing jobs found.
+                      </Text>
+                      <Text className="text-sm font-black text-text-primary mt-2">
+                        Try searching by Booking ID, phone, or vehicle model.
+                      </Text>
+                    </View>
+                  ) : (
+                    <View className="rounded-3xl border border-slate-800 bg-slate-950/80 overflow-hidden">
+                      <TouchableOpacity
+                        activeOpacity={0.8}
+                        onPress={() => setServiceDropdownOpen((prev) => !prev)}
+                        className="flex-row items-center justify-between px-4 py-4 bg-slate-900/80 border-b border-slate-800"
+                      >
+                        <Text
+                          className={`text-sm font-black ${selectedService ? "text-text-primary" : "text-text-muted"}`}
                         >
-                          <Text className="text-sm font-black text-text-primary">
-                            {service.bookingId || `Job ${service.id}`}
-                          </Text>
-                          <Text className="text-[10px] text-text-muted uppercase tracking-widest mt-1">
-                            {service.name} • {service.brand} {service.model}
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
-                    </ScrollView>
+                          {selectedService
+                            ? `${selectedService.bookingId || `Job ${selectedService.id}`} | ${selectedService.name}`
+                            : "-- Select Assigned Job --"}
+                        </Text>
+                        <Ionicons
+                          name={serviceDropdownOpen ? "chevron-up" : "chevron-down"}
+                          size={18}
+                          color="#94A3B8"
+                        />
+                      </TouchableOpacity>
+
+                      {serviceDropdownOpen && (
+                        <ScrollView
+                          className="max-h-56 bg-slate-950/90"
+                          showsVerticalScrollIndicator
+                        >
+                          {filteredServices.map((service) => (
+                            <TouchableOpacity
+                              key={service.id}
+                              onPress={() => {
+                                if (selectedService?.id === service.id) {
+                                  setSelectedService(null);
+                                  setParts([]);
+                                  setIssues([]);
+                                  setServiceDropdownOpen(false);
+                                  return;
+                                }
+                                selectService(service);
+                              }}
+                              className={`px-4 py-4 border-b border-slate-800 ${selectedService?.id === service.id ? "bg-slate-900" : "bg-slate-950/70"}`}
+                            >
+                              <Text className="text-sm font-black text-text-primary">
+                                {service.bookingId || `Job ${service.id}`}
+                              </Text>
+                              <Text className="text-[10px] text-text-muted uppercase tracking-widest mt-1">
+                                {service.name} • {service.brand} {service.model}
+                              </Text>
+                            </TouchableOpacity>
+                          ))}
+                        </ScrollView>
+                      )}
+                    </View>
+                  )}
+
+                  {selectedService && (
+                    <View className="mt-4 rounded-3xl border border-slate-800 bg-slate-900/70 p-4">
+                      <Text className="text-[10px] uppercase tracking-widest text-text-muted mb-2">
+                        Selected Verification Job
+                      </Text>
+                      <Text className="text-sm font-black text-text-primary">
+                        {selectedService.bookingId || `Job ${selectedService.id}`}
+                      </Text>
+                      <Text className="text-[10px] text-text-muted mt-1">
+                        {selectedService.name} • {selectedService.brand}{" "}
+                        {selectedService.model}
+                      </Text>
+                    </View>
                   )}
                 </View>
-              )}
 
-              {selectedService && (
-                <View className="mt-4 rounded-3xl border border-slate-800 bg-slate-900/70 p-4">
-                  <Text className="text-[10px] uppercase tracking-widest text-text-muted mb-2">
-                    Selected Verification Job
-                  </Text>
-                  <Text className="text-sm font-black text-text-primary">
-                    {selectedService.bookingId || `Job ${selectedService.id}`}
-                  </Text>
-                  <Text className="text-[10px] text-text-muted mt-1">
-                    {selectedService.name} • {selectedService.brand}{" "}
-                    {selectedService.model}
-                  </Text>
-                </View>
-              )}
-            </View>
-
-            <View className="w-full bg-card rounded-[2rem] p-5 border border-card shadow-xl shadow-slate-900/20">
-              <SectionTitle title="Accounting Summary" />
-              <View className="flex-row flex-wrap gap-3">
-                <View className="flex-1 min-w-[160px] bg-background/70 rounded-3xl p-4 border border-slate-800">
-                  <Text className="text-[9px] uppercase tracking-widest text-text-muted mb-3">
-                    Workforce Charges
-                  </Text>
-                  <Text className="text-2xl font-black text-text-primary">
-                    ₹{Number(workforceCharges || labour || 0).toLocaleString()}
-                  </Text>
-                </View>
-                <View className="flex-1 min-w-[160px] bg-background/70 rounded-3xl p-4 border border-slate-800">
-                  <Text className="text-[9px] uppercase tracking-widest text-text-muted mb-3">
-                    Taxation Layer (%)
-                  </Text>
-                  <Text className="text-2xl font-black text-text-primary">
-                    {gst || 0}%
-                  </Text>
+                <View className="w-full bg-card rounded-[2rem] p-5 border border-card shadow-xl shadow-slate-900/20">
+                  <SectionTitle title="Accounting Summary" />
+                  <View className="flex-row flex-wrap gap-3">
+                    <View className="flex-1 min-w-[160px] bg-background/70 rounded-3xl p-4 border border-slate-800">
+                      <Text className="text-[9px] uppercase tracking-widest text-text-muted mb-3">
+                        Workforce Charges
+                      </Text>
+                      <Text className="text-2xl font-black text-text-primary">
+                        ₹{Number(workforceCharges || labour || 0).toLocaleString()}
+                      </Text>
+                    </View>
+                    <View className="flex-1 min-w-[160px] bg-background/70 rounded-3xl p-4 border border-slate-800">
+                      <Text className="text-[9px] uppercase tracking-widest text-text-muted mb-3">
+                        Taxation Layer (%)
+                      </Text>
+                      <Text className="text-2xl font-black text-text-primary">
+                        {gst || 0}%
+                      </Text>
+                    </View>
+                  </View>
                 </View>
               </View>
-            </View>
-          </View>
+            </>
+          )}
 
           {billingMode === "manual" && (
             <View className="bg-card rounded-[2rem] p-6 mb-6 border border-card shadow-xl shadow-slate-900/20">

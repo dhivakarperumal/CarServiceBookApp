@@ -370,17 +370,6 @@ export default function ServiceCenter() {
     }
   };
 
-  if (loading) {
-    return (
-      <View className="flex-1 bg-background justify-center items-center">
-        <ActivityIndicator size="large" color="#0EA5E9" />
-        <Text className="text-text-secondary mt-4 font-bold tracking-widest text-[10px] uppercase">
-          Syncing workshop data...
-        </Text>
-      </View>
-    );
-  }
-
   return (
     <SafeAreaView className="relative flex-1 bg-background">
       <ScrollView
@@ -531,7 +520,14 @@ export default function ServiceCenter() {
 
         {/* SERVICE CARDS */}
         <View className="px-3 pb-24 mt-3">
-          {filteredList.length === 0 ? (
+          {loading && services.length === 0 ? (
+            <View className="py-20 justify-center items-center">
+              <ActivityIndicator size="large" color="#0EA5E9" />
+              <Text className="text-text-secondary mt-4 font-bold tracking-widest text-[10px] uppercase">
+                Syncing workshop data...
+              </Text>
+            </View>
+          ) : filteredList.length === 0 ? (
             <View className="bg-card rounded-3xl p-12 items-center border border-card border-dashed mt-10">
               <Ionicons name="car-outline" size={48} color="#64748B" />
               <Text className="text-text-secondary font-black mt-4">
