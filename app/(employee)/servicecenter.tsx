@@ -49,6 +49,7 @@ const STATUS_STEPS = [
 const getStatusColor = (status: string) => {
   switch (status) {
     case "Booked":
+    case "Call Verified":
     case "Approved":
       return "bg-primary text-text-primary";
     case "Processing":
@@ -1060,7 +1061,7 @@ export default function ServiceCenter() {
 
               <View className="bg-background border border-card rounded-3xl overflow-hidden max-h-[60vh]">
                 <ScrollView showsVerticalScrollIndicator={false}>
-                  {["Processing", "Waiting for Spare"].map((s) => (
+                  {STATUS_STEPS.map((s) => (
                     <TouchableOpacity
                       key={s}
                       onPress={() => {
