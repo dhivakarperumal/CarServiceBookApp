@@ -837,7 +837,7 @@ export default function HomeScreen({ navigation }: any) {
             No recent service bookings found.
           </Text>
         ) : (
-          serviceBookings.slice(0, 3).map((item) => {
+          serviceBookings.map((item) => {
             const hasPending = item.status === "WAITING_SPARE" || item.status === "BILL_PENDING" || item.status === "PROCESSING";
             return (
               <TouchableOpacity

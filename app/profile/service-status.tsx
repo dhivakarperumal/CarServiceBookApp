@@ -172,7 +172,7 @@ const ServiceStatus: React.FC = () => {
         userServices.map(async (service: any) => {
           try {
             const detailRes = await api.get(`/all-services/${service.id}`);
-            console.log(`ServiceStatus: service ${service.id} (${service.bookingId}) has ${detailRes.data?.issues?.length || 0} issues`);
+            // console.log(`ServiceStatus: service ${service.id} (${service.bookingId}) has ${detailRes.data?.issues?.length || 0} issues`);
             return {
               ...service,
               parts:
@@ -241,8 +241,8 @@ const ServiceStatus: React.FC = () => {
           (bookingId && s.bookingDocId === bookingId)
         );
 
-        console.log(`ServiceStatus: booking ${b.bookingId} matched service:`, matchedService?.id, matchedService?.bookingId);
-        console.log(`ServiceStatus: booking ${b.bookingId} getting ${matchedService?.issues?.length || 0} issues from service ${matchedService?.id}`);
+        // console.log(`ServiceStatus: booking ${b.bookingId} matched service:`, matchedService?.id, matchedService?.bookingId);
+        // console.log(`ServiceStatus: booking ${b.bookingId} getting ${matchedService?.issues?.length || 0} issues from service ${matchedService?.id}`);
 
         return {
           ...b,
