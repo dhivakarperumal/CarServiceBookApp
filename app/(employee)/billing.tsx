@@ -196,7 +196,7 @@ export default function EmployeeBilling() {
         }
       >
         {/* HEADER */}
-        <View className="bg-card p-6 rounded-3xl border border-card mb-6">
+        <View className="bg-card p-1 rounded-3xl border border-card mb-6">
           <View className="flex-row gap-3">
             <View className="flex-1 bg-success/10 px-4 py-5 rounded-2xl border border-success/20">
               <Text className="text-[9px] text-success font-black uppercase tracking-widest">
