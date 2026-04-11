@@ -48,7 +48,21 @@ export default function AddServiceParts() {
         const found = servRes.data.find(
           (s: any) => s.id.toString() === serviceId.toString(),
         );
-        if (found) setSelectedService(found);
+        if (found) {
+          setSelectedService(found);
+          // Fetch full details including parts
+          const detailRes = await api.get(`/all-services/${serviceId}`);
+          const existingParts = detailRes.data?.parts || [];
+          if (existingParts.length > 0) {
+            setParts(
+              existingParts.map((p: any) => ({
+                partName: p.partName,
+                qty: (p.qty || 1).toString(),
+                price: (p.price || 0).toString(),
+              })),
+            );
+          }
+        }
       }
     } catch (err) {
       Alert.alert("Error", "Failed to load data");
@@ -185,9 +199,27 @@ export default function AddServiceParts() {
                     {filteredServices.map((s) => (
                       <TouchableOpacity
                         key={s.id}
-                        onPress={() => {
+                        onPress={async () => {
                           setSelectedService(s);
                           setSearch("");
+                          // Load parts for manual selection too
+                          try {
+                            const detailRes = await api.get(
+                              `/all-services/${s.id}`,
+                            );
+                            const existingParts = detailRes.data?.parts || [];
+                            if (existingParts.length > 0) {
+                              setParts(
+                                existingParts.map((p: any) => ({
+                                  partName: p.partName,
+                                  qty: (p.qty || 1).toString(),
+                                  price: (p.price || 0).toString(),
+                                })),
+                              );
+                            }
+                          } catch (e) {
+                            console.log("Failed to load parts", e);
+                          }
                         }}
                         className="p-4 border-b border-card/50"
                       >
