@@ -1,18 +1,37 @@
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AuthProvider } from "../contexts/AuthContext";
 import { CartProvider } from "../contexts/CartContext";
 import { FavoriteProvider } from "../contexts/FavoriteContext";
+import { useNotifications } from "../hooks/useNotifications";
+import * as notificationService from "../services/notificationService";
 
 import './global.css';
+
+// ✅ Notification wrapper component
+function NotificationWrapper({ children }: { children: React.ReactNode }) {
+  useNotifications();
+
+  useEffect(() => {
+    // Configure and register for push notifications
+    notificationService.configureNotifications();
+    notificationService.registerForPushNotificationsAsync().catch((error) => {
+      console.error('Failed to register for push notifications:', error);
+    });
+  }, []);
+
+  return <>{children}</>;
+}
 
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
-      <AuthProvider>
-        <CartProvider>
-          <FavoriteProvider>
+      <NotificationWrapper>
+        <AuthProvider>
+          <CartProvider>
+            <FavoriteProvider>
           <Stack
             screenOptions={{
               headerStyle: {
@@ -85,6 +104,7 @@ export default function RootLayout() {
         </FavoriteProvider>
       </CartProvider>
     </AuthProvider>
+      </NotificationWrapper>
     </SafeAreaProvider>
   );
 }

@@ -14,6 +14,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../contexts/AuthContext";
 import { useCart } from "../contexts/CartContext";
 import { api } from "../services/api";
+import * as statusTracker from "../services/statusTracker";
 import { COLORS } from "../theme/colors";
 
 // ✅ User Type
@@ -177,6 +178,29 @@ const Header: React.FC = () => {
         );
       });
 
+      // ✅ Create cached statuses for tracking
+      const allStatuses: statusTracker.CachedStatus[] = [];
+
+      filteredBookings.forEach((item: any) => {
+        allStatuses.push(statusTracker.createCachedStatus(item, 'booking'));
+      });
+
+      filteredAppointments.forEach((item: any) => {
+        allStatuses.push(statusTracker.createCachedStatus(item, 'appointment'));
+      });
+
+      filteredVehicles.forEach((item: any) => {
+        allStatuses.push(statusTracker.createCachedStatus(item, 'vehicle'));
+      });
+
+      filteredOrders.forEach((item: any) => {
+        allStatuses.push(statusTracker.createCachedStatus(item, 'order'));
+      });
+
+      // ✅ Check for changes and send notifications
+      await statusTracker.checkStatusChanges(allStatuses);
+
+      // Update UI with latest statuses
       setBookingStatuses(filteredBookings.slice(0, 3).map((item: any) => formatStatusItem(item, "booking")));
       setAppointmentStatuses(filteredAppointments.slice(0, 3).map((item: any) => formatStatusItem(item, "appointment")));
       setVehicleBookingStatuses(filteredVehicles.slice(0, 3).map((item: any) => formatStatusItem(item, "vehicle")));
