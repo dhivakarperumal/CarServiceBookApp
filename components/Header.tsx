@@ -457,7 +457,7 @@ const Header: React.FC = () => {
                 {renderStatusSection(
                   "Vehicle Bookings",
                   vehicleBookingStatuses,
-                  "/profile/vehicle-bookings",
+                  "/profile/VehicleBookings",
                   `Showing ${vehicleBookingStatuses.length} item${vehicleBookingStatuses.length === 1 ? "" : "s"}`
                 )}
                 {renderStatusSection(

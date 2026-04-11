@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { apiService } from '../services/api';
+import { registerDeviceForPushNotifications } from '../services/notificationService';
 
 interface User {
   id: number;
@@ -35,16 +36,30 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     loadStoredAuth();
   }, []);
 
+  const registerPushTokenForUser = async (currentUser: User | null) => {
+    if (!currentUser) {
+      return;
+    }
+
+    try {
+      await registerDeviceForPushNotifications(currentUser.id);
+    } catch (error) {
+      console.warn('Failed to register device for push notifications:', error);
+    }
+  };
+
   const loadStoredAuth = async () => {
     try {
       const storedToken = await AsyncStorage.getItem(TOKEN_KEY);
       const storedUser = await AsyncStorage.getItem(USER_KEY);
 
       if (storedToken && storedUser) {
+        const parsedUser = JSON.parse(storedUser);
         setToken(storedToken);
-        setUser(JSON.parse(storedUser));
+        setUser(parsedUser);
         // Set the token in axios headers for future requests
         apiService.setAuthToken(storedToken);
+        await registerPushTokenForUser(parsedUser);
       }
     } catch (error) {
       console.error('Error loading stored auth:', error);
@@ -70,7 +85,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       // Set token in axios headers
       apiService.setAuthToken(authToken);
-      
+
+      await registerPushTokenForUser(userData);
       return userData;
 
     } catch (error) {

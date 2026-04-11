@@ -2,6 +2,7 @@ import Constants from 'expo-constants';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
+import { apiService } from './api';
 
 // ✅ Configure how notifications are handled
 export const configureNotifications = () => {
@@ -73,6 +74,30 @@ export const registerForPushNotificationsAsync = async (): Promise<string | unde
   ).data;
 
   console.log('Push token:', token);
+  return token;
+};
+
+export const sendPushTokenToServer = async (userId: number, pushToken: string) => {
+  try {
+    await apiService.api.post('/users/push-tokens', {
+      userId,
+      pushToken,
+      platform: Platform.OS,
+      app: 'carservicebookapp',
+    });
+    console.log('Push token sent to server');
+  } catch (error) {
+    console.warn('Failed to send push token to server:', error);
+  }
+};
+
+export const registerDeviceForPushNotifications = async (userId: number) => {
+  const token = await registerForPushNotificationsAsync();
+  if (!token) {
+    return undefined;
+  }
+
+  await sendPushTokenToServer(userId, token);
   return token;
 };
 
