@@ -151,7 +151,8 @@ export default function AddCarService() {
                  </View>
                )}
             </TouchableOpacity>
-
+            </View>
+            
             <View className="gap-2">
                <Text className="text-slate-500 text-[8px] font-black uppercase tracking-[3px] ml-2">Service Identity</Text>
                <TextInput 
