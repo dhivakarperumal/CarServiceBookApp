@@ -13,11 +13,14 @@ export const useStatusPolling = () => {
   const { user } = useAuth() as any;
   const pollingInterval = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const getUserName = () =>
-    [user?.name, user?.username, user?.displayName, user?.email]
-      .filter(Boolean)
-      .join(' ')
-      .toLowerCase();
+  const getUserIdentifiers = () => {
+    const username = user?.username?.toString().toLowerCase() || '';
+    const email = user?.email?.toString().toLowerCase() || '';
+    const id = user?.id?.toString() || '';
+    const uid = user?.uid?.toString() || '';
+
+    return { username, email, id, uid };
+  };
 
   const filterByUser = (items: any[]) =>
     items.filter(
@@ -122,15 +125,35 @@ export const useStatusPolling = () => {
       }
 
       if (isEmployee) {
-        const employeeName = getUserName();
+        const { username, email, id: employeeId, uid } = getUserIdentifiers();
 
         servicesData
           .filter((service) => {
+            const assignedId =
+              service.assignedEmployeeId ||
+              service.assigned_employee_id ||
+              service.assigned_to ||
+              service.assignedTo ||
+              service.assignedEmployee?.id ||
+              service.assignedEmployeeId?.toString?.();
+
             const assignedName =
               (service.assignedEmployeeName || service.assignedEmployee || service.assigned_employee_name || '')
                 .toString()
                 .toLowerCase();
-            return assignedName && employeeName && assignedName.includes(employeeName);
+
+            const assignedEmail =
+              (service.assignedEmployeeEmail || service.assigned_email || '').toString().toLowerCase();
+
+            const idMatch =
+              assignedId?.toString() === employeeId ||
+              assignedId?.toString() === uid;
+            const nameMatch =
+              (username && (assignedName === username || assignedName.includes(username))) ||
+              (email && (assignedName === email || assignedName.includes(email)));
+            const emailMatch = assignedEmail && (assignedEmail === email || assignedEmail.includes(email));
+
+            return Boolean(idMatch || nameMatch || emailMatch);
           })
           .forEach((service: any) => {
             const status = statusTracker.createCachedServiceStatus(service, 'assignment');
