@@ -424,18 +424,7 @@ export default function Services() {
   return (
     <SafeAreaView className="flex-1 bg-slate-950">
       <ScrollView contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
-        <View className="px-6 mt-8 flex-row justify-between items-center">
-          <View />
-          <TouchableOpacity
-            onPress={() => router.push(`${pathPrefix}/addserviceparts` as any)}
-            className="flex-row items-center gap-2 bg-primary px-5 py-3 rounded-2xl shadow-xl shadow-primary/20"
-          >
-            <Ionicons name="add-circle" size={18} color="black" />
-            <Text className="text-black font-black text-[10px] uppercase tracking-widest">
-              Registry Parts
-            </Text>
-          </TouchableOpacity>
-        </View>
+        
 
 
         {/* Stats Section */}
