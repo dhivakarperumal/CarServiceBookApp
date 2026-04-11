@@ -41,10 +41,23 @@ const STATUS_STEPS = [
   "Processing",
   "Waiting for Spare",
   "Service Going on",
+  "Service Completed",
   "Bill Pending",
   "Bill Completed",
-  "Service Completed",
 ];
+
+const getButtonVisibility = (status: string) => {
+  const currentIndex = STATUS_STEPS.indexOf(status);
+  return {
+    showAddIssue:
+      currentIndex >= STATUS_STEPS.indexOf("Processing") &&
+      currentIndex < STATUS_STEPS.indexOf("Service Completed"),
+    showAddSpare:
+      currentIndex >= STATUS_STEPS.indexOf("Processing") &&
+      currentIndex < STATUS_STEPS.indexOf("Service Completed"),
+    showBilling: status === "Bill Pending",
+  };
+};
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -614,17 +627,23 @@ export default function ServiceCenter() {
                           <Text className="text-[12px] font-black text-text-muted uppercase tracking-widest">
                             Job Details / Issues
                           </Text>
-                          {item.assignedEmployeeId && (
-                            <TouchableOpacity
-                              onPress={() => openIssueEditor(item)}
-                              className="flex-row items-center gap-1 p-2 bg-primary rounded-md"
-                            >
-                              <Ionicons name="add" size={14} color="#FFFFFF" />
-                              <Text className="text-[10px] font-black text-text-primary uppercase tracking-widest">
-                                Add Issues
-                              </Text>
-                            </TouchableOpacity>
-                          )}
+                          {item.assignedEmployeeId &&
+                            getButtonVisibility(item.serviceStatus || "Booked")
+                              .showAddIssue && (
+                              <TouchableOpacity
+                                onPress={() => openIssueEditor(item)}
+                                className="flex-row items-center gap-1 p-2 bg-primary rounded-md"
+                              >
+                                <Ionicons
+                                  name="add"
+                                  size={14}
+                                  color="#FFFFFF"
+                                />
+                                <Text className="text-[10px] font-black text-text-primary uppercase tracking-widest">
+                                  Add Issues
+                                </Text>
+                              </TouchableOpacity>
+                            )}
                         </View>
                         {item.issues?.length > 0 || item.carIssue ? (
                           <View className="gap-2">
@@ -769,8 +788,8 @@ export default function ServiceCenter() {
                           </TouchableOpacity>
                         ) : (
                           <View className="flex-1 flex-row gap-3 items-center">
-                            {(item.serviceStatus === "Processing" ||
-                              item.serviceStatus === "Waiting for Spare") && (
+                            {getButtonVisibility(item.serviceStatus || "Booked")
+                              .showAddSpare && (
                               <TouchableOpacity
                                 onPress={() =>
                                   router.push({
@@ -788,24 +807,27 @@ export default function ServiceCenter() {
                                 />
                               </TouchableOpacity>
                             )}
-                            <TouchableOpacity
-                              onPress={() =>
-                                router.push({
-                                  pathname: "/(employee)/add-billing",
-                                  params: {
-                                    directServiceId: item.id.toString(),
-                                  },
-                                })
-                              }
-                              style={{ minWidth: 90 }}
-                              className="bg-warning py-4 px-4 rounded-2xl items-center justify-center"
-                            >
-                              <Ionicons
-                                name="receipt"
-                                size={20}
-                                color="#FFFFFF"
-                              />
-                            </TouchableOpacity>
+                            {getButtonVisibility(item.serviceStatus || "Booked")
+                              .showBilling && (
+                              <TouchableOpacity
+                                onPress={() =>
+                                  router.push({
+                                    pathname: "/(employee)/add-billing",
+                                    params: {
+                                      directServiceId: item.id.toString(),
+                                    },
+                                  })
+                                }
+                                style={{ minWidth: 90 }}
+                                className="bg-warning py-4 px-4 rounded-2xl items-center justify-center"
+                              >
+                                <Ionicons
+                                  name="receipt"
+                                  size={20}
+                                  color="#FFFFFF"
+                                />
+                              </TouchableOpacity>
+                            )}
                           </View>
                         )}
                       </View>
@@ -1057,7 +1079,13 @@ export default function ServiceCenter() {
 
               <View className="bg-background border border-card rounded-3xl overflow-hidden max-h-[60vh]">
                 <ScrollView showsVerticalScrollIndicator={false}>
-                  {STATUS_STEPS.map((s) => (
+                  {STATUS_STEPS.filter((s) => {
+                    const currentIndex = STATUS_STEPS.indexOf(
+                      activeServiceForStatus?.serviceStatus || "Booked",
+                    );
+                    const stepIndex = STATUS_STEPS.indexOf(s);
+                    return stepIndex >= currentIndex;
+                  }).map((s) => (
                     <TouchableOpacity
                       key={s}
                       onPress={() => {
