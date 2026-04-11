@@ -192,8 +192,8 @@ export default function AdminSettings() {
                            <Text className="text-gray-500 text-[8px] font-black uppercase tracking-widest mt-1">Archived Technical Protocols</Text>
                         </View>
                      </View>
-                     <View className="bg-slate-800 p-2 rounded-full">
-                        <Ionicons name="chevron-forward" size={16} color="#475569" />
+                     <View className="bg-card p-2 border border-slate-700 rounded-full">
+                        <Ionicons name="chevron-forward" size={16} color={COLORS.textMuted} />
                      </View>
                   </TouchableOpacity>
 

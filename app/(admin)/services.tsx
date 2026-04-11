@@ -407,7 +407,7 @@ export default function Services() {
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          className="px-6 mb-10"
+          className="px-6 mt-5 mb-10"
         >
           <StatCard
             title="Active Volume"
@@ -440,7 +440,7 @@ export default function Services() {
         </ScrollView>
 
         {/* Tabs */}
-        <View className="px-6 mb-8 flex-row bg-white/5 p-2 rounded-3xl border border-white/10">
+        {/* <View className="px-6 mb-8 flex-row bg-white/5 p-2 rounded-3xl border border-white/10">
           <TouchableOpacity
             onPress={() => {
               setMainTab("booked");
@@ -467,7 +467,7 @@ export default function Services() {
               Walk-ins
             </Text>
           </TouchableOpacity>
-        </View>
+        </View> */}
 
         {/* Search */}
         <View className="px-6 mb-8 gap-4">

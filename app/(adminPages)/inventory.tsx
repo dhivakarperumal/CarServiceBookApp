@@ -213,11 +213,11 @@ const InventoryManagement = () => {
       {/* FLOATING ADD BUTTON */}
       <TouchableOpacity
         onPress={() => router.push('/(adminPages)/add-inventory' as any)}
-        className="absolute bottom-10 right-8 bg-white w-16 h-16 rounded-full items-center justify-center shadow-2xl shadow-sky-500/20 z-50"
+        className="absolute bottom-10 mb-8 right-8 bg-primary w-16 h-16 rounded-full items-center justify-center shadow-2xl shadow-sky-500/20 z-50"
         style={{ elevation: 15 }}
         activeOpacity={0.8}
       >
-        <Ionicons name="add" size={38} color="black" />
+        <Ionicons name="add" size={25} color="white" />
       </TouchableOpacity>
     </SafeAreaView>
   );

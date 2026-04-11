@@ -235,7 +235,7 @@ export default function BillingsLedger() {
       {/* FLOATING ADD BILLING BUTTON */}
       <TouchableOpacity
         onPress={() => router.push("/(adminPages)/add-billing" as any)}
-        className="absolute bottom-10 right-8 w-16 h-16 bg-primary rounded-3xl items-center justify-center shadow-2xl shadow-primary/30"
+        className="absolute bottom-10 mb-8 right-8 w-16 h-16 bg-primary rounded-full items-center justify-center shadow-2xl shadow-primary/30"
         style={{ elevation: 15 }}
       >
         <Ionicons name="add" size={32} color="white" />

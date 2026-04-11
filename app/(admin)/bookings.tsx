@@ -520,7 +520,7 @@ export default function AdminBookings() {
       {/* ── APPOINTMENTS TAB ── */}
       {activeTab === "appointment" && (
         <ScrollView
-          className="flex-1"
+          className="flex-1 "
           contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
           showsVerticalScrollIndicator={false}
           refreshControl={
@@ -535,7 +535,7 @@ export default function AdminBookings() {
           }
         >
           {filteredAppts.length === 0 ? (
-            <View className="py-20 items-center bg-slate-900/40 rounded-[32px] border border-dashed border-slate-700">
+            <View className="py-20 items-center bg-slate-900/40  rounded-[32px] border border-dashed border-slate-700">
               <MaterialCommunityIcons
                 name="calendar-clock"
                 size={48}
@@ -1184,9 +1184,9 @@ export default function AdminBookings() {
           )
         }
         activeOpacity={0.85}
-        className="absolute bottom-5 right-5 w-14 h-14 rounded-full bg-white items-center justify-center shadow-lg shadow-primary/40 border border-white/15"
+        className="absolute bottom-5 right-5 w-14 h-14 rounded-full bg-primary items-center justify-center shadow-lg shadow-primary/40 border border-white/15"
       >
-        <Ionicons name="add" size={28} color="black" />
+        <Ionicons name="add" size={28} color="white" />
       </TouchableOpacity>
     </SafeAreaView>
   );

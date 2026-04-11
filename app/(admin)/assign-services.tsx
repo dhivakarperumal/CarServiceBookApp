@@ -18,37 +18,6 @@ import { COLORS } from "../../theme/colors";
 
 const ITEMS_PER_PAGE = 8;
 
-const StatCard = ({
-  title,
-  value,
-  iconName,
-  IconComponent,
-  gradientColors,
-  onPress,
-  isActive,
-}: any) => (
-  <TouchableOpacity
-    onPress={onPress}
-    activeOpacity={0.7}
-    style={{ 
-      backgroundColor: COLORS.card,
-      borderColor: isActive ? gradientColors[0] : "rgba(255,255,255,0.05)",
-      borderWidth: 1
-    }}
-    className="mr-4 p-6 rounded-3xl w-48 shadow-xl"
-  >
-    <View className="flex-row justify-between items-start mb-6">
-      <View className={`w-12 h-12 rounded-2xl items-center justify-center ${isActive ? 'bg-white/10' : 'bg-white/5'}`}>
-        <IconComponent name={iconName} size={24} color={isActive ? gradientColors[0] : "#64748B"} />
-      </View>
-      <Text className={`font-black text-[8px] uppercase tracking-widest leading-none ${isActive ? 'text-white' : 'text-white/50'}`}>
-        {title}
-      </Text>
-    </View>
-    <Text className={`text-3xl font-black ${isActive ? 'text-white' : 'text-white/80'}`}>{value}</Text>
-  </TouchableOpacity>
-);
-
 export default function AdminAssignServices() {
   const router = useRouter();
   const { user } = useAuth();
@@ -323,51 +292,39 @@ export default function AdminAssignServices() {
         contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* HEADER */}
-        <View className="px-6 pt-10 pb-8 flex-end justify-between items-end">
-          <TouchableOpacity
-            onPress={async () => {
-              setSelectedBooking(null);
-              setSelectedEmployeeId("");
-              await fetchEmployees();
-              setGlobalModalVisible(true);
-            }}
-            className="w-12 h-12 bg-primary rounded-2xl items-center justify-center shadow-xl shadow-primary/20"
-          >
-            <Ionicons name="person-add" size={20} color="white" />
-          </TouchableOpacity>
-        </View>
+       
+       
 
-        {/* ANALYTICS */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          className="px-6 mb-10"
-        >
-          <StatCard
-            title="Unassigned"
-            value={stats.unassigned}
-            iconName="user-slash"
-            isActive={tab === "unassigned"}
-            onPress={() => setTab("unassigned")}
-            IconComponent={FontAwesome5Wrapper}
-            gradientColors={[COLORS.primary]}
-          />
-          <StatCard
-            title="Assigned"
-            value={stats.assigned}
-            iconName="user-check"
-            isActive={tab === "assigned"}
-            onPress={() => setTab("assigned")}
-            IconComponent={FontAwesome5Wrapper}
-            gradientColors={[COLORS.primaryDark]}
-          />
-        </ScrollView>
 
 
         {/* SEARCH & FILTERS */}
         <View className="px-6 mb-8 gap-4">
-          <View className="flex-row items-center bg-white/5 border border-white/10 rounded-3xl px-6 py-4">
+        
+
+          <View className="flex-row gap-4 mb-8">
+            {[
+              { id: "unassigned", label: `Unassigned (${stats.unassigned})`, icon: "person-remove" },
+              { id: "assigned", label: `Assigned (${stats.assigned})`, icon: "person-add" },
+            ].map((s) => (
+              <TouchableOpacity
+                key={s.id}
+                onPress={() => {
+                  setTab(s.id);
+                  setCurrentPage(1);
+                }}
+                className={`flex-1 flex-row items-center justify-center gap-2 py-4 rounded-3xl border ${tab === s.id ? "bg-primary/20 border-primary/50" : "bg-white/5 border-white/10"}`}
+              >
+                <Ionicons name={s.icon as any} size={16} color={tab === s.id ? COLORS.primary : "#64748B"} />
+                <Text
+                  className={`text-[10px] font-black uppercase tracking-widest ${tab === s.id ? "text-primary" : "text-white/40"}`}
+                >
+                  {s.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+            <View className="flex-row items-center bg-white/5 border border-white/10 rounded-3xl px-6 py-4">
             <Ionicons name="search" size={20} color={COLORS.textSecondary} />
             <TextInput
               placeholder="Search Registry..."
@@ -381,31 +338,6 @@ export default function AdminAssignServices() {
             />
           </View>
 
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            className="flex-row "
-          >
-            {[
-              { id: "unassigned", label: `Unassigned (${stats.unassigned})` },
-              { id: "assigned", label: `Assigned (${stats.assigned})` },
-            ].map((s) => (
-              <TouchableOpacity
-                key={s.id}
-                onPress={() => {
-                  setTab(s.id);
-                  setCurrentPage(1);
-                }}
-                className={`px-6 py-3 rounded-2xl border ${tab === s.id ? "bg-primary/20 border-primary" : "bg-white/5 border-white/10"}`}
-              >
-                <Text
-                  className={`text-[9px] font-black uppercase tracking-widest ${tab === s.id ? "text-primary" : "text-white/40"}`}
-                >
-                  {s.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
         </View>
 
         {/* CONTENT */}
@@ -586,6 +518,19 @@ export default function AdminAssignServices() {
           )}
         </View>
       </ScrollView>
+
+      {/* FLOATING ACTION BUTTON */}
+      <TouchableOpacity
+        onPress={async () => {
+          setSelectedBooking(null);
+          setSelectedEmployeeId("");
+          await fetchEmployees();
+          setGlobalModalVisible(true);
+        }}
+        className="absolute bottom-8 right-8 w-14 h-14 bg-primary rounded-full items-center justify-center shadow-2xl shadow-white/20 z-50 cursor-pointer"
+      >
+        <Ionicons name="person-add" size={24} color="white" />
+      </TouchableOpacity>
 
       {/* ASSIGNMENT MODAL */}
       <Modal
