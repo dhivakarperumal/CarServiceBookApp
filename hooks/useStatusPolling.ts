@@ -117,6 +117,13 @@ export const useStatusPolling = () => {
           : servicesRes.data?.services || servicesRes.data?.data || [];
       }
 
+      if (isCustomer) {
+        filterServiceItemsForUser(servicesData, bookingsData).forEach((service: any) => {
+          const status = statusTracker.createCachedServiceStatus(service, 'service');
+          if (status) allStatuses.push(status);
+        });
+      }
+
       if (isEmployee) {
         const { username, email, id: employeeId, uid } = getUserIdentifiers();
 

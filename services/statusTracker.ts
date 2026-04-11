@@ -161,20 +161,12 @@ export const createCachedServiceStatus = (
   const status = statusParts.join('|');
 
   let message = '';
-
-  const bookingRef =
-    service.bookingId || service.booking_id || service.bookingId || service.orderId || service.appointmentId || service.appointment_id || id;
-  const formattedRef = bookingRef ? bookingRef.toString() : id.toString();
-  const customerName = service.name || service.customerName || service.customer_name || service.customer || 'Customer';
-  const isAppointment = Boolean(service.appointmentId || service.appointment_id || service.isAppointment);
-
   if (type === 'service') {
-    message = `Service #${formattedRef} has been updated.`;
+    message = `Your service #${id} has new updates from the mechanic.`;
   } else if (type === 'assignment') {
-    const itemLabel = isAppointment ? 'Appointment' : 'Booking';
-    message = `${customerName}, ${itemLabel} #${formattedRef} is assigned to you.`;
+    message = `A service has been assigned to you.`;
   } else {
-    message = `Service #${formattedRef} has been updated.`;
+    message = `Service #${id} has been updated.`;
   }
 
   return {
