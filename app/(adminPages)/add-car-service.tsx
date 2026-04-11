@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import * as ImagePicker from 'expo-image-picker';
+import { Picker } from '@react-native-picker/picker';
 import {
   ActivityIndicator,
   Alert,
@@ -175,20 +176,26 @@ export default function AddCarService() {
                     className="w-full bg-slate-950 rounded-2xl border border-white/5 px-6 py-4 text-white font-black"
                  />
               </View>
+            </View>
+
             <View className="gap-2">
                <Text className="text-slate-500 text-[8px] font-black uppercase tracking-[3px] ml-2">Icon Theme</Text>
-               <View className="flex-row flex-wrap gap-3">
-                 {ICON_OPTIONS.map((opt) => (
-                    <TouchableOpacity 
-                      key={opt.name}
-                      onPress={() => setForm({...form, icon: opt.name})}
-                      className={`flex-1 min-w-[22%] py-4 rounded-2xl items-center justify-center gap-2 border ${form.icon === opt.name ? 'bg-white border-white' : 'bg-slate-950 border-white/5'}`}
-                    >
-                       <Ionicons name={opt.icon as any} size={20} color={form.icon === opt.name ? 'black' : '#475569'} />
-                       <Text className={`text-[8px] font-black uppercase tracking-wider ${form.icon === opt.name ? 'text-black' : 'text-slate-600'}`}>{opt.name}</Text>
-                    </TouchableOpacity>
-                 ))}
-               </View>
+               <View className="bg-slate-950 border border-white/10 rounded-2xl px-3 py-2">
+  <Picker
+    selectedValue={form.icon}
+    onValueChange={(value) => setForm({ ...form, icon: value })}
+    dropdownIconColor="#fff"
+    style={{ color: 'white' }}
+  >
+    {ICON_OPTIONS.map((opt) => (
+      <Picker.Item
+        key={opt.name}
+        label={opt.name}
+        value={opt.name}
+      />
+    ))}
+  </Picker>
+</View>
             </View>
 
             <View className="gap-2">
