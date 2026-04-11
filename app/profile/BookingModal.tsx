@@ -512,7 +512,7 @@ const BookingModal: React.FC<Props> = ({
                 booking.issue &&
                 booking.issue !== "Others" &&
                 booking.issueStatus === "pending" &&
-                booking.issueAmount != null &&
+                booking.issueAmount > 0 &&
                 !booking.issues?.length;
 
               const showApprovalButtons =
