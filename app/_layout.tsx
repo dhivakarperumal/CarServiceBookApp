@@ -6,7 +6,6 @@ import { AuthProvider } from "../contexts/AuthContext";
 import { CartProvider } from "../contexts/CartContext";
 import { FavoriteProvider } from "../contexts/FavoriteContext";
 import { useNotifications } from "../hooks/useNotifications";
-import { useStatusPolling } from "../hooks/useStatusPolling";
 import * as notificationService from "../services/notificationService";
 
 import './global.css';
@@ -14,7 +13,6 @@ import './global.css';
 // ✅ Notification wrapper component
 function NotificationWrapper({ children }: { children: React.ReactNode }) {
   useNotifications();
-  useStatusPolling();
 
   useEffect(() => {
     // Configure and register for push notifications
@@ -30,8 +28,8 @@ function NotificationWrapper({ children }: { children: React.ReactNode }) {
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
-      <AuthProvider>
-        <NotificationWrapper>
+      <NotificationWrapper>
+        <AuthProvider>
           <CartProvider>
             <FavoriteProvider>
           <Stack
@@ -103,10 +101,10 @@ export default function RootLayout() {
           </Stack>
 
           <StatusBar style="light" />
-            </FavoriteProvider>
-          </CartProvider>
-        </NotificationWrapper>
-      </AuthProvider>
+        </FavoriteProvider>
+      </CartProvider>
+    </AuthProvider>
+      </NotificationWrapper>
     </SafeAreaProvider>
   );
 }
