@@ -113,15 +113,6 @@ export default function AddPricing() {
           contentContainerStyle={{ paddingBottom: 100 }}
         >
           <View className="p-6">
-            <View className="mb-8">
-              <Text className="text-text-secondary text-[9px] font-black uppercase tracking-widest">
-                Sales Management
-              </Text>
-              <Text className="text-white text-lg font-black tracking-tighter uppercase mt-1">
-                {isEditing ? "Update Package" : "Add Package"}
-              </Text>
-            </View>
-
             {/* FORM */}
             <View className="bg-card border border-slate-700 p-8 rounded-3xl">
               <View className="gap-6">
