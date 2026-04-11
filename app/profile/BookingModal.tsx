@@ -127,6 +127,10 @@ const BookingModal: React.FC<Props> = ({
   });
 
   const effectiveServiceId = bookingSpare?.serviceId || booking.serviceId || booking.service_id || null;
+  const isPricingPackage =
+    booking.issue === "Others" &&
+    booking.otherIssue &&
+    booking.otherIssue.includes("Package:");
 
   /* ===== STATUS TRACKER ===== */
   const StatusTracker = ({ currentStatus }: { currentStatus: string }) => {
@@ -428,121 +432,100 @@ const BookingModal: React.FC<Props> = ({
             )}
 
             {/* ===== ISSUES ===== */}
-            {booking.issues?.length ? (
-              <View className="mt-6">
-                <Text className="text-primary font-bold mb-2">
-                  ⚙️ Issues
-                </Text>
+            {(() => {
+              const hasIssueList = booking.issues?.length > 0;
+              const showSingleIssue =
+                booking.issue &&
+                booking.issue !== "Others" &&
+                !hasIssueList;
 
-                {booking.issues.map((issue) => {
-                  const issueId = issue.id || issue._id || issue.issueId || issue.issue_id || "";
-                  const status = issue.issueStatus || "pending";
-                  const amount = issue.issueAmount != null ? issue.issueAmount : booking.issueAmount;
+              if (isPricingPackage) return null;
 
-                  return (
-                    <View key={issueId || issue.issue} className="p-3 bg-card rounded-lg mb-2">
-                      <Text className="text-text-secondary">
-                        {issue.issue}
-                      </Text>
+              if (hasIssueList) {
+                return (
+                  <View className="mt-6">
+                    <Text className="text-primary font-bold mb-2">
+                      ⚙️ Issues
+                    </Text>
 
-                      {amount != null && (
-                        <Text className="text-text-secondary text-sm mt-1">
-                          Amount: ₹{Number(amount).toFixed(2)}
-                        </Text>
-                      )}
+                    {booking.issues.map((issue) => {
+                      const issueId = issue.id || issue._id || issue.issueId || issue.issue_id || "";
+                      const status = issue.issueStatus || "pending";
+                      const amount = issue.issueAmount != null ? issue.issueAmount : booking.issueAmount;
 
-                      <Text
-                        style={{
-                          color:
-                            status === "approved"
-                              ? COLORS.success
-                              : status === "rejected"
-                                ? COLORS.error
-                                : COLORS.warning,
-                        }}
-                      >
-                        {status.toUpperCase()}
-                      </Text>
+                      return (
+                        <View key={issueId || issue.issue} className="p-3 bg-card rounded-lg mb-2">
+                          <Text className="text-text-secondary">
+                            {issue.issue}
+                          </Text>
 
-                      {/* ✅ ISSUE APPROVAL FIX */}
-                      {/* {status === "pending" && effectiveServiceId && issueId && (
-                        <View className="flex-row gap-2 mt-2">
-                          <TouchableOpacity
-                            onPress={() =>
-                              onApprove(
-                                effectiveServiceId,
-                                issueId,
-                                "approved",
-                                "issue"
-                              )
-                            }
-                            className="p-2 rounded-lg"
+                          {amount != null && (
+                            <Text className="text-text-secondary text-sm mt-1">
+                              Amount: ₹{Number(amount).toFixed(2)}
+                            </Text>
+                          )}
+
+                          <Text
                             style={{
-                              backgroundColor: COLORS.success,
-                              minWidth: 72,
-                              alignItems: "center",
-                              justifyContent: "center",
+                              color:
+                                status === "approved"
+                                  ? COLORS.success
+                                  : status === "rejected"
+                                    ? COLORS.error
+                                    : COLORS.warning,
                             }}
                           >
-                            <Text className="text-white text-xs font-bold">
-                              Approve
-                            </Text>
-                          </TouchableOpacity>
-
-                          <TouchableOpacity
-                            onPress={() =>
-                              onApprove(
-                                effectiveServiceId,
-                                issueId,
-                                "rejected",
-                                "issue"
-                              )
-                            }
-                            className="p-2 rounded-lg"
-                            style={{
-                              backgroundColor: COLORS.error,
-                              minWidth: 72,
-                              alignItems: "center",
-                              justifyContent: "center",
-                            }}
-                          >
-                            <Text className="text-white text-xs font-bold">
-                              Reject
-                            </Text>
-                          </TouchableOpacity>
+                            {status.toUpperCase()}
+                          </Text>
                         </View>
-                      )} */}
-                    </View>
-                  );
-                })}
-              </View>
-            ) : booking.issue && booking.issueStatus ? (
-              <View className="mt-6">
-                <Text className="text-primary font-bold mb-2">
-                  ⚙️ Issue
+                      );
+                    })}
+                  </View>
+                );
+              }
+
+              if (showSingleIssue) {
+                return (
+                  <View className="mt-6">
+                    <Text className="text-primary font-bold mb-2">
+                      ⚙️ Issue
+                    </Text>
+                    <Text className="text-text-secondary mb-2">{booking.issue}</Text>
+                    {booking.issueAmount != null && (
+                      <Text className="text-text-secondary text-sm">
+                        Amount: ₹{Number(booking.issueAmount).toFixed(2)}
+                      </Text>
+                    )}
+                    <Text className="text-text-secondary text-sm mt-2">
+                      Status: <Text className="font-bold" style={{ color: booking.issueStatus === 'approved' ? COLORS.success : booking.issueStatus === 'rejected' ? COLORS.error : COLORS.warning }}>{booking.issueStatus?.toUpperCase() || 'PENDING'}</Text>
+                    </Text>
+                  </View>
+                );
+              }
+
+              return (
+                <Text className="text-text-secondary mt-4 text-sm">
+                  No issue details available for this booking.
                 </Text>
-                <Text className="text-text-secondary mb-2">{booking.issue}</Text>
-                {booking.issueAmount != null && (
-                  <Text className="text-text-secondary text-sm">
-                    Amount: ₹{Number(booking.issueAmount).toFixed(2)}
-                  </Text>
-                )}
-                <Text className="text-text-secondary text-sm mt-2">
-                  Status: <Text className="font-bold" style={{ color: booking.issueStatus === 'approved' ? COLORS.success : booking.issueStatus === 'rejected' ? COLORS.error : COLORS.warning }}>{booking.issueStatus.toUpperCase()}</Text>
-                </Text>
-              </View>
-            ) : (
-              <Text className="text-text-secondary mt-4 text-sm">
-                No issue details available for this booking.
-              </Text>
-            )}
+              );
+            })()}
 
             {/* ===== COMMON APPROVE / REJECT (LIKE WEB) ===== */}
             {(() => {
-              const hasSpares = bookingSpare?.parts?.length > 0;
-              const hasIssues = booking.issues?.length > 0 || (booking.issue && booking.issue !== "Others");
+              const hasPendingSpares = bookingSpare?.parts?.some(
+                (p) => (p.status || "pending") === "pending"
+              );
+              const hasPendingIssues =
+                booking.issues?.some(
+                  (i) => (i.issueStatus || "pending") === "pending"
+                ) ||
+                (
+                  booking.issue &&
+                  booking.issue !== "Others" &&
+                  (booking.issueStatus || "pending") === "pending"
+                );
 
-              if (!hasSpares && !hasIssues) return null;
+              if (!hasPendingSpares && !hasPendingIssues) return null;
 
               return (
                 <View
