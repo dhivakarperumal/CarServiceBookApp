@@ -252,36 +252,36 @@ export default function ReviewsSettings() {
 
               <ScrollView className="max-h-[60vh] gap-6" showsVerticalScrollIndicator={false}>
                  <View>
-                    <Text className="text-slate-500 text-[10px] font-black uppercase tracking-widest ml-2 mb-2">Customer Name</Text>
+                    <Text className="text-slate-500 mb-2 text-[10px] font-black uppercase tracking-widest ml-2 mb-2">Customer Name</Text>
                     <TextInput 
                       placeholder="Enter name" 
                       placeholderTextColor="#475569"
                       value={form.name}
                       onChangeText={(text) => setForm({ ...form, name: text })}
-                      className="bg-slate-950 border border-white/5 h-14 rounded-2xl px-5 text-white font-bold"
+                      className="bg-slate-950 border border-white/5 h-14 rounded-2xl mb-6 px-5 text-white font-bold"
                     />
                  </View>
 
                  <View>
-                    <Text className="text-slate-500 text-[10px] font-black uppercase tracking-widest ml-2 mb-2">Customer Photo</Text>
+                    <Text className="text-slate-500  mb-2 text-[10px] font-black uppercase tracking-widest ml-2 mb-2">Customer Photo</Text>
                     <TouchableOpacity 
                        onPress={pickImage}
                        className="bg-slate-950 border-2 border-dashed border-white/10 h-32 rounded-2xl items-center justify-center overflow-hidden"
                     >
                        {form.image ? (
-                          <Image source={{ uri: form.image }} className="w-full h-full" resizeMode="cover" />
+                          <Image source={{ uri: form.image }} className="w-full h-full mb-6" resizeMode="cover" />
                        ) : (
                           <>
                              <Ionicons name="camera-outline" size={32} color="#475569" />
-                             <Text className="text-slate-600 text-[8px] font-bold uppercase mt-2">Pick Image</Text>
+                             <Text className="text-slate-600 text-[8px] font-bold mb-6 uppercase mt-2">Pick Image</Text>
                           </>
                        )}
                     </TouchableOpacity>
                  </View>
 
                  <View>
-                    <Text className="text-slate-500 text-[10px] font-black uppercase tracking-widest ml-2 mb-2">Rating</Text>
-                    <View className="flex-row gap-3 bg-slate-950 p-4 rounded-2xl border border-white/5 justify-center">
+                    <Text className="text-slate-500 text-[10px]  mt-8 font-black uppercase tracking-widest ml-2 mb-2">Rating</Text>
+                    <View className="flex-row gap-3 bg-slate-950 p-4 mb-6 rounded-2xl border border-white/5 justify-center">
                        {[1, 2, 3, 4, 5].map((i) => (
                           <TouchableOpacity key={i} onPress={() => setForm({ ...form, rating: i })}>
                              <Ionicons 

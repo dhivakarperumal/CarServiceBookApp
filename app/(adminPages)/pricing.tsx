@@ -61,17 +61,9 @@ export default function PricingList() {
 
   return (
     <SafeAreaView className="flex-1 bg-slate-950">
-      <View className="px-6 pt-14 pb-8 flex-row justify-between items-center bg-slate-950">
-        <View>
-          <Text className="text-white font-black text-4xl uppercase tracking-tighter">PRICING</Text>
-          <Text className="text-sky-500 text-[10px] font-black uppercase tracking-[4px] mt-1">Service Packages</Text>
-        </View>
-        <TouchableOpacity 
-           onPress={() => router.push('/(adminPages)/add-pricing' as any)}
-           className="w-14 h-14 bg-white rounded-2xl items-center justify-center shadow-2xl shadow-sky-500/20"
-        >
-          <Ionicons name="add" size={28} color="black" />
-        </TouchableOpacity>
+      <View className="px-6 pt-14 pb-6">
+        <Text className="text-white font-black text-3xl uppercase tracking-tighter">Pricing</Text>
+        <Text className="text-slate-500 text-[10px] font-black uppercase tracking-[4px] mt-1">Service Packages</Text>
       </View>
 
       <View className="px-6 mb-6">
@@ -93,7 +85,7 @@ export default function PricingList() {
         <FlatList 
           data={filtered}
           keyExtractor={(item) => item.id.toString()}
-          contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 100 }}
+          contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 120 }}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={fetchPackages} tintColor="#fff" />}
           renderItem={({ item: pkg }) => (
             <View className="bg-slate-900/50 rounded-[32px] p-6 mb-4 border border-white/5 overflow-hidden">
@@ -103,18 +95,18 @@ export default function PricingList() {
                <View className="flex-row justify-between items-start mb-4">
                   <View className="flex-1">
                      <Text className="text-white font-black text-xl tracking-tight mb-1">{pkg.title}</Text>
-                     <Text className="text-sky-500 font-black text-lg">₹{Number(pkg.price || 0).toLocaleString()}</Text>
+                     <Text className="text-white font-black text-lg">₹{Number(pkg.price || 0).toLocaleString()}</Text>
                   </View>
                   <View className="flex-row gap-2">
                      <TouchableOpacity 
                         onPress={() => router.push({ pathname: '/(adminPages)/add-pricing', params: { id: pkg.id } } as any)}
-                        className="w-10 h-10 rounded-2xl bg-white/5 items-center justify-center border border-white/5"
+                        className="w-10 h-10 rounded-2xl bg-sky-500/20 items-center justify-center border border-sky-500/30"
                      >
-                        <Ionicons name="pencil" size={16} color="#94a3b8" />
+                        <Ionicons name="pencil" size={16} color="#0ea5e9" />
                      </TouchableOpacity>
                      <TouchableOpacity 
                         onPress={() => handleDelete(pkg.id)}
-                        className="w-10 h-10 rounded-2xl bg-rose-500/10 items-center justify-center border border-rose-500/10"
+                        className="w-10 h-10 rounded-2xl bg-rose-500/20 items-center justify-center border border-rose-500/30"
                      >
                         <Ionicons name="trash-outline" size={16} color="#ef4444" />
                      </TouchableOpacity>
@@ -146,6 +138,16 @@ export default function PricingList() {
           )}
         />
       )}
+
+      {/* FLOATING ADD BUTTON */}
+      <TouchableOpacity 
+        onPress={() => router.push('/(adminPages)/add-pricing' as any)}
+        className="absolute bottom-10 right-8 w-16 h-16 bg-white rounded-full items-center justify-center shadow-2xl z-50"
+        style={{ elevation: 15 }}
+        activeOpacity={0.8}
+      >
+        <Ionicons name="add" size={38} color="black" />
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
