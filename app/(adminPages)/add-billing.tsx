@@ -2,16 +2,16 @@ import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    SafeAreaView,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
 import { api } from "../../services/api";
@@ -75,15 +75,17 @@ export default function AddBillingScreen() {
   }, [userProfile?.id]);
 
   useEffect(() => {
-    if (directServiceId && services.length > 0) {
+    if (directServiceId && !loading) {
       const match = services.find(
         (s) => s.id.toString() === directServiceId.toString(),
       );
       if (match) {
         selectService(match);
+      } else {
+        fetchDirectService(directServiceId);
       }
     }
-  }, [directServiceId, services]);
+  }, [directServiceId, services, loading]);
 
   useEffect(() => {
     setInvoiceNo(generateInvoiceNo(billingCount));
@@ -93,28 +95,24 @@ export default function AddBillingScreen() {
     const searchTerm = search.toLowerCase().trim();
     if (!searchTerm) return services;
     return services.filter((s) => {
-      const text = `${s.bookingId || s.booking_id || s.id || ""} ${
-        s.name || s.customer_name || ""
-      } ${s.phone || s.mobile || s.contactNumber || ""} ${
-        s.brand || s.vehicleBrand || ""
-      } ${s.model || s.vehicleModel || ""} ${
-        s.vehicleNumber || s.regNo || s.registrationNumber || ""
-      }`.toLowerCase();
+      const text = `${s.bookingId || s.booking_id || s.id || ""} ${s.name || s.customer_name || ""
+        } ${s.phone || s.mobile || s.contactNumber || ""} ${s.brand || s.vehicleBrand || ""
+        } ${s.model || s.vehicleModel || ""} ${s.vehicleNumber || s.regNo || s.registrationNumber || ""
+        }`.toLowerCase();
       return text.includes(searchTerm);
     });
   }, [services, search]);
 
   const matchingProducts = useMemo(() => {
-    const searchTerm = newPartName.toLowerCase().trim();
-    if (!searchTerm) return products.slice(0, 100);
+    if (!newPartName.trim()) return [];
     return products
       .filter((product) =>
         (product.name || "")
           .toString()
           .toLowerCase()
-          .includes(searchTerm),
+          .includes(newPartName.toLowerCase()),
       )
-      .slice(0, 100);
+      .slice(0, 4);
   }, [products, newPartName]);
 
   const fetchMyServices = async () => {
@@ -132,10 +130,8 @@ export default function AddBillingScreen() {
         (userProfile as any)?.name ||
         "";
 
-      const isAdmin = (userProfile?.role || "").toLowerCase() === "admin";
       const myServices = (serviceRes.data || []).filter((s: any) => {
         const assignedMatch =
-          isAdmin ||
           (s.assignedEmployeeName || s.assigned_to || s.assignedEmployee || "")
             .toString()
             .toLowerCase() === mechanicName.toLowerCase();
@@ -149,7 +145,6 @@ export default function AddBillingScreen() {
           "service completed",
           "pending billing",
           "billing pending",
-          "processing", // Added processing as well just in case
         ].includes(status);
         return assignedMatch && isBillPending;
       });
@@ -203,6 +198,35 @@ export default function AddBillingScreen() {
     }
   };
 
+  const fetchDirectService = async (id: string) => {
+    try {
+      const res = await api.get(`/all-services/${id}`);
+      const service = res.data;
+
+      // Check if assigned to this mechanic
+      const mechanicName =
+        userProfile?.username ||
+        (userProfile as any)?.displayName ||
+        (userProfile as any)?.name ||
+        "";
+
+      const isAdmin = (userProfile?.role || "").toLowerCase() === "admin";
+      if (
+        !isAdmin &&
+        (service.assignedEmployeeName || "").toLowerCase() !==
+        mechanicName.toLowerCase()
+      ) {
+        Alert.alert("Error", "Service not assigned to you");
+        return;
+      }
+
+      selectService(service);
+    } catch (err) {
+      console.error(err);
+      Alert.alert("Error", "Failed to load service");
+    }
+  };
+
   const addManualPart = () => {
     if (!newPartName.trim()) {
       Alert.alert("Missing Part", "Enter a part name before adding.");
@@ -244,13 +268,15 @@ export default function AddBillingScreen() {
         if (i !== index) return part;
         const updated = { ...part };
         if (field === "qty") {
-          updated.qty = value === "" ? 0 : Number(value);
+          const val = Number(value);
+          updated.qty = isNaN(val) ? 0 : val;
         } else if (field === "price") {
-          updated.price = value === "" ? 0 : Number(value);
+          const val = Number(value);
+          updated.price = isNaN(val) ? 0 : val;
         } else {
           updated.partName = value;
         }
-        updated.total = Number(updated.qty || 0) * Number(updated.price || 0);
+        updated.total = (Number(updated.qty) || 0) * (Number(updated.price) || 0);
         return updated;
       }),
     );
@@ -281,13 +307,17 @@ export default function AddBillingScreen() {
     setInvoiceNo(generateInvoiceNo(nextCount));
   };
 
-  const partsTotal = parts.reduce((sum, p) => sum + p.total, 0);
+  const partsTotal = parts.reduce((sum, p) => sum + (Number(p.total) || 0), 0);
   const issueTotal =
-    billingMode === "online" ? issues.reduce((sum, i) => sum + i.amount, 0) : 0;
-  const labourAmount = Number(labour || workforceCharges || 0);
-  const gst = Number(gstPercent || 0);
+    billingMode === "online" ? issues.reduce((sum, i) => sum + (Number(i.amount) || 0), 0) : 0;
 
-  const subTotal = partsTotal + issueTotal + labourAmount;
+  const labNum = Number(labour || workforceCharges || 0);
+  const labourAmount = isNaN(labNum) ? 0 : labNum;
+
+  const gstNum = Number(gstPercent || 0);
+  const gst = isNaN(gstNum) ? 0 : gstNum;
+
+  const subTotal = (partsTotal || 0) + (issueTotal || 0) + (labourAmount || 0);
   const gstAmount = (subTotal * gst) / 100;
   const grandTotal = subTotal + gstAmount;
 
@@ -323,21 +353,21 @@ export default function AddBillingScreen() {
       const bookingId =
         billingMode === "manual"
           ? `MAN-${Date.now()}`
-          : selectedService.bookingId;
+          : selectedService?.bookingId || `JOB-${selectedService?.id}`;
       const customerName =
         billingMode === "manual"
           ? manualCustomerName.trim()
-          : selectedService.name;
+          : selectedService?.name || "Customer";
       const mobileNumber =
         billingMode === "manual"
           ? manualContactNumber.trim()
-          : selectedService.phone;
+          : selectedService?.phone || "";
       const car =
         billingMode === "manual"
           ? `${manualVehicleBrand.trim()} ${manualVehicleModel.trim()}`.trim()
-          : `${selectedService.brand || ""} ${selectedService.model || ""}`.trim();
+          : `${selectedService?.brand || ""} ${selectedService?.model || ""}`.trim();
       const uid =
-        billingMode === "manual" ? userProfile?.id : selectedService.uid;
+        billingMode === "manual" ? userProfile?.id || "manual" : selectedService?.uid;
 
       const payload = {
         invoiceNo,
@@ -371,7 +401,7 @@ export default function AddBillingScreen() {
       if (billingMode === "online") {
         await api
           .put(`/all-services/${selectedService.id}/status`, {
-            serviceStatus: "Bill Generated",
+            serviceStatus: "Bill Completed",
           })
           .catch((err) => console.log("Status update failed:", err));
       }
@@ -382,7 +412,7 @@ export default function AddBillingScreen() {
       Alert.alert("Success", "Invoice created successfully.", [
         {
           text: "OK",
-        //   onPress: () => router.replace("/(employee)/billing"),
+          onPress: () => router.replace("/(admin)/services"),
         },
       ]);
     } catch (error) {
@@ -393,31 +423,19 @@ export default function AddBillingScreen() {
     }
   };
 
-  if (loading) {
-    return (
-      <View className="flex-1 bg-background justify-center items-center">
-        <ActivityIndicator size="large" color="#0EA5E9" />
-        <Text className="text-text-secondary mt-4 font-medium tracking-widest text-[10px] uppercase">
-          Preparing invoice engine...
-        </Text>
-      </View>
-    );
-  }
-
   return (
     <SafeAreaView className="flex-1 bg-background">
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
       >
-        <View className="px-2 py-5 mt-6">
+        <View className="p-5 mt-6">
           <View className="mb-6">
-         
 
-            <View className="mt-4 w-full flex-row items-center rounded-3xl bg-slate-900/90 p-1.5 border border-slate-700">
+            <View className="mt-4 w-full flex-row items-center rounded-full bg-slate-900/90 p-1 border border-slate-700">
               {[
-                { mode: "online", label: "Online" },
-                { mode: "manual", label: "Manual" },
+                { mode: "online", label: "Online Booking" },
+                { mode: "manual", label: "Manual Entry" },
               ].map((option) => (
                 <TouchableOpacity
                   key={option.mode}
@@ -428,10 +446,14 @@ export default function AddBillingScreen() {
                       setIssues([]);
                     }
                   }}
-                  className={`flex-1 py-4 rounded-2xl items-center justify-center ${billingMode === option.mode ? "bg-primary shadow-lg shadow-primary/20" : "bg-transparent"}`}
+                  className={`flex-1 py-3 rounded-full items-center ${billingMode === option.mode ? "bg-primary" : "bg-slate-900"
+                    }`}
                 >
                   <Text
-                    className={`text-[10px] font-black uppercase tracking-widest ${billingMode === option.mode ? "text-background" : "text-text-muted"}`}
+                    className={`text-[10px] font-black uppercase tracking-wider ${billingMode === option.mode
+                        ? "text-text-primary"
+                        : "text-text-muted"
+                      }`}
                   >
                     {option.label}
                   </Text>
@@ -440,113 +462,127 @@ export default function AddBillingScreen() {
             </View>
 
             <Text className="text-[14px] uppercase tracking-[0.35em] text-text-primary font-black mt-4 ml-1">
-              Invoice No :{invoiceNo}
+              Invoice No : {invoiceNo}
             </Text>
+
           </View>
         </View>
 
         <ScrollView
-          className="flex-1 px-2"
+          className="flex-1 px-5"
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          <View className="flex-row flex-wrap gap-4 mb-6">
-            <View className="flex-1 min-w-[280px] bg-card rounded-[2rem] p-5 border border-card shadow-xl shadow-slate-900/20">
-              <SectionTitle title="Quick Search" />
-              <TextInput
-                placeholder="Search Booking ID / Phone"
-                placeholderTextColor="#64748B"
-                value={search}
-                onChangeText={setSearch}
-                className="w-full bg-background border border-slate-800 rounded-2xl px-4 py-4 text-text-primary font-semibold"
-              />
-            </View>
-
-            <View className="flex-1 min-w-[280px] bg-card rounded-[2rem] p-5 border border-card shadow-xl shadow-slate-900/20">
-              <SectionTitle title="Verification Queue" />
-              <Text className="text-[10px] uppercase tracking-widest text-text-muted mb-4">
-                Jobs pulled from https://cars.qtechx.com/api/all-services/
+          {loading && services.length === 0 ? (
+            <View className="py-20 justify-center items-center">
+              <ActivityIndicator size="large" color="#0EA5E9" />
+              <Text className="text-text-secondary mt-4 font-medium tracking-widest text-[10px] uppercase">
+                Preparing invoice engine...
               </Text>
-
-              {filteredServices.length === 0 ? (
-                <View className="rounded-3xl border border-slate-800 bg-slate-950/80 px-4 py-5">
-                  <Text className="text-[10px] text-text-muted uppercase tracking-widest">
-                    No pending billing jobs found.
-                  </Text>
-                  <Text className="text-sm font-black text-text-primary mt-2">
-                    Try searching by Booking ID, phone, or vehicle model.
-                  </Text>
+            </View>
+          ) : (
+            <>
+              <View className="flex-row flex-wrap gap-4 mb-6">
+                <View className="flex-1 min-w-[280px] bg-card rounded-[2rem] p-5 border border-card shadow-xl shadow-slate-900/20">
+                  <SectionTitle title="Quick Search" />
+                  <TextInput
+                    placeholder="Search Booking ID / Phone"
+                    placeholderTextColor="#64748B"
+                    value={search}
+                    onChangeText={setSearch}
+                    className="w-full bg-background border border-slate-800 rounded-2xl px-4 py-4 text-text-primary font-semibold"
+                  />
                 </View>
-              ) : (
-                <View className="rounded-3xl border border-slate-800 bg-slate-950/80 overflow-hidden">
-                  <TouchableOpacity
-                    activeOpacity={0.8}
-                    onPress={() => setServiceDropdownOpen((prev) => !prev)}
-                    className="flex-row items-center justify-between px-4 py-4 bg-slate-900/80 border-b border-slate-800"
-                  >
-                    <Text
-                      className={`text-sm font-black ${selectedService ? "text-text-primary" : "text-text-muted"}`}
-                    >
-                      {selectedService
-                        ? `${selectedService.bookingId || `Job ${selectedService.id}`} | ${selectedService.name}`
-                        : "-- Select Assigned Job --"}
-                    </Text>
-                    <Ionicons
-                      name={serviceDropdownOpen ? "chevron-up" : "chevron-down"}
-                      size={18}
-                      color="#94A3B8"
-                    />
-                  </TouchableOpacity>
 
-                  {serviceDropdownOpen && (
-                    <ScrollView
-                      className="max-h-56 bg-slate-950/90"
-                      showsVerticalScrollIndicator
-                    >
-                      {filteredServices.map((service) => (
-                        <TouchableOpacity
-                          key={service.id}
-                          onPress={() => {
-                            if (selectedService?.id === service.id) {
-                              setSelectedService(null);
-                              setParts([]);
-                              setIssues([]);
-                              setServiceDropdownOpen(false);
-                              return;
-                            }
-                            selectService(service);
-                          }}
-                          className={`px-4 py-4 border-b border-slate-800 ${selectedService?.id === service.id ? "bg-slate-900" : "bg-slate-950/70"}`}
+                <View className="flex-1 min-w-[280px] bg-card rounded-[2rem] p-5 border border-card shadow-xl shadow-slate-900/20">
+                  <SectionTitle title="Verification Queue" />
+                  <Text className="text-[10px] uppercase tracking-widest text-text-muted mb-4">
+                    Jobs pulled from https://cars.qtechx.com/api/all-services/
+                  </Text>
+
+                  {filteredServices.length === 0 ? (
+                    <View className="rounded-3xl border border-slate-800 bg-slate-950/80 px-4 py-5">
+                      <Text className="text-[10px] text-text-muted uppercase tracking-widest">
+                        No pending billing jobs found.
+                      </Text>
+                      <Text className="text-sm font-black text-text-primary mt-2">
+                        Try searching by Booking ID, phone, or vehicle model.
+                      </Text>
+                    </View>
+                  ) : (
+                    <View className="rounded-3xl border border-slate-800 bg-slate-950/80 overflow-hidden">
+                      <TouchableOpacity
+                        activeOpacity={0.8}
+                        onPress={() => setServiceDropdownOpen((prev) => !prev)}
+                        className="flex-row items-center justify-between px-4 py-4 bg-slate-900/80 border-b border-slate-800"
+                      >
+                        <Text
+                          className={`text-sm font-black ${selectedService ? "text-text-primary" : "text-text-muted"}`}
                         >
-                          <Text className="text-sm font-black text-text-primary">
-                            {service.bookingId || `Job ${service.id}`}
-                          </Text>
-                          <Text className="text-[10px] text-text-muted uppercase tracking-widest mt-1">
-                            {service.name} • {service.brand} {service.model}
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
-                    </ScrollView>
+                          {selectedService
+                            ? `${selectedService.bookingId || `Job ${selectedService.id}`} | ${selectedService.name}`
+                            : "-- Select Assigned Job --"}
+                        </Text>
+                        <Ionicons
+                          name={serviceDropdownOpen ? "chevron-up" : "chevron-down"}
+                          size={18}
+                          color="#94A3B8"
+                        />
+                      </TouchableOpacity>
+
+                      {serviceDropdownOpen && (
+                        <ScrollView
+                          className="max-h-56 bg-slate-950/90"
+                          showsVerticalScrollIndicator
+                        >
+                          {filteredServices.map((service) => (
+                            <TouchableOpacity
+                              key={service.id}
+                              onPress={() => {
+                                if (selectedService?.id === service.id) {
+                                  setSelectedService(null);
+                                  setParts([]);
+                                  setIssues([]);
+                                  setServiceDropdownOpen(false);
+                                  return;
+                                }
+                                selectService(service);
+                              }}
+                              className={`px-4 py-4 border-b border-slate-800 ${selectedService?.id === service.id ? "bg-slate-900" : "bg-slate-950/70"}`}
+                            >
+                              <Text className="text-sm font-black text-text-primary">
+                                {service.bookingId || `Job ${service.id}`}
+                              </Text>
+                              <Text className="text-[10px] text-text-muted uppercase tracking-widest mt-1">
+                                {service.name} • {service.brand} {service.model}
+                              </Text>
+                            </TouchableOpacity>
+                          ))}
+                        </ScrollView>
+                      )}
+                    </View>
+                  )}
+
+                  {selectedService && (
+                    <View className="mt-4 rounded-3xl border border-slate-800 bg-slate-900/70 p-4">
+                      <Text className="text-[10px] uppercase tracking-widest text-text-muted mb-2">
+                        Selected Verification Job
+                      </Text>
+                      <Text className="text-sm font-black text-text-primary">
+                        {selectedService.bookingId || `Job ${selectedService.id}`}
+                      </Text>
+                      <Text className="text-[10px] text-text-muted mt-1">
+                        {selectedService.name} • {selectedService.brand}{" "}
+                        {selectedService.model}
+                      </Text>
+                    </View>
                   )}
                 </View>
-              )}
 
-              {selectedService && (
-                <View className="mt-4 rounded-3xl border border-slate-800 bg-slate-900/70 p-4">
-                  <Text className="text-[10px] uppercase tracking-widest text-text-muted mb-2">
-                    Selected Verification Job
-                  </Text>
-                  <Text className="text-sm font-black text-text-primary">
-                    {selectedService.bookingId || `Job ${selectedService.id}`}
-                  </Text>
-                  <Text className="text-[10px] text-text-muted mt-1">
-                    {selectedService.name} • {selectedService.brand}{" "}
-                    {selectedService.model}
-                  </Text>
-                </View>
-              )}
-            </View>
-          </View>
+
+              </View>
+            </>
+          )}
 
           {billingMode === "manual" && (
             <View className="bg-card rounded-[2rem] p-6 mb-6 border border-card shadow-xl shadow-slate-900/20">
@@ -599,7 +635,7 @@ export default function AddBillingScreen() {
             </View>
           )}
 
-          <View className="bg-card rounded-[2rem] p-6 mb-6 border border-card shadow-xl shadow-slate-900/20">
+          <View className="bg-card rounded-[2rem] p-0 mb-6 border border-card shadow-xl shadow-slate-900/20">
             <View className="flex-col gap-2 items-center justify-between mb-5">
               <Text className="text-xl font-black text-text-primary">
                 Spare Parts Inventory
@@ -609,75 +645,77 @@ export default function AddBillingScreen() {
               </Text>
             </View>
 
-            <View className="flex-row gap-2 mb-4 items-center">
+            <View className="flex-row items-center gap-2 mb-4">
+
               <TextInput
-                placeholder="Name"
+                placeholder="Product"
                 placeholderTextColor="#64748B"
                 value={newPartName}
                 onChangeText={(value) => {
                   setNewPartName(value);
                   const match = products.find(
                     (product) =>
-                      (product.name || "").toString().toLowerCase() ===
-                      value.toLowerCase(),
+                      (product.name || "").toLowerCase() === value.toLowerCase()
                   );
                   if (match && match.price != null) {
                     setNewPartPrice(String(match.price));
                   }
                 }}
-                className="flex-[3] bg-background border border-slate-800 rounded-xl px-4 py-3 text-text-primary font-bold text-xs"
+                className="flex-1 bg-background border border-slate-800 rounded-xl px-3 py-3 text-text-primary font-bold"
               />
+
               <TextInput
                 placeholder="Qty"
                 placeholderTextColor="#64748B"
                 value={newPartQty}
                 onChangeText={setNewPartQty}
                 keyboardType="numeric"
-                className="flex-[0.8] bg-background border border-slate-800 rounded-xl px-3 py-3 text-text-primary font-bold text-xs text-center"
+                className="w-16 bg-background border border-slate-800 rounded-xl px-2 py-3 text-text-primary font-bold text-center"
               />
+
               <TextInput
                 placeholder="Price"
                 placeholderTextColor="#64748B"
                 value={newPartPrice}
                 onChangeText={setNewPartPrice}
                 keyboardType="numeric"
-                className="flex-[1.2] bg-background border border-slate-800 rounded-xl px-3 py-3 text-text-primary font-bold text-xs text-center"
+                className="w-20 bg-background border border-slate-800 rounded-xl px-2 py-3 text-text-primary font-bold text-center"
               />
+
               <TouchableOpacity
                 onPress={addManualPart}
-                className="flex-[1.2] bg-primary rounded-xl py-3 items-center justify-center shadow-lg shadow-primary/20"
+                className="bg-primary rounded-xl px-4 py-3 items-center justify-center"
               >
-                <Text className="text-background font-black text-[10px] uppercase">
-                  Add
+                <Text className="text-white font-black text-xs">
+                  + Add
                 </Text>
               </TouchableOpacity>
+
             </View>
             {matchingProducts.length > 0 && (
-              <View className="bg-slate-950/80 rounded-3xl border border-slate-800 p-3 mb-4 max-h-72">
+              <View className="bg-slate-950/80 rounded-3xl border border-slate-800 p-0 mb-4">
                 <Text className="text-[10px] uppercase tracking-widest text-text-muted mb-2">
-                  Inventory Catalog
+                  Suggested products from inventory
                 </Text>
-                <ScrollView nestedScrollEnabled showsVerticalScrollIndicator>
-                  {matchingProducts.map((product) => (
-                    <TouchableOpacity
-                      key={product.id || product.name}
-                      onPress={() => {
-                        setNewPartName(product.name || "");
-                        setNewPartPrice(
-                          String(product.price || product.offerPrice || "0"),
-                        );
-                      }}
-                      className="rounded-2xl px-3 py-3 bg-slate-900/80 mb-2"
-                    >
-                      <Text className="text-sm font-black text-text-primary">
-                        {product.name}
-                      </Text>
-                      <Text className="text-[10px] text-text-muted mt-1">
-                        ₹{product.price || product.offerPrice || "0"}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
+                {matchingProducts.map((product) => (
+                  <TouchableOpacity
+                    key={product.id || product.name}
+                    onPress={() => {
+                      setNewPartName(product.name || "");
+                      setNewPartPrice(
+                        String(product.price || product.offerPrice || "0"),
+                      );
+                    }}
+                    className="rounded-2xl px-3 py-3 bg-slate-900/80 mb-2"
+                  >
+                    <Text className="text-sm font-black text-text-primary">
+                      {product.name}
+                    </Text>
+                    <Text className="text-[10px] text-text-muted mt-1">
+                      ₹{product.price || product.offerPrice || "0"}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
               </View>
             )}
 
@@ -847,7 +885,7 @@ export default function AddBillingScreen() {
               <TouchableOpacity
                 onPress={() => {
                   resetForm();
-                  router.replace("/(employee)/billing");
+                  router.replace("/(admin)/services");
                 }}
                 className="mt-4 py-4 rounded-[1.5rem] border border-slate-700 items-center justify-center"
               >

@@ -178,7 +178,7 @@ export default function AddBillingScreen() {
       const data = res.data;
 
       const partsData = (data.parts || [])
-        .filter((p: any) => (p.status || "").toLowerCase() === "approved")
+        .filter((p: any) => (p.status || "").toLowerCase() !== "rejected")
         .map((p: any) => ({
           partName: p.partName,
           qty: Number(p.qty || 0),
@@ -187,7 +187,7 @@ export default function AddBillingScreen() {
         }));
 
       const issuesData = (data.issues || [])
-        .filter((i: any) => (i.issueStatus || "").toLowerCase() === "approved")
+        .filter((i: any) => (i.issueStatus || "").toLowerCase() !== "rejected")
         .map((i: any) => ({
           issueName: i.issue,
           amount: Number(i.issueAmount || 0),
