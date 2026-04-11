@@ -131,8 +131,10 @@ export default function AddBillingScreen() {
         (userProfile as any)?.name ||
         "";
 
+      const isAdmin = (userProfile?.role || "").toLowerCase() === "admin";
       const myServices = (serviceRes.data || []).filter((s: any) => {
         const assignedMatch =
+          isAdmin ||
           (s.assignedEmployeeName || s.assigned_to || s.assignedEmployee || "")
             .toString()
             .toLowerCase() === mechanicName.toLowerCase();
@@ -146,6 +148,7 @@ export default function AddBillingScreen() {
           "service completed",
           "pending billing",
           "billing pending",
+          "processing", // Added processing as well just in case
         ].includes(status);
         return assignedMatch && isBillPending;
       });

@@ -34,6 +34,7 @@ const getButtonVisibility = (status: string) => {
     showOptions:
       currentIndex >= STATUS_STEPS.indexOf("Processing") &&
       currentIndex < STATUS_STEPS.indexOf("Service Completed"),
+    showBilling: status === "Bill Pending",
   };
 };
 
@@ -66,8 +67,7 @@ export default function Services() {
   const userRole = (userProfile?.role || "").toLowerCase();
   const isMechanic = userRole === "mechanic" || userRole === "staff";
 
-  const [mainTab, setMainTab] = useState("booked");
-  const [subTab, setSubTab] = useState("assigned");
+  const [mainTab, setMainTab] = useState("all");
   const [services, setServices] = useState<any[]>([]);
   const [employees, setEmployees] = useState<any[]>([]);
   const [issueEntries, setIssueEntries] = useState<any>([]);
@@ -87,16 +87,20 @@ export default function Services() {
   const [editingIssueId, setEditingIssueId] = useState<any>(null);
   const [activeModalTab, setActiveModalTab] = useState("issues");
   const [editingParts, setEditingParts] = useState<any>([]);
+  const [products, setProducts] = useState<any[]>([]);
   const [syncing, setSyncing] = useState(false);
 
   const loadData = async (showLoading = true) => {
     try {
       if (showLoading) setLoading(true);
-      const [servRes, empRes, apptsRes] = await Promise.all([
+      const [servRes, empRes, apptsRes, prodRes] = await Promise.all([
         api.get("/all-services"),
         api.get("/staff"),
         api.get("/appointments/all"),
+        api.get("/products"),
       ]);
+
+      setProducts(Array.isArray(prodRes.data) ? prodRes.data : []);
 
       const servicesData = servRes.data || [];
       const apptRaw = apptsRes.data || [];
@@ -172,30 +176,31 @@ export default function Services() {
 
       if (!matchSearch) return false;
 
+
+
       const bDateStr = s.created_at || s.createdAt || s.preferredDate;
       if (dateFilter === "All Time") return true;
       if (!bDateStr) return false;
 
       const bookingDate = new Date(bDateStr);
-      const today = new Date();
-      if (dateFilter === "Today")
-        return bookingDate.toDateString() === today.toDateString();
-      if (dateFilter === "Yesterday") {
-        const yesterday = new Date();
-        yesterday.setDate(today.getDate() - 1);
-        return bookingDate.toDateString() === yesterday.toDateString();
-      }
-      if (dateFilter === "This Week") {
-        const lastWeek = new Date();
-        lastWeek.setDate(today.getDate() - 7);
-        lastWeek.setHours(0, 0, 0, 0);
-        return bookingDate >= lastWeek;
-      }
-      if (dateFilter === "This Month") {
-        const lastMonth = new Date();
-        lastMonth.setDate(today.getDate() - 30);
-        lastMonth.setHours(0, 0, 0, 0);
-        return bookingDate >= lastMonth;
+      const now = new Date();
+      const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+
+      if (dateFilter === "Today") {
+        return startOfDay(bookingDate).getTime() === startOfDay(now).getTime();
+      } else if (dateFilter === "Yesterday") {
+        const yesterday = new Date(now);
+        yesterday.setDate(now.getDate() - 1);
+        return startOfDay(bookingDate).getTime() === startOfDay(yesterday).getTime();
+      } else if (dateFilter === "This Week") {
+        const dayOfWeek = now.getDay();
+        const weekStart = new Date(now);
+        weekStart.setDate(now.getDate() - dayOfWeek);
+        weekStart.setHours(0, 0, 0, 0);
+        return bookingDate >= weekStart && bookingDate <= now;
+      } else if (dateFilter === "This Month") {
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        return bookingDate >= monthStart && bookingDate <= now;
       }
       return true;
     });
@@ -220,6 +225,8 @@ export default function Services() {
 
     return {
       total: relevantServices.length,
+      appointments: relevantServices.filter((s: any) => !s.addVehicle).length,
+      bookings: relevantServices.filter((s: any) => s.addVehicle).length,
       assigned: relevantServices.filter(
         (s: any) => !!(s.assignedEmployeeId || s.assigned_employee_id),
       ).length,
@@ -235,15 +242,14 @@ export default function Services() {
           s.appointmentStatus ||
           ""
         ).toLowerCase();
-        return sStat.includes("completed") || sStat.includes("bill completed");
+        return (
+          sStat.includes("completed") || sStat.includes("bill completed")
+        );
       }).length,
     };
   }, [services, isMechanic, userProfile]);
 
-  const currentMainList =
-    mainTab === "booked"
-      ? searchedServices.filter((s: any) => !s.addVehicle)
-      : searchedServices.filter((s: any) => s.addVehicle);
+  const currentMainList = searchedServices;
 
   const assignedServices = currentMainList.filter((s: any) => {
     if (!(s.assignedEmployeeId || s.assigned_employee_id)) return false;
@@ -260,22 +266,18 @@ export default function Services() {
       ).toLowerCase();
       return empName === targetName;
     }
+
+    const status = (s.serviceStatus || s.status || s.appointmentStatus || "").toLowerCase();
+    if (status.includes("bill completed")) return false;
     return true;
   });
 
-  const unassignedServices = isMechanic
-    ? []
-    : currentMainList.filter(
-        (s: any) => !(s.assignedEmployeeId || s.assigned_employee_id),
-      );
-  const listData =
-    subTab === "assigned" ? assignedServices : unassignedServices;
-
-  const totalPages = Math.ceil(listData.length / itemsPerPage);
-  const paginatedData = listData.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage,
-  );
+  const totalPages = Math.ceil(assignedServices.length / itemsPerPage);
+  const paginatedData = useMemo(() => {
+    const list = assignedServices;
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return list.slice(startIndex, startIndex + itemsPerPage);
+  }, [assignedServices, currentPage]);
 
   const getMappedStatus = (status: string) => {
     if (!status) return "Booked";
@@ -335,11 +337,19 @@ export default function Services() {
   };
 
   const handleUpdateStatus = async (id: number, newStatus: string) => {
+    // Optimistic Update
+    const oldServices = [...services];
+    const updatedServices = services.map((s: any) =>
+      (s.id || s._id) === id ? { ...s, serviceStatus: newStatus } : s,
+    );
+    setServices(updatedServices);
+
     try {
       await api.put(`/all-services/${id}/status`, { serviceStatus: newStatus });
       Alert.alert("Success", `Status updated to ${newStatus}`);
-      loadData();
+      // loadData(false); // Refresh silently to sync with server
     } catch (error) {
+      setServices(oldServices); // Rollback
       Alert.alert("Error", "Failed to update status");
     }
   };
@@ -414,6 +424,18 @@ export default function Services() {
   return (
     <SafeAreaView className="flex-1 bg-slate-950">
       <ScrollView contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
+        <View className="px-6 mt-8 flex-row justify-between items-center">
+          <View />
+          <TouchableOpacity
+            onPress={() => router.push(`${pathPrefix}/addserviceparts` as any)}
+            className="flex-row items-center gap-2 bg-primary px-5 py-3 rounded-2xl shadow-xl shadow-primary/20"
+          >
+            <Ionicons name="add-circle" size={18} color="black" />
+            <Text className="text-black font-black text-[10px] uppercase tracking-widest">
+              Registry Parts
+            </Text>
+          </TouchableOpacity>
+        </View>
 
 
         {/* Stats Section */}
@@ -423,28 +445,35 @@ export default function Services() {
           className="px-6 mt-5 mb-10"
         >
           <StatCard
-            title="Active Volume"
+            title="Total Volume"
             value={stats.total}
             IconComponent={MaterialCommunityIcons}
             iconName="gauge"
             iconColor={COLORS.primary}
           />
           <StatCard
-            title="In Field"
-            value={stats.assigned}
+            title="Appointments"
+            value={stats.appointments}
             IconComponent={Ionicons}
-            iconName="construct"
-            iconColor="#818CF8"
+            iconName="calendar"
+            iconColor="#A855F7"
           />
           <StatCard
-            title="In Queue"
+            title="Direct Bookings"
+            value={stats.bookings}
+            IconComponent={Ionicons}
+            iconName="car-sport"
+            iconColor="#F97316"
+          />
+          <StatCard
+            title="Pending Assignment"
             value={stats.unassigned}
             IconComponent={Ionicons}
             iconName="timer"
             iconColor="#FBBF24"
           />
           <StatCard
-            title="Decommissioned"
+            title="Successfully Closed"
             value={stats.completed}
             IconComponent={Ionicons}
             iconName="checkmark-done"
@@ -452,35 +481,7 @@ export default function Services() {
           />
         </ScrollView>
 
-        {/* Tabs */}
-        {/* <View className="px-6 mb-8 flex-row bg-white/5 p-2 rounded-3xl border border-white/10">
-          <TouchableOpacity
-            onPress={() => {
-              setMainTab("booked");
-              setCurrentPage(1);
-            }}
-            className={`flex-1 py-4 rounded-3xl items-center ${mainTab === "booked" ? "bg-primary" : ""}`}
-          >
-            <Text
-              className={`font-black text-[10px] uppercase ${mainTab === "booked" ? "text-text-primary" : "text-white/40"}`}
-            >
-              Portal Logs
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {
-              setMainTab("addVehicle");
-              setCurrentPage(1);
-            }}
-            className={`flex-1 py-4 rounded-3xl items-center ${mainTab === "addVehicle" ? "bg-primary" : ""}`}
-          >
-            <Text
-              className={`font-black text-[10px] uppercase ${mainTab === "addVehicle" ? "text-background" : "text-white/40"}`}
-            >
-              Walk-ins
-            </Text>
-          </TouchableOpacity>
-        </View> */}
+
 
         {/* Search */}
         <View className="px-6 mb-8 gap-4">
@@ -497,36 +498,25 @@ export default function Services() {
               }}
             />
           </View>
-          <View className="flex-row gap-4">
-            <View className="flex-1 flex-row bg-white/5 p-1 rounded-2xl border border-white/10">
-              <TouchableOpacity
-                onPress={() => {
-                  setSubTab("assigned");
-                  setCurrentPage(1);
-                }}
-                className={`flex-1 py-3 rounded-xl items-center ${subTab === "assigned" ? "bg-primary/20 border border-primary" : ""}`}
-              >
-                <Text
-                  className={`text-[10px] font-black uppercase ${subTab === "assigned" ? "text-text-primary" : "text-text-muted"}`}
-                >
-                  Active ({assignedServices.length})
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => {
-                  setSubTab("unassigned");
-                  setCurrentPage(1);
-                }}
-                className={`flex-1 py-3 rounded-xl items-center ${subTab === "unassigned" ? "bg-primary/20 border border-primary" : ""}`}
-              >
-                <Text
-                  className={`text-[10px] font-black uppercase ${subTab === "unassigned" ? "text-text-primary" : "text-text-muted"}`}
-                >
-                  Queue ({unassignedServices.length})
-                </Text>
-              </TouchableOpacity>
-            </View>
+
+          <View className="flex-row gap-3">
+
+
+            <TouchableOpacity
+              onPress={() => {
+                const options = ["All Time", "Today", "Yesterday", "This Week", "This Month"];
+                const nextIdx = (options.indexOf(dateFilter) + 1) % options.length;
+                setDateFilter(options[nextIdx]);
+                setCurrentPage(1);
+              }}
+              className="bg-white/5 border border-white/10 rounded-2xl px-6 py-3 items-center justify-center min-w-[100px]"
+            >
+              <Text className="text-text-muted text-[8px] font-black uppercase mb-0.5">Timeframe</Text>
+              <Text className="text-white text-[10px] font-black uppercase tracking-widest">{dateFilter}</Text>
+            </TouchableOpacity>
           </View>
+
+
         </View>
 
         {/* List */}
@@ -706,6 +696,23 @@ export default function Services() {
                   >
                     <Ionicons name="eye-outline" size={20} color="white" />
                   </TouchableOpacity>
+                  {getButtonVisibility(item.serviceStatus || "Booked").showBilling && (
+                    <TouchableOpacity
+                      onPress={() =>
+                        router.push({
+                          pathname: "/(adminPages)/add-billing",
+                          params: { directServiceId: item.id || item._id },
+                        })
+                      }
+                      className="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 rounded-xl items-center justify-center"
+                    >
+                      <Ionicons
+                        name="receipt-outline"
+                        size={20}
+                        color={COLORS.success}
+                      />
+                    </TouchableOpacity>
+                  )}
                   <TouchableOpacity
                     onPress={() => handleDelete(item.id || item._id)}
                     className="w-12 h-12 bg-red-500/10 border border-red-500/20 rounded-xl items-center justify-center"
@@ -967,16 +974,49 @@ export default function Services() {
                       className="bg-white/5 p-6 rounded-2xl mb-4 border border-white/10"
                     >
                       <TextInput
-                        placeholder="Part..."
+                        placeholder="Part Name (Search Registry...)"
                         placeholderTextColor="#666"
                         className="text-white font-bold text-xs mb-4 bg-black/20 p-4 rounded-xl"
                         value={part.partName}
                         onChangeText={(val) => {
                           const copy = [...editingParts];
                           copy[idx].partName = val;
+                          
+                          // Auto price if exact match
+                          const match = products.find(p => p.name?.toLowerCase() === val.toLowerCase());
+                          if (match) {
+                            copy[idx].price = match.price || match.offerPrice || 0;
+                          }
+                          
                           setEditingParts(copy);
                         }}
                       />
+                      
+                      {/* Product Suggestions */}
+                      {part.partName?.length > 1 && (
+                        <View className="mb-4">
+                          <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row py-2">
+                            {products
+                              .filter(p => p.name?.toLowerCase().includes(part.partName.toLowerCase()))
+                              .slice(0, 5)
+                              .map((suggestion, sIdx) => (
+                                <TouchableOpacity
+                                  key={sIdx}
+                                  onPress={() => {
+                                    const copy = [...editingParts];
+                                    copy[idx].partName = suggestion.name;
+                                    copy[idx].price = suggestion.price || suggestion.offerPrice || 0;
+                                    setEditingParts(copy);
+                                  }}
+                                  className="bg-white/10 px-4 py-2 rounded-xl mr-2 border border-white/5"
+                                >
+                                  <Text className="text-white font-black text-[9px] uppercase tracking-widest">{suggestion.name}</Text>
+                                  <Text className="text-primary text-[8px] font-bold mt-1">₹{suggestion.price || suggestion.offerPrice || 0}</Text>
+                                </TouchableOpacity>
+                              ))}
+                          </ScrollView>
+                        </View>
+                      )}
                       <View className="flex-row gap-4">
                         <TextInput
                           placeholder="Qty"
@@ -1030,7 +1070,7 @@ export default function Services() {
               <TouchableOpacity
                 onPress={() => setIssueModalVisible(false)}
                 disabled={syncing}
-                className={`flex-1 py-5 rounded-2xl bg-white/5 items-center ${syncing ? "opacity-20" : ""}`}
+                className={`flex-1 py-5 rounded-2xl bg-white/5 items-center justify-center ${syncing ? "opacity-20" : ""}`}
               >
                 <Text className="text-white/40 font-black text-[10px] uppercase">
                   Abort
@@ -1101,7 +1141,7 @@ export default function Services() {
                   }
                 }}
                 disabled={syncing}
-                className="flex-2 py-5 rounded-2xl bg-primary items-center shadow-xl shadow-primary/20"
+                className="flex-[2] py-5 rounded-2xl bg-primary items-center justify-center shadow-xl shadow-primary/20"
               >
                 {syncing ? (
                   <ActivityIndicator size="small" color={COLORS.background} />
