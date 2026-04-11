@@ -326,6 +326,12 @@ export default function EmployeeDashboard() {
     },
   ];
 
+  const completedCount =
+    employeeChartData.find((item) => item.label === "Completed")?.value || 0;
+  const completionPercent = myTasks.length
+    ? Math.round((completedCount / myTasks.length) * 100)
+    : 0;
+
   return (
     <SafeAreaView className="flex-1 bg-background">
       <ScrollView
@@ -581,34 +587,13 @@ export default function EmployeeDashboard() {
                   Completion Rate
                 </Text>
                 <Text className="text-xs font-black text-text-primary">
-                  {myTasks.length > 0
-                    ? Math.round(
-                        ((employeeChartData.find(
-                          (item) => item.label === "Completed",
-                        )?.value || 0) /
-                          myTasks.length) *
-                          100,
-                      )
-                    : 0}
-                  %
+                  {completionPercent}%
                 </Text>
               </View>
               <View className="h-2 bg-slate-800/50 rounded-full overflow-hidden">
                 <View
-                  className="h-full bg-gradient-to-r from-primary via-warning to-success rounded-full"
-                  style={{
-                    width: `${
-                      myTasks.length > 0
-                        ? Math.round(
-                            ((employeeChartData.find(
-                              (item) => item.label === "Completed",
-                            )?.value || 0) /
-                              myTasks.length) *
-                              100,
-                          )
-                        : 0
-                    }%`,
-                  }}
+                  className="h-full bg-success rounded-full"
+                  style={{ width: `${completionPercent}%` }}
                 />
               </View>
             </View>
