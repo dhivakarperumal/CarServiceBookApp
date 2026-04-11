@@ -105,15 +105,16 @@ export default function AddBillingScreen() {
   }, [services, search]);
 
   const matchingProducts = useMemo(() => {
-    if (!newPartName.trim()) return [];
+    const searchTerm = newPartName.toLowerCase().trim();
+    if (!searchTerm) return products.slice(0, 100);
     return products
       .filter((product) =>
         (product.name || "")
           .toString()
           .toLowerCase()
-          .includes(newPartName.toLowerCase()),
+          .includes(searchTerm),
       )
-      .slice(0, 4);
+      .slice(0, 100);
   }, [products, newPartName]);
 
   const fetchMyServices = async () => {
@@ -179,7 +180,7 @@ export default function AddBillingScreen() {
       const data = res.data;
 
       const partsData = (data.parts || [])
-        .filter((p: any) => (p.status || "").toLowerCase() === "approved")
+        .filter((p: any) => (p.status || "").toLowerCase() !== "rejected")
         .map((p: any) => ({
           partName: p.partName,
           qty: Number(p.qty || 0),
@@ -188,7 +189,7 @@ export default function AddBillingScreen() {
         }));
 
       const issuesData = (data.issues || [])
-        .filter((i: any) => (i.issueStatus || "").toLowerCase() === "approved")
+        .filter((i: any) => (i.issueStatus || "").toLowerCase() !== "rejected")
         .map((i: any) => ({
           issueName: i.issue,
           amount: Number(i.issueAmount || 0),
@@ -409,14 +410,14 @@ export default function AddBillingScreen() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
       >
-        <View className="p-5 mt-6">
+        <View className="px-2 py-5 mt-6">
           <View className="mb-6">
          
 
-            <View className="mt-4 self-start flex-row flex-nowrap items-center rounded-full bg-slate-900/90 p-1 border border-slate-700">
+            <View className="mt-4 w-full flex-row items-center rounded-3xl bg-slate-900/90 p-1.5 border border-slate-700">
               {[
-                { mode: "online", label: "Online Booking" },
-                { mode: "manual", label: "Manual Entry" },
+                { mode: "online", label: "Online" },
+                { mode: "manual", label: "Manual" },
               ].map((option) => (
                 <TouchableOpacity
                   key={option.mode}
@@ -427,10 +428,10 @@ export default function AddBillingScreen() {
                       setIssues([]);
                     }
                   }}
-                  className={`px-4 py-3 rounded-full ${billingMode === option.mode ? "bg-primary" : "bg-slate-900"}`}
+                  className={`flex-1 py-4 rounded-2xl items-center justify-center ${billingMode === option.mode ? "bg-primary shadow-lg shadow-primary/20" : "bg-transparent"}`}
                 >
                   <Text
-                    className={`text-[10px] font-black uppercase tracking-wider ${billingMode === option.mode ? "text-text-primary" : "text-text-muted"}`}
+                    className={`text-[10px] font-black uppercase tracking-widest ${billingMode === option.mode ? "text-background" : "text-text-muted"}`}
                   >
                     {option.label}
                   </Text>
@@ -445,7 +446,7 @@ export default function AddBillingScreen() {
         </View>
 
         <ScrollView
-          className="flex-1 px-5"
+          className="flex-1 px-2"
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
@@ -545,28 +546,6 @@ export default function AddBillingScreen() {
                 </View>
               )}
             </View>
-
-            <View className="w-full bg-card rounded-[2rem] p-5 border border-card shadow-xl shadow-slate-900/20">
-              <SectionTitle title="Accounting Summary" />
-              <View className="flex-row flex-wrap gap-3">
-                <View className="flex-1 min-w-[160px] bg-background/70 rounded-3xl p-4 border border-slate-800">
-                  <Text className="text-[9px] uppercase tracking-widest text-text-muted mb-3">
-                    Workforce Charges
-                  </Text>
-                  <Text className="text-2xl font-black text-text-primary">
-                    ₹{Number(workforceCharges || labour || 0).toLocaleString()}
-                  </Text>
-                </View>
-                <View className="flex-1 min-w-[160px] bg-background/70 rounded-3xl p-4 border border-slate-800">
-                  <Text className="text-[9px] uppercase tracking-widest text-text-muted mb-3">
-                    Taxation Layer (%)
-                  </Text>
-                  <Text className="text-2xl font-black text-text-primary">
-                    {gst || 0}%
-                  </Text>
-                </View>
-              </View>
-            </View>
           </View>
 
           {billingMode === "manual" && (
@@ -630,9 +609,9 @@ export default function AddBillingScreen() {
               </Text>
             </View>
 
-            <View className="flex-row flex-wrap gap-3 mb-4">
+            <View className="flex-row gap-2 mb-4 items-center">
               <TextInput
-                placeholder="Type or select a product"
+                placeholder="Name"
                 placeholderTextColor="#64748B"
                 value={newPartName}
                 onChangeText={(value) => {
@@ -646,7 +625,7 @@ export default function AddBillingScreen() {
                     setNewPartPrice(String(match.price));
                   }
                 }}
-                className="flex-1 min-w-[220px] bg-background border border-slate-800 rounded-2xl px-4 py-4 text-text-primary font-bold"
+                className="flex-[3] bg-background border border-slate-800 rounded-xl px-4 py-3 text-text-primary font-bold text-xs"
               />
               <TextInput
                 placeholder="Qty"
@@ -654,49 +633,51 @@ export default function AddBillingScreen() {
                 value={newPartQty}
                 onChangeText={setNewPartQty}
                 keyboardType="numeric"
-                className="w-24 bg-background border border-slate-800 rounded-2xl px-4 py-4 text-text-primary font-bold"
+                className="flex-[0.8] bg-background border border-slate-800 rounded-xl px-3 py-3 text-text-primary font-bold text-xs text-center"
               />
               <TextInput
-                placeholder="Unit Price"
+                placeholder="Price"
                 placeholderTextColor="#64748B"
                 value={newPartPrice}
                 onChangeText={setNewPartPrice}
                 keyboardType="numeric"
-                className="w-28 bg-background border border-slate-800 rounded-2xl px-4 py-4 text-text-primary font-bold"
+                className="flex-[1.2] bg-background border border-slate-800 rounded-xl px-3 py-3 text-text-primary font-bold text-xs text-center"
               />
               <TouchableOpacity
                 onPress={addManualPart}
-                className="min-w-[140px] bg-[#111827] rounded-3xl px-5 py-4 items-center justify-center"
+                className="flex-[1.2] bg-primary rounded-xl py-3 items-center justify-center shadow-lg shadow-primary/20"
               >
-                <Text className="text-text-primary bg-primary p-3 rounded-xl font-black">
-                  + Add Part
+                <Text className="text-background font-black text-[10px] uppercase">
+                  Add
                 </Text>
               </TouchableOpacity>
             </View>
             {matchingProducts.length > 0 && (
-              <View className="bg-slate-950/80 rounded-3xl border border-slate-800 p-3 mb-4">
+              <View className="bg-slate-950/80 rounded-3xl border border-slate-800 p-3 mb-4 max-h-72">
                 <Text className="text-[10px] uppercase tracking-widest text-text-muted mb-2">
-                  Suggested products from inventory
+                  Inventory Catalog
                 </Text>
-                {matchingProducts.map((product) => (
-                  <TouchableOpacity
-                    key={product.id || product.name}
-                    onPress={() => {
-                      setNewPartName(product.name || "");
-                      setNewPartPrice(
-                        String(product.price || product.offerPrice || "0"),
-                      );
-                    }}
-                    className="rounded-2xl px-3 py-3 bg-slate-900/80 mb-2"
-                  >
-                    <Text className="text-sm font-black text-text-primary">
-                      {product.name}
-                    </Text>
-                    <Text className="text-[10px] text-text-muted mt-1">
-                      ₹{product.price || product.offerPrice || "0"}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+                <ScrollView nestedScrollEnabled showsVerticalScrollIndicator>
+                  {matchingProducts.map((product) => (
+                    <TouchableOpacity
+                      key={product.id || product.name}
+                      onPress={() => {
+                        setNewPartName(product.name || "");
+                        setNewPartPrice(
+                          String(product.price || product.offerPrice || "0"),
+                        );
+                      }}
+                      className="rounded-2xl px-3 py-3 bg-slate-900/80 mb-2"
+                    >
+                      <Text className="text-sm font-black text-text-primary">
+                        {product.name}
+                      </Text>
+                      <Text className="text-[10px] text-text-muted mt-1">
+                        ₹{product.price || product.offerPrice || "0"}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
               </View>
             )}
 

@@ -424,18 +424,7 @@ export default function Services() {
   return (
     <SafeAreaView className="flex-1 bg-slate-950">
       <ScrollView contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
-        <View className="px-6 mt-8 flex-row justify-between items-center">
-          <View />
-          <TouchableOpacity
-            onPress={() => router.push(`${pathPrefix}/addserviceparts` as any)}
-            className="flex-row items-center gap-2 bg-primary px-5 py-3 rounded-2xl shadow-xl shadow-primary/20"
-          >
-            <Ionicons name="add-circle" size={18} color="black" />
-            <Text className="text-black font-black text-[10px] uppercase tracking-widest">
-              Registry Parts
-            </Text>
-          </TouchableOpacity>
-        </View>
+        
 
 
         {/* Stats Section */}
@@ -1053,12 +1042,12 @@ export default function Services() {
                   if (activeModalTab === "issues")
                     setIssueEntries([
                       ...issueEntries,
-                      { issue: "", issueAmount: "", issueStatus: "pending" },
+                      { issue: "", issueAmount: "", issueStatus: "approved" },
                     ]);
                   else
                     setEditingParts([
                       ...editingParts,
-                      { partName: "", qty: 1, price: 0, status: "pending" },
+                      { partName: "", qty: 1, price: 0, status: "approved" },
                     ]);
                 }}
                 className="py-10 border border-dashed border-white/20 rounded-2xl items-center mb-32"
@@ -1113,7 +1102,7 @@ export default function Services() {
                       api.post(`/all-services/${editingIssueId}/parts`, {
                         parts: partsToSave.map((p: any) => ({
                           ...p,
-                          status: p.status || "pending",
+                          status: p.status || "approved",
                         })),
                       }),
                     );
