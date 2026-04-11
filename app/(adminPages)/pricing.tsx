@@ -89,7 +89,7 @@ export default function PricingList() {
       <FlatList
         data={filtered}
         keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 100 }}
+        contentContainerStyle={{ paddingHorizontal: 1, paddingBottom: 100 }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -120,7 +120,7 @@ export default function PricingList() {
           </View>
         )}
         renderItem={({ item: pkg }) => (
-          <View className="bg-card border border-slate-700 rounded-3xl p-6 mb-4 shadow-sm mx-6">
+          <View className="bg-card border border-slate-700 rounded-3xl p-4 mb-4 shadow-sm mx-6">
             {/* Accent Glow */}
             <View className="absolute -top-10 -right-10 w-32 h-32 bg-primary/5 rounded-full" />
 
