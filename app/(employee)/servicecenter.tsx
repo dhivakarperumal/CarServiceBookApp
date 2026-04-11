@@ -427,15 +427,26 @@ export default function ServiceCenter() {
     if (bookingIssue) {
       const alreadyIncluded = initialIssues.some(
         (issue: any) =>
-          issue.issue?.trim().toLowerCase() ===
-          bookingIssue.issue.trim().toLowerCase(),
+          (issue.issue || "").trim().toLowerCase() ===
+          (bookingIssue.issue || "").trim().toLowerCase(),
       );
       if (!alreadyIncluded) {
         initialIssues.unshift(bookingIssue);
       }
     }
 
-    setIssueEntries(initialIssues);
+    // Secondary deduplication to ensure absolutely no name duplicates
+    const uniqueRows: any[] = [];
+    const seenNames = new Set();
+    initialIssues.forEach((item) => {
+      const name = (item.issue || "").trim().toLowerCase();
+      if (name && !seenNames.has(name)) {
+        uniqueRows.push(item);
+        seenNames.add(name);
+      }
+    });
+
+    setIssueEntries(uniqueRows);
     setIssueModalVisible(true);
   };
 
@@ -768,16 +779,21 @@ export default function ServiceCenter() {
                         </View>
                         {(() => {
                           const bookingIssue = getBookingIssue(item);
-                          const issueRows = bookingIssue
-                            ? [
-                                bookingIssue,
-                                ...(item.issues || []).filter(
-                                  (iss: any) =>
-                                    iss.issue?.trim().toLowerCase() !==
-                                    bookingIssue.issue.trim().toLowerCase(),
-                                ),
-                              ]
-                            : item.issues || [];
+                          let issueRows: any[] = [];
+                          const seen = new Set();
+                          
+                          if (bookingIssue) {
+                            issueRows.push(bookingIssue);
+                            seen.add(bookingIssue.issue.trim().toLowerCase());
+                          }
+                          
+                          (item.issues || []).forEach((iss: any) => {
+                            const name = (iss.issue || "").trim().toLowerCase();
+                            if (name && !seen.has(name)) {
+                              issueRows.push(iss);
+                              seen.add(name);
+                            }
+                          });
 
                           return issueRows.length > 0 ? (
                             <View className="gap-2">
