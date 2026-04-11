@@ -125,18 +125,9 @@ const InventoryManagement = () => {
         contentContainerStyle={{ padding: 24, paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* HEADER & ADD BUTTON */}
-        <View className="flex-row justify-between items-end mb-8">
-           <View>
-              <Text className="text-white text-3xl font-black tracking-tighter uppercase">Inventory</Text>
-              <Text className="text-sky-500 text-[10px] font-black uppercase tracking-[2px]">Asset Maintenance Oversight</Text>
-           </View>
-           <TouchableOpacity 
-             onPress={() => router.push('/(adminPages)/add-inventory' as any)}
-             className="bg-sky-500 w-12 h-12 rounded-2xl items-center justify-center shadow-lg shadow-sky-500/50"
-           >
-              <Ionicons name="add" size={28} color="white" />
-           </TouchableOpacity>
+        {/* HEADER SECTION */}
+        <View className="mb-8">
+          
         </View>
 
         {/* DASHBOARD STATS */}
@@ -223,6 +214,16 @@ const InventoryManagement = () => {
            )}
         </View>
       </ScrollView>
+
+      {/* FLOATING ADD BUTTON */}
+      <TouchableOpacity 
+        onPress={() => router.push('/(adminPages)/add-inventory' as any)}
+        className="absolute bottom-10 bg-white text-black right-8 bg-sky-500 w-16 h-16 rounded-full items-center justify-center shadow-2xl shadow-sky-500/50 z-50"
+        style={{ elevation: 10 }}
+        activeOpacity={0.7}
+      >
+        <Ionicons name="add" size={35} color="black" />
+      </TouchableOpacity>
     </SafeAreaView>
   );
 };
