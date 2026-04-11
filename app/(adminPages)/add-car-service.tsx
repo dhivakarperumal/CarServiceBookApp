@@ -175,20 +175,20 @@ export default function AddCarService() {
                     className="w-full bg-slate-950 rounded-2xl border border-white/5 px-6 py-4 text-white font-black"
                  />
               </View>
-              <View className="flex-1 gap-2">
-                 <Text className="text-slate-500 text-[8px] font-black uppercase tracking-[3px] ml-2">Icon Theme</Text>
-                 <View className="flex-row gap-1 bg-slate-950 p-2 rounded-2xl border border-white/5">
-                   {ICON_OPTIONS.map((opt) => (
-                      <TouchableOpacity 
-                        key={opt.name}
-                        onPress={() => setForm({...form, icon: opt.name})}
-                        className={`flex-1 h-12 rounded-xl items-center justify-center ${form.icon === opt.name ? 'bg-sky-500 border-sky-400' : 'bg-slate-900 border-white/5'}`}
-                      >
-                         <Ionicons name={opt.icon as any} size={18} color={form.icon === opt.name ? 'black' : '#475569'} />
-                      </TouchableOpacity>
-                   ))}
-                 </View>
-              </View>
+            <View className="gap-2">
+               <Text className="text-slate-500 text-[8px] font-black uppercase tracking-[3px] ml-2">Icon Theme</Text>
+               <View className="flex-row flex-wrap gap-3">
+                 {ICON_OPTIONS.map((opt) => (
+                    <TouchableOpacity 
+                      key={opt.name}
+                      onPress={() => setForm({...form, icon: opt.name})}
+                      className={`flex-1 min-w-[22%] py-4 rounded-2xl items-center justify-center gap-2 border ${form.icon === opt.name ? 'bg-white border-white' : 'bg-slate-950 border-white/5'}`}
+                    >
+                       <Ionicons name={opt.icon as any} size={20} color={form.icon === opt.name ? 'black' : '#475569'} />
+                       <Text className={`text-[8px] font-black uppercase tracking-wider ${form.icon === opt.name ? 'text-black' : 'text-slate-600'}`}>{opt.name}</Text>
+                    </TouchableOpacity>
+                 ))}
+               </View>
             </View>
 
             <View className="gap-2">
@@ -274,12 +274,13 @@ export default function AddCarService() {
             <TouchableOpacity 
                disabled={loading}
                onPress={handleSubmit}
-               className="bg-sky-500 rounded-3xl py-6 mt-8 items-center justify-center shadow-2xl shadow-sky-900"
+               className={`bg-white rounded-3xl py-6 mt-8 items-center justify-center shadow-2xl shadow-sky-500/20 ${loading ? 'opacity-50' : ''}`}
+               activeOpacity={0.8}
             >
                {loading ? (
                   <ActivityIndicator color="black" />
                ) : (
-                  <Text className="text-black font-black text-xs uppercase tracking-widest">
+                  <Text className="text-black font-black text-sm uppercase tracking-widest">
                      {isEditing ? "Apply Adjustments" : "Establish Service"}
                   </Text>
                )}

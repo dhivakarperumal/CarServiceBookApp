@@ -62,20 +62,9 @@ export default function CarServicesList() {
 
   return (
     <SafeAreaView className="flex-1 bg-slate-950">
-      <View className="px-6 pt-14 pb-8 flex-row justify-between items-center bg-slate-950">
-        <View>
-          <Text className="text-white font-black text-4xl uppercase tracking-tighter">SERVICES</Text>
-          <Text className="text-sky-500 text-[10px] font-black uppercase tracking-[4px] mt-1">Car Service Catalog</Text>
-        </View>
-        <TouchableOpacity 
-           onPress={() => router.push('/(adminPages)/add-car-service' as any)}
-           className="w-14 h-14 bg-white rounded-2xl items-center justify-center shadow-2xl shadow-sky-500/20"
-        >
-          <Ionicons name="add" size={28} color="black" />
-        </TouchableOpacity>
-      </View>
+    
 
-      <View className="px-6 mb-6">
+      <View className="px-6 mt-5 mb-6">
         <View className="flex-row items-center bg-slate-900 rounded-[24px] px-5 h-14 border border-white/5">
            <Ionicons name="search" size={20} color="#475569" />
            <TextInput 
@@ -94,7 +83,7 @@ export default function CarServicesList() {
         <FlatList 
           data={filtered}
           keyExtractor={(item) => item.id.toString()}
-          contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 100 }}
+          contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 120 }}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={fetchServices} tintColor="#fff" />}
           renderItem={({ item: srv }) => (
             <View className="bg-slate-900/50 rounded-[32px] p-5 mb-4 border border-white/5 overflow-hidden">
@@ -112,7 +101,7 @@ export default function CarServicesList() {
                   
                   <View className="flex-1">
                      <Text className="text-white font-black text-lg tracking-tight mb-0.5">{srv.name}</Text>
-                     <Text className="text-sky-500 font-black text-sm">₹{Number(srv.price || 0).toLocaleString()}</Text>
+                     <Text className="text-white font-black text-sm">₹{Number(srv.price || 0).toLocaleString()}</Text>
                      <Text className="text-slate-500 text-[9px] font-bold mt-1 uppercase" numberOfLines={1}>{srv.description || "NO DESCRIPTION"}</Text>
                   </View>
 
@@ -141,6 +130,16 @@ export default function CarServicesList() {
           )}
         />
       )}
+
+      {/* FLOATING ADD BUTTON */}
+      <TouchableOpacity 
+        onPress={() => router.push('/(adminPages)/add-car-service' as any)}
+        className="absolute bottom-10 right-8 w-16 h-16 bg-white rounded-full items-center justify-center shadow-2xl z-50"
+        style={{ elevation: 15 }}
+        activeOpacity={0.8}
+      >
+        <Ionicons name="add" size={38} color="black" />
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
