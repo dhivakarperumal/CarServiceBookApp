@@ -181,33 +181,6 @@ export default function ServiceDetails() {
                     {service.vehicleNumber || service.vehicle_number || "N/A"}
                   </Text>
                 </View>
-                <View className="bg-background p-4 rounded-2xl border border-card shadow-sm">
-                  <Text className="text-text-muted text-[8px] font-black uppercase tracking-widest mb-1">
-                    Year
-                  </Text>
-                  <Text className="text-text-primary font-black">
-                    {service.year || "N/A"}
-                  </Text>
-                </View>
-              </View>
-
-              <View className="grid grid-cols-2 gap-3 mt-3">
-                <View className="bg-background p-4 rounded-2xl border border-card shadow-sm">
-                  <Text className="text-text-muted text-[8px] font-black uppercase tracking-widest mb-1">
-                    Fuel Type
-                  </Text>
-                  <Text className="text-text-primary font-black uppercase">
-                    {service.fuelType || "N/A"}
-                  </Text>
-                </View>
-                <View className="bg-background p-4 rounded-2xl border border-card shadow-sm">
-                  <Text className="text-text-muted text-[8px] font-black uppercase tracking-widest mb-1">
-                    Kilometers
-                  </Text>
-                  <Text className="text-text-primary font-black">
-                    {service.km || 0} KM
-                  </Text>
-                </View>
               </View>
             </View>
 
