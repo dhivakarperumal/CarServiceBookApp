@@ -623,7 +623,7 @@ export default function AdminDashboard() {
                   stats.inventory.slice(0, 5).map((item: any, i: number) => (
                     <View
                       key={i}
-                      className="flex-row p-3 border-b border-slate-800 items-center"
+                      className="flex-row p-3  items-center"
                     >
                       <Text className="flex-1 text-white text-[10px] font-bold">
                         {item.name || item.partName || "Spare Part"}
