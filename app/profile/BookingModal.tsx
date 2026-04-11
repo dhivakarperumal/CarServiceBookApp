@@ -70,6 +70,7 @@ type Booking = {
   vehicleNumber?: string;
   registrationNumber?: string;
   issue?: string;
+  otherIssue?: string;
   preferredDate?: string;
   assignedEmployeeName?: string;
   address?: string;
@@ -257,7 +258,7 @@ const BookingModal: React.FC<Props> = ({
             </Text>
 
             {/* ISSUE */}
-            {booking.issue && (
+            {booking.issue && booking.issue !== "Others" && (
               <Text className="text-text-secondary mt-1 mb-1">
                 <Text className="text-primary">Issue: </Text>
                 {booking.issue}
@@ -289,6 +290,41 @@ const BookingModal: React.FC<Props> = ({
                 </Text>
               </View>
             )}
+
+            {/* SELECTED PACKAGE (FROM PRICING PAGE) */}
+            {(() => {
+              const isPricingPackage = booking.issue === "Others" && booking.otherIssue && booking.otherIssue.includes("Package:");
+              if (!isPricingPackage) return null;
+
+              const packageMatch = booking.otherIssue.match(/Package:\s*(.+?)\s*-\s*Price:\s*₹(\d+)/);
+              if (!packageMatch) return null;
+
+              const packageName = packageMatch[1];
+              const packagePrice = packageMatch[2];
+
+              return (
+                <View
+                  style={{
+                    backgroundColor: COLORS.success + "15",
+                    padding: 10,
+                    borderRadius: 8,
+                    marginTop: 6,
+                    borderWidth: 1,
+                    borderColor: COLORS.success + "30",
+                  }}
+                >
+                  <Text style={{ color: COLORS.success, fontWeight: "bold", fontSize: 16 }}>
+                    📦 Selected Package
+                  </Text>
+                  <Text style={{ color: COLORS.textPrimary, fontSize: 14, marginTop: 4 }}>
+                    <Text style={{ fontWeight: "bold" }}>Name:</Text> {packageName}
+                  </Text>
+                  <Text style={{ color: COLORS.textPrimary, fontSize: 14 }}>
+                    <Text style={{ fontWeight: "bold" }}>Amount:</Text> ₹{packagePrice}
+                  </Text>
+                </View>
+              );
+            })()}
 
             {/* ADDRESS */}
             <Text className="text-text-secondary mt-2">
@@ -503,17 +539,10 @@ const BookingModal: React.FC<Props> = ({
 
             {/* ===== COMMON APPROVE / REJECT (LIKE WEB) ===== */}
             {(() => {
-              const hasPendingSpares = bookingSpare?.parts?.some(
-                (p) => p.status === "pending"
-              );
+              const hasSpares = bookingSpare?.parts?.length > 0;
+              const hasIssues = booking.issues?.length > 0 || (booking.issue && booking.issue !== "Others");
 
-              const hasPendingIssues = booking.issues?.length
-                ? booking.issues.some(
-                  (i) => (i.issueStatus || "pending") === "pending"
-                )
-                : (booking.issueStatus || "pending") === "pending";
-
-              if (!hasPendingSpares && !hasPendingIssues) return null;
+              if (!hasSpares && !hasIssues) return null;
 
               return (
                 <View

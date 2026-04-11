@@ -39,6 +39,7 @@ type Booking = {
   brand?: string;
   model?: string;
   issue?: string;
+  otherIssue?: string;
   issueAmount?: number;
   issueStatus?: string;
   issues?: any[];
@@ -254,6 +255,7 @@ const ServiceStatus: React.FC = () => {
           normalizedStatus: STATUS_NORMALIZER[b.status] || b.status,
           issues: matchedService?.issues || b.issues || b.serviceIssues || [],
           issue: b.issue || b.serviceType || matchedService?.issue || "",
+          otherIssue: b.otherIssue || matchedService?.otherIssue || "",
           issueAmount: b.issueAmount ?? matchedService?.issueAmount,
           issueStatus: b.issueStatus || matchedService?.issueStatus,
           serviceId:
