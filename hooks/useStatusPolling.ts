@@ -13,64 +13,138 @@ export const useStatusPolling = () => {
   const { user } = useAuth() as any;
   const pollingInterval = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  const getUserName = () =>
+    [user?.name, user?.username, user?.displayName, user?.email]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
+
+  const filterByUser = (items: any[]) =>
+    items.filter(
+      (item) =>
+        item.user_id === user.id ||
+        item.userId === user.id ||
+        item.uid === user.id ||
+        item.uid === user.uid ||
+        item.email?.toLowerCase() === user.email?.toLowerCase() ||
+        item.customerEmail?.toLowerCase() === user.email?.toLowerCase()
+    );
+
+  const filterServiceItemsForUser = (items: any[], userBookings: any[]) =>
+    items.filter((item) => {
+      const hasBookingMatch = userBookings.some(
+        (booking) =>
+          booking.bookingId === item.bookingId ||
+          booking.id === item.bookingId ||
+          booking.booking_id === item.bookingId ||
+          booking.orderId === item.orderId
+      );
+
+      return (
+        hasBookingMatch ||
+        item.uid === user.id ||
+        item.uid === user.uid ||
+        item.userId === user.id ||
+        item.email?.toLowerCase() === user.email?.toLowerCase() ||
+        item.customerEmail?.toLowerCase() === user.email?.toLowerCase()
+      );
+    });
+
   const checkForUpdates = async () => {
     if (!user?.id) return;
 
+    const role = (user.role || '').toString().toLowerCase();
+    const isAdmin = role === 'admin';
+    const isEmployee = ['employee', 'mechanic', 'staff'].includes(role);
+    const isCustomer = !isAdmin && !isEmployee;
+
     try {
-      const [bookingsRes, appointmentsRes, vehicleRes, ordersRes] = await Promise.all([
-        api.get("/bookings").catch(() => ({ data: [] })),
-        api.get("/appointments/my", { params: { uid: user.uid } }).catch(() => ({ data: [] })),
-        api.get(`/vehicle-bookings/user/${user.id}`).catch(() => ({ data: [] })),
-        api.get(`/orders/user/${user.id}`).catch(() => ({ data: [] })),
-      ]);
-
-      const bookingsData = Array.isArray(bookingsRes.data)
-        ? bookingsRes.data
-        : bookingsRes.data?.bookings || bookingsRes.data?.data || [];
-
-      const appointmentData = Array.isArray(appointmentsRes.data)
-        ? appointmentsRes.data
-        : appointmentsRes.data?.appointments || appointmentsRes.data?.data || [];
-
-      const vehicleData = Array.isArray(vehicleRes.data)
-        ? vehicleRes.data
-        : vehicleRes.data?.vehicleBookings || vehicleRes.data?.data || [];
-
-      const orderData = Array.isArray(ordersRes.data)
-        ? ordersRes.data
-        : ordersRes.data?.orders || ordersRes.data?.data || [];
-
-      // Filter data for current user
-      const filterByUser = (items: any[]) =>
-        items.filter(
-          (item) =>
-            item.user_id === user.id ||
-            item.userId === user.id ||
-            item.uid === user.id ||
-            item.uid === user.uid ||
-            item.email?.toLowerCase() === user.email?.toLowerCase() ||
-            item.customerEmail?.toLowerCase() === user.email?.toLowerCase()
-        );
-
       const allStatuses: statusTracker.CachedStatus[] = [];
+      let bookingsData: any[] = [];
+      let appointmentData: any[] = [];
+      let vehicleData: any[] = [];
+      let orderData: any[] = [];
+      let servicesData: any[] = [];
 
-      filterByUser(bookingsData).forEach((item: any) => {
-        allStatuses.push(statusTracker.createCachedStatus(item, 'booking'));
-      });
+      if (isCustomer || isAdmin) {
+        const [bookingsRes, appointmentsRes, vehicleRes, ordersRes] = await Promise.all([
+          api.get('/bookings').catch(() => ({ data: [] })),
+          api.get('/appointments/my', { params: { uid: user.uid } }).catch(() => ({ data: [] })),
+          api.get(`/vehicle-bookings/user/${user.id}`).catch(() => ({ data: [] })),
+          api.get(`/orders/user/${user.id}`).catch(() => ({ data: [] })),
+        ]);
 
-      filterByUser(appointmentData).forEach((item: any) => {
-        allStatuses.push(statusTracker.createCachedStatus(item, 'appointment'));
-      });
+        bookingsData = Array.isArray(bookingsRes.data)
+          ? bookingsRes.data
+          : bookingsRes.data?.bookings || bookingsRes.data?.data || [];
 
-      filterByUser(vehicleData).forEach((item: any) => {
-        allStatuses.push(statusTracker.createCachedStatus(item, 'vehicle'));
-      });
+        appointmentData = Array.isArray(appointmentsRes.data)
+          ? appointmentsRes.data
+          : appointmentsRes.data?.appointments || appointmentsRes.data?.data || [];
 
-      filterByUser(orderData).forEach((item: any) => {
-        allStatuses.push(statusTracker.createCachedStatus(item, 'order'));
-      });
+        vehicleData = Array.isArray(vehicleRes.data)
+          ? vehicleRes.data
+          : vehicleRes.data?.vehicleBookings || vehicleRes.data?.data || [];
 
-      // Check for changes and send notifications
+        orderData = Array.isArray(ordersRes.data)
+          ? ordersRes.data
+          : ordersRes.data?.orders || ordersRes.data?.data || [];
+
+        filterByUser(bookingsData).forEach((item: any) => {
+          allStatuses.push(statusTracker.createCachedStatus(item, 'booking'));
+        });
+
+        filterByUser(appointmentData).forEach((item: any) => {
+          allStatuses.push(statusTracker.createCachedStatus(item, 'appointment'));
+        });
+
+        filterByUser(vehicleData).forEach((item: any) => {
+          allStatuses.push(statusTracker.createCachedStatus(item, 'vehicle'));
+        });
+
+        filterByUser(orderData).forEach((item: any) => {
+          allStatuses.push(statusTracker.createCachedStatus(item, 'order'));
+        });
+      }
+
+      if (isCustomer || isAdmin || isEmployee) {
+        const servicesRes = await api.get('/all-services').catch(() => ({ data: [] }));
+        servicesData = Array.isArray(servicesRes.data)
+          ? servicesRes.data
+          : servicesRes.data?.services || servicesRes.data?.data || [];
+      }
+
+      if (isCustomer) {
+        filterServiceItemsForUser(servicesData, bookingsData).forEach((service: any) => {
+          const status = statusTracker.createCachedServiceStatus(service, 'service');
+          if (status) allStatuses.push(status);
+        });
+      }
+
+      if (isEmployee) {
+        const employeeName = getUserName();
+
+        servicesData
+          .filter((service) => {
+            const assignedName =
+              (service.assignedEmployeeName || service.assignedEmployee || service.assigned_employee_name || '')
+                .toString()
+                .toLowerCase();
+            return assignedName && employeeName && assignedName.includes(employeeName);
+          })
+          .forEach((service: any) => {
+            const status = statusTracker.createCachedServiceStatus(service, 'assignment');
+            if (status) allStatuses.push(status);
+          });
+      }
+
+      if (isAdmin) {
+        servicesData.forEach((service: any) => {
+          const status = statusTracker.createCachedServiceStatus(service, 'admin');
+          if (status) allStatuses.push(status);
+        });
+      }
+
       await statusTracker.checkStatusChanges(allStatuses);
     } catch (error) {
       console.error('Error checking for status updates:', error);

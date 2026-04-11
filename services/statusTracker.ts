@@ -5,8 +5,16 @@ const STATUS_CACHE_KEY = '@booking_statuses_cache';
 
 export interface CachedStatus {
   bookingId: string | number;
-  type: 'booking' | 'appointment' | 'vehicle' | 'order';
+  type:
+    | 'booking'
+    | 'appointment'
+    | 'vehicle'
+    | 'order'
+    | 'service'
+    | 'assignment'
+    | 'admin';
   status: string;
+  message?: string;
 }
 
 // ✅ Get cached statuses
@@ -51,32 +59,7 @@ export const checkStatusChanges = async (newStatuses: CachedStatus[]) => {
         console.log(`Status change detected: ${key} => ${newStatus.status}`);
 
         // Send appropriate notification
-        switch (newStatus.type) {
-          case 'booking':
-            notificationService.sendBookingNotification(
-              newStatus.bookingId,
-              newStatus.status
-            );
-            break;
-          case 'appointment':
-            notificationService.sendAppointmentNotification(
-              newStatus.bookingId,
-              newStatus.status
-            );
-            break;
-          case 'vehicle':
-            notificationService.sendVehicleBookingNotification(
-              newStatus.bookingId,
-              newStatus.status
-            );
-            break;
-          case 'order':
-            notificationService.sendOrderNotification(
-              newStatus.bookingId,
-              newStatus.status
-            );
-            break;
-        }
+        sendCachedStatusNotification(newStatus);
 
         updates.push(newStatus);
       } else {
@@ -131,4 +114,116 @@ export const createCachedStatus = (
     type,
     status: status.toString(),
   };
+};
+
+export const createCachedServiceStatus = (
+  service: any,
+  type: 'service' | 'assignment' | 'admin'
+): CachedStatus | null => {
+  const id =
+    service.id ||
+    service.serviceId ||
+    service.bookingId ||
+    service.booking_id ||
+    service.orderId ||
+    'N/A';
+
+  const issues = Array.isArray(service.issues) ? service.issues : [];
+  const parts = Array.isArray(service.parts) ? service.parts : [];
+  const assignedName =
+    service.assignedEmployeeName ||
+    service.assignedEmployee ||
+    service.assigned_employee_name ||
+    service.assignedEmployeeId ||
+    service.assigned_employee_id ||
+    '';
+
+  const issueSnapshot = issues
+    .map(
+      (issue: any) =>
+        `${issue.id || issue._id || issue.issueId || issue.issue_id || 'unknown'}:${
+          issue.issueStatus || 'pending'
+        }`
+    )
+    .join(',');
+
+  const partSnapshot = parts
+    .map((part: any) => `${part.id || part.partName || 'unknown'}:${part.status || 'pending'}`)
+    .join(',');
+
+  const statusParts = [];
+  if (issueSnapshot) statusParts.push(`issues:${issueSnapshot}`);
+  if (partSnapshot) statusParts.push(`parts:${partSnapshot}`);
+  if (assignedName) statusParts.push(`assigned:${assignedName}`);
+
+  if (statusParts.length === 0) return null;
+
+  const status = statusParts.join('|');
+
+  let message = '';
+  if (type === 'service') {
+    message = `Your service #${id} has new updates from the mechanic.`;
+  } else if (type === 'assignment') {
+    message = `A service has been assigned to you.`;
+  } else {
+    message = `Service #${id} has been updated.`;
+  }
+
+  return {
+    bookingId: id,
+    type,
+    status,
+    message,
+  };
+};
+
+const sendCachedStatusNotification = (newStatus: CachedStatus) => {
+  switch (newStatus.type) {
+    case 'booking':
+      notificationService.sendBookingNotification(
+        newStatus.bookingId,
+        newStatus.status,
+        newStatus.message
+      );
+      break;
+    case 'appointment':
+      notificationService.sendAppointmentNotification(
+        newStatus.bookingId,
+        newStatus.status,
+        newStatus.message
+      );
+      break;
+    case 'vehicle':
+      notificationService.sendVehicleBookingNotification(
+        newStatus.bookingId,
+        newStatus.status,
+        newStatus.message
+      );
+      break;
+    case 'order':
+      notificationService.sendOrderNotification(
+        newStatus.bookingId,
+        newStatus.status,
+        newStatus.message
+      );
+      break;
+    case 'service':
+      notificationService.sendServiceNotification(
+        newStatus.bookingId,
+        newStatus.message || `Service #${newStatus.bookingId} has updates.`
+      );
+      break;
+    case 'assignment':
+      notificationService.sendAssignmentNotification(
+        newStatus.bookingId,
+        newStatus.message || `A service has been assigned to you.`
+      );
+      break;
+    case 'admin':
+      notificationService.sendAdminNotification(
+        newStatus.bookingId,
+        newStatus.message || `Service #${newStatus.bookingId} has been updated.`
+      );
+      break;
+  }
 };
