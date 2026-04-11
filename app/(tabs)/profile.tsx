@@ -108,7 +108,7 @@ export default function ProfileScreen() {
         >
           <Ionicons name="log-out-outline" size={20} color="#EF4444" />
           <Text className="text-error font-bold ml-2">
-            Log Out
+            Logout
           </Text>
         </TouchableOpacity>
 
