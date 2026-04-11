@@ -140,7 +140,13 @@ export default function Services() {
         })),
       ];
 
-      setServices(combined);
+      const sorted = combined.sort((a, b) => {
+        const dateA = new Date(a.created_at || a.createdAt || a.preferredDate || a.date || a.bookingDate || 0);
+        const dateB = new Date(b.created_at || b.createdAt || b.preferredDate || b.date || b.bookingDate || 0);
+        return dateB.getTime() - dateA.getTime();
+      });
+
+      setServices(sorted);
       setEmployees(empRes.data || []);
     } catch (error) {
       console.error("Failed to fetch data", error);
@@ -178,7 +184,7 @@ export default function Services() {
 
 
 
-      const bDateStr = s.created_at || s.createdAt || s.preferredDate;
+      const bDateStr = s.created_at || s.createdAt || s.preferredDate || s.date || s.bookingDate;
       if (dateFilter === "All Time") return true;
       if (!bDateStr) return false;
 
