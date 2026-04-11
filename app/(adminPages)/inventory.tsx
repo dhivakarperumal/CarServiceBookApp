@@ -192,7 +192,7 @@ const InventoryManagement = () => {
                   <View className="flex-row gap-4">
                     <TouchableOpacity
                       onPress={() => router.push({ pathname: '/(adminPages)/add-inventory', params: { id: item.id } } as any)}
-                      className="w-8 h-8 bg-slate-800 rounded-full items-center justify-center border border-slate-700"
+                      className="w-8 h-8 bg-slate-800 rounded-full items-center justify-center border border-[#0ea5e9]"
                     >
                       <Ionicons name="pencil" size={14} color="#94A3B8" />
                     </TouchableOpacity>

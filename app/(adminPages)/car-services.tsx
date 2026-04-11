@@ -106,10 +106,10 @@ export default function CarServicesList() {
                 </View>
 
                 <View className="gap-2">
-                  <TouchableOpacity
-                    onPress={() => router.push({ pathname: '/(adminPages)/add-car-service', params: { id: srv.id } } as any)}
-                    className="w-10 h-10 rounded-xl bg-white/5 items-center justify-center border border-white/5"
-                  >
+                     <TouchableOpacity 
+                        onPress={() => router.push({ pathname: '/(adminPages)/add-car-service', params: { id: srv.id } } as any)}
+                        className="w-10 h-10 rounded-xl bg-slate-800 items-center justify-center border border-[#0ea5e9]"
+                     >
                     <Ionicons name="pencil" size={16} color="#94a3b8" />
                   </TouchableOpacity>
                   <TouchableOpacity

@@ -141,18 +141,18 @@ export default function PricingList() {
                       params: { id: pkg.id },
                     } as any)
                   }
-                  className="w-10 h-10 rounded-2xl bg-card-light items-center justify-center border border-slate-700"
+                  className="w-10 h-10 rounded-2xl bg-slate-800 items-center justify-center border border-[#0ea5e9]"
                 >
-                  <Ionicons name="pencil" size={16} color={COLORS.primary} />
+                  <Ionicons name="pencil" size={16} color="#0ea5e9" />
                 </TouchableOpacity>
-                <TouchableOpacity
+                <TouchableOpacity 
                   onPress={() => handleDelete(pkg.id)}
-                  className="w-10 h-10 rounded-2xl bg-card-light items-center justify-center border border-slate-700"
+                  className="w-10 h-10 rounded-2xl bg-rose-500/20 items-center justify-center border border-rose-500/30"
                 >
                   <Ionicons
                     name="trash-outline"
                     size={16}
-                    color={COLORS.primary}
+                    color="#f43f5e"
                   />
                 </TouchableOpacity>
               </View>
