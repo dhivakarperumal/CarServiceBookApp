@@ -82,6 +82,28 @@ const getStatusColor = (status: string) => {
   }
 };
 
+const getStatusDisplayName = (status: string) => {
+  switch (status) {
+    case "Waiting for Spare":
+      return "Waiting for Spare Approval";
+    default:
+      return status;
+  }
+};
+
+const getBookingIssue = (service: any) => {
+  const bookingIssue =
+    service.carIssue || service.issue || service.bookingIssue || "";
+  if (!bookingIssue) return null;
+
+  return {
+    issue: bookingIssue,
+    issueAmount: service.issueAmount || 0,
+    issueStatus: service.issueStatus || "pending",
+    isBookingIssue: true,
+  };
+};
+
 export default function ServiceCenter() {
   const router = useRouter();
   const { user: userProfile } = useAuth();
@@ -203,6 +225,10 @@ export default function ServiceCenter() {
       const text =
         `${s.bookingId || ""} ${s.name || ""} ${s.phone || ""} ${s.brand || ""} ${s.model || ""} ${s.vehicleNumber || ""}`.toLowerCase();
 
+      // Exclude fully billed/completed service center items
+      const status = (s.serviceStatus || s.status || "").toLowerCase().trim();
+      if (status === "bill completed") return false;
+
       // SEARCH FILTER
       if (search && !text.includes(search.toLowerCase())) return false;
 
@@ -263,7 +289,7 @@ export default function ServiceCenter() {
     }).length;
     const completed = filteredList.filter((s: any) => {
       const sStat = (s.serviceStatus || s.status || "").toLowerCase();
-      return sStat.includes("completed") || sStat.includes("bill completed");
+      return sStat.includes("completed") && !sStat.includes("bill completed");
     }).length;
     return { total, processing, completed };
   }, [filteredList]);
@@ -314,14 +340,20 @@ export default function ServiceCenter() {
 
   const openIssueEditor = (service: any) => {
     setEditingServiceId(service.id);
-    let initialIssues = [...(service.issues || [])];
-    if (initialIssues.length === 0 && service.carIssue) {
-      initialIssues.push({
-        issue: service.carIssue,
-        issueAmount: service.issueAmount || 0,
-        issueStatus: service.issueStatus || "pending",
-      });
+    const initialIssues = [...(service.issues || [])];
+    const bookingIssue = getBookingIssue(service);
+
+    if (bookingIssue) {
+      const alreadyIncluded = initialIssues.some(
+        (issue: any) =>
+          issue.issue?.trim().toLowerCase() ===
+          bookingIssue.issue.trim().toLowerCase(),
+      );
+      if (!alreadyIncluded) {
+        initialIssues.unshift(bookingIssue);
+      }
     }
+
     setIssueEntries(initialIssues);
     setIssueModalVisible(true);
   };
@@ -372,6 +404,12 @@ export default function ServiceCenter() {
           }
         }
       }
+
+      const primaryIssue = toSave[0];
+      await api.put(`/all-services/${editingServiceId}/issue`, {
+        issue: primaryIssue ? primaryIssue.issue.trim() : "",
+        issueAmount: Number(primaryIssue?.issueAmount || 0),
+      });
 
       Alert.alert("Success", "Issue entries saved");
       setIssueModalVisible(false);
@@ -585,7 +623,9 @@ export default function ServiceCenter() {
                           )}`}
                         >
                           <Text className="text-[10px] font-black uppercase tracking-widest">
-                            {item.serviceStatus || "Booked"}
+                            {getStatusDisplayName(
+                              item.serviceStatus || "Booked",
+                            )}
                           </Text>
                         </View>
                       </View>
@@ -645,41 +685,57 @@ export default function ServiceCenter() {
                               </TouchableOpacity>
                             )}
                         </View>
-                        {item.issues?.length > 0 || item.carIssue ? (
-                          <View className="gap-2">
-                            {(item.issues?.length > 0
-                              ? item.issues
-                              : [
-                                  {
-                                    issue: item.carIssue || item.issue,
-                                    issueAmount: item.issueAmount || 0,
-                                    status: item.issueStatus || "pending",
-                                  },
-                                ]
-                            ).map((iss: any, idx: number) => (
-                              <View
-                                key={idx}
-                                className="bg-card p-3 rounded-xl border border-card"
-                              >
-                                <Text className="text-xs font-bold text-text-secondary leading-snug">
-                                  {iss.issue}
-                                </Text>
-                                <View className="flex-row justify-between items-center mt-2 pt-2 border-t border-card">
-                                  <Text className="text-[10px] font-black text-success">
-                                    ₹{Number(iss.issueAmount || 0).toFixed(2)}
-                                  </Text>
-                                  <Text className="text-[8px] font-black text-text-muted uppercase tracking-widest">
-                                    {iss.issueStatus || iss.status || "pending"}
-                                  </Text>
+                        {(() => {
+                          const bookingIssue = getBookingIssue(item);
+                          const issueRows = bookingIssue
+                            ? [
+                                bookingIssue,
+                                ...(item.issues || []).filter(
+                                  (iss: any) =>
+                                    iss.issue?.trim().toLowerCase() !==
+                                    bookingIssue.issue.trim().toLowerCase(),
+                                ),
+                              ]
+                            : item.issues || [];
+
+                          return issueRows.length > 0 ? (
+                            <View className="gap-2">
+                              {issueRows.map((iss: any, idx: number) => (
+                                <View
+                                  key={idx}
+                                  className="bg-card p-3 rounded-xl border border-card"
+                                >
+                                  <View className="flex-row items-center justify-between mb-2">
+                                    <Text className="text-xs font-bold text-text-secondary leading-snug flex-1">
+                                      {iss.issue}
+                                    </Text>
+                                    {iss.isBookingIssue && (
+                                      <View className="bg-primary/20 px-2 py-0.5 rounded-full ml-2">
+                                        <Text className="text-[8px] font-black text-primary uppercase tracking-widest">
+                                          Booking Issue
+                                        </Text>
+                                      </View>
+                                    )}
+                                  </View>
+                                  <View className="flex-row justify-between items-center pt-2 border-t border-card">
+                                    <Text className="text-[10px] font-black text-success">
+                                      ₹{Number(iss.issueAmount || 0).toFixed(2)}
+                                    </Text>
+                                    <Text className="text-[8px] font-black text-text-muted uppercase tracking-widest">
+                                      {iss.issueStatus ||
+                                        iss.status ||
+                                        "pending"}
+                                    </Text>
+                                  </View>
                                 </View>
-                              </View>
-                            ))}
-                          </View>
-                        ) : (
-                          <Text className="text-[12px] text-text-muted italic">
-                            No job issues recorded yet.
-                          </Text>
-                        )}
+                              ))}
+                            </View>
+                          ) : (
+                            <Text className="text-[12px] text-text-muted italic">
+                              No job issues recorded yet.
+                            </Text>
+                          );
+                        })()}
                       </View>
 
                       {/* SPARE PARTS */}
@@ -745,7 +801,9 @@ export default function ServiceCenter() {
                           </View>
                           <View className="px-4 pb-3 flex-row justify-between items-center">
                             <Text className="text-text-primary font-bold text-sm">
-                              {item.serviceStatus || "Booked"}
+                              {getStatusDisplayName(
+                                item.serviceStatus || "Booked",
+                              )}
                             </Text>
                             <Ionicons
                               name="chevron-down"
@@ -1097,7 +1155,7 @@ export default function ServiceCenter() {
                       <Text
                         className={`font-black uppercase tracking-widest text-xs ${activeServiceForStatus?.serviceStatus === s ? "text-text-primary" : "text-text-secondary"}`}
                       >
-                        {s}
+                        {getStatusDisplayName(s)}
                       </Text>
                       {activeServiceForStatus?.serviceStatus === s && (
                         <Ionicons

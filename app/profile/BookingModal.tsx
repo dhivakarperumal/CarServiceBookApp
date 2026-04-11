@@ -70,6 +70,7 @@ type Booking = {
   vehicleNumber?: string;
   registrationNumber?: string;
   issue?: string;
+  otherIssue?: string;
   preferredDate?: string;
   assignedEmployeeName?: string;
   address?: string;
@@ -257,7 +258,7 @@ const BookingModal: React.FC<Props> = ({
             </Text>
 
             {/* ISSUE */}
-            {booking.issue && (
+            {booking.issue && booking.issue !== "Others" && (
               <Text className="text-text-secondary mt-1 mb-1">
                 <Text className="text-primary">Issue: </Text>
                 {booking.issue}
@@ -289,6 +290,41 @@ const BookingModal: React.FC<Props> = ({
                 </Text>
               </View>
             )}
+
+            {/* SELECTED PACKAGE (FROM PRICING PAGE) */}
+            {(() => {
+              const isPricingPackage = booking.issue === "Others" && booking.otherIssue && booking.otherIssue.includes("Package:");
+              if (!isPricingPackage) return null;
+
+              const packageMatch = booking.otherIssue.match(/Package:\s*(.+?)\s*-\s*Price:\s*₹(\d+)/);
+              if (!packageMatch) return null;
+
+              const packageName = packageMatch[1];
+              const packagePrice = packageMatch[2];
+
+              return (
+                <View
+                  style={{
+                    backgroundColor: COLORS.success + "15",
+                    padding: 10,
+                    borderRadius: 8,
+                    marginTop: 6,
+                    borderWidth: 1,
+                    borderColor: COLORS.success + "30",
+                  }}
+                >
+                  <Text style={{ color: COLORS.success, fontWeight: "bold", fontSize: 16 }}>
+                    📦 Selected Package
+                  </Text>
+                  <Text style={{ color: COLORS.textPrimary, fontSize: 14, marginTop: 4 }}>
+                    <Text style={{ fontWeight: "bold" }}>Name:</Text> {packageName}
+                  </Text>
+                  <Text style={{ color: COLORS.textPrimary, fontSize: 14 }}>
+                    <Text style={{ fontWeight: "bold" }}>Amount:</Text> ₹{packagePrice}
+                  </Text>
+                </View>
+              );
+            })()}
 
             {/* ADDRESS */}
             <Text className="text-text-secondary mt-2">
@@ -392,128 +428,99 @@ const BookingModal: React.FC<Props> = ({
             )}
 
             {/* ===== ISSUES ===== */}
-            {booking.issues?.length ? (
-              <View className="mt-6">
-                <Text className="text-primary font-bold mb-2">
-                  ⚙️ Issues
-                </Text>
+            {(() => {
+              const hasIssueList = booking.issues?.length > 0;
+              const showSingleIssue =
+                booking.issue &&
+                booking.issue !== "Others" &&
+                !hasIssueList;
 
-                {booking.issues.map((issue) => {
-                  const issueId = issue.id || issue._id || issue.issueId || issue.issue_id || "";
-                  const status = issue.issueStatus || "pending";
-                  const amount = issue.issueAmount != null ? issue.issueAmount : booking.issueAmount;
+              if (hasIssueList) {
+                return (
+                  <View className="mt-6">
+                    <Text className="text-primary font-bold mb-2">
+                      ⚙️ Issues
+                    </Text>
 
-                  return (
-                    <View key={issueId || issue.issue} className="p-3 bg-card rounded-lg mb-2">
-                      <Text className="text-text-secondary">
-                        {issue.issue}
-                      </Text>
+                    {booking.issues.map((issue) => {
+                      const issueId = issue.id || issue._id || issue.issueId || issue.issue_id || "";
+                      const status = issue.issueStatus || "pending";
+                      const amount = issue.issueAmount != null ? issue.issueAmount : booking.issueAmount;
 
-                      {amount != null && (
-                        <Text className="text-text-secondary text-sm mt-1">
-                          Amount: ₹{Number(amount).toFixed(2)}
-                        </Text>
-                      )}
+                      return (
+                        <View key={issueId || issue.issue} className="p-3 bg-card rounded-lg mb-2">
+                          <Text className="text-text-secondary">
+                            {issue.issue}
+                          </Text>
 
-                      <Text
-                        style={{
-                          color:
-                            status === "approved"
-                              ? COLORS.success
-                              : status === "rejected"
-                                ? COLORS.error
-                                : COLORS.warning,
-                        }}
-                      >
-                        {status.toUpperCase()}
-                      </Text>
+                          {amount != null && (
+                            <Text className="text-text-secondary text-sm mt-1">
+                              Amount: ₹{Number(amount).toFixed(2)}
+                            </Text>
+                          )}
 
-                      {/* ✅ ISSUE APPROVAL FIX */}
-                      {/* {status === "pending" && effectiveServiceId && issueId && (
-                        <View className="flex-row gap-2 mt-2">
-                          <TouchableOpacity
-                            onPress={() =>
-                              onApprove(
-                                effectiveServiceId,
-                                issueId,
-                                "approved",
-                                "issue"
-                              )
-                            }
-                            className="p-2 rounded-lg"
+                          <Text
                             style={{
-                              backgroundColor: COLORS.success,
-                              minWidth: 72,
-                              alignItems: "center",
-                              justifyContent: "center",
+                              color:
+                                status === "approved"
+                                  ? COLORS.success
+                                  : status === "rejected"
+                                    ? COLORS.error
+                                    : COLORS.warning,
                             }}
                           >
-                            <Text className="text-white text-xs font-bold">
-                              Approve
-                            </Text>
-                          </TouchableOpacity>
-
-                          <TouchableOpacity
-                            onPress={() =>
-                              onApprove(
-                                effectiveServiceId,
-                                issueId,
-                                "rejected",
-                                "issue"
-                              )
-                            }
-                            className="p-2 rounded-lg"
-                            style={{
-                              backgroundColor: COLORS.error,
-                              minWidth: 72,
-                              alignItems: "center",
-                              justifyContent: "center",
-                            }}
-                          >
-                            <Text className="text-white text-xs font-bold">
-                              Reject
-                            </Text>
-                          </TouchableOpacity>
+                            {status.toUpperCase()}
+                          </Text>
                         </View>
-                      )} */}
-                    </View>
-                  );
-                })}
-              </View>
-            ) : booking.issue && booking.issueStatus ? (
-              <View className="mt-6">
-                <Text className="text-primary font-bold mb-2">
-                  ⚙️ Issue
-                </Text>
-                <Text className="text-text-secondary mb-2">{booking.issue}</Text>
-                {booking.issueAmount != null && (
-                  <Text className="text-text-secondary text-sm">
-                    Amount: ₹{Number(booking.issueAmount).toFixed(2)}
-                  </Text>
-                )}
-                <Text className="text-text-secondary text-sm mt-2">
-                  Status: <Text className="font-bold" style={{ color: booking.issueStatus === 'approved' ? COLORS.success : booking.issueStatus === 'rejected' ? COLORS.error : COLORS.warning }}>{booking.issueStatus.toUpperCase()}</Text>
-                </Text>
-              </View>
-            ) : (
-              <Text className="text-text-secondary mt-4 text-sm">
-                No issue details available for this booking.
-              </Text>
-            )}
+                      );
+                    })}
+                  </View>
+                );
+              }
+
+              if (showSingleIssue) {
+                return (
+                  <View className="mt-6">
+                    <Text className="text-primary font-bold mb-2">
+                      ⚙️ Issue
+                    </Text>
+                    <Text className="text-text-secondary mb-2">{booking.issue}</Text>
+                    {booking.issueAmount != null && (
+                      <Text className="text-text-secondary text-sm">
+                        Amount: ₹{Number(booking.issueAmount).toFixed(2)}
+                      </Text>
+                    )}
+                    <Text className="text-text-secondary text-sm mt-2">
+                      Status: <Text className="font-bold" style={{ color: booking.issueStatus === 'approved' ? COLORS.success : booking.issueStatus === 'rejected' ? COLORS.error : COLORS.warning }}>{booking.issueStatus?.toUpperCase() || 'PENDING'}</Text>
+                    </Text>
+                  </View>
+                );
+              }
+
+              return null;
+            })()}
 
             {/* ===== COMMON APPROVE / REJECT (LIKE WEB) ===== */}
             {(() => {
               const hasPendingSpares = bookingSpare?.parts?.some(
-                (p) => p.status === "pending"
+                (p) => (p.status || "pending") === "pending"
               );
+              const hasPendingIssueItems = booking.issues?.some(
+                (i) => (i.issueStatus || "pending") === "pending"
+              );
+              const hasPendingSingleIssue =
+                booking.issue &&
+                booking.issue !== "Others" &&
+                booking.issueStatus === "pending" &&
+                booking.issueAmount > 0 &&
+                !booking.issues?.length;
 
-              const hasPendingIssues = booking.issues?.length
-                ? booking.issues.some(
-                  (i) => (i.issueStatus || "pending") === "pending"
-                )
-                : (booking.issueStatus || "pending") === "pending";
+              const showApprovalButtons =
+                !!hasPendingSpares ||
+                !!hasPendingIssueItems ||
+                !!hasPendingSingleIssue;
 
-              if (!hasPendingSpares && !hasPendingIssues) return null;
+              if (!showApprovalButtons) return null;
 
               return (
                 <View
@@ -548,7 +555,7 @@ const BookingModal: React.FC<Props> = ({
                         }
 
                         // ISSUES
-                        if (hasPendingIssues && effectiveServiceId) {
+                        if (hasPendingIssueItems && effectiveServiceId) {
                           if (booking.issues?.length) {
                             booking.issues
                               .filter(
@@ -606,7 +613,7 @@ const BookingModal: React.FC<Props> = ({
                         }
 
                         // ISSUES
-                        if (hasPendingIssues && effectiveServiceId) {
+                        if (hasPendingIssueItems && effectiveServiceId) {
                           if (booking.issues?.length) {
                             booking.issues
                               .filter(
