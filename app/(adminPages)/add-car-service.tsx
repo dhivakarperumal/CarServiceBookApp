@@ -293,7 +293,6 @@ export default function AddCarService() {
                   </Text>
                )}
             </TouchableOpacity>
-          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
