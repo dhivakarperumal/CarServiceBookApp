@@ -127,10 +127,6 @@ const BookingModal: React.FC<Props> = ({
   });
 
   const effectiveServiceId = bookingSpare?.serviceId || booking.serviceId || booking.service_id || null;
-  const isPricingPackage =
-    booking.issue === "Others" &&
-    booking.otherIssue &&
-    booking.otherIssue.includes("Package:");
 
   /* ===== STATUS TRACKER ===== */
   const StatusTracker = ({ currentStatus }: { currentStatus: string }) => {
@@ -439,8 +435,6 @@ const BookingModal: React.FC<Props> = ({
                 booking.issue !== "Others" &&
                 !hasIssueList;
 
-              if (isPricingPackage) return null;
-
               if (hasIssueList) {
                 return (
                   <View className="mt-6">
@@ -503,11 +497,7 @@ const BookingModal: React.FC<Props> = ({
                 );
               }
 
-              return (
-                <Text className="text-text-secondary mt-4 text-sm">
-                  No issue details available for this booking.
-                </Text>
-              );
+              return null;
             })()}
 
             {/* ===== COMMON APPROVE / REJECT (LIKE WEB) ===== */}
@@ -515,17 +505,22 @@ const BookingModal: React.FC<Props> = ({
               const hasPendingSpares = bookingSpare?.parts?.some(
                 (p) => (p.status || "pending") === "pending"
               );
-              const hasPendingIssues =
-                booking.issues?.some(
-                  (i) => (i.issueStatus || "pending") === "pending"
-                ) ||
-                (
-                  booking.issue &&
-                  booking.issue !== "Others" &&
-                  (booking.issueStatus || "pending") === "pending"
-                );
+              const hasPendingIssueItems = booking.issues?.some(
+                (i) => (i.issueStatus || "pending") === "pending"
+              );
+              const hasPendingSingleIssue =
+                booking.issue &&
+                booking.issue !== "Others" &&
+                booking.issueStatus === "pending" &&
+                booking.issueAmount != null &&
+                !booking.issues?.length;
 
-              if (!hasPendingSpares && !hasPendingIssues) return null;
+              const showApprovalButtons =
+                !!hasPendingSpares ||
+                !!hasPendingIssueItems ||
+                !!hasPendingSingleIssue;
+
+              if (!showApprovalButtons) return null;
 
               return (
                 <View
