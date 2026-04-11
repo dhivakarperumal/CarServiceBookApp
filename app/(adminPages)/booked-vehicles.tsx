@@ -55,22 +55,26 @@ export default function BookedVehicles() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
 
-  const fetchBookings = async () => {
+  const fetchBookings = async (showLoading = true) => {
     try {
-      setLoading(true);
+      if (showLoading) setLoading(true);
       const data = await apiService.getVehicleBookings();
       setBookings(data || []);
     } catch (err) {
       console.error("Fetch vehicle bookings error", err);
-      Alert.alert("Error", "Failed to load vehicle bookings");
+      if (showLoading) Alert.alert("Error", "Failed to load vehicle bookings");
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
       setRefreshing(false);
     }
   };
 
   useEffect(() => {
-    fetchBookings();
+    fetchBookings(true);
+    const interval = setInterval(() => {
+      fetchBookings(false);
+    }, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleCancelAndRepublish = async (id: any) => {

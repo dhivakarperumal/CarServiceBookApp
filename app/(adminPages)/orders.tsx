@@ -162,20 +162,25 @@ export default function AllOrders() {
   const [statusModal, setStatusModal] = useState<{ order: any } | null>(null);
 
   /* ─── LOAD ─── */
-  const loadOrders = async () => {
+  const loadOrders = async (showLoading = true) => {
     try {
+      if (showLoading) setLoading(true);
       const res = await api.get("/orders");
       setOrders(res.data || []);
     } catch {
-      Alert.alert("Error", "Failed to load orders");
+      if (showLoading) Alert.alert("Error", "Failed to load orders");
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
       setRefreshing(false);
     }
   };
 
   useEffect(() => {
-    loadOrders();
+    loadOrders(true);
+    const interval = setInterval(() => {
+      loadOrders(false);
+    }, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   /* ─── STATS ─── */

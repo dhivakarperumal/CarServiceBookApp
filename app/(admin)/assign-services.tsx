@@ -76,7 +76,7 @@ export default function AdminAssignServices() {
       setLoadingEmployees(true);
       const res = await api.get("/staff");
       const list = (res.data || []).filter(
-        (emp: any) => emp.status === "active",
+        (emp: any) => (emp.status || "").toLowerCase() === "active",
       );
       setEmployees(list);
     } catch (error) {

@@ -23,10 +23,19 @@ const STATUS_STEPS = [
   "Processing",
   "Waiting for Spare",
   "Service Going on",
+  "Service Completed",
   "Bill Pending",
   "Bill Completed",
-  "Service Completed",
 ];
+
+const getButtonVisibility = (status: string) => {
+  const currentIndex = STATUS_STEPS.indexOf(status);
+  return {
+    showOptions:
+      currentIndex >= STATUS_STEPS.indexOf("Processing") &&
+      currentIndex < STATUS_STEPS.indexOf("Service Completed"),
+  };
+};
 
 const StatCard = ({
   title,
@@ -80,9 +89,9 @@ export default function Services() {
   const [editingParts, setEditingParts] = useState<any>([]);
   const [syncing, setSyncing] = useState(false);
 
-  const loadData = async () => {
+  const loadData = async (showLoading = true) => {
     try {
-      setLoading(true);
+      if (showLoading) setLoading(true);
       const [servRes, empRes, apptsRes] = await Promise.all([
         api.get("/all-services"),
         api.get("/staff"),
@@ -132,12 +141,16 @@ export default function Services() {
     } catch (error) {
       console.error("Failed to fetch data", error);
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadData();
+    loadData(true);
+    const interval = setInterval(() => {
+      loadData(false);
+    }, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   const searchedServices = useMemo(() => {
@@ -674,12 +687,14 @@ export default function Services() {
                       </Text>
                     </TouchableOpacity>
                   )}
-                  <TouchableOpacity
-                    onPress={() => handleOpenIssueModal(item)}
-                    className="w-12 h-12 bg-white/5 border border-white/10 rounded-xl items-center justify-center"
-                  >
-                    <Ionicons name="options-outline" size={20} color="white" />
-                  </TouchableOpacity>
+                  {getButtonVisibility(item.serviceStatus || "Booked").showOptions && (
+                    <TouchableOpacity
+                      onPress={() => handleOpenIssueModal(item)}
+                      className="w-12 h-12 bg-white/5 border border-white/10 rounded-xl items-center justify-center"
+                    >
+                      <Ionicons name="options-outline" size={20} color="white" />
+                    </TouchableOpacity>
+                  )}
                   <TouchableOpacity
                     onPress={() =>
                       router.push({
@@ -800,7 +815,15 @@ export default function Services() {
               style={{ maxHeight: 400 }}
               className="bg-white/5 border border-white/10 rounded-2xl p-2 mb-4"
             >
-              {STATUS_STEPS.map((s: string) => (
+              {STATUS_STEPS.filter((_, index) => {
+                const currentStatus = getMappedStatus(
+                  selectedBooking?.serviceStatus || 
+                  selectedBooking?.status || 
+                  selectedBooking?.appointmentStatus
+                );
+                const currentIndex = STATUS_STEPS.findIndex(step => step.toLowerCase() === currentStatus.toLowerCase());
+                return index >= Math.max(0, currentIndex);
+              }).map((s: string) => (
                 <TouchableOpacity
                   key={s}
                   onPress={async () => {
@@ -819,6 +842,13 @@ export default function Services() {
                   >
                     {s}
                   </Text>
+                  {getMappedStatus(selectedBooking?.serviceStatus || selectedBooking?.status || selectedBooking?.appointmentStatus) === s && (
+                    <Ionicons
+                      name="checkmark-circle"
+                      size={16}
+                      color={COLORS.primary}
+                    />
+                  )}
                 </TouchableOpacity>
               ))}
             </ScrollView>

@@ -88,13 +88,9 @@ export default function EmployeeBilling() {
     }
   }, [serviceId]);
 
-  useEffect(() => {
-    loadData();
-  }, [userProfile?.id]);
-
-  const loadData = async () => {
+  const loadData = async (showLoading = true) => {
     try {
-      setLoading(true);
+      if (showLoading) setLoading(true);
       const [billRes, bookRes] = await Promise.all([
         api.get("/billings"),
         api.get("/bookings"),
@@ -120,11 +116,19 @@ export default function EmployeeBilling() {
       setBills(myBills);
     } catch (err) {
       console.error(err);
-      Alert.alert("Error", "Failed to load billing history");
+      if (showLoading) Alert.alert("Error", "Failed to load billing history");
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadData(true);
+    const interval = setInterval(() => {
+      loadData(false);
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [userProfile?.id]);
 
   const onRefresh = async () => {
     setRefreshing(true);
