@@ -104,6 +104,34 @@ const getBookingIssue = (service: any) => {
   };
 };
 
+const getMappedStatus = (status: string) => {
+  if (!status) return "Booked";
+  const sLow = status.toLowerCase();
+  if (sLow === "cancelled") return "Cancelled";
+  const found = STATUS_STEPS.find((step) => step.toLowerCase() === sLow);
+  if (found) return found;
+  if (sLow.includes("bill completed")) return "Bill Completed";
+  if (sLow.includes("completed")) return "Service Completed";
+  return "Booked";
+};
+
+const getHoursDifference = (dateStr: string) => {
+  if (!dateStr) return 0;
+  const past = new Date(dateStr);
+  const now = new Date();
+  return Math.floor((now.getTime() - past.getTime()) / (1000 * 60 * 60));
+};
+
+const getElapsedTime = (dateStr: string) => {
+  if (!dateStr) return "0h";
+  const past = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - past.getTime();
+  const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+  return `${diffHrs}h ${diffMins}m`;
+};
+
 export default function ServiceCenter() {
   const router = useRouter();
   const { user: userProfile } = useAuth();
@@ -141,6 +169,11 @@ export default function ServiceCenter() {
   const [issueEntries, setIssueEntries] = useState<any[]>([]);
   const [editingServiceId, setEditingServiceId] = useState<any>(null);
   const [savingIssues, setSavingIssues] = useState(false);
+
+  // Close Booking Modal
+  const [closeModalVisible, setCloseModalVisible] = useState(false);
+  const [closeReason, setCloseReason] = useState("");
+  const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -335,6 +368,54 @@ export default function ServiceCenter() {
       Alert.alert("Error", "Assignment failed");
     } finally {
       setAssigning(false);
+    }
+  };
+
+  const handleCloseBooking = async () => {
+    if (!selectedBooking || !closeReason.trim() || isClosing) return;
+    try {
+      setIsClosing(true);
+
+      // Auto-reject pending issues and parts
+      const updatedIssues = (selectedBooking.issues || []).map((iss) =>
+        iss.issueStatus === "pending"
+          ? { ...iss, issueStatus: "rejected" }
+          : iss,
+      );
+      const updatedParts = (selectedBooking.parts || []).map((p) =>
+        p.status === "pending" ? { ...p, status: "rejected" } : p,
+      );
+
+      // Save the rejections
+      if (updatedIssues.length > 0) {
+        for (const iss of updatedIssues) {
+          if (iss.id)
+            await api.put(
+              `/all-services/${selectedBooking.id}/issues/${iss.id}`,
+              iss,
+            );
+        }
+      }
+      if (updatedParts.length > 0) {
+        await api.post(`/all-services/${selectedBooking.id}/parts`, {
+          parts: updatedParts,
+        });
+      }
+
+      await api.put(`/all-services/${selectedBooking.id}/status`, {
+        serviceStatus: "Cancelled",
+        status: "Cancelled",
+        closeReason: closeReason.trim(),
+      });
+      Alert.alert("Success", "Booking closed and items rejected");
+      setCloseModalVisible(false);
+      setCloseReason("");
+      setSelectedBooking(null);
+      loadData();
+    } catch (error) {
+      Alert.alert("Error", "Failed to close booking");
+    } finally {
+      setIsClosing(false);
     }
   };
 
@@ -886,6 +967,31 @@ export default function ServiceCenter() {
                                 />
                               </TouchableOpacity>
                             )}
+                            {getMappedStatus(
+                              item.serviceStatus || item.status,
+                            ) === "Waiting for Spare" && (
+                              <TouchableOpacity
+                                onPress={() => {
+                                  setSelectedBooking(item);
+                                  setCloseModalVisible(true);
+                                }}
+                                style={{ minWidth: 90 }}
+                                className="bg-error py-4 px-4 rounded-2xl items-center justify-center flex-col"
+                              >
+                                <Text className="text-text-primary font-black text-xs">
+                                  {getHoursDifference(
+                                    item.updatedAt || item.updated_at,
+                                  ) >= 72
+                                    ? "TIME OUT"
+                                    : "NO RESPONSE"}
+                                </Text>
+                                <Text className="text-text-primary font-bold text-[8px] opacity-70">
+                                  {getElapsedTime(
+                                    item.updatedAt || item.updated_at,
+                                  )}
+                                </Text>
+                              </TouchableOpacity>
+                            )}
                           </View>
                         )}
                       </View>
@@ -1121,6 +1227,100 @@ export default function ServiceCenter() {
               </TouchableOpacity>
             </View>
           </KeyboardAvoidingView>
+        </Modal>
+
+        {/* CLOSE BOOKING MODAL */}
+        <Modal
+          visible={closeModalVisible}
+          transparent={true}
+          animationType="fade"
+        >
+          <View className="flex-1 bg-black/60 justify-center items-center p-6">
+            <View className="w-full max-w-sm rounded-3xl bg-card p-8 border border-card shadow-2xl">
+              <View className="mb-6 text-center">
+                <View className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-100">
+                  <Ionicons name="close" size={24} color="#EF4444" />
+                </View>
+                <Text className="text-xl font-black text-text-primary text-center uppercase tracking-tight">
+                  Close Booking
+                </Text>
+                <Text className="text-[10px] text-text-muted font-black uppercase tracking-widest mt-1 text-center">
+                  Provide reason for closing this service
+                </Text>
+                {selectedBooking &&
+                  getHoursDifference(
+                    selectedBooking.updatedAt || selectedBooking.updated_at,
+                  ) >= 72 && (
+                    <Text className="mt-2 text-[10px] text-red-500 font-bold uppercase tracking-widest bg-red-50 py-1 px-3 rounded-full">
+                      72+ Hours since last update
+                    </Text>
+                  )}
+              </View>
+              <View className="mb-6 space-y-4">
+                <View>
+                  <Text className="text-[9px] font-black text-text-muted uppercase tracking-widest mb-2">
+                    Closing Reason
+                  </Text>
+                  <TextInput
+                    value={closeReason}
+                    onChangeText={setCloseReason}
+                    placeholder="e.g. Customer not approved spare parts / No response after 72 hours"
+                    multiline
+                    className="w-full min-h-[100px] rounded-xl border border-card bg-background px-4 py-3 text-xs font-bold text-text-primary focus:bg-card focus:border-red-500 outline-none transition-all"
+                  />
+                </View>
+                <View className="flex-row flex-wrap gap-2">
+                  <TouchableOpacity
+                    onPress={() =>
+                      setCloseReason("Customer not approve spare part")
+                    }
+                    className="px-3 py-1.5 rounded-lg bg-background border border-card"
+                  >
+                    <Text className="text-[9px] font-black uppercase tracking-widest text-text-muted">
+                      Not Approved
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() =>
+                      setCloseReason("No response from customer after 72 hours")
+                    }
+                    className="px-3 py-1.5 rounded-lg bg-background border border-card"
+                  >
+                    <Text className="text-[9px] font-black uppercase tracking-widest text-text-muted">
+                      No Response (72h)
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <View className="flex-row gap-3">
+                <TouchableOpacity
+                  onPress={() => {
+                    setCloseModalVisible(false);
+                    setCloseReason("");
+                    setSelectedBooking(null);
+                  }}
+                  className="flex-1 rounded-xl bg-card py-3 items-center"
+                >
+                  <Text className="text-[10px] font-black text-text-secondary uppercase tracking-widest">
+                    Back
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={handleCloseBooking}
+                  disabled={isClosing || !closeReason.trim()}
+                  className={`flex-1 rounded-xl bg-error py-3 items-center ${isClosing || !closeReason.trim() ? "opacity-50" : ""}`}
+                >
+                  {isClosing ? (
+                    <ActivityIndicator color="#FFFFFF" />
+                  ) : (
+                    <Text className="text-[10px] font-black text-text-primary uppercase tracking-widest">
+                      Close Booking
+                    </Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
         </Modal>
 
         {/* STATUS SELECT MODAL */}
