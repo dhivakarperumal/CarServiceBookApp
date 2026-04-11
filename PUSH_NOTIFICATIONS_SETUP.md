@@ -7,7 +7,7 @@ This guide explains how to implement and use push notifications in your Expo Car
 
 ### 1. **Installed Packages**
 ```bash
-npx expo install expo-notifications expo-device expo-constants
+npx expo install expo-notifications expo-device expo-constants expo-background-fetch expo-task-manager
 ```
 
 ### 2. **Updated app.json**
@@ -40,6 +40,10 @@ Your `app.json` already includes:
 - Automatically sends notifications when status changes
 - Prevents duplicate notifications
 
+#### `/services/backgroundTaskService.ts`
+- `registerBackgroundTask()` - Registers the app to check for updates every 15 mins while closed
+- Runs autonomously in the background via `expo-task-manager`
+
 ### 4. **Created Hooks**
 
 #### `/hooks/useNotifications.ts`
@@ -57,6 +61,8 @@ The `_layout.tsx` now:
 - Initializes push notifications on app startup
 - Sets up notification listeners
 - Registers for push notifications automatically
+- **NEW**: Registers Background Status Tracker to work while app is closed
+- **NEW**: Sends push token to server automatically when user logs in
 
 ### 6. **Updated Header Component**
 The `Header.tsx` now:
@@ -125,7 +131,7 @@ await api.post('/users/register-push-token', { token, userId: user.id });
 ```
 
 ### 2. Send Notifications from Backend
-Your backend can send notifications using Expo Push Notification Service:
+Your backend can send notifications using Expo Push Notification Service. This is the **BEST** way to ensure notifications arrive while the app is closed.
 
 ```bash
 # Backend Example (Node.js)

@@ -2,25 +2,41 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { AuthProvider } from "../contexts/AuthContext";
+import { AuthProvider, useAuth } from "../contexts/AuthContext";
 import { CartProvider } from "../contexts/CartContext";
 import { FavoriteProvider } from "../contexts/FavoriteContext";
 import { useNotifications } from "../hooks/useNotifications";
 import * as notificationService from "../services/notificationService";
+import { registerBackgroundTask } from "../services/backgroundTaskService";
 
 import './global.css';
 
 // ✅ Notification wrapper component
 function NotificationWrapper({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
   useNotifications();
 
   useEffect(() => {
-    // Configure and register for push notifications
+    // Configure notifications handler
     notificationService.configureNotifications();
-    notificationService.registerForPushNotificationsAsync().catch((error) => {
-      console.error('Failed to register for push notifications:', error);
+    
+    // Register background task for checking status updates when app is closed
+    registerBackgroundTask().catch((error) => {
+      console.error('Failed to register background task:', error);
     });
-  }, []);
+
+    // If user is logged in, register for push notifications and send token to server
+    if (user?.id) {
+      notificationService.registerDeviceForPushNotifications(user.id).catch((error) => {
+        console.error('Failed to register for push notifications:', error);
+      });
+    } else {
+      // Just request permissions if not logged in
+      notificationService.registerForPushNotificationsAsync().catch((error) => {
+        console.error('Failed to request notification permissions:', error);
+      });
+    }
+  }, [user?.id]);
 
   return <>{children}</>;
 }
@@ -28,83 +44,83 @@ function NotificationWrapper({ children }: { children: React.ReactNode }) {
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
-      <NotificationWrapper>
-        <AuthProvider>
+      <AuthProvider>
+        <NotificationWrapper>
           <CartProvider>
             <FavoriteProvider>
-          <Stack
-            screenOptions={{
-              headerStyle: {
-                backgroundColor: "#1F2A3A",
-              },
-              headerTintColor: "#E5E7EB",
-              headerTitleStyle: {
-                fontWeight: "bold",
-              },
-            }}
-          >
-            {/* Initial Redirect */}
-            <Stack.Screen name="index" options={{ headerShown: false }} />
+              <Stack
+                screenOptions={{
+                  headerStyle: {
+                    backgroundColor: "#1F2A3A",
+                  },
+                  headerTintColor: "#E5E7EB",
+                  headerTitleStyle: {
+                    fontWeight: "bold",
+                  },
+                }}
+              >
+                {/* Initial Redirect */}
+                <Stack.Screen name="index" options={{ headerShown: false }} />
 
-            {/* Tabs (Main App) */}
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                {/* Tabs (Main App) */}
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
 
-            {/* Auth Screens */}
-            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                {/* Auth Screens */}
+                <Stack.Screen name="(auth)" options={{ headerShown: false }} />
 
-            {/* Employee Dashboard */}
-            <Stack.Screen name="(employee)" options={{ headerShown: false }} />
+                {/* Employee Dashboard */}
+                <Stack.Screen name="(employee)" options={{ headerShown: false }} />
 
-            {/* Admin Dashboard */}
-            <Stack.Screen name="(admin)" options={{ headerShown: false }} />
+                {/* Admin Dashboard */}
+                <Stack.Screen name="(admin)" options={{ headerShown: false }} />
 
-            {/* Admin Utility Pages */}
-            <Stack.Screen name="(adminPages)" options={{ headerShown: false }} />
+                {/* Admin Utility Pages */}
+                <Stack.Screen name="(adminPages)" options={{ headerShown: false }} />
 
-            <Stack.Screen
-              name="service/[id]"
-              options={({ route }) => ({
-                title: route.params?.title || "Service Details",
-              })}
-            />
+                <Stack.Screen
+                  name="service/[id]"
+                  options={({ route }) => ({
+                    title: route.params?.title || "Service Details",
+                  })}
+                />
 
-            {/* PROFILE SCREENS */}
-            <Stack.Screen
-              name="profile/service-status"
-              options={{ title: "Service Status" }}
-            />
+                {/* PROFILE SCREENS */}
+                <Stack.Screen
+                  name="profile/service-status"
+                  options={{ title: "Service Status" }}
+                />
 
-            <Stack.Screen
-              name="profile/personal-info"
-              options={{ title: "Personal Info" }}
-            />
+                <Stack.Screen
+                  name="profile/personal-info"
+                  options={{ title: "Personal Info" }}
+                />
 
-            <Stack.Screen
-              name="profile/orders"
-              options={{ title: "My Orders" }}
-            />
+                <Stack.Screen
+                  name="profile/orders"
+                  options={{ title: "My Orders" }}
+                />
 
-            <Stack.Screen
-              name="profile/VehicleBookings"
-              options={{ title: "Vehicle Bookings" }}
-            />
+                <Stack.Screen
+                  name="profile/VehicleBookings"
+                  options={{ title: "Vehicle Bookings" }}
+                />
 
-            <Stack.Screen
-              name="profile/history"
-              options={{ title: "History" }}
-            />
+                <Stack.Screen
+                  name="profile/history"
+                  options={{ title: "History" }}
+                />
 
-            <Stack.Screen
-              name="profile/change-password"
-              options={{ title: "Set / Change Password" }}
-            />
-          </Stack>
+                <Stack.Screen
+                  name="profile/change-password"
+                  options={{ title: "Set / Change Password" }}
+                />
+              </Stack>
 
-          <StatusBar style="light" />
-        </FavoriteProvider>
-      </CartProvider>
-    </AuthProvider>
-      </NotificationWrapper>
+              <StatusBar style="light" />
+            </FavoriteProvider>
+          </CartProvider>
+        </NotificationWrapper>
+      </AuthProvider>
     </SafeAreaProvider>
   );
 }
