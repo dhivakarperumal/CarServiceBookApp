@@ -555,7 +555,7 @@ const BookingModal: React.FC<Props> = ({
                         }
 
                         // ISSUES
-                        if (hasPendingIssues && effectiveServiceId) {
+                        if (hasPendingIssueItems && effectiveServiceId) {
                           if (booking.issues?.length) {
                             booking.issues
                               .filter(
@@ -613,7 +613,7 @@ const BookingModal: React.FC<Props> = ({
                         }
 
                         // ISSUES
-                        if (hasPendingIssues && effectiveServiceId) {
+                        if (hasPendingIssueItems && effectiveServiceId) {
                           if (booking.issues?.length) {
                             booking.issues
                               .filter(
