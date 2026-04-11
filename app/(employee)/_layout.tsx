@@ -9,6 +9,7 @@ import {
   View,
 } from "react-native";
 import EmployeeHeaderDropdown from "../../components/EmployeeHeaderDropdown";
+import EmployeeNotificationDropdown from "../../components/EmployeeNotificationDropdown";
 import { useAuth } from "../../contexts/AuthContext";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -71,13 +72,7 @@ export default function EmployeeAdminLayout() {
 
   const renderHeaderRight = (routeName: string) => (
     <View className="flex-row items-center gap-3 pr-2">
-      <TouchableOpacity
-        onPress={() => router.push("/(employee)/staff")}
-        activeOpacity={0.7}
-        className="p-2 bg-[#111827] rounded-2xl border border-[#334155]"
-      >
-        <Ionicons name="notifications-outline" size={20} color="#FFFFFF" />
-      </TouchableOpacity>
+      <EmployeeNotificationDropdown />
       <EmployeeHeaderDropdown />
     </View>
   );

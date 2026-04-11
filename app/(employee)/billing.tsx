@@ -463,15 +463,8 @@ export default function EmployeeBilling() {
                       </Text>
                     </TouchableOpacity>
 
-                    {/* View Button */}
-                    <TouchableOpacity
-                      onPress={() =>
-                        Alert.alert("History", "Detail view coming soon.")
-                      }
-                      className="w-12 bg-primary/10 border border-primary/20 rounded-2xl items-center justify-center"
-                    >
-                      <Ionicons name="eye" size={18} color="#0EA5E9" />
-                    </TouchableOpacity>
+                   
+                   
                   </View>
                 </View>
               );
