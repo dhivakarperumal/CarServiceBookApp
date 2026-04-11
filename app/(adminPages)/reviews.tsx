@@ -333,11 +333,11 @@ export default function ReviewsSettings() {
       {/* FLOATING ADD BUTTON */}
       <TouchableOpacity
         onPress={() => setShowModal(true)}
-        className="absolute bottom-10 right-8 w-16 h-16 bg-white rounded-full items-center justify-center shadow-2xl z-50"
+        className="absolute bottom-10 mb-8 right-8 w-16 h-16 bg-primary rounded-full items-center justify-center shadow-2xl z-50"
         style={{ elevation: 15 }}
         activeOpacity={0.8}
       >
-        <Ionicons name="add" size={38} color="black" />
+        <Ionicons name="add" size={25} color="white" />
       </TouchableOpacity>
     </SafeAreaView>
   );
