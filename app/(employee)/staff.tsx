@@ -306,7 +306,7 @@ export default function EmployeeDashboard() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        <View className="rounded-[32px] border border-slate-800 bg-slate-950/95 p-6 shadow-2xl mb-8">
+        <View className="rounded-[32px] border border-text-muted bg-slate-950/95 p-6 shadow-2xl mb-8">
           <View className="flex-row items-center justify-between mb-6">
             <View className="flex-row items-center flex-1 pr-4">
               <View className="w-16 h-16 rounded-3xl bg-primary/20 items-center justify-center mr-4 shadow-inner">
@@ -328,42 +328,52 @@ export default function EmployeeDashboard() {
 
           {/* Quick Stats */}
           <View className="flex-row justify-between gap-3">
-            <View className="flex-1 bg-slate-900/90 p-5 rounded-[28px] border border-slate-800 shadow-lg">
-              <View className="w-12 h-12 rounded-2xl bg-primary/10 items-center justify-center mb-4">
-                <Ionicons name="time-outline" size={22} color="#0EA5E9" />
+            <View className="flex-1 px-5 py-4 rounded-2xl border border-text-secondary shadow-md bg-gradient-to-br from-primary/15 to-primary/5">
+              <View className="flex-row items-center justify-between mb-2">
+                <Text className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">
+                  Daily / Work
+                </Text>
+                {/* <Ionicons name="time-outline" size={16} color="#0EA5E9" /> */}
               </View>
-              <Text className="text-xs text-text-muted font-semibold uppercase tracking-[0.28em] mb-2">
-                Daily / Total Workload
-              </Text>
-              <Text className="text-3xl font-black text-text-primary">
+              <Text className="text-[28px] font-black text-text-primary">
                 {stats.todayCount} / {stats.totalCount}
               </Text>
             </View>
-            <View className="flex-1 bg-slate-900/90 p-5 rounded-[28px] border border-slate-800 shadow-lg">
-              <View className="w-12 h-12 rounded-2xl bg-primary/10 items-center justify-center mb-4">
-                <Ionicons name="construct-outline" size={22} color="#0EA5E9" />
+            <View className="flex-1 px-5 py-4 rounded-2xl border border-text-secondary shadow-md bg-gradient-to-br from-primary/15 to-primary/5 relative">
+              <View className="flex-row items-center justify-between mb-2">
+                <Text className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">
+                  In Progress
+                </Text>
               </View>
-              <Text className="text-xs text-text-muted font-semibold uppercase tracking-[0.28em] mb-2">
-                In Progress
-              </Text>
-              <Text className="text-3xl font-black text-text-primary">
+
+              <Text className="text-[28px] font-black text-text-primary">
                 {stats.inProgress}
               </Text>
+
+              {/* ICON WITH BACKGROUND */}
+              <View className="absolute bottom-4 right-3 w-8 h-8 rounded-lg bg-primary/20 items-center justify-center">
+                <Ionicons name="construct-outline" size={16} color="#0EA5E9" />
+              </View>
             </View>
-            <View className="flex-1 bg-slate-900/90 p-5 rounded-[28px] border border-slate-800 shadow-lg">
-              <View className="w-12 h-12 rounded-2xl bg-success/10 items-center justify-center mb-4">
+            <View className="flex-1 px-5 py-4 rounded-2xl border border-text-secondary shadow-md bg-gradient-to-br from-success/15 to-success/5 relative">
+              <View className="flex-row items-center justify-between mb-2">
+                <Text className="text-[10px] font-bold uppercase tracking-widest text-text-secondary">
+                  Completed
+                </Text>
+              </View>
+
+              <Text className="text-[28px] font-black text-text-primary">
+                {stats.completed}
+              </Text>
+
+              {/* ICON WITH BACKGROUND */}
+              <View className="absolute bottom-4 right-3 w-8 h-8 rounded-lg bg-success/20 items-center justify-center">
                 <Ionicons
                   name="checkmark-circle-outline"
-                  size={22}
+                  size={16}
                   color="#10B981"
                 />
               </View>
-              <Text className="text-xs text-text-muted font-semibold uppercase tracking-[0.28em] mb-2">
-                Completed
-              </Text>
-              <Text className="text-3xl font-black text-text-primary">
-                {stats.completed}
-              </Text>
             </View>
           </View>
         </View>
@@ -614,15 +624,6 @@ export default function EmployeeDashboard() {
                   </Text>
                 </>
               )}
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => setShowAttendanceModal(false)}
-              className="mt-6"
-            >
-              <Text className="text-text-muted font-bold uppercase text-xs tracking-wider">
-                Skip for now
-              </Text>
             </TouchableOpacity>
           </View>
         </View>
