@@ -22,13 +22,13 @@ export const useNotifications = () => {
 
       // Navigate based on notification type
       if (data.type === 'booking' && data.bookingId) {
-        router.push(`/(tabs)/booking`);
+        router.push(`/profile/service-status`);
       } else if (data.type === 'appointment' && data.appointmentId) {
-        router.push(`/(adminPages)/add-appointment`);
+        router.push(`/profile/service-status`);
       } else if (data.type === 'vehicle' && data.vehicleBookingId) {
-        router.push(`/(tabs)/vehicles`);
+        router.push(`/profile/VehicleBookings`);
       } else if (data.type === 'order' && data.orderId) {
-        router.push(`/(tabs)/products`);
+        router.push(`/profile/orders`);
       }
     });
 
