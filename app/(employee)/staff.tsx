@@ -292,6 +292,40 @@ export default function EmployeeDashboard() {
     }
   };
 
+  const employeeChartData = [
+    {
+      label: "Assigned",
+      value: myTasks.filter((task: any) => {
+        const status = (task.status || task.serviceStatus || "").toLowerCase();
+        return ["pending", "assigned", "approved"].includes(status);
+      }).length,
+      colorClass: "bg-primary",
+    },
+    {
+      label: "In Progress",
+      value: myTasks.filter((task: any) => {
+        const status = (task.status || task.serviceStatus || "").toLowerCase();
+        return [
+          "processing",
+          "waiting for spare",
+          "service going on",
+          "call verified",
+        ].includes(status);
+      }).length,
+      colorClass: "bg-warning",
+    },
+    {
+      label: "Completed",
+      value: myTasks.filter((task: any) => {
+        const status = (task.status || task.serviceStatus || "").toLowerCase();
+        return ["service completed", "completed", "bill completed"].includes(
+          status,
+        );
+      }).length,
+      colorClass: "bg-success",
+    },
+  ];
+
   return (
     <SafeAreaView className="flex-1 bg-background">
       <ScrollView
@@ -372,6 +406,209 @@ export default function EmployeeDashboard() {
                   name="checkmark-circle-outline"
                   size={16}
                   color="#10B981"
+                />
+              </View>
+            </View>
+          </View>
+        </View>
+
+        {/* Employee Task Chart */}
+        <View className="bg-slate-950/95 border border-text-muted rounded-[32px] p-6 shadow-2xl mb-8">
+          <View className="flex-row items-center justify-between mb-6">
+            <View>
+              <Text className="text-white text-sm font-black uppercase tracking-[3px]">
+                Workload Analytics
+              </Text>
+              <Text className="text-text-secondary text-[10px] mt-1">
+                Task distribution overview
+              </Text>
+            </View>
+            <View className="bg-primary/10 px-3 py-1 rounded-full">
+              <Text className="text-[10px] uppercase tracking-[2px] text-primary font-black">
+                {myTasks.length} Tasks
+              </Text>
+            </View>
+          </View>
+
+          {/* Modern Gauge Chart */}
+          <View className="flex-row justify-between items-center gap-2">
+            {employeeChartData.map((item) => {
+              const total = employeeChartData.reduce(
+                (sum, d) => sum + d.value,
+                0,
+              );
+              const percentage = total > 0 ? (item.value / total) * 100 : 0;
+              const strokeWidth = 6;
+              const radius = 32;
+              const circumference = 2 * Math.PI * radius;
+              const strokeDasharray = circumference;
+              const strokeDashoffset =
+                circumference - (percentage / 100) * circumference;
+
+              return (
+                <View key={item.label} className="flex-1 items-center">
+                  {/* Gauge Container */}
+                  <View className="relative w-20 h-20 items-center justify-center mb-3">
+                    {/* Background Circle */}
+                    <View className="absolute inset-0 items-center justify-center">
+                      <View className="w-16 h-16 rounded-full border-4 border-slate-700/30" />
+                    </View>
+
+                    {/* Progress Circle */}
+                    <View className="absolute inset-0 items-center justify-center">
+                      <View
+                        className="w-16 h-16 rounded-full border-4"
+                        style={{
+                          borderColor:
+                            item.label === "Assigned"
+                              ? "#0EA5E9"
+                              : item.label === "In Progress"
+                                ? "#F59E0B"
+                                : "#10B981",
+                          borderTopColor: "transparent",
+                          borderRightColor: "transparent",
+                          transform: [{ rotate: "-135deg" }],
+                        }}
+                      />
+                      <View
+                        className="absolute w-16 h-16 rounded-full border-4"
+                        style={{
+                          borderColor:
+                            item.label === "Assigned"
+                              ? "#0EA5E9"
+                              : item.label === "In Progress"
+                                ? "#F59E0B"
+                                : "#10B981",
+                          borderBottomColor: "transparent",
+                          borderLeftColor: "transparent",
+                          transform: [
+                            { rotate: `${-135 + percentage * 1.8}deg` },
+                          ],
+                        }}
+                      />
+                    </View>
+
+                    {/* Center Icon */}
+                    <View className="absolute inset-0 items-center justify-center">
+                      <View
+                        className={`w-10 h-10 rounded-full items-center justify-center ${
+                          item.label === "Assigned"
+                            ? "bg-primary/20"
+                            : item.label === "In Progress"
+                              ? "bg-warning/20"
+                              : "bg-success/20"
+                        }`}
+                      >
+                        <Ionicons
+                          name={
+                            item.label === "Assigned"
+                              ? "clipboard-outline"
+                              : item.label === "In Progress"
+                                ? "construct-outline"
+                                : "checkmark-circle-outline"
+                          }
+                          size={16}
+                          color={
+                            item.label === "Assigned"
+                              ? "#0EA5E9"
+                              : item.label === "In Progress"
+                                ? "#F59E0B"
+                                : "#10B981"
+                          }
+                        />
+                      </View>
+                    </View>
+                  </View>
+
+                  {/* Stats */}
+                  <View className="items-center">
+                    <Text className="text-lg font-black text-text-primary">
+                      {item.value}
+                    </Text>
+                    <Text className="text-[10px] font-black uppercase tracking-[2px] text-text-secondary mb-1">
+                      {item.label}
+                    </Text>
+                    <View
+                      className={`px-2 py-0.5 rounded-full ${
+                        item.label === "Assigned"
+                          ? "bg-primary/10"
+                          : item.label === "In Progress"
+                            ? "bg-warning/10"
+                            : "bg-success/10"
+                      }`}
+                    >
+                      <Text
+                        className={`text-[8px] font-black uppercase ${
+                          item.label === "Assigned"
+                            ? "text-primary"
+                            : item.label === "In Progress"
+                              ? "text-warning"
+                              : "text-success"
+                        }`}
+                      >
+                        {Math.round(percentage)}%
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+
+          {/* Progress Summary */}
+          <View className="mt-6 p-4 bg-slate-900/30 rounded-2xl border border-slate-700/50">
+            <View className="flex-row items-center justify-between">
+              <View className="flex-row items-center gap-2">
+                <Ionicons name="analytics-outline" size={16} color="#0EA5E9" />
+                <Text className="text-sm font-black text-text-primary uppercase tracking-[1px]">
+                  Today's Progress
+                </Text>
+              </View>
+              <View className="flex-row items-center gap-2">
+                <Text className="text-lg font-black text-text-primary">
+                  {myTasks.length}
+                </Text>
+                <Text className="text-xs text-text-secondary font-medium">
+                  Total Tasks
+                </Text>
+              </View>
+            </View>
+
+            {/* Mini Progress Bar */}
+            <View className="mt-3">
+              <View className="flex-row justify-between items-center mb-2">
+                <Text className="text-xs text-text-secondary font-medium">
+                  Completion Rate
+                </Text>
+                <Text className="text-xs font-black text-text-primary">
+                  {myTasks.length > 0
+                    ? Math.round(
+                        ((employeeChartData.find(
+                          (item) => item.label === "Completed",
+                        )?.value || 0) /
+                          myTasks.length) *
+                          100,
+                      )
+                    : 0}
+                  %
+                </Text>
+              </View>
+              <View className="h-2 bg-slate-800/50 rounded-full overflow-hidden">
+                <View
+                  className="h-full bg-gradient-to-r from-primary via-warning to-success rounded-full"
+                  style={{
+                    width: `${
+                      myTasks.length > 0
+                        ? Math.round(
+                            ((employeeChartData.find(
+                              (item) => item.label === "Completed",
+                            )?.value || 0) /
+                              myTasks.length) *
+                              100,
+                          )
+                        : 0
+                    }%`,
+                  }}
                 />
               </View>
             </View>
