@@ -95,7 +95,11 @@ const StatCard = ({ title, value, gradient, isSmall = false }: any) => (
         </Text>
 
         <View className="flex-row items-center gap-1">
-          <Ionicons name="trending-up" size={14} color="rgba(255,255,255,0.8)" />
+          <Ionicons
+            name="trending-up"
+            size={14}
+            color="rgba(255,255,255,0.8)"
+          />
         </View>
       </View>
 
@@ -565,20 +569,20 @@ export default function AdminDashboard() {
 
                       {/* Customer Info */}
                       <View>
-                        <Text className="text-white font-bold text-[12px] tracking-wide">
+                        <Text className="text-white font-bold text-[13px] tracking-wide">
                           {b.name || "Customer"}
                         </Text>
 
-                        <Text className="text-gray-500 text-[9px] uppercase font-black tracking-[1.5px] mt-0.5">
+                        <Text className="text-gray-500 text-[10px] uppercase font-black tracking-[1.5px] mt-0.5">
                           {b.brand} · {b.model}
                         </Text>
                       </View>
                     </View>
 
-                    {/* Price Badge */}
+                    {/* Booking ID Badge */}
                     <View className="bg-emerald-500/10 border border-emerald-500/30 px-3 py-1.5 rounded-full">
                       <Text className="text-emerald-400 font-black text-[10px] uppercase tracking-wider">
-                        ₹{b.totalCost || "---"}
+                        ID: {b.bookingId || b.id || i + 1}
                       </Text>
                     </View>
                   </TouchableOpacity>
