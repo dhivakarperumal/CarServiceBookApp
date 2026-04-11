@@ -1,19 +1,17 @@
-import React, { useEffect, useState, useMemo } from "react";
+import { Ionicons } from "@expo/vector-icons";
+import { Stack, useRouter } from "expo-router";
+import React, { useEffect, useMemo, useState } from "react";
 import {
-  View,
-  Text,
-  SafeAreaView,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
   ActivityIndicator,
   Alert,
-  FlatList,
-  Modal
+  SafeAreaView,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from "react-native";
 import { apiService } from "../../services/api";
-import { useRouter, Stack } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
 import { COLORS } from "../../theme/colors";
 
 const InventoryManagement = () => {
@@ -144,16 +142,16 @@ const InventoryManagement = () => {
 
         {/* SEARCH SECTION */}
         <View className="bg-slate-900/50 border border-slate-800 rounded-[32px] p-6 shadow-2xl mb-8">
-           <View className="flex-row items-center bg-slate-950 border border-slate-800 rounded-2xl px-4 py-1">
-              <Ionicons name="search" size={16} color="#475569" />
-              <TextInput 
-                className="flex-1 h-12 px-3 text-white font-bold text-xs"
-                placeholder="Search by part name or supplier..."
-                placeholderTextColor="#334155"
-                value={search}
-                onChangeText={setSearch}
-              />
-           </View>
+          <View className="flex-row items-center bg-slate-950 border border-slate-800 rounded-2xl px-4 py-1">
+            <Ionicons name="search" size={16} color="#475569" />
+            <TextInput
+              className="flex-1 h-12 px-3 text-white font-bold text-xs"
+              placeholder="Search by part name or supplier..."
+              placeholderTextColor="#334155"
+              value={search}
+              onChangeText={setSearch}
+            />
+          </View>
         </View>
 
         {/* INVENTORY LIST */}

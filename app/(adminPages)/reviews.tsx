@@ -153,9 +153,9 @@ export default function ReviewsSettings() {
      
 
       <ScrollView className="flex-1 px-6 pt-6" showsVerticalScrollIndicator={false}>
-        {/* SEARCH + ADD */}
-        <View className="flex-row gap-4 mb-8">
-          <View className="flex-1 bg-slate-900 rounded-2xl border border-white/10 h-14 flex-row items-center px-4">
+        {/* SEARCH */}
+        <View className="mb-8">
+          <View className="bg-slate-900 rounded-2xl border border-white/10 h-14 flex-row items-center px-4">
             <Ionicons name="search-outline" size={18} color="#64748b" />
             <TextInput
               placeholder="Search feedback..."
@@ -165,19 +165,13 @@ export default function ReviewsSettings() {
               className="flex-1 ml-3 text-white font-bold"
             />
           </View>
-          <TouchableOpacity 
-            onPress={() => setShowModal(true)}
-            className="bg-white px-5 rounded-2xl items-center justify-center shadow-lg"
-          >
-            <Ionicons name="add" size={24} color="black" />
-          </TouchableOpacity>
         </View>
 
         {/* LIST */}
         {loading ? (
           <ActivityIndicator size="large" color="#0ea5e9" className="mt-20" />
         ) : (
-          <View className="gap-4 pb-20">
+          <View className="gap-4 pb-32">
             {filtered.map((r) => (
               <View key={r.id} className="bg-slate-900/50 p-5 rounded-[32px] border border-white/5">
                 <View className="flex-row gap-4">
@@ -209,19 +203,19 @@ export default function ReviewsSettings() {
                       <View className="flex-row gap-2">
                         <TouchableOpacity 
                            onPress={() => toggleStatus(r.id, r.status)}
-                           className={`w-8 h-8 rounded-full items-center justify-center ${r.status ? 'bg-emerald-500/10' : 'bg-slate-800'}`}
+                           className={`w-9 h-9 rounded-2xl items-center justify-center border ${r.status ? 'bg-emerald-500/20 border-emerald-500/30' : 'bg-slate-800 border-slate-700'}`}
                         >
                           <Ionicons name="checkmark-circle" size={18} color={r.status ? "#10b981" : "#475569"} />
                         </TouchableOpacity>
                         <TouchableOpacity 
                            onPress={() => handleEdit(r)}
-                           className="w-8 h-8 rounded-full bg-sky-500/10 items-center justify-center"
+                           className="w-9 h-9 rounded-2xl bg-slate-800 border border-[#0ea5e9] items-center justify-center"
                         >
                           <Ionicons name="create-outline" size={18} color="#0ea5e9" />
                         </TouchableOpacity>
                         <TouchableOpacity 
                            onPress={() => handleDelete(r.id)}
-                           className="w-8 h-8 rounded-full bg-rose-500/10 items-center justify-center"
+                           className="w-9 h-9 rounded-2xl bg-rose-500/20 border border-rose-500/30 items-center justify-center"
                         >
                           <Ionicons name="trash-outline" size={18} color="#f43f5e" />
                         </TouchableOpacity>
@@ -335,6 +329,16 @@ export default function ReviewsSettings() {
            </View>
         </View>
       </Modal>
+
+      {/* FLOATING ADD BUTTON */}
+      <TouchableOpacity
+        onPress={() => setShowModal(true)}
+        className="absolute bottom-10 right-8 w-16 h-16 bg-white rounded-full items-center justify-center shadow-2xl z-50"
+        style={{ elevation: 15 }}
+        activeOpacity={0.8}
+      >
+        <Ionicons name="add" size={38} color="black" />
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
