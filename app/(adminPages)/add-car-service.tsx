@@ -134,93 +134,93 @@ export default function AddCarService() {
     <SafeAreaView className="flex-1 bg-slate-950">
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1">
         <ScrollView className="flex-1 p-6" contentContainerStyle={{ paddingBottom: 100 }}>
-      
+
 
           {/* FORM */}
           <View className="gap-6 bg-slate-900 border border-white/5 p-8 rounded-[40px]">
             {/* Image Section */}
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={pickImage}
               className="w-full h-48 bg-slate-950 rounded-3xl border border-dashed border-white/10 items-center justify-center overflow-hidden"
             >
-               {form.image ? (
-                 <Image source={{ uri: form.image }} className="w-full h-full" />
-               ) : (
-                 <View className="items-center">
-                    <Ionicons name="image-outline" size={32} color="#475569" />
-                    <Text className="text-slate-500 text-[10px] font-black uppercase tracking-widest mt-2">Upload Visual</Text>
-                 </View>
-               )}
+              {form.image ? (
+                <Image source={{ uri: form.image }} className="w-full h-full" />
+              ) : (
+                <View className="items-center">
+                  <Ionicons name="image-outline" size={32} color="#475569" />
+                  <Text className="text-slate-500 text-[10px] font-black uppercase tracking-widest mt-2">Upload Visual</Text>
+                </View>
+              )}
             </TouchableOpacity>
-            
+
             <View className="gap-2">
-               <Text className="text-slate-500 text-[8px] font-black uppercase tracking-[3px] ml-2">Service Identity</Text>
-               <TextInput 
-                  placeholder="e.g. Engine Detail Wash"
-                  placeholderTextColor="#475569"
-                  value={form.name}
-                  onChangeText={(v) => setForm({...form, name: v})}
-                  className="w-full bg-slate-950 rounded-2xl border border-white/5 px-6 py-4 text-white font-black"
-               />
+              <Text className="text-slate-500 text-[8px] font-black uppercase tracking-[3px] ml-2">Service Identity</Text>
+              <TextInput
+                placeholder="e.g. Engine Detail Wash"
+                placeholderTextColor="#475569"
+                value={form.name}
+                onChangeText={(v) => setForm({ ...form, name: v })}
+                className="w-full bg-slate-950 rounded-2xl border border-white/5 px-6 py-4 text-white font-black"
+              />
             </View>
 
             <View className="flex-row gap-4">
               <View className="flex-1 gap-2">
-                 <Text className="text-slate-500 text-[8px] font-black uppercase tracking-[3px] ml-2">Rate (₹)</Text>
-                 <TextInput 
-                    placeholder="999"
-                    placeholderTextColor="#475569"
-                    keyboardType="numeric"
-                    value={form.price}
-                    onChangeText={(v) => setForm({...form, price: v})}
-                    className="w-full bg-slate-950 rounded-2xl border border-white/5 px-6 py-4 text-white font-black"
-                 />
+                <Text className="text-slate-500 text-[8px] font-black uppercase tracking-[3px] ml-2">Rate (₹)</Text>
+                <TextInput
+                  placeholder="999"
+                  placeholderTextColor="#475569"
+                  keyboardType="numeric"
+                  value={form.price}
+                  onChangeText={(v) => setForm({ ...form, price: v })}
+                  className="w-full bg-slate-950 rounded-2xl border border-white/5 px-6 py-4 text-white font-black"
+                />
               </View>
             </View>
 
             <View className="gap-2">
-               <Text className="text-slate-500 text-[8px] font-black uppercase tracking-[3px] ml-2">Icon Theme</Text>
-               <View className="bg-slate-950 border border-white/10 rounded-2xl px-3 py-2">
-  <Picker
-    selectedValue={form.icon}
-    onValueChange={(value) => setForm({ ...form, icon: value })}
-    dropdownIconColor="#fff"
-    style={{ color: 'white' }}
-  >
-    {ICON_OPTIONS.map((opt) => (
-      <Picker.Item
-        key={opt.name}
-        label={opt.name}
-        value={opt.name}
-      />
-    ))}
-  </Picker>
-</View>
+              <Text className="text-slate-500 text-[8px] font-black uppercase tracking-[3px] ml-2">Icon Theme</Text>
+              <View className="bg-slate-950 border border-white/10 rounded-2xl px-3 py-2">
+                <Picker
+                  selectedValue={form.icon}
+                  onValueChange={(value) => setForm({ ...form, icon: value })}
+                  dropdownIconColor="#fff"
+                  style={{ color: 'white' }}
+                >
+                  {ICON_OPTIONS.map((opt) => (
+                    <Picker.Item
+                      key={opt.name}
+                      label={opt.name}
+                      value={opt.name}
+                    />
+                  ))}
+                </Picker>
+              </View>
             </View>
 
             <View className="gap-2">
-               <Text className="text-slate-500 text-[8px] font-black uppercase tracking-[3px] ml-2">Elevator Pitch</Text>
-               <TextInput 
-                  placeholder="Quick summary..."
-                  placeholderTextColor="#475569"
-                  value={form.description}
-                  onChangeText={(v) => setForm({...form, description: v})}
-                  className="w-full bg-slate-950 rounded-2xl border border-white/5 px-6 py-4 text-white font-bold text-xs"
-               />
+              <Text className="text-slate-500 text-[8px] font-black uppercase tracking-[3px] ml-2">Elevator Pitch</Text>
+              <TextInput
+                placeholder="Quick summary..."
+                placeholderTextColor="#475569"
+                value={form.description}
+                onChangeText={(v) => setForm({ ...form, description: v })}
+                className="w-full bg-slate-950 rounded-2xl border border-white/5 px-6 py-4 text-white font-bold text-xs"
+              />
             </View>
 
             <View className="gap-2">
-               <Text className="text-slate-500 text-[8px] font-black uppercase tracking-[3px] ml-2">Comprehensive Details</Text>
-               <TextInput 
-                  placeholder="Detailed breakdown..."
-                  placeholderTextColor="#475569"
-                  multiline
-                  numberOfLines={4}
-                  value={form.bigDescription}
-                  onChangeText={(v) => setForm({...form, bigDescription: v})}
-                  className="w-full bg-slate-950 rounded-2xl border border-white/5 px-6 py-4 text-white font-bold text-xs"
-                  style={{ textAlignVertical: 'top' }}
-               />
+              <Text className="text-slate-500 text-[8px] font-black uppercase tracking-[3px] ml-2">Comprehensive Details</Text>
+              <TextInput
+                placeholder="Detailed breakdown..."
+                placeholderTextColor="#475569"
+                multiline
+                numberOfLines={4}
+                value={form.bigDescription}
+                onChangeText={(v) => setForm({ ...form, bigDescription: v })}
+                className="w-full bg-slate-950 rounded-2xl border border-white/5 px-6 py-4 text-white font-bold text-xs"
+                style={{ textAlignVertical: 'top' }}
+              />
             </View>
 
             {/* Arrays */}
@@ -229,69 +229,70 @@ export default function AddCarService() {
             {/* Brands */}
             <View className="gap-4">
               <View className="flex-row justify-between items-center px-2">
-                 <Text className="text-slate-500 text-[8px] font-black uppercase tracking-[3px]">Car Brands</Text>
-                 <TouchableOpacity onPress={() => addField('supportedBrands')} className="p-2 bg-white rounded-xl">
-                    <Ionicons name="add" size={16} color="black" />
-                 </TouchableOpacity>
+                <Text className="text-slate-500 text-[8px] font-black uppercase tracking-[3px]">Car Brands</Text>
+                <TouchableOpacity onPress={() => addField('supportedBrands')} className="p-2 bg-white rounded-xl">
+                  <Ionicons name="add" size={16} color="black" />
+                </TouchableOpacity>
               </View>
               {form.supportedBrands.map((b, i) => (
-                 <View key={i} className="flex-row items-center gap-3">
-                    <TextInput 
-                       placeholder="e.g. BMW"
-                       placeholderTextColor="#475569"
-                       value={b}
-                       onChangeText={(v) => handleArrayChange(i, 'supportedBrands', v)}
-                       className="flex-1 bg-slate-950 rounded-2xl border border-white/5 px-6 py-4 text-white font-bold text-xs"
-                    />
-                    {form.supportedBrands.length > 1 && (
-                       <TouchableOpacity onPress={() => removeField('supportedBrands', i)} className="w-12 h-12 bg-rose-500/10 rounded-2xl items-center justify-center border border-rose-500/10">
-                          <Ionicons name="close" size={18} color="#ef4444" />
-                       </TouchableOpacity>
-                    )}
-                 </View>
+                <View key={i} className="flex-row items-center gap-3">
+                  <TextInput
+                    placeholder="e.g. BMW"
+                    placeholderTextColor="#475569"
+                    value={b}
+                    onChangeText={(v) => handleArrayChange(i, 'supportedBrands', v)}
+                    className="flex-1 bg-slate-950 rounded-2xl border border-white/5 px-6 py-4 text-white font-bold text-xs"
+                  />
+                  {form.supportedBrands.length > 1 && (
+                    <TouchableOpacity onPress={() => removeField('supportedBrands', i)} className="w-12 h-12 bg-rose-500/10 rounded-2xl items-center justify-center border border-rose-500/10">
+                      <Ionicons name="close" size={18} color="#ef4444" />
+                    </TouchableOpacity>
+                  )}
+                </View>
               ))}
             </View>
 
             {/* Spare Parts */}
             <View className="gap-4">
               <View className="flex-row justify-between items-center px-2">
-                 <Text className="text-slate-500 text-[8px] font-black uppercase tracking-[3px]">Included Spares</Text>
-                 <TouchableOpacity onPress={() => addField('sparePartsIncluded')} className="p-2 bg-white rounded-xl">
-                    <Ionicons name="add" size={16} color="black" />
-                 </TouchableOpacity>
+                <Text className="text-slate-500 text-[8px] font-black uppercase tracking-[3px]">Included Spares</Text>
+                <TouchableOpacity onPress={() => addField('sparePartsIncluded')} className="p-2 bg-white rounded-xl">
+                  <Ionicons name="add" size={16} color="black" />
+                </TouchableOpacity>
               </View>
               {form.sparePartsIncluded.map((p, i) => (
-                 <View key={i} className="flex-row items-center gap-3">
-                    <TextInput 
-                       placeholder="e.g. Air Filter"
-                       placeholderTextColor="#475569"
-                       value={p}
-                       onChangeText={(v) => handleArrayChange(i, 'sparePartsIncluded', v)}
-                       className="flex-1 bg-slate-950 rounded-2xl border border-white/5 px-6 py-4 text-white font-bold text-xs"
-                    />
-                    {form.sparePartsIncluded.length > 1 && (
-                       <TouchableOpacity onPress={() => removeField('sparePartsIncluded', i)} className="w-12 h-12 bg-rose-500/10 rounded-2xl items-center justify-center border border-rose-500/10">
-                          <Ionicons name="close" size={18} color="#ef4444" />
-                       </TouchableOpacity>
-                    )}
-                 </View>
+                <View key={i} className="flex-row items-center gap-3">
+                  <TextInput
+                    placeholder="e.g. Air Filter"
+                    placeholderTextColor="#475569"
+                    value={p}
+                    onChangeText={(v) => handleArrayChange(i, 'sparePartsIncluded', v)}
+                    className="flex-1 bg-slate-950 rounded-2xl border border-white/5 px-6 py-4 text-white font-bold text-xs"
+                  />
+                  {form.sparePartsIncluded.length > 1 && (
+                    <TouchableOpacity onPress={() => removeField('sparePartsIncluded', i)} className="w-12 h-12 bg-rose-500/10 rounded-2xl items-center justify-center border border-rose-500/10">
+                      <Ionicons name="close" size={18} color="#ef4444" />
+                    </TouchableOpacity>
+                  )}
+                </View>
               ))}
             </View>
 
-            <TouchableOpacity 
-               disabled={loading}
-               onPress={handleSubmit}
-               className={`bg-white rounded-3xl py-6 mt-8 items-center justify-center shadow-2xl shadow-sky-500/20 ${loading ? 'opacity-50' : ''}`}
-               activeOpacity={0.8}
+            <TouchableOpacity
+              disabled={loading}
+              onPress={handleSubmit}
+              className={`bg-white rounded-3xl py-6 mt-8 items-center justify-center shadow-2xl shadow-sky-500/20 ${loading ? 'opacity-50' : ''}`}
+              activeOpacity={0.8}
             >
-               {loading ? (
-                  <ActivityIndicator color="black" />
-               ) : (
-                  <Text className="text-black font-black text-sm uppercase tracking-widest">
-                     {isEditing ? "Apply Adjustments" : "Establish Service"}
-                  </Text>
-               )}
+              {loading ? (
+                <ActivityIndicator color="black" />
+              ) : (
+                <Text className="text-black font-black text-sm uppercase tracking-widest">
+                  {isEditing ? "Apply Adjustments" : "Establish Service"}
+                </Text>
+              )}
             </TouchableOpacity>
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
