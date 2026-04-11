@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -11,9 +11,10 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import { apiService } from "../../services/api";
+import { COLORS } from "../../theme/colors";
 
 export default function AddPricing() {
   const router = useRouter();
@@ -63,7 +64,7 @@ export default function AddPricing() {
       return;
     }
 
-    const cleanFeatures = features.map(f => f.trim()).filter(f => f !== "");
+    const cleanFeatures = features.map((f) => f.trim()).filter((f) => f !== "");
     if (cleanFeatures.length === 0) {
       Alert.alert("Validation", "Add at least one feature");
       return;
@@ -74,7 +75,7 @@ export default function AddPricing() {
       const payload = {
         title: title.trim(),
         price: Number(price),
-        features: cleanFeatures
+        features: cleanFeatures,
       };
 
       if (isEditing) {
@@ -93,96 +94,117 @@ export default function AddPricing() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-slate-950">
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    <SafeAreaView className="flex-1 bg-background">
+      <Stack.Screen
+        options={{
+          title: isEditing ? "Update Package" : "Add Package",
+          headerShown: true,
+          headerStyle: { backgroundColor: COLORS.background },
+          headerTintColor: COLORS.white,
+          headerTitleStyle: { fontWeight: "900", fontSize: 16 },
+        }}
+      />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
       >
-        <ScrollView className="flex-1 p-6" contentContainerStyle={{ paddingBottom: 100 }}>
-          {/* HEADER */}
-          <View className="flex-row items-center justify-between mt-12 mb-10">
-             <TouchableOpacity 
-               onPress={() => router.back()}
-               className="w-12 h-12 bg-white/5 rounded-2xl items-center justify-center border border-white/5"
-             >
-                <Ionicons name="arrow-back" size={24} color="white" />
-             </TouchableOpacity>
-             <Text className="text-white font-black text-2xl uppercase tracking-tighter">
-               {isEditing ? "Update Package" : "Add Package"}
-             </Text>
-             <View className="w-12" />
-          </View>
-
-          {/* FORM */}
-          <View className="gap-6 bg-slate-900 border border-white/5 p-8 rounded-[40px]">
-            <View className="gap-2">
-               <Text className="text-slate-500 text-[8px] font-black uppercase tracking-[3px] ml-2">Package Title</Text>
-               <TextInput 
-                  placeholder="e.g. Standard Wash"
-                  placeholderTextColor="#475569"
-                  value={title}
-                  onChangeText={setTitle}
-                  className="w-full bg-slate-950 rounded-2xl border border-white/5 px-6 py-4 text-white font-black"
-               />
+        <ScrollView
+          className="flex-1"
+          contentContainerStyle={{ paddingBottom: 100 }}
+        >
+          <View className="p-6">
+            <View className="mb-8">
+              <Text className="text-text-secondary text-[9px] font-black uppercase tracking-widest">
+                Sales Management
+              </Text>
+              <Text className="text-white text-lg font-black tracking-tighter uppercase mt-1">
+                {isEditing ? "Update Package" : "Add Package"}
+              </Text>
             </View>
 
-            <View className="gap-2">
-               <Text className="text-slate-500 text-[8px] font-black uppercase tracking-[3px] ml-2">Price Value (₹)</Text>
-               <TextInput 
-                  placeholder="2999"
-                  placeholderTextColor="#475569"
-                  keyboardType="numeric"
-                  value={price}
-                  onChangeText={setPrice}
-                  className="w-full bg-slate-950 rounded-2xl border border-white/5 px-6 py-4 text-white font-black"
-               />
-            </View>
-
-            <View className="my-2 h-px bg-white/5" />
-
-            <View className="flex-row justify-between items-center px-2">
-               <Text className="text-slate-500 text-[8px] font-black uppercase tracking-[3px]">Features List</Text>
-               <TouchableOpacity 
-                  onPress={addFeatureField}
-                  className="p-2 bg-white rounded-xl"
-               >
-                  <Ionicons name="add" size={16} color="black" />
-               </TouchableOpacity>
-            </View>
-
-            {features.map((f, i) => (
-               <View key={i} className="flex-row items-center gap-3">
-                  <TextInput 
-                     placeholder={`Feature ${i + 1}`}
-                     placeholderTextColor="#475569"
-                     value={f}
-                     onChangeText={(v) => handleFeatureChange(i, v)}
-                     className="flex-1 bg-slate-950 rounded-2xl border border-white/5 px-6 py-4 text-white font-bold text-xs"
-                  />
-                  {features.length > 1 && (
-                     <TouchableOpacity 
-                        onPress={() => removeFeatureField(i)}
-                        className="w-12 h-12 bg-rose-500/10 rounded-2xl items-center justify-center border border-rose-500/10"
-                     >
-                        <Ionicons name="trash-outline" size={18} color="#ef4444" />
-                     </TouchableOpacity>
-                  )}
-               </View>
-            ))}
-
-            <TouchableOpacity 
-               disabled={loading}
-               onPress={handleSubmit}
-               className="bg-white rounded-3xl py-6 mt-8 items-center justify-center shadow-2xl shadow-sky-500/10"
-            >
-               {loading ? (
-                  <ActivityIndicator color="black" />
-               ) : (
-                  <Text className="text-black font-black text-xs uppercase tracking-widest">
-                     {isEditing ? "Commit Updates" : "Register Package"}
+            {/* FORM */}
+            <View className="bg-card border border-slate-700 p-8 rounded-3xl">
+              <View className="gap-6">
+                <View className="gap-2">
+                  <Text className="text-text-secondary text-[8px] font-black uppercase tracking-widest ml-2">
+                    Package Title
                   </Text>
-               )}
-            </TouchableOpacity>
+                  <TextInput
+                    placeholder="e.g. Standard Wash"
+                    placeholderTextColor={COLORS.textSecondary}
+                    value={title}
+                    onChangeText={setTitle}
+                    className="w-full bg-card-light rounded-3xl border border-slate-700 px-6 py-4 text-white font-black"
+                  />
+                </View>
+
+                <View className="gap-2">
+                  <Text className="text-text-secondary text-[8px] font-black uppercase tracking-widest ml-2">
+                    Price Value (₹)
+                  </Text>
+                  <TextInput
+                    placeholder="2999"
+                    placeholderTextColor={COLORS.textSecondary}
+                    keyboardType="numeric"
+                    value={price}
+                    onChangeText={setPrice}
+                    className="w-full bg-card-light rounded-3xl border border-slate-700 px-6 py-4 text-white font-black"
+                  />
+                </View>
+
+                <View className="my-2 h-px bg-slate-700" />
+
+                <View className="flex-row justify-between items-center px-2">
+                  <Text className="text-text-secondary text-[8px] font-black uppercase tracking-widest">
+                    Features List
+                  </Text>
+                  <TouchableOpacity
+                    onPress={addFeatureField}
+                    className="p-2 bg-primary rounded-xl"
+                  >
+                    <Ionicons name="add" size={16} color="black" />
+                  </TouchableOpacity>
+                </View>
+
+                {features.map((f, i) => (
+                  <View key={i} className="flex-row items-center gap-3">
+                    <TextInput
+                      placeholder={`Feature ${i + 1}`}
+                      placeholderTextColor={COLORS.textSecondary}
+                      value={f}
+                      onChangeText={(v) => handleFeatureChange(i, v)}
+                      className="flex-1 bg-card-light rounded-3xl border border-slate-700 px-6 py-4 text-white font-bold text-sm"
+                    />
+                    {features.length > 1 && (
+                      <TouchableOpacity
+                        onPress={() => removeFeatureField(i)}
+                        className="w-12 h-12 bg-card-light rounded-2xl items-center justify-center border border-slate-700"
+                      >
+                        <Ionicons
+                          name="trash-outline"
+                          size={18}
+                          color={COLORS.primary}
+                        />
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                ))}
+
+                <TouchableOpacity
+                  disabled={loading}
+                  onPress={handleSubmit}
+                  className="bg-primary rounded-3xl py-6 mt-8 items-center justify-center shadow-2xl shadow-primary/5"
+                >
+                  {loading ? (
+                    <ActivityIndicator color="black" />
+                  ) : (
+                    <Text className="text-black font-black text-[10px] uppercase tracking-widest">
+                      {isEditing ? "Commit Updates" : "Register Package"}
+                    </Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
