@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
-import { useRouter } from "expo-router";
-import React, { useEffect, useMemo, useState } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -187,22 +187,21 @@ export default function ServiceCenter() {
         api.get("/staff"),
       ]);
 
-      const servicesWithDetails = [];
       const servicesRaw = servRes.data || [];
-
-      // Fetch details for each service to get parts and issues
-      for (const service of servicesRaw) {
-        try {
-          const detailRes = await api.get(`/all-services/${service.id}`);
-          servicesWithDetails.push({
-            ...service,
-            parts: detailRes.data?.parts || [],
-            issues: detailRes.data?.issues || [],
-          });
-        } catch (err) {
-          servicesWithDetails.push({ ...service, parts: [], issues: [] });
-        }
-      }
+      const servicesWithDetails = await Promise.all(
+        servicesRaw.map(async (service: any) => {
+          try {
+            const detailRes = await api.get(`/all-services/${service.id}`);
+            return {
+              ...service,
+              parts: detailRes.data?.parts || [],
+              issues: detailRes.data?.issues || [],
+            };
+          } catch (err) {
+            return { ...service, parts: [], issues: [] };
+          }
+        }),
+      );
 
       setServices(servicesWithDetails);
       setEmployees(empRes.data || []);
@@ -214,6 +213,12 @@ export default function ServiceCenter() {
     }
   };
 
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, []),
+  );
+
   const onRefresh = async () => {
     setRefreshing(true);
     try {
@@ -222,21 +227,21 @@ export default function ServiceCenter() {
         api.get("/staff"),
       ]);
 
-      const servicesWithDetails = [];
       const servicesRaw = servRes.data || [];
-
-      for (const service of servicesRaw) {
-        try {
-          const detailRes = await api.get(`/all-services/${service.id}`);
-          servicesWithDetails.push({
-            ...service,
-            parts: detailRes.data?.parts || [],
-            issues: detailRes.data?.issues || [],
-          });
-        } catch (err) {
-          servicesWithDetails.push({ ...service, parts: [], issues: [] });
-        }
-      }
+      const servicesWithDetails = await Promise.all(
+        servicesRaw.map(async (service: any) => {
+          try {
+            const detailRes = await api.get(`/all-services/${service.id}`);
+            return {
+              ...service,
+              parts: detailRes.data?.parts || [],
+              issues: detailRes.data?.issues || [],
+            };
+          } catch (err) {
+            return { ...service, parts: [], issues: [] };
+          }
+        }),
+      );
 
       setServices(servicesWithDetails);
       setEmployees(empRes.data || []);
