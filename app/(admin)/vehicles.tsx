@@ -117,9 +117,9 @@ export default function AdminVehicles() {
         };
       case "sold":
         return {
-          bg: "bg-sky-500/10",
-          text: "text-sky-500",
-          border: "border-sky-500/20",
+          bg: "bg-red-500/10",
+          text: "text-red-500",
+          border: "border-red-500/20",
         };
       default:
         return {
@@ -523,7 +523,7 @@ export default function AdminVehicles() {
         className="absolute bottom-8 right-8 w-14 h-14 bg-primary rounded-full items-center justify-center shadow-2xl"
         style={{ elevation: 10 }}
       >
-        <Ionicons name="add" size={32} color={COLORS.background} />
+        <Ionicons name="add" size={32} color={COLORS.textPrimary} />
       </TouchableOpacity>
     </SafeAreaView>
   );
