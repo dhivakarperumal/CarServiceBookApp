@@ -563,10 +563,10 @@ export default function ServiceCenter() {
                 </View>
               </View>
 
-              {/* FINISHED */}
+              {/* COMPLETED */}
               <View className="flex-1 rounded-[28px] bg-slate-950/95 border border-text-muted p-4">
                 <Text className="text-[10px] uppercase tracking-[0.3em] text-text-muted font-semibold mb-4">
-                  Finished
+                  Completed
                 </Text>
 
                 <View className="flex-row items-center justify-between">

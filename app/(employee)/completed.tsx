@@ -1,18 +1,18 @@
 import { Ionicons } from "@expo/vector-icons";
+import { Picker } from "@react-native-picker/picker";
 import { useEffect, useMemo, useState } from "react";
 import {
-  Alert,
-  Modal,
-  Platform,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Alert,
+    Modal,
+    Platform,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
 import { api } from "../../services/api";
-import { Picker } from "@react-native-picker/picker";
 
 const CompletedHistory = () => {
   const { user } = useAuth();
@@ -176,6 +176,20 @@ const CompletedHistory = () => {
       <Text className="text-white text-xl font-black mb-6">
         Completed History
       </Text>
+
+      <View className="bg-slate-950/95 rounded-3xl border border-slate-700 p-4 mb-6 flex-row items-center justify-between">
+        <View>
+          <Text className="text-[10px] uppercase tracking-[0.3em] text-text-muted font-semibold">
+            Completed Jobs
+          </Text>
+          <Text className="text-3xl font-black text-white mt-2">
+            {filteredServices.length}
+          </Text>
+        </View>
+        <View className="h-12 w-12 rounded-full bg-success/10 items-center justify-center">
+          <Ionicons name="checkmark-done" size={20} color="#10B981" />
+        </View>
+      </View>
 
       <View className="bg-slate-900 rounded-3xl border border-card px-4 py-3 flex-row items-center mb-6">
         <Ionicons name="search" size={18} color="#94A3B8" />

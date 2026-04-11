@@ -2,16 +2,15 @@ import { Ionicons } from "@expo/vector-icons";
 import { Redirect, Tabs, useRouter } from "expo-router";
 import React from "react";
 import {
-  ActivityIndicator,
-  Image,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Image,
+    Text,
+    View
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import EmployeeHeaderDropdown from "../../components/EmployeeHeaderDropdown";
 import EmployeeNotificationDropdown from "../../components/EmployeeNotificationDropdown";
 import { useAuth } from "../../contexts/AuthContext";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function EmployeeAdminLayout() {
   const router = useRouter();
@@ -118,15 +117,6 @@ export default function EmployeeAdminLayout() {
         }}
       />
       <Tabs.Screen
-        name="assigned"
-        options={{
-          title: "Assigned",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="clipboard" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="servicecenter"
         options={{
           title: "Center",
@@ -141,6 +131,15 @@ export default function EmployeeAdminLayout() {
           title: "Billing",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="receipt" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="assigned"
+        options={{
+          title: "Assigned",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="clipboard" size={size} color={color} />
           ),
         }}
       />
