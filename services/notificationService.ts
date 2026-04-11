@@ -16,6 +16,14 @@ export const configureNotifications = () => {
   });
 };
 
+const getExpoProjectId = (): string | undefined => {
+  return (
+    Constants.expoConfig?.extra?.eas?.projectId ||
+    Constants.easConfig?.projectId ||
+    Constants.expoConfig?.extra?.projectId
+  );
+};
+
 // ✅ Get push notification token
 export const registerForPushNotificationsAsync = async (): Promise<string | undefined> => {
   let token;
@@ -30,31 +38,41 @@ export const registerForPushNotificationsAsync = async (): Promise<string | unde
     });
   }
 
-  if (Device.isDevice) {
-    const { status: existingStatus } = await Notifications.getPermissionsAsync();
-    let finalStatus = existingStatus;
-
-    if (existingStatus !== 'granted') {
-      const { status } = await Notifications.requestPermissionsAsync();
-      finalStatus = status;
-    }
-
-    if (finalStatus !== 'granted') {
-      console.log('Failed to get push token for push notification!');
-      return undefined;
-    }
-
-    token = (
-      await Notifications.getExpoPushTokenAsync({
-        projectId: Constants.expoConfig?.extra?.eas?.projectId || Constants.easConfig?.projectId,
-      })
-    ).data;
-
-    console.log('Push token:', token);
-  } else {
-    console.log('Must use physical device for Push Notifications');
+  if (!Device.isDevice) {
+    console.log('Must use a physical device for push notifications');
+    return undefined;
   }
 
+  const { status: existingStatus } = await Notifications.getPermissionsAsync();
+  let finalStatus = existingStatus;
+
+  if (existingStatus !== 'granted') {
+    const { status } = await Notifications.requestPermissionsAsync();
+    finalStatus = status;
+  }
+
+  if (finalStatus !== 'granted') {
+    console.log('Failed to get push token for push notification!');
+    return undefined;
+  }
+
+  const projectId = getExpoProjectId();
+
+  if (!projectId) {
+    console.warn(
+      'No Expo projectId found. Local notifications still work, but Expo push token registration is disabled.\n' +
+      'Add your EAS projectId to app.json under expo.extra.eas.projectId or pass it here.'
+    );
+    return undefined;
+  }
+
+  token = (
+    await Notifications.getExpoPushTokenAsync({
+      projectId,
+    })
+  ).data;
+
+  console.log('Push token:', token);
   return token;
 };
 
