@@ -34,7 +34,7 @@ const getButtonVisibility = (status: string) => {
     showOptions:
       currentIndex >= STATUS_STEPS.indexOf("Processing") &&
       currentIndex < STATUS_STEPS.indexOf("Service Completed"),
-    showBilling: status === "Bill Pending",
+    showBilling: status === "Bill Pending" || status === "Service Completed",
   };
 };
 
@@ -252,8 +252,10 @@ export default function Services() {
   const currentMainList = searchedServices;
 
   const assignedServices = currentMainList.filter((s: any) => {
-    if (!(s.assignedEmployeeId || s.assigned_employee_id)) return false;
+    const isAssigned = !!(s.assignedEmployeeId || s.assigned_employee_id);
+
     if (isMechanic) {
+      if (!isAssigned) return false;
       const empName = (
         s.assignedEmployeeName ||
         s.assigned_employee_name ||
@@ -267,9 +269,14 @@ export default function Services() {
       return empName === targetName;
     }
 
-    const status = (s.serviceStatus || s.status || s.appointmentStatus || "").toLowerCase();
+    const status = (
+      s.serviceStatus ||
+      s.status ||
+      s.appointmentStatus ||
+      ""
+    ).toLowerCase();
     if (status.includes("bill completed")) return false;
-    return true;
+    return true; // Show both assigned and unassigned for Admin
   });
 
   const totalPages = Math.ceil(assignedServices.length / itemsPerPage);
