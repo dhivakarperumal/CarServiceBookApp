@@ -377,12 +377,12 @@ export default function ServiceCenter() {
       setIsClosing(true);
 
       // Auto-reject pending issues and parts
-      const updatedIssues = (selectedBooking.issues || []).map((iss) =>
+      const updatedIssues = (selectedBooking.issues || []).map((iss: any) =>
         iss.issueStatus === "pending"
           ? { ...iss, issueStatus: "rejected" }
           : iss,
       );
-      const updatedParts = (selectedBooking.parts || []).map((p) =>
+      const updatedParts = (selectedBooking.parts || []).map((p: any) =>
         p.status === "pending" ? { ...p, status: "rejected" } : p,
       );
 
@@ -985,7 +985,7 @@ export default function ServiceCenter() {
                                     ? "TIME OUT"
                                     : "NO RESPONSE"}
                                 </Text>
-                                <Text className="text-text-primary font-bold text-[8px] opacity-70">
+                                <Text className="text-text-primary font-bold text-[10px] mt-1 opacity-70">
                                   {getElapsedTime(
                                     item.updatedAt || item.updated_at,
                                   )}
@@ -1237,59 +1237,75 @@ export default function ServiceCenter() {
         >
           <View className="flex-1 bg-black/60 justify-center items-center p-6">
             <View className="w-full max-w-sm rounded-3xl bg-card p-8 border border-card shadow-2xl">
-              <View className="mb-6 text-center">
-                <View className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-100">
-                  <Ionicons name="close" size={24} color="#EF4444" />
+              <View className="mb-6 items-center">
+                <View className="w-16 h-16 bg-error/10 rounded-full flex items-center justify-center mb-4 border border-error/30">
+                  <Ionicons name="alert-circle" size={28} color="#EF4444" />
                 </View>
-                <Text className="text-xl font-black text-text-primary text-center uppercase tracking-tight">
+                <Text className="text-2xl font-black text-text-primary text-center uppercase tracking-tight">
                   Close Booking
                 </Text>
-                <Text className="text-[10px] text-text-muted font-black uppercase tracking-widest mt-1 text-center">
-                  Provide reason for closing this service
+                <Text className="text-[10px] text-text-muted font-black uppercase tracking-widest mt-2 text-center">
+                  This action cannot be undone
                 </Text>
                 {selectedBooking &&
                   getHoursDifference(
                     selectedBooking.updatedAt || selectedBooking.updated_at,
                   ) >= 72 && (
-                    <Text className="mt-2 text-[10px] text-red-500 font-bold uppercase tracking-widest bg-red-50 py-1 px-3 rounded-full">
-                      72+ Hours since last update
-                    </Text>
+                    <View className="mt-4 bg-error/15 border border-error/30 rounded-2xl px-4 py-3 flex-row items-center gap-3">
+                      <Ionicons name="time" size={16} color="#EF4444" />
+                      <View>
+                        <Text className="text-[9px] text-error font-black uppercase tracking-widest">
+                          Time Exceeded
+                        </Text>
+                        <Text className="text-[8px] text-error/70 font-bold">
+                          72+ hours since last update
+                        </Text>
+                      </View>
+                    </View>
                   )}
               </View>
               <View className="mb-6 space-y-4">
                 <View>
-                  <Text className="text-[9px] font-black text-text-muted uppercase tracking-widest mb-2">
-                    Closing Reason
+                  <Text className="text-[9px] font-black text-text-muted uppercase tracking-widest mb-3">
+                    Reason for Closing
                   </Text>
                   <TextInput
                     value={closeReason}
                     onChangeText={setCloseReason}
                     placeholder="e.g. Customer not approved spare parts / No response after 72 hours"
+                    placeholderTextColor="#64748B"
                     multiline
-                    className="w-full min-h-[100px] rounded-xl border border-card bg-background px-4 py-3 text-xs font-bold text-text-primary focus:bg-card focus:border-red-500 outline-none transition-all"
+                    className="w-full min-h-[100px] rounded-2xl border border-card bg-background px-4 py-3 text-xs font-bold text-text-primary focus:bg-card focus:border-primary outline-none transition-all"
                   />
                 </View>
-                <View className="flex-row flex-wrap gap-2">
-                  <TouchableOpacity
-                    onPress={() =>
-                      setCloseReason("Customer not approve spare part")
-                    }
-                    className="px-3 py-1.5 rounded-lg bg-background border border-card"
-                  >
-                    <Text className="text-[9px] font-black uppercase tracking-widest text-text-muted">
-                      Not Approved
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() =>
-                      setCloseReason("No response from customer after 72 hours")
-                    }
-                    className="px-3 py-1.5 rounded-lg bg-background border border-card"
-                  >
-                    <Text className="text-[9px] font-black uppercase tracking-widest text-text-muted">
-                      No Response (72h)
-                    </Text>
-                  </TouchableOpacity>
+                <View className="space-y-2 mt-3">
+                  <Text className="text-[9px] font-black text-text-muted uppercase tracking-widest">
+                    Quick Templates
+                  </Text>
+                  <View className="flex-row gap-2 mt-4">
+                    <TouchableOpacity
+                      onPress={() =>
+                        setCloseReason("Customer not approve spare part")
+                      }
+                      className="flex-1 px-3 py-2 rounded-xl bg-background border border-warning/30 hover:border-warning transition-all"
+                    >
+                      <Text className="text-[8px] font-black uppercase tracking-widest text-warning text-center">
+                        Not Approved
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() =>
+                        setCloseReason(
+                          "No response from customer after 72 hours",
+                        )
+                      }
+                      className="flex-1 px-3 py-2 rounded-xl bg-background border border-error/30 hover:border-error transition-all"
+                    >
+                      <Text className="text-[8px] font-black uppercase tracking-widest text-error text-center">
+                        No Response
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
               </View>
               <View className="flex-row gap-3">
@@ -1299,16 +1315,16 @@ export default function ServiceCenter() {
                     setCloseReason("");
                     setSelectedBooking(null);
                   }}
-                  className="flex-1 rounded-xl bg-card py-3 items-center"
+                  className="flex-1 rounded-2xl bg-background border border-card py-4 items-center"
                 >
                   <Text className="text-[10px] font-black text-text-secondary uppercase tracking-widest">
-                    Back
+                    Cancel
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={handleCloseBooking}
                   disabled={isClosing || !closeReason.trim()}
-                  className={`flex-1 rounded-xl bg-error py-3 items-center ${isClosing || !closeReason.trim() ? "opacity-50" : ""}`}
+                  className={`flex-1 rounded-2xl bg-error py-4 items-center ${isClosing || !closeReason.trim() ? "opacity-50" : ""}`}
                 >
                   {isClosing ? (
                     <ActivityIndicator color="#FFFFFF" />
@@ -1373,7 +1389,7 @@ export default function ServiceCenter() {
                 onPress={() => setStatusModalVisible(false)}
                 className="mt-6 w-full py-4 bg-card rounded-2xl items-center"
               >
-                <Text className="text-text-secondary font-bold uppercase tracking-widest text-[10px]">
+                <Text className="text-text-primary bg-primary px-8 py-4 rounded-2xl font-bold uppercase tracking-widest text-[10px]">
                   Close
                 </Text>
               </TouchableOpacity>
