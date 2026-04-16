@@ -440,7 +440,7 @@ export default function AddBillingScreen() {
           </View>
         </View>
 
-        <View className="mt-4 self-start flex-row flex-nowrap items-center rounded-full bg-slate-900/90 p-1 border border-slate-700">
+        <View className="mt-4 w-full flex-row items-center rounded-full bg-slate-900/90 p-1 border border-slate-700">
           {[
             { mode: "online", label: "Online Booking" },
             { mode: "manual", label: "Manual Entry" },
@@ -454,7 +454,7 @@ export default function AddBillingScreen() {
                   setIssues([]);
                 }
               }}
-              className={`px-4 py-3 rounded-full ${billingMode === option.mode ? "bg-primary" : "bg-slate-900"}`}
+              className={`flex-1 py-3 rounded-full items-center justify-center ${billingMode === option.mode ? "bg-primary" : "bg-slate-900"}`}
             >
               <Text
                 className={`text-[10px] font-black uppercase tracking-wider ${billingMode === option.mode ? "text-text-primary" : "text-text-muted"}`}
@@ -489,119 +489,122 @@ export default function AddBillingScreen() {
               </View>
             ) : (
               <>
-                <View className="flex-row flex-wrap gap-4 mb-6">
+                {billingMode === "online" && (
+                  <View className="flex-row flex-wrap gap-4 mb-6">
+                    <View className="flex-1 min-w-[280px] bg-card rounded-[28px] p-6 border border-slate-700">
+                      <SectionTitle title="Verification Queue" />
+                      <Text className="text-[10px] uppercase tracking-widest text-text-muted mb-4">
+                        Jobs pulled from
+                        https://cars.qtechx.com/api/all-services/
+                      </Text>
 
-                  <View className="flex-1 min-w-[280px] bg-card rounded-[28px] p-6 border border-slate-700">
-                    <SectionTitle title="Verification Queue" />
-                    <Text className="text-[10px] uppercase tracking-widest text-text-muted mb-4">
-                      Jobs pulled from https://cars.qtechx.com/api/all-services/
-                    </Text>
-
-                    {filteredServices.length === 0 ? (
-                      <View className="rounded-2xl border border-slate-700 bg-slate-900/30 px-4 py-5">
-                        <Text className="text-[10px] text-text-muted uppercase tracking-widest">
-                          No pending billing jobs found.
-                        </Text>
-                        <Text className="text-sm font-black text-text-primary mt-2">
-                          Try searching by Booking ID, phone, or vehicle model.
-                        </Text>
-                      </View>
-                    ) : (
-                      <View className="rounded-2xl border border-slate-700 bg-slate-900/30 overflow-hidden">
-                        <TouchableOpacity
-                          activeOpacity={0.8}
-                          onPress={() =>
-                            setServiceDropdownOpen((prev) => !prev)
-                          }
-                          className="flex-row items-center justify-between px-4 py-4 bg-slate-900/50 border-b border-slate-700"
-                        >
-                          <Text
-                            className={`text-sm font-black ${selectedService ? "text-text-primary" : "text-text-muted"}`}
-                          >
-                            {selectedService
-                              ? `${selectedService.bookingId || `Job ${selectedService.id}`} | ${selectedService.name}`
-                              : "-- Select Assigned Job --"}
+                      {filteredServices.length === 0 ? (
+                        <View className="rounded-2xl border border-slate-700 bg-slate-900/30 px-4 py-5">
+                          <Text className="text-[10px] text-text-muted uppercase tracking-widest">
+                            No pending billing jobs found.
                           </Text>
-                          <Ionicons
-                            name={
-                              serviceDropdownOpen
-                                ? "chevron-up"
-                                : "chevron-down"
-                            }
-                            size={18}
-                            color="#94A3B8"
-                          />
-                        </TouchableOpacity>
-
-                        {serviceDropdownOpen && (
-                          <ScrollView
-                            className="max-h-56 bg-slate-900/30"
-                            showsVerticalScrollIndicator
-                          >
-                            {filteredServices.map((service) => (
-                              <TouchableOpacity
-                                key={service.id}
-                                onPress={() => {
-                                  if (selectedService?.id === service.id) {
-                                    setSelectedService(null);
-                                    setParts([]);
-                                    setIssues([]);
-                                    setServiceDropdownOpen(false);
-                                    return;
-                                  }
-                                  selectService(service);
-                                }}
-                                className={`px-4 py-4 border-b border-slate-700 ${selectedService?.id === service.id ? "bg-slate-900/50" : "bg-slate-900/20"}`}
-                              >
-                                <Text className="text-sm font-black text-text-primary">
-                                  {service.bookingId || `Job ${service.id}`}
-                                </Text>
-                                <Text className="text-[10px] text-text-muted uppercase tracking-widest mt-1">
-                                  {service.name} • {service.brand}{" "}
-                                  {service.model}
-                                </Text>
-                              </TouchableOpacity>
-                            ))}
-                          </ScrollView>
-                        )}
-                      </View>
-                    )}
-
-                    {selectedService && (
-                      <View className="mt-4 rounded-2xl border border-slate-700 bg-gradient-to-r from-slate-900/50 to-slate-900/20 p-5">
-                        <View className="flex-row items-start justify-between mb-3">
-                          <View className="flex-1">
-                            <Text className="text-[10px] uppercase tracking-widest text-success font-black mb-1">
-                              ✓ Selected Job
-                            </Text>
-                            <Text className="text-base font-black text-text-primary">
-                              {selectedService.bookingId ||
-                                `Job ${selectedService.id}`}
-                            </Text>
-                            <Text className="text-[10px] text-text-muted mt-2">
-                              {selectedService.name}
-                            </Text>
-                            <Text className="text-[9px] text-text-muted mt-1">
-                              {selectedService.brand} {selectedService.model}
-                            </Text>
-                          </View>
-                          <TouchableOpacity
-                            onPress={() => {
-                              setSelectedService(null);
-                              setParts([]);
-                              setIssues([]);
-                            }}
-                            className="bg-error/20 border border-error rounded-xl px-3 py-2"
-                          >
-                            <Text className="text-[10px] font-black text-error uppercase tracking-widest">
-                              Unselect
-                            </Text>
-                          </TouchableOpacity>
+                          <Text className="text-sm font-black text-text-primary mt-2">
+                            Try searching by Booking ID, phone, or vehicle
+                            model.
+                          </Text>
                         </View>
-                      </View>
-                    )}
+                      ) : (
+                        <View className="rounded-2xl border border-slate-700 bg-slate-900/30 overflow-hidden">
+                          <TouchableOpacity
+                            activeOpacity={0.8}
+                            onPress={() =>
+                              setServiceDropdownOpen((prev) => !prev)
+                            }
+                            className="flex-row items-center justify-between px-4 py-4 bg-slate-900/50 border-b border-slate-700"
+                          >
+                            <Text
+                              className={`text-sm font-black ${selectedService ? "text-text-primary" : "text-text-muted"}`}
+                            >
+                              {selectedService
+                                ? `${selectedService.bookingId || `Job ${selectedService.id}`} | ${selectedService.name}`
+                                : "-- Select Assigned Job --"}
+                            </Text>
+                            <Ionicons
+                              name={
+                                serviceDropdownOpen
+                                  ? "chevron-up"
+                                  : "chevron-down"
+                              }
+                              size={18}
+                              color="#94A3B8"
+                            />
+                          </TouchableOpacity>
+
+                          {serviceDropdownOpen && (
+                            <ScrollView
+                              className="max-h-56 bg-slate-900/30"
+                              showsVerticalScrollIndicator
+                            >
+                              {filteredServices.map((service) => (
+                                <TouchableOpacity
+                                  key={service.id}
+                                  onPress={() => {
+                                    if (selectedService?.id === service.id) {
+                                      setSelectedService(null);
+                                      setParts([]);
+                                      setIssues([]);
+                                      setServiceDropdownOpen(false);
+                                      return;
+                                    }
+                                    selectService(service);
+                                  }}
+                                  className={`px-4 py-4 border-b border-slate-700 ${selectedService?.id === service.id ? "bg-slate-900/50" : "bg-slate-900/20"}`}
+                                >
+                                  <Text className="text-sm font-black text-text-primary">
+                                    {service.bookingId || `Job ${service.id}`}
+                                  </Text>
+                                  <Text className="text-[10px] text-text-muted uppercase tracking-widest mt-1">
+                                    {service.name} • {service.brand}{" "}
+                                    {service.model}
+                                  </Text>
+                                </TouchableOpacity>
+                              ))}
+                            </ScrollView>
+                          )}
+                        </View>
+                      )}
+
+                      {selectedService && (
+                        <View className="mt-4 rounded-2xl border border-slate-700 bg-gradient-to-r from-slate-900/50 to-slate-900/20 p-5">
+                          <View className="flex-row items-start justify-between mb-3">
+                            <View className="flex-1">
+                              <Text className="text-[10px] uppercase tracking-widest text-success font-black mb-1">
+                                ✓ Selected Job
+                              </Text>
+                              <Text className="text-base font-black text-text-primary">
+                                {selectedService.bookingId ||
+                                  `Job ${selectedService.id}`}
+                              </Text>
+                              <Text className="text-[10px] text-text-muted mt-2">
+                                {selectedService.name}
+                              </Text>
+                              <Text className="text-[9px] text-text-muted mt-1">
+                                {selectedService.brand} {selectedService.model}
+                              </Text>
+                            </View>
+                            <TouchableOpacity
+                              onPress={() => {
+                                setSelectedService(null);
+                                setParts([]);
+                                setIssues([]);
+                              }}
+                              className="bg-error/20 border border-error rounded-xl px-3 py-2"
+                            >
+                              <Text className="text-[10px] font-black text-error uppercase tracking-widest">
+                                Unselect
+                              </Text>
+                            </TouchableOpacity>
+                          </View>
+                        </View>
+                      )}
+                    </View>
                   </View>
-                </View>
+                )}
               </>
             )}
 
