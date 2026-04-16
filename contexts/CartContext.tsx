@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from './AuthContext';
 
 export interface CartItem {
   id: string;
@@ -9,6 +10,9 @@ export interface CartItem {
   quantity: number;
   image: string | null;
   brand?: string;
+  userId?: number;
+  uid?: string;
+  email?: string;
 }
 
 interface CartContextType {
@@ -27,6 +31,7 @@ const CART_KEY = '@cart_data';
 
 export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
+  const { user } = useAuth() as any;
 
   useEffect(() => {
     loadCart();
@@ -57,13 +62,28 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const addToCart = (product: any) => {
     setCart((prevCart) => {
-      const existingItem = prevCart.find((item) => item.docId === product.docId);
+      const existingItem = prevCart.find(
+        (item) =>
+          item.docId === product.docId &&
+          (
+            item.userId === user?.id ||
+            item.uid === user?.uid ||
+            item.email?.toLowerCase() === user?.email?.toLowerCase()
+          )
+      );
       if (existingItem) {
         return prevCart.map((item) =>
-          item.docId === product.docId ? { ...item, quantity: item.quantity + 1 } : item
+          item.docId === product.docId &&
+            (
+              item.userId === user?.id ||
+              item.uid === user?.uid ||
+              item.email?.toLowerCase() === user?.email?.toLowerCase()
+            )
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
         );
       }
-      
+
       const newItem: CartItem = {
         id: product.id,
         docId: product.docId,
@@ -72,13 +92,29 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         quantity: 1,
         image: Array.isArray(product.images) && product.images.length > 0 ? product.images[0] : null,
         brand: product.brand,
+
+        userId: user?.id,
+        uid: user?.uid,
+        email: user?.email,
       };
       return [...prevCart, newItem];
     });
   };
 
   const removeFromCart = (docId: number) => {
-    setCart((prevCart) => prevCart.filter((item) => item.docId !== docId));
+    setCart((prevCart) =>
+      prevCart.filter(
+        (item) =>
+          !(
+            item.docId === docId &&
+            (
+              item.userId === user?.id ||
+              item.uid === user?.uid ||
+              item.email?.toLowerCase() === user?.email?.toLowerCase()
+            )
+          )
+      )
+    );
   };
 
   const updateQuantity = (docId: number, quantity: number) => {
@@ -87,7 +123,14 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       return;
     }
     setCart((prevCart) =>
-      prevCart.map((item) => (item.docId === docId ? { ...item, quantity } : item))
+      prevCart.map((item) => (item.docId === docId &&
+        (
+          item.userId === user?.id ||
+          item.uid === user?.uid ||
+          item.email?.toLowerCase() === user?.email?.toLowerCase()
+        )
+        ? { ...item, quantity }
+        : item))
     );
   };
 
