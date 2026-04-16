@@ -163,6 +163,18 @@ export default function EmployeeBilling() {
     }
   };
 
+  const handleMarkAsPaid = async (billId: number | string) => {
+    try {
+      await (api as any).updateBillingStatus(billId, "Paid");
+      Alert.alert("Success", "Bill marked as paid successfully!");
+      // Refresh the data to update the UI
+      loadData(false);
+    } catch (error) {
+      console.error("Error updating bill status:", error);
+      Alert.alert("Error", "Failed to update bill status. Please try again.");
+    }
+  };
+
   const filteredBills = useMemo(() => {
     return bills.filter((b) => {
       const text =
@@ -487,20 +499,60 @@ export default function EmployeeBilling() {
 
                       {/* Actions */}
                       <View className="px-5 pb-5">
-                        <TouchableOpacity
-                          onPress={() =>
-                            Alert.alert(
-                              "Print",
-                              "Printing functionality will be available in the native build.",
-                            )
-                          }
-                          className="bg-primary py-3.5 rounded-2xl flex-row items-center justify-center gap-2"
-                        >
-                          <Ionicons name="print" size={17} color="#FFFFFF" />
-                          <Text className="text-white text-[11px] font-black uppercase tracking-widest">
-                            Print Bill
-                          </Text>
-                        </TouchableOpacity>
+                        <View className="flex-row gap-3">
+                          <TouchableOpacity
+                            onPress={() =>
+                              Alert.alert(
+                                "Print",
+                                "Printing functionality will be available in the native build.",
+                              )
+                            }
+                            className="flex-1 bg-primary py-3.5 rounded-2xl flex-row items-center justify-center gap-2"
+                          >
+                            <Ionicons name="print" size={17} color="#FFFFFF" />
+                            <Text className="text-white text-[11px] font-black uppercase tracking-widest">
+                              Print Bill
+                            </Text>
+                          </TouchableOpacity>
+
+                          {statusFilter === "paid" && (
+                            <TouchableOpacity
+                              onPress={() => {
+                                // Navigate to edit bill - pass bill data
+                                router.push({
+                                  pathname: "/(employee)/add-billing",
+                                  params: { editBillId: bill.id },
+                                } as any);
+                              }}
+                              className="flex-1 bg-warning py-3.5 rounded-2xl flex-row items-center justify-center gap-2"
+                            >
+                              <Ionicons
+                                name="create"
+                                size={17}
+                                color="#FFFFFF"
+                              />
+                              <Text className="text-white text-[11px] font-black uppercase tracking-widest">
+                                Edit Bill
+                              </Text>
+                            </TouchableOpacity>
+                          )}
+
+                          {statusFilter === "pending" && (
+                            <TouchableOpacity
+                              onPress={() => handleMarkAsPaid(bill.id)}
+                              className="flex-1 bg-success py-3.5 rounded-2xl flex-row items-center justify-center gap-2"
+                            >
+                              <Ionicons
+                                name="checkmark"
+                                size={17}
+                                color="#FFFFFF"
+                              />
+                              <Text className="text-white text-[11px] font-black uppercase tracking-widest">
+                                Mark Paid
+                              </Text>
+                            </TouchableOpacity>
+                          )}
+                        </View>
                       </View>
                     </>
                   )}
