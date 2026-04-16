@@ -1,5 +1,40 @@
 # Push Notifications - Quick Start
 
+## ⚠️ Expo Go Limitations
+
+**Important**: Push notifications do NOT work in Expo Go on Android (SDK 53+).
+- Use **Development Build** for testing push notifications
+- Local notifications work in Expo Go for basic testing
+
+### Testing with Local Notifications (Expo Go):
+```typescript
+import { 
+  sendEmployeeAssignmentNotification,
+  sendSparePartsStatusNotification,
+  sendAdminOrderNotification,
+  sendAdminEmployeeUpdateNotification,
+  sendAdminVehicleBookingNotification
+} from '../services/notificationService';
+
+// Test employee notifications
+sendEmployeeAssignmentNotification('SVC-001', 'John Doe', 'Oil Change');
+sendSparePartsStatusNotification('SVC-001', 'approved', 'Brake Pads x4');
+
+// Test admin notifications  
+sendAdminOrderNotification('ORD-001', 'Jane Smith', 'pending');
+sendAdminEmployeeUpdateNotification('booking', 'BK-001', 'Mike Johnson', 'completed');
+sendAdminVehicleBookingNotification('VB-001', 'Bob Wilson', 'confirmed');
+```
+
+### Quick Test Script:
+```typescript
+// Import the test script
+import { testNotifications } from '../scripts/testNotifications';
+
+// Run all notification tests
+testNotifications();
+```
+
 ## ✅ What's Already Done
 
 Everything is automatically set up! Your push notification system is **ready to go**. Here's what was implemented:

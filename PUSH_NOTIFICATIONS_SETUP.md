@@ -1,5 +1,40 @@
 # Push Notification Setup Guide
 
+## ⚠️ Important: Expo Go Limitations
+
+**Expo Go does NOT support push notifications on Android starting from SDK 53+.**
+- ✅ Local notifications work in Expo Go
+- ❌ Push notifications (remote) do NOT work in Expo Go on Android
+- 🔧 Use **Development Build** for full push notification testing
+
+### For Development Testing:
+```bash
+# Install EAS CLI
+npm install -g @expo/cli
+
+# Build development build
+eas build --platform android --profile development
+
+# Run the development build
+npx expo run:android --device
+```
+
+### Alternative: Test with Local Notifications
+The app includes local notification fallbacks that work in Expo Go:
+
+```typescript
+import { 
+  sendEmployeeAssignmentNotification,
+  sendSparePartsStatusNotification,
+  sendAdminOrderNotification 
+} from '../services/notificationService';
+
+// These will work in Expo Go
+sendEmployeeAssignmentNotification('SVC-001', 'John Doe');
+sendSparePartsStatusNotification('SVC-001', 'approved');
+sendAdminOrderNotification('ORD-001', 'Jane Smith', 'pending');
+```
+
 ## Overview
 This guide explains how to implement and use push notifications in your Expo Car Service Booking App.
 

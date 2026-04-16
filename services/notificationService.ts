@@ -4,6 +4,11 @@ import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import { apiService } from './api';
 
+// ✅ Check if running in Expo Go
+const isExpoGo = (): boolean => {
+  return Constants.appOwnership === 'expo';
+};
+
 // ✅ Configure how notifications are handled
 export const configureNotifications = () => {
   Notifications.setNotificationHandler({
@@ -28,6 +33,12 @@ const getExpoProjectId = (): string | undefined => {
 // ✅ Get push notification token
 export const registerForPushNotificationsAsync = async (): Promise<string | undefined> => {
   let token;
+
+  // Skip push notification setup in Expo Go for Android
+  if (isExpoGo() && Platform.OS === 'android') {
+    console.log('Expo Go detected on Android - Push notifications not supported. Using local notifications only.');
+    return undefined;
+  }
 
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync('default', {
@@ -94,6 +105,7 @@ export const sendPushTokenToServer = async (userId: number, pushToken: string) =
 export const registerDeviceForPushNotifications = async (userId: number) => {
   const token = await registerForPushNotificationsAsync();
   if (!token) {
+    console.log('No push token available (possibly Expo Go) - local notifications will still work');
     return undefined;
   }
 
@@ -180,5 +192,92 @@ export const sendOrderNotification = (
     orderId: orderId.toString(),
     status,
     type: 'order',
+  });
+};
+
+// ✅ Send notification for employee assignment
+export const sendEmployeeAssignmentNotification = (
+  serviceId: string | number,
+  customerName: string,
+  serviceDetails?: string
+) => {
+  const title = 'New Service Assignment';
+  const body = `You have been assigned to service for ${customerName}`;
+
+  sendLocalNotification(title, body, {
+    serviceId: serviceId.toString(),
+    customerName,
+    serviceDetails: serviceDetails || '',
+    type: 'employee_assignment',
+  });
+};
+
+// ✅ Send notification for spare parts status
+export const sendSparePartsStatusNotification = (
+  serviceId: string | number,
+  status: 'approved' | 'rejected',
+  partDetails?: string
+) => {
+  const title = status === 'approved' ? 'Spare Parts Approved' : 'Spare Parts Rejected';
+  const body = `Your spare parts request for service #${serviceId} has been ${status}`;
+
+  sendLocalNotification(title, body, {
+    serviceId: serviceId.toString(),
+    status,
+    partDetails: partDetails || '',
+    type: 'spare_parts_status',
+  });
+};
+
+// ✅ Send notification for admin - new order
+export const sendAdminOrderNotification = (
+  orderId: string | number,
+  userName: string,
+  status: string
+) => {
+  const title = 'New Order Placed';
+  const body = `Order #${orderId} placed by ${userName} - Status: ${status}`;
+
+  sendLocalNotification(title, body, {
+    orderId: orderId.toString(),
+    userName,
+    status,
+    type: 'admin_order',
+  });
+};
+
+// ✅ Send notification for admin - employee status update
+export const sendAdminEmployeeUpdateNotification = (
+  serviceType: string,
+  serviceId: string | number,
+  employeeName: string,
+  newStatus: string
+) => {
+  const title = 'Employee Updated Status';
+  const body = `${employeeName} updated ${serviceType} #${serviceId} to ${newStatus}`;
+
+  sendLocalNotification(title, body, {
+    serviceType,
+    serviceId: serviceId.toString(),
+    employeeName,
+    newStatus,
+    type: 'admin_employee_update',
+  });
+};
+
+// ✅ Send notification for admin - new vehicle booking
+export const sendAdminVehicleBookingNotification = (
+  vehicleBookingId: string | number,
+  userName: string,
+  status: string
+) => {
+  const title = 'New Vehicle Booking';
+  const body = `Vehicle booking #${vehicleBookingId} by ${userName} - Status: ${status}`;
+
+  sendLocalNotification(title, body, {
+    vehicleBookingId: vehicleBookingId.toString(),
+    userName,
+    status,
+    type: 'admin_vehicle_booking',
   });
 };
