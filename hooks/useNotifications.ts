@@ -29,6 +29,10 @@ export const useNotifications = () => {
         router.push(`/profile/VehicleBookings`);
       } else if (data.type === 'order' && data.orderId) {
         router.push(`/profile/orders`);
+      } else if (data.type === 'employee_assignment' && data.serviceId) {
+        router.push(`/(employee)/assigned`);
+      } else if (data.type === 'spare_parts_status' && data.serviceId) {
+        router.push(`/(employee)/assigned`);
       }
     });
 

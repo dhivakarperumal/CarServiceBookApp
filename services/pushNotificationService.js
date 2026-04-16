@@ -201,9 +201,33 @@ class PushNotificationService {
       type: 'order',
     });
   }
-}
 
-module.exports = new PushNotificationService();
+  // Send employee assignment notification
+  async sendEmployeeAssignmentNotification(serviceId, employeeId, customerName, serviceDetails) {
+    const title = 'New Service Assignment';
+    const body = `You have been assigned to service for ${customerName}`;
+
+    return this.sendToUser(employeeId, title, body, {
+      serviceId: serviceId.toString(),
+      customerName,
+      serviceDetails,
+      type: 'employee_assignment',
+    });
+  }
+
+  // Send spare parts approval notification to employee
+  async sendSparePartsApprovalNotification(serviceId, employeeId, status, partDetails) {
+    const title = status === 'approved' ? 'Spare Parts Approved' : 'Spare Parts Rejected';
+    const body = `Your spare parts request for service #${serviceId} has been ${status}`;
+
+    return this.sendToUser(employeeId, title, body, {
+      serviceId: serviceId.toString(),
+      status,
+      partDetails,
+      type: 'spare_parts_status',
+    });
+  }
+}
 ```
 
 ### Step 5: Integrate with Booking Status Updates

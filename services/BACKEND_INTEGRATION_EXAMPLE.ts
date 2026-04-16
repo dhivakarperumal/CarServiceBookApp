@@ -143,10 +143,53 @@ async function sendStatusNotification(type, itemId, status) {
 */
 
 /**
- * Example 4: Update Push Token on New Registration
+ * Example 4: Employee Notifications
  * 
- * After user creates account, store their token
+ * Send notifications to employees when assigned or when parts are approved/rejected
  */
+
+/*
+// When a service is assigned to an employee
+async function onServiceAssigned(serviceId, employeeId, customerName, serviceDetails) {
+  try {
+    const pushService = require('../services/pushNotificationService');
+    
+    await pushService.sendEmployeeAssignmentNotification(
+      serviceId, 
+      employeeId, 
+      customerName, 
+      serviceDetails
+    );
+    
+    console.log(`Assignment notification sent to employee ${employeeId}`);
+  } catch (error) {
+    console.error('Error sending employee assignment notification:', error);
+  }
+}
+
+// When spare parts are approved or rejected
+async function onSparePartsStatusChanged(serviceId, employeeId, status, partDetails) {
+  try {
+    const pushService = require('../services/pushNotificationService');
+    
+    await pushService.sendSparePartsApprovalNotification(
+      serviceId,
+      employeeId, 
+      status, // 'approved' or 'rejected'
+      partDetails
+    );
+    
+    console.log(`Spare parts ${status} notification sent to employee ${employeeId}`);
+  } catch (error) {
+    console.error('Error sending spare parts status notification:', error);
+  }
+}
+
+module.exports = { onServiceAssigned, onSparePartsStatusChanged };
+*/
+
+/**
+ * Example 5: Update Push Token on New Registration
 
 export const registerUserWithPushToken = async (userData: any) => {
   try {

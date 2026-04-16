@@ -10,8 +10,10 @@ Everything is automatically set up! Your push notification system is **ready to 
 3. ✅ Status tracking and change detection
 4. ✅ Booking notifications with booking ID and status
 5. ✅ Support for: Bookings, Appointments, Vehicle Bookings, Orders
-6. ✅ Notification badge counter in Header
-7. ✅ Tap-to-navigate functionality
+6. ✅ **NEW**: Employee assignment notifications
+7. ✅ **NEW**: Spare parts approval/rejection notifications
+8. ✅ Notification badge counter in Header
+9. ✅ Tap-to-navigate functionality
 
 ## 🚀 Start Using It Now
 
@@ -26,6 +28,11 @@ Everything is automatically set up! Your push notification system is **ready to 
 - Notification shows: **Booking ID** + **New Status**
 - Example: "Your booking #1001 is now completed"
 - Tap notification → App navigates to relevant screen
+
+### Employee Notifications:
+- When assigned to a service → **"New Service Assignment" notification**
+- When spare parts are approved/rejected → **"Spare Parts Approved/Rejected" notification**
+- Tap notification → Navigate to assigned services page
 
 ## 📋 Files Created
 

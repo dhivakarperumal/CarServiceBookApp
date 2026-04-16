@@ -183,6 +183,63 @@ sendOrderNotification('ORD-001', 'shipped');
 // Body: "Your order #ORD-001 status is shipped"
 ```
 
+### Employee Assignment Notification
+```typescript
+sendEmployeeAssignmentNotification('SVC-001', employeeId, 'John Doe', 'Oil Change');
+// Title: "New Service Assignment"
+// Body: "You have been assigned to service for John Doe"
+```
+
+### Spare Parts Status Notification
+```typescript
+sendSparePartsApprovalNotification('SVC-001', employeeId, 'approved', 'Brake Pads x4');
+// Title: "Spare Parts Approved"
+// Body: "Your spare parts request for service #SVC-001 has been approved"
+```
+
+## 👷 Employee Notifications
+
+### Overview
+Employees receive push notifications for:
+1. **Service Assignments** - When a customer service is assigned to them
+2. **Spare Parts Approvals** - When their requested spare parts are approved or rejected by customers
+
+### Backend Implementation
+Add these methods to your backend push notification service:
+
+```javascript
+// Send assignment notification
+async sendEmployeeAssignmentNotification(serviceId, employeeId, customerName, serviceDetails) {
+  const title = 'New Service Assignment';
+  const body = `You have been assigned to service for ${customerName}`;
+  
+  return this.sendToUser(employeeId, title, body, {
+    serviceId: serviceId.toString(),
+    customerName,
+    serviceDetails,
+    type: 'employee_assignment',
+  });
+}
+
+// Send spare parts status notification
+async sendSparePartsApprovalNotification(serviceId, employeeId, status, partDetails) {
+  const title = status === 'approved' ? 'Spare Parts Approved' : 'Spare Parts Rejected';
+  const body = `Your spare parts request for service #${serviceId} has been ${status}`;
+  
+  return this.sendToUser(employeeId, title, body, {
+    serviceId: serviceId.toString(),
+    status,
+    partDetails,
+    type: 'spare_parts_status',
+  });
+}
+```
+
+### Integration Points
+Call these functions when:
+- **Assignment**: When updating service records with `assignedEmployeeId`
+- **Parts Approval**: When customers approve/reject spare parts requests in the app
+
 ## 🎯 Notification Flow
 
 ```
