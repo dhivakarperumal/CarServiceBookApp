@@ -589,16 +589,24 @@ export default function Services() {
                    style={{ backgroundColor: COLORS.card }}
                    className="p-4 rounded-[28px] border border-white/5 shadow-xl mb-3"
                  >
-                   {/* TOP ROW: Vehicle & Status */}
+                   {/* TOP ROW: ID & Status */}
                    <View className="flex-row justify-between items-center mb-3">
-                     <View className="flex-row items-center gap-2">
-                       <View
-                         className={`w-2 h-2 rounded-full ${item.vehicleType === "bike" ? "bg-orange-500" : "bg-blue-500"}`}
-                       />
-                       <Text className="text-white text-md font-black uppercase tracking-tight">
-                         {item.brand} {item.model}
+                     <TouchableOpacity
+                       onPress={() =>
+                         setExpandedId(isExpanded ? null : (item.id || item._id))
+                       }
+                       className="flex-row items-center gap-2"
+                     >
+                       <Text className="text-white text-md font-black uppercase bg-primary/10 px-2 py-1 rounded-lg border border-primary/20">
+                         {item.appointmentId || item.bookingId || `#${item.id || item._id}`}
                        </Text>
-                     </View>
+                       <Ionicons
+                         name={isExpanded ? "chevron-up" : "chevron-down"}
+                         size={12}
+                         color={COLORS.primary}
+                       />
+                     </TouchableOpacity>
+ 
                      <TouchableOpacity
                        onPress={() => {
                          setSelectedBooking(item);
@@ -616,31 +624,22 @@ export default function Services() {
                      </TouchableOpacity>
                    </View>
  
-                   {/* INFO ROW: Registry Details */}
-                   <View className="flex-row justify-between items-end mb-4 px-1">
-                     <View className="flex-1">
-                       <TouchableOpacity
-                         onPress={() =>
-                           setExpandedId(isExpanded ? null : (item.id || item._id))
-                         }
-                         className="flex-row items-center gap-2 mb-1.5"
-                       >
-                         <Text className="text-primary text-[10px] font-black uppercase tracking-widest bg-primary/5 self-start px-2 py-0.5 rounded-md">
-                           {item.appointmentId || item.bookingId || `#${item.id || item._id}`}
-                         </Text>
-                         <Ionicons
-                           name={isExpanded ? "chevron-up" : "chevron-down"}
-                           size={10}
-                           color={COLORS.primary}
-                         />
-                       </TouchableOpacity>
-                       <Text className="text-white/30 text-[9px] font-bold uppercase tracking-wide">
-                         {item.name} • {item.phone || "No Ph"} • {item.email || "No Email"}
-                       </Text>
-                       <Text className="text-white/20 text-[8px] font-black uppercase mt-0.5 tracking-widest">
-                         Mechanic: {item.assignedEmployeeName || item.assigned_employee_name || "Allocation Pending"}
+                   {/* SECOND ROW: Vehicle & Contact */}
+                   <View className="mb-4 px-1">
+                     <View className="flex-row items-center gap-2 mb-1.5">
+                       <View
+                         className={`w-2 h-2 rounded-full ${item.vehicleType === "bike" ? "bg-orange-500" : "bg-blue-500"}`}
+                       />
+                       <Text className="text-white text-md font-black uppercase tracking-tight">
+                         {item.brand} {item.model}
                        </Text>
                      </View>
+                     <Text className="text-white text-[11px] font-bold uppercase tracking-wide">
+                       {item.name} • {item.phone || "No Ph"} • {item.email || "No Email"}
+                     </Text>
+                     <Text className="text-white text-[9px] font-black uppercase mt-1 tracking-widest opacity-40">
+                       Technician: {item.assignedEmployeeName || item.assigned_employee_name || "Allocation Pending"}
+                     </Text>
                    </View>
  
                    {/* EXPANDED CONTENT: ISSUES & PARTS */}
