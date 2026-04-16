@@ -178,7 +178,7 @@ export default function ServiceCenter() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState("");
-  const [dateFilter, setDateFilter] = useState("today");
+  const [dateFilter, setDateFilter] = useState("all");
   const [expandedItems, setExpandedItems] = useState<(string | number)[]>([]);
 
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
@@ -728,7 +728,7 @@ export default function ServiceCenter() {
                   >
                     <View className="flex-row justify-between items-start mb-4">
                       <View>
-                        <Text className="text-white/20 text-[9px] font-black uppercase tracking-[2px]">
+                        <Text className="text-text-primary text-[10px] font-black uppercase tracking-[2px]">
                           {item.bookingId || `SER-${item.id}`}
                         </Text>
                         <Text className="text-white text-[17px] font-black mt-0.5 uppercase tracking-tight">
@@ -1126,10 +1126,10 @@ export default function ServiceCenter() {
             behavior={Platform.OS === "ios" ? "padding" : undefined}
             className="flex-1 bg-black/60 justify-end"
           >
-            <View className="bg-card rounded-t-[40px] border-t border-slate-700 h-[80%] w-full">
+            <View className="bg-card border-t border-slate-700 h-full w-full">
               <View className="flex-row justify-between items-center px-7 pt-7 pb-5 border-b border-slate-700">
                 <View className="flex-row items-center gap-3.5">
-                  <View className="w-11 h-11 rounded-2xl bg-sky-500/15 items-center justify-center border border-sky-500/20">
+                  <View className="w-11 h-11 rounded-2xl bg-sky-500/15 items-center justify-center border border-white">
                     <Ionicons
                       name="construct-outline"
                       size={20}
@@ -1150,103 +1150,112 @@ export default function ServiceCenter() {
                 </TouchableOpacity>
               </View>
 
-              <ScrollView
-                className="max-h-[50vh] mb-6 px-7 pt-7"
-                showsVerticalScrollIndicator={false}
-              >
-                {issueEntries.map((entry, idx) => (
-                  <View
-                    key={idx}
-                    className="bg-slate-900/40 border border-slate-700 rounded-2xl p-5 mb-4"
-                  >
-                    <View className="flex-row justify-between items-center mb-4">
-                      <Text className="text-[10px] font-black text-text-muted uppercase tracking-widest">
-                        Task #{idx + 1}
-                      </Text>
-                      <TouchableOpacity
-                        onPress={() => {
-                          const copy = [...issueEntries];
-                          copy.splice(idx, 1);
-                          setIssueEntries(copy);
-                        }}
-                      >
-                        <Ionicons name="trash" size={16} color={COLORS.error} />
-                      </TouchableOpacity>
-                    </View>
-
-                    <TextInput
-                      value={entry.issue}
-                      onChangeText={(t) => {
-                        const copy = [...issueEntries];
-                        copy[idx].issue = t;
-                        setIssueEntries(copy);
-                      }}
-                      placeholder="Describe car issue..."
-                      placeholderTextColor={COLORS.textMuted}
-                      multiline
-                      className="bg-slate-900/60 border border-slate-700 rounded-2xl p-4 text-text-primary font-bold text-sm min-h-[80px]"
-                    />
-
-                    <View className="flex-row gap-4 mt-4 items-center">
-                      <View className="flex-1 relative">
-                        <Text className="absolute left-4 top-3.5 z-10 text-success font-black">
-                          ₹
+              <View className="flex-1">
+                <ScrollView
+                  className="flex-1 px-7 pt-7"
+                  showsVerticalScrollIndicator={false}
+                  contentContainerStyle={{ paddingBottom: 120 }}
+                >
+                  {issueEntries.map((entry, idx) => (
+                    <View
+                      key={idx}
+                      className="bg-slate-900/40 border border-slate-700 rounded-2xl p-5 mb-4"
+                    >
+                      <View className="flex-row justify-between items-center mb-4">
+                        <Text className="text-[10px] font-black text-text-muted uppercase tracking-widest">
+                          Task #{idx + 1}
                         </Text>
-                        <TextInput
-                          value={entry.issueAmount?.toString()}
-                          onChangeText={(t) => {
+                        <TouchableOpacity
+                          onPress={() => {
                             const copy = [...issueEntries];
-                            copy[idx].issueAmount = t;
+                            copy.splice(idx, 1);
                             setIssueEntries(copy);
                           }}
-                          placeholder="0.00"
-                          placeholderTextColor={COLORS.textMuted}
-                          keyboardType="numeric"
-                          className="bg-slate-900/60 border border-slate-700 rounded-2xl pl-8 pr-4 py-3.5 text-text-primary font-black"
-                        />
-                      </View>
-                      <View
-                        className={`px-4 py-3 rounded-2xl border ${entry.issueStatus === "approved" ? "bg-success/10 border-success" : "bg-slate-900/40 border-slate-700"}`}
-                      >
-                        <Text
-                          className={`text-[10px] font-black uppercase tracking-widest ${entry.issueStatus === "approved" ? "text-text-primary" : "text-text-muted"}`}
                         >
-                          {entry.issueStatus || "pending"}
-                        </Text>
+                          <Ionicons
+                            name="trash"
+                            size={16}
+                            color={COLORS.error}
+                          />
+                        </TouchableOpacity>
+                      </View>
+
+                      <TextInput
+                        value={entry.issue}
+                        onChangeText={(t) => {
+                          const copy = [...issueEntries];
+                          copy[idx].issue = t;
+                          setIssueEntries(copy);
+                        }}
+                        placeholder="Describe car issue..."
+                        placeholderTextColor={COLORS.textMuted}
+                        multiline
+                        className="bg-slate-900/60 border border-slate-700 rounded-2xl p-4 text-text-primary font-bold text-sm min-h-[80px]"
+                      />
+
+                      <View className="flex-row gap-4 mt-4 items-center">
+                        <View className="flex-1 relative">
+                          <Text className="absolute left-4 top-3.5 z-10 text-success font-black">
+                            ₹
+                          </Text>
+                          <TextInput
+                            value={entry.issueAmount?.toString()}
+                            onChangeText={(t) => {
+                              const copy = [...issueEntries];
+                              copy[idx].issueAmount = t;
+                              setIssueEntries(copy);
+                            }}
+                            placeholder="0.00"
+                            placeholderTextColor={COLORS.textMuted}
+                            keyboardType="numeric"
+                            className="bg-slate-900/60 border border-slate-700 rounded-2xl pl-8 pr-4 py-3.5 text-text-primary font-black"
+                          />
+                        </View>
+                        <View
+                          className={`px-4 py-3 rounded-2xl border ${entry.issueStatus === "approved" ? "bg-success/10 border-success" : "bg-slate-900/40 border-slate-700"}`}
+                        >
+                          <Text
+                            className={`text-[10px] font-black uppercase tracking-widest ${entry.issueStatus === "approved" ? "text-text-primary" : "text-text-muted"}`}
+                          >
+                            {entry.issueStatus || "pending"}
+                          </Text>
+                        </View>
                       </View>
                     </View>
-                  </View>
-                ))}
+                  ))}
 
+                  <TouchableOpacity
+                    onPress={() =>
+                      setIssueEntries([
+                        ...issueEntries,
+                        { issue: "", issueAmount: "", issueStatus: "pending" },
+                      ])
+                    }
+                    className="flex-row items-center justify-center p-4 rounded-2xl bg-success border border-card border-dashed"
+                  >
+                    <Ionicons name="add-circle" size={20} color="#fff" />
+                    <Text className="text-text-primary font-bold ml-2 uppercase text-[10px] tracking-widest">
+                      Add another task
+                    </Text>
+                  </TouchableOpacity>
+                </ScrollView>
+              </View>
+
+              <View className="px-7 pb-7 border-t border-slate-700 pt-5">
                 <TouchableOpacity
-                  onPress={() =>
-                    setIssueEntries([
-                      ...issueEntries,
-                      { issue: "", issueAmount: "", issueStatus: "pending" },
-                    ])
-                  }
-                  className="flex-row items-center justify-center p-4 rounded-2xl bg-success border border-card border-dashed"
+                  onPress={saveIssues}
+                  disabled={savingIssues}
+                  className={`w-full py-4 bg-primary rounded-2xl items-center ${savingIssues ? "opacity-30" : ""}`}
                 >
-                  <Ionicons name="add-circle" size={20} color="#fff" />
-                  <Text className="text-text-primary font-bold ml-2 uppercase text-[10px] tracking-widest">
-                    Add another task
-                  </Text>
+                  {savingIssues ? (
+                    <ActivityIndicator color="#FFFFFF" />
+                  ) : (
+                    <Text className="text-text-primary font-black uppercase tracking-widest">
+                      Save All Changes
+                    </Text>
+                  )}
                 </TouchableOpacity>
-              </ScrollView>
-
-              <TouchableOpacity
-                onPress={saveIssues}
-                disabled={savingIssues}
-                className={`w-full py-4 bg-primary p-5 rounded-2xl items-center ${savingIssues ? "opacity-30" : ""}`}
-              >
-                {savingIssues ? (
-                  <ActivityIndicator color="#FFFFFF" />
-                ) : (
-                  <Text className="text-text-primary font-black uppercase tracking-widest">
-                    Save All Changes
-                  </Text>
-                )}
-              </TouchableOpacity>
+              </View>
             </View>
           </KeyboardAvoidingView>
         </Modal>
