@@ -276,7 +276,7 @@ export default function EmployeeBilling() {
         {/* BILLING CARDS */}
         <View className="px-6 pb-24">
           {loading && bills.length === 0 ? (
-            <View className="py-15 items-center bg-card rounded-[32px] border border-dashed border-slate-700">
+            <View className="py-20 items-center bg-card rounded-[32px] border border-dashed border-slate-700">
               <Ionicons
                 name="receipt-outline"
                 size={48}
