@@ -1,3 +1,6 @@
+import { Picker } from "@react-native-picker/picker";
+import dayjs from "dayjs";
+import isBetween from "dayjs/plugin/isBetween";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Stack, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
@@ -15,6 +18,8 @@ import {
 } from "react-native";
 import { apiService } from "../../services/api";
 import { COLORS } from "../../theme/colors";
+
+dayjs.extend(isBetween);
 
 const formatValue = (num: number) => {
   if (num >= 100000) return (num / 100000).toFixed(1) + " L";
@@ -52,7 +57,8 @@ export default function BookedVehicles() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("booked");
+  const [timeFilter, setTimeFilter] = useState("all");
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
 
   const fetchBookings = async (showLoading = true) => {
@@ -161,9 +167,22 @@ export default function BookedVehicles() {
         matchStatus = currentStatus === statusFilter.toLowerCase();
       }
 
-      return matchSearch && matchStatus;
+      let matchTime = true;
+      const bDate = dayjs(b.createdAt);
+      const now = dayjs();
+      if (timeFilter === "today") {
+        matchTime = bDate.isSame(now, "day");
+      } else if (timeFilter === "yesterday") {
+        matchTime = bDate.isSame(now.subtract(1, "day"), "day");
+      } else if (timeFilter === "week") {
+        matchTime = bDate.isAfter(now.subtract(1, "week"));
+      } else if (timeFilter === "month") {
+        matchTime = bDate.isAfter(now.subtract(1, "month"));
+      }
+
+      return matchSearch && matchStatus && matchTime;
     });
-  }, [bookings, search, statusFilter]);
+  }, [bookings, search, statusFilter, timeFilter]);
 
   if (loading && !refreshing) {
     return (
@@ -240,8 +259,8 @@ export default function BookedVehicles() {
           </ScrollView>
 
           {/* SEARCH & FILTERS */}
-          <View className="pb-6 gap-4">
-            <View className="bg-card border border-slate-700 flex-row items-center px-4 rounded-3xl h-14">
+          <View className="pb-6 gap-4 px-2">
+            <View className="bg-card border border-slate-700 flex-row items-center px-4 rounded-3xl h-14 w-full">
               <Ionicons name="search" size={18} color={COLORS.textSecondary} />
               <TextInput
                 placeholder="Search ID, Vehicle or Customer..."
@@ -252,22 +271,36 @@ export default function BookedVehicles() {
               />
             </View>
 
-            <View className="flex-row gap-2">
-              {(
-                ["all", "booked", "confirmed", "sold", "cancelled"] as const
-              ).map((filter) => (
-                <TouchableOpacity
-                  key={filter}
-                  onPress={() => setStatusFilter(filter)}
-                  className={`px-4 py-2 rounded-2xl border ${statusFilter === filter ? "bg-primary border-primary" : "bg-card border-slate-700"}`}
+            <View className="flex-row gap-3">
+              <View className="flex-1 bg-card border border-slate-700 rounded-2xl overflow-hidden h-12 justify-center">
+                <Picker
+                  selectedValue={timeFilter}
+                  onValueChange={(val) => setTimeFilter(val)}
+                  dropdownIconColor={COLORS.primary}
+                  style={{ color: "white", backgroundColor: "transparent" }}
                 >
-                  <Text
-                    className={`text-[9px] font-black uppercase tracking-widest ${statusFilter === filter ? "text-white" : "text-text-secondary"}`}
-                  >
-                    {filter}
-                  </Text>
-                </TouchableOpacity>
-              ))}
+                  <Picker.Item label="All Time" value="all" style={{ fontSize: 12, color: COLORS.background }} />
+                  <Picker.Item label="Today" value="today" style={{ fontSize: 12, color: COLORS.background }} />
+                  <Picker.Item label="Yesterday" value="yesterday" style={{ fontSize: 12, color: COLORS.background }} />
+                  <Picker.Item label="This Week" value="week" style={{ fontSize: 12, color: COLORS.background }} />
+                  <Picker.Item label="This Month" value="month" style={{ fontSize: 12, color: COLORS.background }} />
+                </Picker>
+              </View>
+
+              <View className="flex-1 bg-card border border-slate-700 rounded-2xl overflow-hidden h-12 justify-center">
+                <Picker
+                  selectedValue={statusFilter}
+                  onValueChange={(val) => setStatusFilter(val)}
+                  dropdownIconColor={COLORS.primary}
+                  style={{ color: "white", backgroundColor: "transparent" }}
+                >
+                  <Picker.Item label="All Status" value="all" style={{ fontSize: 12, color: COLORS.background }} />
+                  <Picker.Item label="Booked" value="booked" style={{ fontSize: 12, color: COLORS.background }} />
+                  <Picker.Item label="Confirmed" value="confirmed" style={{ fontSize: 12, color: COLORS.background }} />
+                  <Picker.Item label="Sold" value="sold" style={{ fontSize: 12, color: COLORS.background }} />
+                  <Picker.Item label="Cancelled" value="cancelled" style={{ fontSize: 12, color: COLORS.background }} />
+                </Picker>
+              </View>
             </View>
           </View>
 
