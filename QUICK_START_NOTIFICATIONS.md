@@ -1,5 +1,40 @@
 # Push Notifications - Quick Start
 
+## ⚠️ Expo Go Limitations
+
+**Important**: Push notifications do NOT work in Expo Go on Android (SDK 53+).
+- Use **Development Build** for testing push notifications
+- Local notifications work in Expo Go for basic testing
+
+### Testing with Local Notifications (Expo Go):
+```typescript
+import { 
+  sendEmployeeAssignmentNotification,
+  sendSparePartsStatusNotification,
+  sendAdminOrderNotification,
+  sendAdminEmployeeUpdateNotification,
+  sendAdminVehicleBookingNotification
+} from '../services/notificationService';
+
+// Test employee notifications
+sendEmployeeAssignmentNotification('SVC-001', 'John Doe', 'Oil Change');
+sendSparePartsStatusNotification('SVC-001', 'approved', 'Brake Pads x4');
+
+// Test admin notifications  
+sendAdminOrderNotification('ORD-001', 'Jane Smith', 'pending');
+sendAdminEmployeeUpdateNotification('booking', 'BK-001', 'Mike Johnson', 'completed');
+sendAdminVehicleBookingNotification('VB-001', 'Bob Wilson', 'confirmed');
+```
+
+### Quick Test Script:
+```typescript
+// Import the test script
+import { testNotifications } from '../scripts/testNotifications';
+
+// Run all notification tests
+testNotifications();
+```
+
 ## ✅ What's Already Done
 
 Everything is automatically set up! Your push notification system is **ready to go**. Here's what was implemented:
@@ -10,8 +45,13 @@ Everything is automatically set up! Your push notification system is **ready to 
 3. ✅ Status tracking and change detection
 4. ✅ Booking notifications with booking ID and status
 5. ✅ Support for: Bookings, Appointments, Vehicle Bookings, Orders
-6. ✅ Notification badge counter in Header
-7. ✅ Tap-to-navigate functionality
+6. ✅ **NEW**: Employee assignment notifications
+7. ✅ **NEW**: Spare parts approval/rejection notifications
+8. ✅ **NEW**: Admin order notifications
+9. ✅ **NEW**: Admin employee status update notifications
+10. ✅ **NEW**: Admin vehicle booking notifications
+11. ✅ Notification badge counter in Header
+12. ✅ Tap-to-navigate functionality
 
 ## 🚀 Start Using It Now
 
@@ -26,6 +66,17 @@ Everything is automatically set up! Your push notification system is **ready to 
 - Notification shows: **Booking ID** + **New Status**
 - Example: "Your booking #1001 is now completed"
 - Tap notification → App navigates to relevant screen
+
+### Employee Notifications:
+- When assigned to a service → **"New Service Assignment" notification**
+- When spare parts are approved/rejected → **"Spare Parts Approved/Rejected" notification**
+- Tap notification → Navigate to assigned services page
+
+### Admin Notifications:
+- When users place orders → **"New Order Placed" notification with order ID and user name**
+- When employees update statuses → **"Employee Updated Status" notification**
+- When users book vehicles → **"New Vehicle Booking" notification**
+- Tap notification → Navigate to relevant admin panel screens
 
 ## 📋 Files Created
 

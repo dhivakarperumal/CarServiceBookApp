@@ -29,6 +29,16 @@ export const useNotifications = () => {
         router.push(`/profile/VehicleBookings`);
       } else if (data.type === 'order' && data.orderId) {
         router.push(`/profile/orders`);
+      } else if (data.type === 'employee_assignment' && data.serviceId) {
+        router.push(`/(employee)/assigned`);
+      } else if (data.type === 'spare_parts_status' && data.serviceId) {
+        router.push(`/(employee)/assigned`);
+      } else if (data.type === 'admin_order' && data.orderId) {
+        router.push(`/(admin)/orders`);
+      } else if (data.type === 'admin_employee_update' && data.serviceId) {
+        router.push(`/(admin)/bookings`);
+      } else if (data.type === 'admin_vehicle_booking' && data.vehicleBookingId) {
+        router.push(`/(admin)/booked-vehicles`);
       }
     });
 

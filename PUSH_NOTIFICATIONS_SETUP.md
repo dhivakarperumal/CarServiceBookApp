@@ -1,5 +1,40 @@
 # Push Notification Setup Guide
 
+## ⚠️ Important: Expo Go Limitations
+
+**Expo Go does NOT support push notifications on Android starting from SDK 53+.**
+- ✅ Local notifications work in Expo Go
+- ❌ Push notifications (remote) do NOT work in Expo Go on Android
+- 🔧 Use **Development Build** for full push notification testing
+
+### For Development Testing:
+```bash
+# Install EAS CLI
+npm install -g @expo/cli
+
+# Build development build
+eas build --platform android --profile development
+
+# Run the development build
+npx expo run:android --device
+```
+
+### Alternative: Test with Local Notifications
+The app includes local notification fallbacks that work in Expo Go:
+
+```typescript
+import { 
+  sendEmployeeAssignmentNotification,
+  sendSparePartsStatusNotification,
+  sendAdminOrderNotification 
+} from '../services/notificationService';
+
+// These will work in Expo Go
+sendEmployeeAssignmentNotification('SVC-001', 'John Doe');
+sendSparePartsStatusNotification('SVC-001', 'approved');
+sendAdminOrderNotification('ORD-001', 'Jane Smith', 'pending');
+```
+
 ## Overview
 This guide explains how to implement and use push notifications in your Expo Car Service Booking App.
 
@@ -182,6 +217,156 @@ sendOrderNotification('ORD-001', 'shipped');
 // Title: "Order Status Updated"
 // Body: "Your order #ORD-001 status is shipped"
 ```
+
+### Employee Assignment Notification
+```typescript
+sendEmployeeAssignmentNotification('SVC-001', employeeId, 'John Doe', 'Oil Change');
+// Title: "New Service Assignment"
+// Body: "You have been assigned to service for John Doe"
+```
+
+### Spare Parts Status Notification
+```typescript
+sendSparePartsApprovalNotification('SVC-001', employeeId, 'approved', 'Brake Pads x4');
+// Title: "Spare Parts Approved"
+// Body: "Your spare parts request for service #SVC-001 has been approved"
+```
+
+### Admin Order Notification
+```typescript
+sendNewOrderNotification('ORD-001', 'John Doe', 'pending');
+// Title: "New Order Placed"
+// Body: "Order #ORD-001 placed by John Doe - Status: pending"
+```
+
+### Admin Employee Status Update Notification
+```typescript
+sendEmployeeStatusUpdateNotification('booking', 'BK-001', 'Mike Johnson', 'completed');
+// Title: "Employee Updated Status"
+// Body: "Mike Johnson updated booking #BK-001 to completed"
+```
+
+### Admin Vehicle Booking Notification
+```typescript
+sendNewVehicleBookingNotification('VB-001', 'Jane Smith', 'confirmed');
+// Title: "New Vehicle Booking"
+// Body: "Vehicle booking #VB-001 by Jane Smith - Status: confirmed"
+```
+
+## 👷 Employee Notifications
+
+### Overview
+Employees receive push notifications for:
+1. **Service Assignments** - When a customer service is assigned to them
+2. **Spare Parts Approvals** - When their requested spare parts are approved or rejected by customers
+
+### Backend Implementation
+Add these methods to your backend push notification service:
+
+```javascript
+// Send assignment notification
+async sendEmployeeAssignmentNotification(serviceId, employeeId, customerName, serviceDetails) {
+  const title = 'New Service Assignment';
+  const body = `You have been assigned to service for ${customerName}`;
+  
+  return this.sendToUser(employeeId, title, body, {
+    serviceId: serviceId.toString(),
+    customerName,
+    serviceDetails,
+    type: 'employee_assignment',
+  });
+}
+
+// Send spare parts status notification
+async sendSparePartsApprovalNotification(serviceId, employeeId, status, partDetails) {
+  const title = status === 'approved' ? 'Spare Parts Approved' : 'Spare Parts Rejected';
+  const body = `Your spare parts request for service #${serviceId} has been ${status}`;
+  
+  return this.sendToUser(employeeId, title, body, {
+    serviceId: serviceId.toString(),
+    status,
+    partDetails,
+    type: 'spare_parts_status',
+  });
+}
+```
+
+### Integration Points
+Call these functions when:
+- **Assignment**: When updating service records with `assignedEmployeeId`
+### Parts Approval**: When customers approve/reject spare parts requests in the app
+
+## 👨‍💼 Admin Notifications
+
+### Overview
+Admins receive push notifications for:
+1. **New Orders** - When users place orders with order ID, user name, and status
+2. **Employee Status Updates** - When employees update booking/appointment statuses
+3. **New Vehicle Bookings** - When users make vehicle bookings
+
+### Backend Implementation
+Add these methods to your backend push notification service:
+
+```javascript
+// Send new order notification to admins
+async sendNewOrderNotification(orderId, userName, status) {
+  const title = 'New Order Placed';
+  const body = `Order #${orderId} placed by ${userName} - Status: ${status}`;
+  
+  return this.sendToAdmins(title, body, {
+    orderId: orderId.toString(),
+    userName,
+    status,
+    type: 'admin_order',
+  });
+}
+
+// Send employee status update notification to admins
+async sendEmployeeStatusUpdateNotification(serviceType, serviceId, employeeName, newStatus) {
+  const title = 'Employee Updated Status';
+  const body = `${employeeName} updated ${serviceType} #${serviceId} to ${newStatus}`;
+  
+  return this.sendToAdmins(title, body, {
+    serviceType,
+    serviceId: serviceId.toString(),
+    employeeName,
+    newStatus,
+    type: 'admin_employee_update',
+  });
+}
+
+// Send new vehicle booking notification to admins
+async sendNewVehicleBookingNotification(vehicleBookingId, userName, status) {
+  const title = 'New Vehicle Booking';
+  const body = `Vehicle booking #${vehicleBookingId} by ${userName} - Status: ${status}`;
+  
+  return this.sendToAdmins(title, body, {
+    vehicleBookingId: vehicleBookingId.toString(),
+    userName,
+    status,
+    type: 'admin_vehicle_booking',
+  });
+}
+
+// Helper method to send to all admins
+async sendToAdmins(title, body, data = {}) {
+  // Get all admin user IDs from your database
+  const adminUserIds = await db.query('SELECT id FROM users WHERE role = ?', ['admin']);
+  
+  // Send notification to each admin
+  const notifications = adminUserIds.map(admin => 
+    this.sendToUser(admin.id, title, body, data)
+  );
+  
+  return Promise.all(notifications);
+}
+```
+
+### Integration Points
+Call these functions when:
+- **New Orders**: When users place orders via `/orders` endpoint
+- **Employee Updates**: When employees update booking/appointment status
+- **Vehicle Bookings**: When users create vehicle bookings
 
 ## 🎯 Notification Flow
 
