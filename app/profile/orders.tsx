@@ -1,17 +1,18 @@
+import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  ActivityIndicator,
-  ScrollView,
-  Modal,
+    ActivityIndicator,
+    Modal,
+    RefreshControl,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../../contexts/AuthContext";
 import { api } from "../../services/api";
 import { COLORS } from "../../theme/colors";
-import { Ionicons } from "@expo/vector-icons";
 
 const STATUS_CONFIG = {
   orderplaced: { label: "Order Placed", step: 0 },
@@ -35,6 +36,7 @@ export default function Orders() {
 
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
 
   const fetchOrders = async () => {
@@ -57,6 +59,17 @@ export default function Orders() {
     fetchOrders();
   }, [user?.id]);
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await fetchOrders();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   if (loading) {
     return (
       <SafeAreaView className="flex-1 bg-background justify-center items-center">
@@ -70,7 +83,16 @@ export default function Orders() {
       {orders.length === 0 ? (
         <Text className="text-text-secondary mt-6">No orders found</Text>
       ) : (
-        <ScrollView className="mt-4">
+        <ScrollView
+          className="mt-4"
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={COLORS.primary}
+            />
+          }
+        >
           {orders.map((order: any) => {
             const statusKey = (order.status || "orderplaced").toLowerCase();
             const statusLabel =

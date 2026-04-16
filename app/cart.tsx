@@ -1,22 +1,30 @@
-import React from 'react';
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  Image,
-  SafeAreaView,
-} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router, Stack } from 'expo-router';
-import { useCart, CartItem } from '../contexts/CartContext';
+import React, { useState } from 'react';
+import {
+    FlatList,
+    Image,
+    RefreshControl,
+    SafeAreaView,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+import { CartItem, useCart } from '../contexts/CartContext';
 import { useFavorites } from '../contexts/FavoriteContext';
 import { COLORS } from '../theme/colors';
-import { LinearGradient } from 'expo-linear-gradient';
 
 export default function CartScreen() {
+  const [refreshing, setRefreshing] = useState(false);
   const { cart, removeFromCart, updateQuantity, totalAmount } = useCart();
   const { toggleFavorite, isFavorite } = useFavorites();
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    // Cart items are managed by context, so just simulate refresh
+    setTimeout(() => setRefreshing(false), 1000);
+  };
 
   const handleCheckout = () => {
     if (cart.length === 0) return;
@@ -122,6 +130,9 @@ export default function CartScreen() {
             keyExtractor={(item) => String(item.docId)}
             renderItem={renderCartItem}
             contentContainerStyle={{ padding: 20, paddingBottom: 150 }}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#0EA5E9" />
+            }
           />
           
           <View className="bg-[#1E293B] p-6 rounded-t-[30px] border-t border-[#334155] absolute bottom-0 w-full">

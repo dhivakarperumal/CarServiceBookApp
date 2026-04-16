@@ -3,16 +3,17 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  SafeAreaView,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    RefreshControl,
+    SafeAreaView,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 // @ts-ignore
 import RazorpayCheckout from 'react-native-razorpay';
@@ -34,6 +35,7 @@ export default function CheckoutScreen() {
 
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'CASH' | 'ONLINE'>('CASH');
   const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
   const [showAddressList, setShowAddressList] = useState(false);
@@ -86,6 +88,19 @@ export default function CheckoutScreen() {
       }
     } catch (err) {
       console.warn("Failed to fetch addresses:", err);
+    }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      if (user?.id) {
+        await fetchAddresses();
+      }
+    } catch (err) {
+      console.error("Refresh failed:", err);
+    } finally {
+      setRefreshing(false);
     }
   };
 
@@ -212,7 +227,9 @@ export default function CheckoutScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"
       >
-        <ScrollView contentContainerStyle={{ padding: 20 }} showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerStyle={{ padding: 20 }} showsVerticalScrollIndicator={false} refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#0EA5E9" />
+            }>
           {/* Saved Addresses Toggle */}
           {savedAddresses.length > 0 && (
             <View className="mb-6">

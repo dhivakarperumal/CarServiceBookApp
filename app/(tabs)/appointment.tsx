@@ -3,9 +3,10 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import * as Location from 'expo-location';
 import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { ActivityIndicator, Alert, KeyboardAvoidingView, Modal, Platform, SafeAreaView, ScrollView, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, KeyboardAvoidingView, Modal, Platform, RefreshControl, SafeAreaView, ScrollView, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useAuth } from "../../contexts/AuthContext";
 import { apiService } from "../../services/api";
+import { COLORS } from "../../theme/colors";
 
 const APPOINTMENT_STATUS = {
   BOOKED: "Appointment Booked",
@@ -130,6 +131,7 @@ export default function AppointmentScreen() {
   const [locationQuery, setLocationQuery] = useState("");
   const [locationResults, setLocationResults] = useState<any[]>([]);
   const [coords, setCoords] = useState({ lat: null as any, lng: null as any });
+  const [refreshing, setRefreshing] = useState(false);
   const searchTimeoutRef = useRef<any>(null);
 
   useEffect(() => {
@@ -263,6 +265,26 @@ export default function AppointmentScreen() {
     }
   };
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      // Simulate refresh for form-based page (clear and reset form)
+      setFormData(prev => ({
+        ...prev,
+        otherIssue: "",
+        pickupAddress: "",
+        locationQuery: "",
+        notes: ""
+      }));
+      setLocationResults([]);
+      setLocationQuery("");
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-[#0a0a0b]">
       <View className="px-6 py-4 flex-row justify-between items-center border-b border-white/5">
@@ -277,7 +299,17 @@ export default function AppointmentScreen() {
       </View>
 
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} className="flex-1">
-        <ScrollView className="flex-1 p-5" showsVerticalScrollIndicator={false}>
+        <ScrollView
+          className="flex-1 p-5"
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={COLORS.primary}
+            />
+          }
+        >
           
           <View className="bg-card border border-white/10 rounded-[2.5rem] p-8 mb-20 shadow-2xl">
             

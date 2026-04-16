@@ -1,22 +1,23 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  Image,
-  TouchableOpacity,
-  ActivityIndicator,
-  Alert,
-  Dimensions,
-} from 'react-native';
-import { useLocalSearchParams, Stack, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+    ActivityIndicator,
+    Alert,
+    Dimensions,
+    Image,
+    RefreshControl,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+import { useAuth } from '../../contexts/AuthContext';
+import { useCart } from '../../contexts/CartContext';
+import { useFavorites } from '../../contexts/FavoriteContext';
 import { apiService } from '../../services/api';
 import { COLORS } from '../../theme/colors';
-import { useCart } from '../../contexts/CartContext';
-import { useAuth } from '../../contexts/AuthContext';
-import { useFavorites } from '../../contexts/FavoriteContext';
 
 const { width } = Dimensions.get('window');
 
@@ -24,6 +25,7 @@ export default function ProductDetailsScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
   const [qty, setQty] = useState(1);
@@ -55,6 +57,24 @@ export default function ProductDetailsScreen() {
       Alert.alert('Error', 'Failed to load product details');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      if (slug) {
+        const data = await apiService.getProductBySlug(slug);
+        setProduct(data);
+        if (data?.docId) {
+          const reviewsData = await apiService.getReviews(data.docId);
+          setReviews(reviewsData.filter((r: any) => r.status === 1 || r.status === true));
+        }
+      }
+    } catch (error) {
+      console.error('Error refreshing product:', error);
+    } finally {
+      setRefreshing(false);
     }
   };
 
@@ -138,7 +158,9 @@ export default function ProductDetailsScreen() {
 
   return (
     <View className="flex-1 bg-[#0F172A]">
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView showsVerticalScrollIndicator={false} refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#0EA5E9" />
+            }>
         <Stack.Screen options={{
           title: product.name,
           headerBackTitle: 'Back',

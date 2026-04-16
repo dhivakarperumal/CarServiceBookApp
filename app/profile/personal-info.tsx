@@ -1,15 +1,17 @@
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useState } from "react";
 import {
-  View,
+  ActivityIndicator,
+  Alert,
+  RefreshControl,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
-  Alert,
-  ActivityIndicator,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { LinearGradient } from "expo-linear-gradient";
-import { Ionicons } from "@expo/vector-icons";
 
 import { useAuth } from "../../contexts/AuthContext";
 import { api } from "../../services/api";
@@ -22,6 +24,7 @@ export default function PersonalInfo() {
   const [mobile, setMobile] = useState("");
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   // FETCH USER DATA
   useEffect(() => {
@@ -75,82 +78,106 @@ export default function PersonalInfo() {
     }
   };
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      // Simulate refresh for form-based page (clear form fields)
+      setName("");
+      setMobile("");
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   return (
-    <SafeAreaView className="flex-1 bg-background px-4">
-
-      {/* TITLE */}
-      <View className="flex-row items-center gap-2 mt-6 mb-6">
-        <Ionicons name="person-outline" size={22} color={COLORS.primary} />
-        <Text className="text-text-primary text-xl font-bold">
-          Personal Information
-        </Text>
-      </View>
-
-      {/* INPUTS */}
-      <View className="space-y-4">
-
-        {/* NAME */}
-        <TextInput
-          value={name}
-          onChangeText={setName}
-          placeholder="Full Name"
-          placeholderTextColor="#94a3b8"
-          className="bg-card px-4 py-4 rounded-xl text-white border border-primary/30"
-        />
-
-        {/* MOBILE */}
-        <TextInput
-          value={mobile}
-          onChangeText={(text) => setMobile(text.replace(/[^0-9]/g, ""))}
-          maxLength={10}
-          keyboardType="numeric"
-          placeholder="Mobile Number"
-          placeholderTextColor="#94a3b8"
-          className="bg-card px-4 py-4 mt-4 rounded-xl text-white border border-primary/30"
-        />
-
-        {/* EMAIL (READ ONLY) */}
-        <TextInput
-          value={email}
-          editable={false}
-          placeholder="Email Address"
-          placeholderTextColor="#94a3b8"
-          className="bg-slate800 px-4 py-4 mt-4 rounded-xl text-gray-400 border border-white/10"
-        />
-      </View>
-
-      {/* BUTTON */}
-      <TouchableOpacity
-        onPress={handleUpdate}
-        disabled={loading}
-        activeOpacity={0.8}
-        className="mt-8 rounded-xl overflow-hidden"
+    <SafeAreaView className="flex-1 bg-background">
+      <ScrollView
+        className="px-4"
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={COLORS.primary}
+          />
+        }
       >
-        <LinearGradient
-          colors={GRADIENT}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={{ borderRadius: 12 }}
-          className="py-4 flex-row justify-center items-center"
-        >
-          {loading ? (
-            <>
-              <ActivityIndicator color="#000" />
-              <Text className="ml-2 font-bold text-black">
-                Updating...
-              </Text>
-            </>
-          ) : (
-            <>
-              <Ionicons name="save-outline" size={18} color="#000" />
-              <Text className="ml-2 font-bold text-black">
-                Update Changes
-              </Text>
-            </>
-          )}
-        </LinearGradient>
-      </TouchableOpacity>
 
+        {/* TITLE */}
+        <View className="flex-row items-center gap-2 mt-6 mb-6">
+          <Ionicons name="person-outline" size={22} color={COLORS.primary} />
+          <Text className="text-text-primary text-xl font-bold">
+            Personal Information
+          </Text>
+        </View>
+
+        {/* INPUTS */}
+        <View className="space-y-4">
+
+          {/* NAME */}
+          <TextInput
+            value={name}
+            onChangeText={setName}
+            placeholder="Full Name"
+            placeholderTextColor="#94a3b8"
+            className="bg-card px-4 py-4 rounded-xl text-white border border-primary/30"
+          />
+
+          {/* MOBILE */}
+          <TextInput
+            value={mobile}
+            onChangeText={(text) => setMobile(text.replace(/[^0-9]/g, ""))}
+            maxLength={10}
+            keyboardType="numeric"
+            placeholder="Mobile Number"
+            placeholderTextColor="#94a3b8"
+            className="bg-card px-4 py-4 mt-4 rounded-xl text-white border border-primary/30"
+          />
+
+          {/* EMAIL (READ ONLY) */}
+          <TextInput
+            value={email}
+            editable={false}
+            placeholder="Email Address"
+            placeholderTextColor="#94a3b8"
+            className="bg-slate800 px-4 py-4 mt-4 rounded-xl text-gray-400 border border-white/10"
+          />
+        </View>
+
+        {/* BUTTON */}
+        <TouchableOpacity
+          onPress={handleUpdate}
+          disabled={loading}
+          activeOpacity={0.8}
+          className="mt-8 rounded-xl overflow-hidden"
+        >
+          <LinearGradient
+            colors={GRADIENT}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={{ borderRadius: 12 }}
+            className="py-4 flex-row justify-center items-center"
+          >
+            {loading ? (
+              <>
+                <ActivityIndicator color="#000" />
+                <Text className="ml-2 font-bold text-black">
+                  Updating...
+                </Text>
+              </>
+            ) : (
+              <>
+                <Ionicons name="save-outline" size={18} color="#000" />
+                <Text className="ml-2 font-bold text-black">
+                  Update Changes
+                </Text>
+              </>
+            )}
+          </LinearGradient>
+        </TouchableOpacity>
+
+      </ScrollView>
     </SafeAreaView>
   );
 }

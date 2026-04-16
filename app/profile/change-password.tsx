@@ -1,15 +1,17 @@
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import React, { useState } from "react";
 import {
-    View,
+    ActivityIndicator,
+    Alert,
+    RefreshControl,
+    ScrollView,
     Text,
     TextInput,
     TouchableOpacity,
-    Alert,
-    ActivityIndicator,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import { useAuth } from "../../contexts/AuthContext";
 import { api } from "../../services/api";
 import { COLORS, GRADIENT } from "../../theme/colors";
@@ -21,6 +23,7 @@ export default function ChangePassword() {
     const [newPwd, setNewPwd] = useState("");
     const [confirmPwd, setConfirmPwd] = useState("");
     const [loading, setLoading] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
 
     const [showCurrent, setShowCurrent] = useState(false);
     const [showNew, setShowNew] = useState(false);
@@ -65,8 +68,32 @@ export default function ChangePassword() {
         }
     };
 
+    const onRefresh = async () => {
+        setRefreshing(true);
+        try {
+            // Simulate refresh for form-based page (clear all password fields)
+            setCurrentPwd("");
+            setNewPwd("");
+            setConfirmPwd("");
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setRefreshing(false);
+        }
+    };
+
     return (
-        <SafeAreaView className="flex-1 bg-background px-4">
+        <SafeAreaView className="flex-1 bg-background">
+            <ScrollView
+                className="px-4"
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                        tintColor={COLORS.primary}
+                    />
+                }
+            >
 
             {/* TITLE */}
             <View className="flex-row items-center gap-2 mt-6 mb-6">
@@ -184,6 +211,7 @@ export default function ChangePassword() {
                 </LinearGradient>
             </TouchableOpacity>
 
+            </ScrollView>
         </SafeAreaView>
     );
 }

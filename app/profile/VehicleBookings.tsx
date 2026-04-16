@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  ActivityIndicator,
+    ActivityIndicator,
+    FlatList,
+    RefreshControl,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { api } from "../../services/api";
 import { useAuth } from "../../contexts/AuthContext";
+import { api } from "../../services/api";
+import { COLORS } from "../../theme/colors";
 import VehicleBookingModal from "./VehicleBookingModal";
 
 type Booking = {
@@ -32,6 +34,7 @@ const VehicleBookings: React.FC = () => {
 
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
 
   const fetchBookings = async () => {
@@ -51,6 +54,17 @@ const VehicleBookings: React.FC = () => {
   useEffect(() => {
     fetchBookings();
   }, [user?.id]);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await fetchBookings();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -81,6 +95,13 @@ const VehicleBookings: React.FC = () => {
           keyExtractor={(item) => item.id.toString()}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 20 }}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={COLORS.primary}
+            />
+          }
           renderItem={({ item }) => (
             <TouchableOpacity
               onPress={() => setSelectedBooking(item)}

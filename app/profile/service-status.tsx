@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
-  FlatList,
-  Modal,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    FlatList,
+    Modal,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../../contexts/AuthContext";
@@ -98,6 +98,7 @@ const ServiceStatus: React.FC = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [spareParts, setSpareParts] = useState<SpareService[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
   const [showSpareModal, setShowSpareModal] = useState<boolean>(false);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [approving, setApproving] = useState<boolean>(false);
@@ -309,6 +310,17 @@ const ServiceStatus: React.FC = () => {
   useEffect(() => {
     fetchData();
   }, [user]);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await fetchData();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const handleApprove = async (
     serviceId: number,
@@ -547,6 +559,13 @@ const ServiceStatus: React.FC = () => {
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderItem}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={COLORS.primary}
+          />
+        }
       />
 
       {/* MODAL */}

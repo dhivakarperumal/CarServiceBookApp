@@ -1,12 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    RefreshControl,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../../contexts/AuthContext";
@@ -23,6 +24,7 @@ const History = () => {
   const { user } = useAuth();
   const [completedServices, setCompletedServices] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [expandedService, setExpandedService] = useState(null);
 
   const fetchCompletedServices = React.useCallback(async () => {
@@ -77,6 +79,17 @@ const History = () => {
     }
   }, [user?.uid, fetchCompletedServices]);
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await fetchCompletedServices();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   if (loading) {
     return (
       <SafeAreaView className="flex-1 bg-background">
@@ -107,7 +120,16 @@ const History = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <ScrollView className="flex-1 p-4">
+      <ScrollView
+        className="flex-1 p-4"
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={COLORS.primary}
+          />
+        }
+      >
         <Text className="text-3xl font-bold text-sky text-center mb-6">
           📜 Service History
         </Text>
