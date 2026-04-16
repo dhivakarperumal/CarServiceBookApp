@@ -48,7 +48,17 @@ const Header: React.FC = () => {
   const router = useRouter();
 
   const { user, logout } = useAuth() as AuthContextType;
-  const { totalItems: cartCount } = useCart() as CartContextType;
+  const { cart } = useCart() as any;
+  const userCartCount = cart
+  .filter(
+    (item: any) =>
+      item.userId === user?.id ||
+      item.user_id === user?.id ||
+      item.uid === user?.id ||
+      item.uid === user?.uid ||
+      item.email?.toLowerCase() === user?.email?.toLowerCase()
+  )
+  .length;
 
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
   const [notificationOpen, setNotificationOpen] = useState<boolean>(false);
@@ -316,10 +326,10 @@ const Header: React.FC = () => {
               </TouchableOpacity>
 
               {/* 🔴 CART BADGE */}
-              {cartCount > 0 && (
+              {userCartCount > 0 && (
                 <View className="absolute -top-2 -right-2 bg-red-500 rounded-full px-1.5 min-w-[16px] h-[16px] items-center justify-center">
                   <Text className="text-[10px] text-white font-bold">
-                    {cartCount}
+                    {userCartCount}
                   </Text>
                 </View>
               )}

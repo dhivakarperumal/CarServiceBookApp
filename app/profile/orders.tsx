@@ -1,13 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Modal,
-    RefreshControl,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Modal,
+  RefreshControl,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../../contexts/AuthContext";
@@ -38,6 +38,7 @@ export default function Orders() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState<"current" | "delivered">("current");
 
   const fetchOrders = async () => {
     if (!user?.id) {
@@ -78,10 +79,24 @@ export default function Orders() {
     );
   }
 
+  const filteredOrders = orders.filter((order: any) => {
+    const status = (order.status || "").toLowerCase();
+
+    if (activeTab === "delivered") {
+      return status === "delivered";
+    }
+
+    return status !== "delivered" && status !== "cancelled";
+  });
+
   return (
-    <SafeAreaView className="flex-1 bg-background px-4">
-      {orders.length === 0 ? (
-        <Text className="text-text-secondary mt-6">No orders found</Text>
+    <SafeAreaView edges={["left", "right"]} className="flex-1 bg-background px-4">
+      {filteredOrders.length === 0 ? (
+        <Text className="text-text-secondary mt-6">
+          {activeTab === "current"
+            ? "No current orders found"
+            : "No delivered orders found"}
+        </Text>
       ) : (
         <ScrollView
           className="mt-4"
@@ -93,7 +108,35 @@ export default function Orders() {
             />
           }
         >
-          {orders.map((order: any) => {
+
+          <View className="flex-row mt-4 mb-4 bg-card rounded-2xl p-1">
+            <TouchableOpacity
+              onPress={() => setActiveTab("current")}
+              className={`flex-1 py-3 rounded-2xl ${activeTab === "current" ? "bg-primary" : ""
+                }`}
+            >
+              <Text
+                className={`text-center font-bold ${activeTab === "current" ? "text-black" : "text-white"
+                  }`}
+              >
+                Current Orders
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => setActiveTab("delivered")}
+              className={`flex-1 py-3 rounded-2xl ${activeTab === "delivered" ? "bg-primary" : ""
+                }`}
+            >
+              <Text
+                className={`text-center font-bold ${activeTab === "delivered" ? "text-black" : "text-white"
+                  }`}
+              >
+                Delivered Orders
+              </Text>
+            </TouchableOpacity>
+          </View>
+          {filteredOrders.map((order: any) => {
             const statusKey = (order.status || "orderplaced").toLowerCase();
             const statusLabel =
               STATUS_CONFIG[statusKey]?.label || "Order Placed";
@@ -271,9 +314,8 @@ function OrderModal({ order, onClose }: any) {
                   {/* CIRCLE + LINE */}
                   <View className="items-center mr-3">
                     <View
-                      className={`w-7 h-7 rounded-full items-center justify-center ${
-                        index <= currentStep ? "bg-primary" : "bg-gray-700"
-                      }`}
+                      className={`w-7 h-7 rounded-full items-center justify-center ${index <= currentStep ? "bg-primary" : "bg-gray-700"
+                        }`}
                     >
                       <Text className="text-black text-xs font-bold">
                         {index + 1}
@@ -282,20 +324,18 @@ function OrderModal({ order, onClose }: any) {
 
                     {index !== STATUS_STEPS.length - 1 && (
                       <View
-                        className={`w-[2px] h-6 mt-1 ${
-                          index < currentStep ? "bg-primary" : "bg-gray-700"
-                        }`}
+                        className={`w-[2px] h-6 mt-1 ${index < currentStep ? "bg-primary" : "bg-gray-700"
+                          }`}
                       />
                     )}
                   </View>
 
                   {/* LABEL */}
                   <Text
-                    className={`mt-1 ${
-                      index <= currentStep
-                        ? "text-primary font-bold"
-                        : "text-text-secondary"
-                    }`}
+                    className={`mt-1 ${index <= currentStep
+                      ? "text-primary font-bold"
+                      : "text-text-secondary"
+                      }`}
                   >
                     {step}
                   </Text>
