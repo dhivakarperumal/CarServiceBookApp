@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { ExpoImage } from "expo-image";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -10,7 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { api } from "../../services/api";
+import { api, IMAGE_URL } from "../../services/api";
 import { COLORS } from "../../theme/colors";
 
 /* ─── HELPERS ─── */
@@ -267,13 +268,14 @@ export default function OrderDetails() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.background }}>
+      <Stack.Screen options={{ headerShown: false }} />
       {/* ── HEADER ── */}
       <View
         style={{
           flexDirection: "row",
           alignItems: "center",
           gap: 14,
-          paddingHorizontal: 24,
+          paddingHorizontal: 8,
           paddingTop: 40,
           paddingBottom: 20,
           borderBottomWidth: 1,
@@ -299,7 +301,7 @@ export default function OrderDetails() {
           <Text
             style={{
               color: "white",
-              fontSize: 20,
+              fontSize: 18,
               fontWeight: "900",
               textTransform: "uppercase",
             }}
@@ -338,7 +340,7 @@ export default function OrderDetails() {
       </View>
 
       <ScrollView
-        contentContainerStyle={{ padding: 24, paddingBottom: 100 }}
+        contentContainerStyle={{ padding: 8, paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
       >
         {/* ── ORDER TRACKING ── */}
@@ -360,9 +362,9 @@ export default function OrderDetails() {
                     <View style={{ alignItems: "center", gap: 6 }}>
                       <View
                         style={{
-                          width: 38,
-                          height: 38,
-                          borderRadius: 19,
+                          width: 34,
+                          height: 34,
+                          borderRadius: 17,
                           backgroundColor: done
                             ? COLORS.primary
                             : COLORS.cardLight,
@@ -374,7 +376,7 @@ export default function OrderDetails() {
                       >
                         <Ionicons
                           name={done ? "checkmark" : (step.icon as any)}
-                          size={16}
+                          size={14}
                           color={done ? COLORS.white : COLORS.textSecondary}
                         />
                       </View>
@@ -504,22 +506,26 @@ export default function OrderDetails() {
                 label="Address"
                 value={order.shippingAddress}
               />
-              <View style={{ flexDirection: "row", gap: 12 }}>
-                <View style={{ flex: 1 }}>
-                  <InfoRow
-                    iconName="business-outline"
-                    label="City / State"
-                    value={`${order.shippingCity || "-"}, ${order.shippingState || "-"}`}
-                  />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <InfoRow
-                    iconName="map-outline"
-                    label="ZIP / Country"
-                    value={`${order.shippingZip || "-"}, ${order.shippingCountry || "-"}`}
-                  />
-                </View>
-              </View>
+              <InfoRow
+                iconName="business-outline"
+                label="City"
+                value={order.shippingCity}
+              />
+              <InfoRow
+                iconName="map-outline"
+                label="State"
+                value={order.shippingState}
+              />
+              <InfoRow
+                iconName="pin-outline"
+                label="ZIP Code"
+                value={order.shippingZip}
+              />
+              <InfoRow
+                iconName="globe-outline"
+                label="Country"
+                value={order.shippingCountry}
+              />
             </>
           )}
         </Card>
@@ -539,7 +545,7 @@ export default function OrderDetails() {
           >
             <Text
               style={{
-                flex: 2,
+                flex: 3,
                 color: COLORS.textSecondary,
                 fontSize: 8,
                 fontWeight: "900",
@@ -562,7 +568,7 @@ export default function OrderDetails() {
             </Text>
             <Text
               style={{
-                flex: 1,
+                flex: 1.5,
                 color: COLORS.textSecondary,
                 fontSize: 8,
                 fontWeight: "900",
@@ -574,77 +580,146 @@ export default function OrderDetails() {
             </Text>
           </View>
 
-          {(order.items || []).map((item: any, idx: number) => (
-            <View
-              key={idx}
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                paddingVertical: 10,
-                borderBottomWidth: idx < order.items.length - 1 ? 1 : 0,
-                borderBottomColor: COLORS.slate700,
-              }}
-            >
-              <View style={{ flex: 2 }}>
-                <Text
-                  style={{
-                    color: COLORS.textPrimary,
-                    fontSize: 12,
-                    fontWeight: "700",
-                  }}
-                >
-                  {item.name}
-                </Text>
-                {item.variant ? (
-                  <Text
-                    style={{
-                      color: COLORS.textSecondary,
-                      fontSize: 10,
-                      marginTop: 2,
-                    }}
-                  >
-                    {item.variant}
-                  </Text>
-                ) : null}
-              </View>
+          {(order.items || []).map((item: any, idx: number) => {
+            const parseImageData = (data: any): string | null => {
+              if (!data) return null;
+              try {
+                // If it's already an array
+                if (Array.isArray(data)) return data[0] || null;
+                
+                // If it's a JSON string (common in this backend)
+                if (typeof data === 'string' && data.startsWith('[')) {
+                  const parsed = JSON.parse(data);
+                  if (Array.isArray(parsed)) return parsed[0] || null;
+                }
+                
+                // If it's an object with keys like {img1: '...', img2: '...'}
+                if (typeof data === 'object') {
+                  const values = Object.values(data).filter(v => typeof v === 'string' && v.length > 0);
+                  return values[0] as string || null;
+                }
+                
+                // If it's just a string (check if it's JSON anyway)
+                if (typeof data === 'string') {
+                  try {
+                    const parsed = JSON.parse(data);
+                    if (Array.isArray(parsed)) return parsed[0] || null;
+                    if (typeof parsed === 'string') return parsed;
+                  } catch {
+                    return data;
+                  }
+                }
+              } catch (e) {
+                console.warn('Image parse error:', e);
+              }
+              return typeof data === 'string' ? data : null;
+            };
+
+            const getProductImage = (item: any): string | null => {
+              // Priority order for fields
+              const rawData = item.images || item.image || item.thumbnail || item.productImage || item.product_image || item.img;
+              const img = parseImageData(rawData);
+              
+              if (!img) return null;
+              if (img.startsWith('data:')) return img;
+              if (img.startsWith('http')) return img;
+              
+              // Base URL resolution
+              return `https://cars.qtechx.com/${img.startsWith('/') ? img.substring(1) : img}`;
+            };
+            
+            const imageUri = getProductImage(item);
+
+            return (
               <View
+                key={idx}
                 style={{
-                  flex: 1,
+                  flexDirection: "row",
                   alignItems: "center",
-                  backgroundColor: COLORS.cardLight,
-                  borderRadius: 8,
-                  paddingVertical: 4,
+                  paddingVertical: 12,
+                  borderBottomWidth: idx < order.items.length - 1 ? 1 : 0,
+                  borderBottomColor: COLORS.slate700,
                 }}
               >
-                <Text
+                {/* Product Image */}
+                <View style={{ width: 50, height: 50, borderRadius: 12, backgroundColor: COLORS.cardLight, marginRight: 12, overflow: 'hidden', borderWidth: 1, borderColor: COLORS.slate700 }}>
+                  {imageUri ? (
+                    <ExpoImage 
+                      source={{ uri: imageUri }} 
+                      style={{ width: '100%', height: '100%' }}
+                      contentFit="cover"
+                      transition={200}
+                    />
+                  ) : (
+                    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                      <Ionicons name="cube-outline" size={20} color={COLORS.textMuted} />
+                    </View>
+                  )}
+                </View>
+
+                <View style={{ flex: 3 }}>
+                  <Text
+                    style={{
+                      color: COLORS.textPrimary,
+                      fontSize: 12,
+                      fontWeight: "900",
+                    }}
+                    numberOfLines={2}
+                  >
+                    {item.name}
+                  </Text>
+                  {item.variant ? (
+                    <Text
+                      style={{
+                        color: COLORS.textSecondary,
+                        fontSize: 10,
+                        marginTop: 2,
+                        fontWeight: '700'
+                      }}
+                    >
+                      {item.variant}
+                    </Text>
+                  ) : null}
+                </View>
+                <View
                   style={{
-                    color: COLORS.primary,
-                    fontSize: 12,
-                    fontWeight: "900",
+                    flex: 1,
+                    alignItems: "center",
+                    backgroundColor: COLORS.cardLight,
+                    borderRadius: 10,
+                    paddingVertical: 6,
                   }}
                 >
-                  {item.qty}
-                </Text>
+                  <Text
+                    style={{
+                      color: COLORS.primary,
+                      fontSize: 13,
+                      fontWeight: "900",
+                    }}
+                  >
+                    {item.qty}
+                  </Text>
+                </View>
+                <View style={{ flex: 1.5, alignItems: "flex-end" }}>
+                  <Text
+                    style={{
+                      color: COLORS.textPrimary,
+                      fontSize: 13,
+                      fontWeight: "900",
+                    }}
+                  >
+                    ₹
+                    {Number(
+                      item.total || item.price * item.qty || 0,
+                    ).toLocaleString("en-IN")}
+                  </Text>
+                  <Text style={{ color: COLORS.textSecondary, fontSize: 9, fontWeight: '700' }}>
+                    ₹{Number(item.price || 0).toLocaleString("en-IN")} ea
+                  </Text>
+                </View>
               </View>
-              <View style={{ flex: 1, alignItems: "flex-end" }}>
-                <Text
-                  style={{
-                    color: COLORS.textPrimary,
-                    fontSize: 12,
-                    fontWeight: "700",
-                  }}
-                >
-                  ₹
-                  {Number(
-                    item.total || item.price * item.qty || 0,
-                  ).toLocaleString("en-IN")}
-                </Text>
-                <Text style={{ color: COLORS.textSecondary, fontSize: 10 }}>
-                  ₹{Number(item.price || 0).toLocaleString("en-IN")} ea
-                </Text>
-              </View>
-            </View>
-          ))}
+            );
+          })}
         </Card>
 
         {/* ── PAYMENT SUMMARY ── */}
