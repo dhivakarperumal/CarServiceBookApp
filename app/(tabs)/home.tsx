@@ -967,7 +967,7 @@ export default function HomeScreen({ navigation }: any) {
               No vehicle bookings found.
             </Text>
           ) : (
-            vehicleBookings.slice(0, 3).map((item) => (
+            vehicleBookings.map((item) => (
               <TouchableOpacity
                 key={item.id || item.bookingId}
                 onPress={() => setSelectedVehicleBooking(item)}
