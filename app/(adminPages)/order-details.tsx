@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { ExpoImage } from "expo-image";
+import { Image as ExpoImage } from "expo-image";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -11,7 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { api, IMAGE_URL } from "../../services/api";
+import { api } from "../../services/api";
 import { COLORS } from "../../theme/colors";
 
 /* ─── HELPERS ─── */
