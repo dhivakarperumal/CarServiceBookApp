@@ -16,6 +16,7 @@ import {
 import { useAuth } from "../../contexts/AuthContext";
 import { api } from "../../services/api";
 
+
 const CustomInput = ({ label, required, ...props }: any) => (
   <View className="mb-4">
     <Text className="mb-2 text-[10px] uppercase font-black text-text-muted tracking-wider ml-1">
@@ -37,8 +38,10 @@ const SectionTitle = ({ title }: { title: string }) => (
 
 export default function AddBillingScreen() {
   const router = useRouter();
-  const { directServiceId } = useLocalSearchParams();
+  const { directServiceId, id } = useLocalSearchParams();
   const { user: userProfile } = useAuth();
+  const serviceId = Array.isArray(directServiceId) ? directServiceId[0] : directServiceId;
+  const billingId = Array.isArray(id) ? id[0] : id;
 
   const generateInvoiceNo = (currentCount = 0) =>
     `INV${String(currentCount + 1).padStart(3, "0")}`;
@@ -75,21 +78,29 @@ export default function AddBillingScreen() {
   }, [userProfile?.id]);
 
   useEffect(() => {
-    if (directServiceId && !loading) {
+    if (serviceId && !loading) {
       const match = services.find(
-        (s) => s.id.toString() === directServiceId.toString(),
+        (s) => s.id.toString() === serviceId.toString(),
       );
       if (match) {
         selectService(match);
       } else {
-        fetchDirectService(directServiceId);
+        fetchDirectService(serviceId);
       }
     }
-  }, [directServiceId, services, loading]);
+  }, [serviceId, services, loading]);
 
   useEffect(() => {
-    setInvoiceNo(generateInvoiceNo(billingCount));
-  }, [selectedService, billingMode, billingCount]);
+    if (!billingId) {
+      setInvoiceNo(generateInvoiceNo(billingCount));
+    }
+  }, [billingCount, billingId]);
+
+  useEffect(() => {
+    if (billingId) {
+      fetchBillingForEdit(billingId);
+    }
+  }, [billingId]);
 
   const filteredServices = useMemo(() => {
     const searchTerm = search.toLowerCase().trim();
@@ -321,6 +332,93 @@ export default function AddBillingScreen() {
   const gstAmount = (subTotal * gst) / 100;
   const grandTotal = subTotal + gstAmount;
 
+  const fetchBillingForEdit = async (billingId: string) => {
+    try {
+      setLoading(true);
+
+      const res = await api.get(`/billings/${billingId}`);
+      const bill = res.data;
+
+      setInvoiceNo(bill.invoiceNo || "");
+
+      const isManual =
+        bill.billingType?.toLowerCase() === "manual" ||
+        !bill.serviceId;
+
+      setBillingMode(isManual ? "manual" : "online");
+
+      // -------------------------
+      // ONLINE BILLING PREFILL
+      // -------------------------
+      if (!isManual && bill.serviceId) {
+        const matchedService = services.find(
+          (s) => String(s.id) === String(bill.serviceId)
+        );
+
+        if (matchedService) {
+          // Use selectService to populate parts and issues
+          await selectService(matchedService);
+        } else {
+          // fallback fetch service if not in dropdown list
+          try {
+            const serviceRes = await api.get(`/all-services/${bill.serviceId}`);
+            // Use selectService to populate parts and issues
+            await selectService(serviceRes.data);
+          } catch (err) {
+            console.log("Service fetch failed", err);
+          }
+        }
+      } else if (isManual) {
+        setSelectedService(null);
+      }
+
+      // ------------------------- 
+      // MANUAL BILLING PREFILL
+      // -------------------------
+      setManualCustomerName(bill.customerName || "");
+      setManualContactNumber(bill.mobileNumber || "");
+      setManualPlateNumber(
+        bill.plateNumber || bill.registrationNumber || ""
+      );
+
+      const carParts = (bill.car || "").split(" ");
+      setManualVehicleBrand(carParts[0] || "");
+      setManualVehicleModel(carParts.slice(1).join(" ") || "");
+
+      // -------------------------
+      // PARTS PREFILL
+      // -------------------------
+      setParts(
+        (bill.parts || []).map((p: any) => ({
+          partName: p.partName || "",
+          qty: Number(p.qty || 0),
+          price: Number(p.price || 0),
+          total:
+            Number(p.total || 0) ||
+            Number(p.qty || 0) * Number(p.price || 0),
+        }))
+      );
+
+      // -------------------------
+      // ISSUES PREFILL
+      // -------------------------
+      setIssues(
+        (bill.issues || []).map((i: any) => ({
+          issueName: i.issueName || i.issue || "",
+          amount: Number(i.amount || 0),
+        }))
+      );
+
+      setWorkforceCharges(String(bill.labour || 0));
+      setGstPercent(String(bill.gstPercent || 18));
+    } catch (err) {
+      console.error(err);
+      Alert.alert("Error", "Failed to load invoice details");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleGenerateBill = async () => {
     if (billingMode === "online" && !selectedService) {
       Alert.alert(
@@ -396,7 +494,11 @@ export default function AddBillingScreen() {
         createdAt: new Date().toISOString(),
       };
 
-      await api.post("/billings", payload);
+      if (id) {
+        await api.put(`/billings/${id}`, payload);
+      } else {
+        await api.post("/billings", payload);
+      }
 
       if (billingMode === "online") {
         await api
@@ -409,12 +511,16 @@ export default function AddBillingScreen() {
       const nextCount = billingCount + 1;
       setBillingCount(nextCount);
       resetForm(nextCount);
-      Alert.alert("Success", "Invoice created successfully.", [
-        {
-          text: "OK",
-          onPress: () => router.replace("/(admin)/services"),
-        },
-      ]);
+      Alert.alert(
+        "Success",
+        id ? "Invoice updated successfully." : "Invoice created successfully.",
+        [
+          {
+            text: "OK",
+            onPress: () => router.replace("/(admin)/services"),
+          },
+        ]
+      );
     } catch (error) {
       console.error(error);
       Alert.alert("Error", "Failed to create invoice.");
@@ -451,8 +557,8 @@ export default function AddBillingScreen() {
                 >
                   <Text
                     className={`text-[10px] font-black uppercase tracking-wider ${billingMode === option.mode
-                        ? "text-text-primary"
-                        : "text-text-muted"
+                      ? "text-text-primary"
+                      : "text-text-muted"
                       }`}
                   >
                     {option.label}
