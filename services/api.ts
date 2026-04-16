@@ -520,7 +520,7 @@ export const apiService = {
         params: { uid },
       });
 
-      console.log('✅ ALL SERVICES API:', response.data);
+      // console.log('✅ ALL SERVICES API:', response.data);
 
       const data = Array.isArray(response.data)
         ? response.data

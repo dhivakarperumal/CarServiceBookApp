@@ -515,7 +515,7 @@ export default function HomeScreen({ navigation }: any) {
           userServices.map(async (service: any) => {
             try {
               const detailRes = await api.get(`/all-services/${service.id}`);
-              console.log(`Home: service ${service.id} (${service.bookingId}) has ${detailRes.data?.issues?.length || 0} issues`);
+              // console.log(`Home: service ${service.id} (${service.bookingId}) has ${detailRes.data?.issues?.length || 0} issues`);
               return {
                 ...service,
                 parts:
@@ -589,8 +589,8 @@ export default function HomeScreen({ navigation }: any) {
             );
           });
 
-          console.log(`Home: booking ${booking.bookingId} matched service:`, matchedService?.id, matchedService?.bookingId);
-          console.log(`Home: booking ${booking.bookingId} getting ${matchedService?.issues?.length || 0} issues from service ${matchedService?.id}`);
+          // console.log(`Home: booking ${booking.bookingId} matched service:`, matchedService?.id, matchedService?.bookingId);
+          // console.log(`Home: booking ${booking.bookingId} getting ${matchedService?.issues?.length || 0} issues from service ${matchedService?.id}`);
 
           return {
             ...booking,
