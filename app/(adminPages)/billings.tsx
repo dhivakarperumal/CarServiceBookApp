@@ -19,16 +19,14 @@ const StatusBadge = ({ status }: { status: string }) => {
 
   return (
     <View
-      className={`px-2 py-1 rounded-md border ${
-        isPaid
-          ? "bg-emerald-500/10 border-emerald-500/20"
-          : "bg-rose-500/10 border-rose-500/20"
-      }`}
+      className={`px-2 py-1 rounded-md border ${isPaid
+        ? "bg-emerald-500/10 border-emerald-500/20"
+        : "bg-rose-500/10 border-rose-500/20"
+        }`}
     >
       <Text
-        className={`text-[8px] font-black uppercase ${
-          isPaid ? "text-emerald-500" : "text-rose-500"
-        }`}
+        className={`text-[8px] font-black uppercase ${isPaid ? "text-emerald-500" : "text-rose-500"
+          }`}
       >
         {status}
       </Text>
@@ -41,7 +39,7 @@ export default function BillingsLedger() {
   const [billings, setBillings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("paid");
 
   const fetchBillings = async () => {
     try {
@@ -59,10 +57,11 @@ export default function BillingsLedger() {
     fetchBillings();
   }, []);
 
-  const filteredBillings = billings.filter((b) => {
-    if (statusFilter === "all") return true;
-    return (b.paymentStatus || "Pending").toLowerCase().includes(statusFilter);
-  });
+  const filteredBillings = billings.filter((b) =>
+    (b.paymentStatus || "Pending")
+      .toLowerCase()
+      .includes(statusFilter.toLowerCase())
+  );
 
   const handleMarkPaid = async (id: any) => {
     Alert.alert("Confirm Payment", "Mark this invoice as fully PAID?", [
@@ -71,10 +70,47 @@ export default function BillingsLedger() {
         text: "Confirm",
         onPress: async () => {
           try {
-            await apiService.updateBillingStatus(id, "Paid");
-            fetchBillings();
+            await apiService.updateBillingStatus(id, {
+              paymentStatus: "Paid",
+            });
+
+            setBillings((prev) =>
+              prev.map((b) =>
+                b.id === id
+                  ? {
+                    ...b,
+                    paymentStatus: "Paid",
+                  }
+                  : b
+              )
+            );
           } catch {
             Alert.alert("Error", "Failed to update payment status");
+          }
+        },
+      },
+    ]);
+  };
+
+  const formatValue = (num: number) => {
+    if (num >= 100000) return (num / 100000).toFixed(1) + "L";
+    if (num >= 1000) return (num / 1000).toFixed(1) + "K";
+    return num.toLocaleString();
+  };
+
+  const handleDelete = async (id: any) => {
+    Alert.alert("Delete Invoice", "Are you sure you want to delete this invoice?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await apiService.deleteBilling(id);
+
+            setBillings((prev) => prev.filter((b) => b.id !== id));
+          } catch {
+            Alert.alert("Error", "Failed to delete invoice");
           }
         },
       },
@@ -116,9 +152,9 @@ export default function BillingsLedger() {
           </Text>
           <Text className="text-white font-black text-lg mt-1">
             ₹
-            {billings
-              .reduce((s, b) => s + Number(b.grandTotal || b.total || 0), 0)
-              .toLocaleString()}
+            {formatValue(
+              billings.reduce((s, b) => s + Number(b.grandTotal || 0), 0)
+            )}
           </Text>
         </View>
 
@@ -137,29 +173,25 @@ export default function BillingsLedger() {
 
       {/* FILTER */}
       <View className="px-4 mb-2">
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <View className="flex-row gap-2">
-            {["all", "paid", "partial", "pending"].map((f) => (
-              <TouchableOpacity
-                key={f}
-                onPress={() => setStatusFilter(f)}
-                className={`px-5 h-10 rounded-2xl border items-center justify-center ${
-                  statusFilter === f
-                    ? "bg-primary border-primary"
-                    : "bg-card border-slate-700"
+        <View className="flex-row justify-between gap-3">
+          {["paid", "pending"].map((f) => (
+            <TouchableOpacity
+              key={f}
+              onPress={() => setStatusFilter(f)}
+              className={`flex-1 h-12 rounded-2xl border items-center justify-center ${statusFilter === f
+                ? "bg-primary border-primary"
+                : "bg-card border-slate-700"
                 }`}
-              >
-                <Text
-                  className={`text-[9px] font-black uppercase ${
-                    statusFilter === f ? "text-black" : "text-white"
+            >
+              <Text
+                className={`text-[10px] font-black uppercase ${statusFilter === f ? "text-black" : "text-white"
                   }`}
-                >
-                  {f}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </ScrollView>
+              >
+                {f}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
       </View>
 
       {loading ? (
@@ -228,12 +260,34 @@ export default function BillingsLedger() {
                       </Text>
                     </TouchableOpacity>
                   )}
+                  <View className="flex-row gap-2">
+                    {b.paymentStatus?.toLowerCase() !== "paid" && (
+                      <TouchableOpacity
+                        onPress={() => handleMarkPaid(b.id)}
+                        className="bg-emerald-500 px-4 h-10 rounded-xl items-center justify-center"
+                      >
+                        <Text className="text-black font-black text-[9px] uppercase">
+                          Paid
+                        </Text>
+                      </TouchableOpacity>
+                    )}
 
-                  <TouchableOpacity className="bg-slate-800 px-4 h-10 rounded-xl items-center justify-center">
-                    <Text className="text-white font-black text-[9px] uppercase">
-                      View
-                    </Text>
-                  </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() =>
+                        router.push(`/(adminPages)/add-billing?id=${b.id}` as any)
+                      }
+                      className="bg-blue-500 px-4 h-10 rounded-xl items-center justify-center"
+                    >
+                      <Ionicons name="create-outline" size={18} color="white" />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      onPress={() => handleDelete(b.id)}
+                      className="bg-red-500 px-4 h-10 rounded-xl items-center justify-center"
+                    >
+                      <Ionicons name="trash-outline" size={18} color="white" />
+                    </TouchableOpacity>
+                  </View>
                 </View>
               </View>
             </View>
