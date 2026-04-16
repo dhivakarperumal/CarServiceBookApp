@@ -181,7 +181,7 @@ const ProductBilling = () => {
       /* 2. Create Order Manifest with redundant data for high-fidelity persistence */
       const orderData = {
         orderId,
-        invoiceNo: orderId, // Use orderId as invoiceNo for consistency
+        invoiceNo: orderId,
         customerName: isOnline ? shipping.name : customer.name,
         customerPhone: isOnline ? shipping.phone : customer.phone,
         customerMobile: isOnline ? shipping.phone : customer.phone,
