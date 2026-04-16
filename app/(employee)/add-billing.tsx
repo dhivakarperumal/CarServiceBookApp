@@ -593,31 +593,6 @@ export default function AddBillingScreen() {
                       </View>
                     )}
                   </View>
-
-                  <View className="w-full bg-card rounded-[28px] p-6 border border-slate-700">
-                    <SectionTitle title="Accounting Summary" />
-                    <View className="flex-row flex-wrap gap-3">
-                      <View className="flex-1 min-w-[160px] bg-slate-900/30 rounded-2xl p-4 border border-slate-700">
-                        <Text className="text-[9px] uppercase tracking-widest text-text-muted mb-3">
-                          Workforce Charges
-                        </Text>
-                        <Text className="text-2xl font-black text-text-primary">
-                          ₹
-                          {Number(
-                            workforceCharges || labour || 0,
-                          ).toLocaleString()}
-                        </Text>
-                      </View>
-                      <View className="flex-1 min-w-[160px] bg-slate-900/30 rounded-2xl p-4 border border-slate-700">
-                        <Text className="text-[9px] uppercase tracking-widest text-text-muted mb-3">
-                          Taxation Layer (%)
-                        </Text>
-                        <Text className="text-2xl font-black text-text-primary">
-                          {gst || 0}%
-                        </Text>
-                      </View>
-                    </View>
-                  </View>
                 </View>
               </>
             )}
@@ -855,7 +830,7 @@ export default function AddBillingScreen() {
                     />
                   </View>
 
-                  <View className="bg-slate-900/30 rounded-2xl p-4 border border-slate-700">
+                  <View className="bg-slate-900/30 rounded-2xl mt-2 p-4 border border-slate-700">
                     <Text className="text-[10px] uppercase tracking-widest text-text-muted mb-2">
                       Taxation Layer (%)
                     </Text>
@@ -869,7 +844,7 @@ export default function AddBillingScreen() {
                     />
                   </View>
 
-                  <View className="bg-slate-900/30 rounded-2xl p-4 border border-slate-700">
+                  <View className="bg-slate-900/30 rounded-2xl mt-2 p-4 border border-slate-700">
                     <Text className="text-[10px] uppercase tracking-widest text-text-muted mb-3">
                       Subtotal
                     </Text>
@@ -878,7 +853,7 @@ export default function AddBillingScreen() {
                     </Text>
                   </View>
 
-                  <View className="bg-slate-900/30 rounded-2xl p-4 border border-slate-700">
+                  <View className="bg-slate-900/30 rounded-2xl mt-2 p-4 border border-slate-700">
                     <Text className="text-[10px] uppercase tracking-widest text-text-muted mb-3">
                       Tax Amount
                     </Text>
@@ -887,7 +862,7 @@ export default function AddBillingScreen() {
                     </Text>
                   </View>
 
-                  <View className="bg-slate-900/50 rounded-2xl p-6 border border-slate-700">
+                  <View className="bg-slate-900/50 rounded-2xl mt-2 p-6 border border-slate-700">
                     <Text className="text-[10px] uppercase tracking-widest text-text-muted mb-3">
                       Grand Payable Total
                     </Text>
@@ -898,7 +873,7 @@ export default function AddBillingScreen() {
                 </View>
               </View>
 
-              <View className="w-full bg-card rounded-[28px] p-6 border border-slate-700">
+              <View className="w-full bg-card rounded-[28px] mt-2 p-6 border border-slate-700">
                 <Text className="text-xl font-black text-text-primary mb-4">
                   Review & Commit
                 </Text>
