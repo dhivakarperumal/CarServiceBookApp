@@ -91,6 +91,33 @@ export default function Orders() {
 
   return (
     <SafeAreaView edges={["left", "right"]} className="flex-1 bg-background px-4">
+      <View className="flex-row mt-4 mb-4 bg-card rounded-2xl p-1">
+        <TouchableOpacity
+          onPress={() => setActiveTab("current")}
+          className={`flex-1 py-3 rounded-2xl ${activeTab === "current" ? "bg-primary" : ""
+            }`}
+        >
+          <Text
+            className={`text-center font-bold ${activeTab === "current" ? "text-black" : "text-white"
+              }`}
+          >
+            Current Orders
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => setActiveTab("delivered")}
+          className={`flex-1 py-3 rounded-2xl ${activeTab === "delivered" ? "bg-primary" : ""
+            }`}
+        >
+          <Text
+            className={`text-center font-bold ${activeTab === "delivered" ? "text-black" : "text-white"
+              }`}
+          >
+            Delivered Orders
+          </Text>
+        </TouchableOpacity>
+      </View>
       {filteredOrders.length === 0 ? (
         <Text className="text-text-secondary mt-6">
           {activeTab === "current"
@@ -108,34 +135,6 @@ export default function Orders() {
             />
           }
         >
-
-          <View className="flex-row mt-4 mb-4 bg-card rounded-2xl p-1">
-            <TouchableOpacity
-              onPress={() => setActiveTab("current")}
-              className={`flex-1 py-3 rounded-2xl ${activeTab === "current" ? "bg-primary" : ""
-                }`}
-            >
-              <Text
-                className={`text-center font-bold ${activeTab === "current" ? "text-black" : "text-white"
-                  }`}
-              >
-                Current Orders
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => setActiveTab("delivered")}
-              className={`flex-1 py-3 rounded-2xl ${activeTab === "delivered" ? "bg-primary" : ""
-                }`}
-            >
-              <Text
-                className={`text-center font-bold ${activeTab === "delivered" ? "text-black" : "text-white"
-                  }`}
-              >
-                Delivered Orders
-              </Text>
-            </TouchableOpacity>
-          </View>
           {filteredOrders.map((order: any) => {
             const statusKey = (order.status || "orderplaced").toLowerCase();
             const statusLabel =
