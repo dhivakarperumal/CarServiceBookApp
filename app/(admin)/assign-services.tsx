@@ -34,10 +34,15 @@ export default function AdminAssignServices() {
   const [globalModalVisible, setGlobalModalVisible] = useState(false);
 
   const [tab, setTab] = useState("unassigned");
-  const [dateFilter, setDateFilter] = useState("All");
+  const [dateFilter, setDateFilter] = useState("All Time");
   const [searchText, setSearchText] = useState("");
   const [viewMode, setViewMode] = useState("card");
   const [currentPage, setCurrentPage] = useState(1);
+
+  /* Filter UI State */
+  const [filterModal, setFilterModal] = useState<{
+    type: "date";
+  } | null>(null);
 
   const fetchData = async () => {
     try {
@@ -110,7 +115,7 @@ export default function AdminAssignServices() {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
-      if (dateFilter === "All") return true;
+      if (dateFilter === "All" || dateFilter === "All Time") return true;
 
       if (!bookingDate) return false;
       const d = new Date(bookingDate);
@@ -123,14 +128,15 @@ export default function AdminAssignServices() {
         return d.getTime() === yesterday.getTime();
       }
       if (dateFilter === "This Week") {
-        const lastWeek = new Date(today);
-        lastWeek.setDate(today.getDate() - 7);
-        return bookingDate >= lastWeek;
+        const dayOfWeek = today.getDay();
+        const weekStart = new Date(today);
+        weekStart.setDate(today.getDate() - dayOfWeek);
+        weekStart.setHours(0, 0, 0, 0);
+        return bookingDate >= weekStart && bookingDate <= new Date();
       }
       if (dateFilter === "This Month") {
-        const lastMonth = new Date(today);
-        lastMonth.setDate(today.getDate() - 30);
-        return bookingDate >= lastMonth;
+        const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+        return bookingDate >= monthStart && bookingDate <= new Date();
       }
       return true;
     });
@@ -195,16 +201,16 @@ export default function AdminAssignServices() {
       );
 
       const isCompleted = s.includes("completed");
+      const isActionable =
+        s === "approved" ||
+        s === "confirmed" ||
+        s.includes("booked") ||
+        s === "approved_confirmed";
 
-      if (tab === "unassigned") return !hasAssignee && !isCompleted;
+      if (tab === "unassigned")
+        return !hasAssignee && !isCompleted && isActionable;
       if (tab === "assigned") return hasAssignee && !isCompleted;
-      if (tab === "approved")
-        return (
-          s === "approved" ||
-          s === "confirmed" ||
-          s.includes("booked") ||
-          s.includes("assigned")
-        );
+      if (tab === "approved") return isActionable;
       if (tab === "completed") return isCompleted;
       return true;
     });
@@ -324,20 +330,37 @@ export default function AdminAssignServices() {
             ))}
           </View>
 
-            <View className="flex-row items-center bg-white/5 border border-white/10 rounded-3xl px-6 py-4">
-            <Ionicons name="search" size={20} color={COLORS.textSecondary} />
-            <TextInput
-              placeholder="Search Registry..."
-              placeholderTextColor={COLORS.textMuted}
-              className="flex-1 ml-4 text-white font-bold text-sm"
-              value={searchText}
-              onChangeText={(val) => {
-                setSearchText(val);
-                setCurrentPage(1);
-              }}
-            />
-          </View>
+          <View className="flex-row gap-4 mb-4">
+            <View className="flex-1 flex-row items-center bg-white/5 border border-white/10 rounded-3xl px-5 py-2.5">
+              <Ionicons name="search" size={18} color={COLORS.textSecondary} />
+              <TextInput
+                placeholder="Search..."
+                placeholderTextColor={COLORS.textMuted}
+                className="flex-1 ml-3 text-white font-bold text-[13px]"
+                value={searchText}
+                onChangeText={(val) => {
+                  setSearchText(val);
+                  setCurrentPage(1);
+                }}
+              />
+            </View>
 
+            {/* Date Select Button */}
+            <TouchableOpacity
+              onPress={() => setFilterModal({ type: "date" })}
+              className="bg-white/5 border border-white/10 rounded-3xl px-4 py-2.5 items-center justify-center flex-row gap-2"
+            >
+              <View>
+                <Text className="text-white/30 text-[7px] font-black uppercase tracking-widest text-center">
+                  Timeframe
+                </Text>
+                <Text className="text-white text-[10px] font-black uppercase">
+                  {dateFilter === "All Time" ? "All" : dateFilter}
+                </Text>
+              </View>
+              <Ionicons name="chevron-down" size={12} color={COLORS.primary} />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* CONTENT */}
@@ -729,6 +752,65 @@ export default function AdminAssignServices() {
                 )}
               </TouchableOpacity>
             </View>
+          </View>
+        </View>
+      </Modal>
+      {/* ────────────────────────────
+          FILTER SELECT MODAL
+      ──────────────────────────── */}
+      <Modal
+        visible={!!filterModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setFilterModal(null)}
+      >
+        <View className="flex-1 bg-black/60 justify-end">
+          <View className="bg-card rounded-t-[32px] p-6 pb-12 border-t border-slate-700">
+            <View className="w-12 h-1 bg-slate-600 rounded-full self-center mb-6" />
+
+            <Text className="text-white text-xl font-bold mb-6 px-2">
+              Select Timeframe
+            </Text>
+
+            <View className="gap-2.5">
+              {["All Time", "Today", "Yesterday", "This Week", "This Month"].map(
+                (option) => {
+                  const isSelected = dateFilter === option;
+
+                  return (
+                    <TouchableOpacity
+                      key={option}
+                      onPress={() => {
+                        setDateFilter(option);
+                        setFilterModal(null);
+                        setCurrentPage(1);
+                      }}
+                      className={`p-4.5 rounded-2xl flex-row justify-between items-center ${isSelected ? "bg-primary" : "bg-slate-900/40 border border-slate-700"}`}
+                    >
+                      <Text
+                        className={`font-bold text-[13px] ${isSelected ? "text-background" : "text-text-secondary"}`}
+                      >
+                        {option}
+                      </Text>
+                      {isSelected && (
+                        <Ionicons
+                          name="checkmark-circle"
+                          size={20}
+                          color={COLORS.background}
+                        />
+                      )}
+                    </TouchableOpacity>
+                  );
+                },
+              )}
+            </View>
+
+            <TouchableOpacity
+              onPress={() => setFilterModal(null)}
+              className="mt-6 p-4.5 items-center"
+            >
+              <Text className="text-slate-500 font-bold underline">Dismiss</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
