@@ -11,7 +11,7 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    View
+    View,
 } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
 import { api } from "../../services/api";
@@ -396,7 +396,7 @@ export default function AssignedHistory() {
               return (
                 <View
                   key={item.id}
-                  className="mb-4 bg-card rounded-[28px] border border-slate-700 overflow-hidden"
+                  className="mb-4 bg-card rounded-[28px] border border-slate-700 overflow-hidden relative"
                 >
                   <TouchableOpacity
                     onPress={() => toggleExpanded(item.id)}
@@ -424,11 +424,6 @@ export default function AssignedHistory() {
                             {item.serviceStatus || item.status}
                           </Text>
                         </View>
-                        <Ionicons
-                          name="chevron-down"
-                          size={12}
-                          color="#64748B"
-                        />
                       </View>
                     </View>
 
@@ -453,6 +448,9 @@ export default function AssignedHistory() {
                           {item.phone || item.mobile}
                         </Text>
                       </View>
+                    </View>
+                    <View className="absolute bottom-5 right-5 rounded-full bg-primary p-1 flex items-center justify-center">
+                      <Ionicons name="chevron-down" size={14} color="#FFFFFF" />
                     </View>
                   </TouchableOpacity>
 

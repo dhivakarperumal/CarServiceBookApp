@@ -304,7 +304,7 @@ export default function EmployeeBilling() {
               return (
                 <View
                   key={bill.id}
-                  className="mb-4 bg-card rounded-[28px] border border-slate-700 overflow-hidden"
+                  className="mb-4 bg-card rounded-[28px] border border-slate-700 overflow-hidden relative"
                 >
                   <TouchableOpacity
                     onPress={() => toggleExpanded(bill.id)}
@@ -324,11 +324,6 @@ export default function EmployeeBilling() {
                         <View className="mb-1">
                           <StatusBadge status={bill.paymentStatus} />
                         </View>
-                        <Ionicons
-                          name="chevron-down"
-                          size={12}
-                          color={COLORS.textMuted}
-                        />
                       </View>
                     </View>
 
@@ -353,6 +348,13 @@ export default function EmployeeBilling() {
                           ₹{Number(bill.grandTotal).toLocaleString()}
                         </Text>
                       </View>
+                    </View>
+                    <View className="absolute bottom-5 right-5 rounded-full bg-primary p-1 flex items-center justify-center">
+                      <Ionicons
+                        name="chevron-down"
+                        size={14}
+                        color={COLORS.textPrimary}
+                      />
                     </View>
                   </TouchableOpacity>
 
