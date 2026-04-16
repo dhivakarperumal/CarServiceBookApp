@@ -19,16 +19,14 @@ const StatusBadge = ({ status }: { status: string }) => {
 
   return (
     <View
-      className={`px-2 py-1 rounded-md border ${
-        isPaid
-          ? "bg-emerald-500/10 border-emerald-500/20"
-          : "bg-rose-500/10 border-rose-500/20"
-      }`}
+      className={`px-2 py-1 rounded-md border ${isPaid
+        ? "bg-emerald-500/10 border-emerald-500/20"
+        : "bg-rose-500/10 border-rose-500/20"
+        }`}
     >
       <Text
-        className={`text-[8px] font-black uppercase ${
-          isPaid ? "text-emerald-500" : "text-rose-500"
-        }`}
+        className={`text-[8px] font-black uppercase ${isPaid ? "text-emerald-500" : "text-rose-500"
+          }`}
       >
         {status}
       </Text>
@@ -41,7 +39,7 @@ export default function BillingsLedger() {
   const [billings, setBillings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("paid");
 
   const fetchBillings = async () => {
     try {
@@ -59,10 +57,11 @@ export default function BillingsLedger() {
     fetchBillings();
   }, []);
 
-  const filteredBillings = billings.filter((b) => {
-    if (statusFilter === "all") return true;
-    return (b.paymentStatus || "Pending").toLowerCase().includes(statusFilter);
-  });
+  const filteredBillings = billings.filter((b) =>
+    (b.paymentStatus || "Pending")
+      .toLowerCase()
+      .includes(statusFilter.toLowerCase())
+  );
 
   const handleMarkPaid = async (id: any) => {
     Alert.alert("Confirm Payment", "Mark this invoice as fully PAID?", [
@@ -125,30 +124,27 @@ export default function BillingsLedger() {
       </View>
 
       {/* FILTER */}
+      {/* FILTER */}
       <View className="px-4 mb-2">
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <View className="flex-row gap-2">
-            {["all", "paid", "partial", "pending"].map((f) => (
-              <TouchableOpacity
-                key={f}
-                onPress={() => setStatusFilter(f)}
-                className={`px-5 h-10 rounded-2xl border items-center justify-center ${
-                  statusFilter === f
-                    ? "bg-primary border-primary"
-                    : "bg-card border-slate-700"
+        <View className="flex-row justify-between gap-3">
+          {["paid", "pending"].map((f) => (
+            <TouchableOpacity
+              key={f}
+              onPress={() => setStatusFilter(f)}
+              className={`flex-1 h-12 rounded-2xl border items-center justify-center ${statusFilter === f
+                ? "bg-primary border-primary"
+                : "bg-card border-slate-700"
                 }`}
-              >
-                <Text
-                  className={`text-[9px] font-black uppercase ${
-                    statusFilter === f ? "text-black" : "text-white"
+            >
+              <Text
+                className={`text-[10px] font-black uppercase ${statusFilter === f ? "text-black" : "text-white"
                   }`}
-                >
-                  {f}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </ScrollView>
+              >
+                {f}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
       </View>
 
       {loading ? (
