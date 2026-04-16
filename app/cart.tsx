@@ -99,7 +99,7 @@ export default function CartScreen() {
           </View>
         </View>
         <View className="items-center justify-center">
-          <TouchableOpacity
+          {/* <TouchableOpacity
             onPress={() => toggleFavorite(item.docId)}
             className="p-2 mb-2.5"
           >
@@ -108,7 +108,7 @@ export default function CartScreen() {
               size={22}
               color={isFavorite(item.docId) ? "#ef4444" : "#94a3b8"}
             />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <TouchableOpacity
             onPress={() => removeFromCart(item.docId)}
             className="p-2"
