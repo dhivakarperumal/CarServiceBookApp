@@ -107,7 +107,8 @@ function AdminHeader({ routeName }: { routeName: string }) {
     services: { title: "Services", subtitle: "Service management" },
     orders: { title: "Orders", subtitle: "Customer purchases" },
     products: { title: "Products", subtitle: "Inventory management" },
-    vehicles: { title: "Vehicles", subtitle: "Vehicle records" },
+    vehicles: { title: "Vehicles", subtitle: "Vehicle inventory" },
+    "booked-vehicles": { title: "Bookings", subtitle: "Sales & reservations" },
     users: { title: "Users", subtitle: "User management" },
     settings: { title: "Settings", subtitle: "Admin settings" },
   };
@@ -384,9 +385,19 @@ export default function AdminLayout() {
         }}
       />
       <Tabs.Screen
+        name="booked-vehicles"
+        options={{
+          title: "Bookings",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="car-sport" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="vehicles"
         options={{
           title: "Vehicles",
+          href: null,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="car-sport" size={size} color={color} />
           ),
