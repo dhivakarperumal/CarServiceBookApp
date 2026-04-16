@@ -58,7 +58,7 @@ const Header: React.FC = () => {
       item.uid === user?.uid ||
       item.email?.toLowerCase() === user?.email?.toLowerCase()
   )
-  .reduce((sum: number, item: any) => sum + item.quantity, 0);
+  .length;
 
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
   const [notificationOpen, setNotificationOpen] = useState<boolean>(false);

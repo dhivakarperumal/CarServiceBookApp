@@ -18,17 +18,24 @@ import { useAuth } from '../contexts/AuthContext';
 
 export default function CartScreen() {
   const [refreshing, setRefreshing] = useState(false);
-  const { cart, removeFromCart, updateQuantity, totalAmount } = useCart();
-  const userCart = cart.filter(
-  (item: any) =>
-    item.userId === user?.id ||
-    item.user_id === user?.id ||
-    item.uid === user?.id ||
-    item.email?.toLowerCase() === user?.email?.toLowerCase()
-);
-  const { toggleFavorite, isFavorite } = useFavorites();
   const { user } = useAuth() as any;
-  
+  const { cart, removeFromCart, updateQuantity } = useCart();
+
+  const { toggleFavorite, isFavorite } = useFavorites();
+
+  const userCart = cart.filter(
+    (item: any) =>
+      item.userId === user?.id ||
+      item.user_id === user?.id ||
+      item.uid === user?.id ||
+      item.uid === user?.uid ||
+      item.email?.toLowerCase() === user?.email?.toLowerCase()
+  );
+
+  const userTotalAmount = userCart.reduce(
+    (sum: number, item: any) => sum + item.price * item.quantity,
+    0
+  );
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -148,7 +155,7 @@ export default function CartScreen() {
           <View className="bg-[#1E293B] p-6 rounded-t-[30px] border-t border-[#334155] absolute bottom-0 w-full">
             <View className="flex-row justify-between items-center mb-5">
               <Text className="text-[#94A3B8] text-base">Total Amount:</Text>
-              <Text className="text-white text-2xl font-bold">₹ {totalAmount.toFixed(2)}</Text>
+              <Text className="text-white text-2xl font-bold">₹ {userTotalAmount.toFixed(2)}</Text>
             </View>
 
             <TouchableOpacity onPress={handleCheckout} activeOpacity={0.8}>
