@@ -1030,19 +1030,6 @@ export default function ServiceCenter() {
           )}
         </View>
 
-        {/* FIXED NEW INVOICE BUTTON */}
-        <View className="absolute right-5 bottom-6 z-30">
-          <TouchableOpacity
-            onPress={() => router.push("/(employee)/add-billing" as any)}
-            className="flex-row items-center gap-2 bg-primary px-5 py-4 rounded-full shadow-2xl"
-          >
-            <Ionicons name="add" size={20} color={COLORS.background} />
-            <Text className="text-background font-black text-sm uppercase">
-              New Invoice
-            </Text>
-          </TouchableOpacity>
-        </View>
-
         {/* ASSIGN MODAL */}
         <Modal visible={modalVisible} transparent animationType="fade">
           <View className="flex-1 bg-black/60 justify-center p-6">
@@ -1374,6 +1361,19 @@ export default function ServiceCenter() {
           </View>
         </Modal>
       </ScrollView>
+
+      {/* FIXED NEW INVOICE BUTTON - OUTSIDE SCROLL */}
+      <View className="absolute bottom-6 right-6 z-40">
+        <TouchableOpacity
+          onPress={() => router.push("/(employee)/add-billing" as any)}
+          className="flex-row items-center gap-3 bg-primary px-4 py-3 rounded-full shadow-2xl border border-white/10"
+        >
+          <Ionicons name="add" size={24} color="white" />
+          <Text className="text-white font-black text-sm uppercase tracking-[1px]">
+            New Invoice
+          </Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 }
