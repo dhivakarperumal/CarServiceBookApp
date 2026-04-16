@@ -92,6 +92,31 @@ export default function BillingsLedger() {
     ]);
   };
 
+  const formatValue = (num: number) => {
+    if (num >= 100000) return (num / 100000).toFixed(1) + "L";
+    if (num >= 1000) return (num / 1000).toFixed(1) + "K";
+    return num.toLocaleString();
+  };
+
+  const handleDelete = async (id: any) => {
+    Alert.alert("Delete Invoice", "Are you sure you want to delete this invoice?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await apiService.deleteBilling(id);
+
+            setBillings((prev) => prev.filter((b) => b.id !== id));
+          } catch {
+            Alert.alert("Error", "Failed to delete invoice");
+          }
+        },
+      },
+    ]);
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-background">
       {/* HEADER */}
@@ -116,9 +141,9 @@ export default function BillingsLedger() {
           </Text>
           <Text className="text-white font-black text-lg mt-1">
             ₹
-            {billings
-              .reduce((s, b) => s + Number(b.grandTotal || 0), 0)
-              .toLocaleString()}
+            {formatValue(
+              billings.reduce((s, b) => s + Number(b.grandTotal || 0), 0)
+            )}
           </Text>
         </View>
 
@@ -135,7 +160,6 @@ export default function BillingsLedger() {
         </View>
       </View>
 
-      {/* FILTER */}
       {/* FILTER */}
       <View className="px-4 mb-2">
         <View className="flex-row justify-between gap-3">
@@ -225,12 +249,34 @@ export default function BillingsLedger() {
                       </Text>
                     </TouchableOpacity>
                   )}
+                  <View className="flex-row gap-2">
+                    {b.paymentStatus?.toLowerCase() !== "paid" && (
+                      <TouchableOpacity
+                        onPress={() => handleMarkPaid(b.id)}
+                        className="bg-emerald-500 px-4 h-10 rounded-xl items-center justify-center"
+                      >
+                        <Text className="text-black font-black text-[9px] uppercase">
+                          Paid
+                        </Text>
+                      </TouchableOpacity>
+                    )}
 
-                  <TouchableOpacity className="bg-slate-800 px-4 h-10 rounded-xl items-center justify-center">
-                    <Text className="text-white font-black text-[9px] uppercase">
-                      View
-                    </Text>
-                  </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() =>
+                        router.push(`/(adminPages)/add-billing?id=${b.id}` as any)
+                      }
+                      className="bg-blue-500 px-4 h-10 rounded-xl items-center justify-center"
+                    >
+                      <Ionicons name="create-outline" size={18} color="white" />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      onPress={() => handleDelete(b.id)}
+                      className="bg-red-500 px-4 h-10 rounded-xl items-center justify-center"
+                    >
+                      <Ionicons name="trash-outline" size={18} color="white" />
+                    </TouchableOpacity>
+                  </View>
                 </View>
               </View>
             </View>
