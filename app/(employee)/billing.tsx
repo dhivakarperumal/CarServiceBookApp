@@ -1,5 +1,4 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Picker } from "@react-native-picker/picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
@@ -72,7 +71,7 @@ export default function EmployeeBilling() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("paid");
   const [expandedItems, setExpandedItems] = useState<(string | number)[]>([]);
 
   const toggleExpanded = (id: string | number) => {
@@ -170,8 +169,9 @@ export default function EmployeeBilling() {
         `${b.invoiceNo} ${b.customerName} ${b.carNumber} ${b.bookingId}`.toLowerCase();
       const matchesSearch = text.includes(search.toLowerCase());
       const matchesStatus =
-        statusFilter === "all" ||
-        b.paymentStatus?.toLowerCase() === statusFilter;
+        statusFilter === "paid"
+          ? b.paymentStatus?.toLowerCase() === "paid"
+          : b.paymentStatus?.toLowerCase() !== "paid";
       return matchesSearch && matchesStatus;
     });
   }, [bills, search, statusFilter]);
@@ -188,99 +188,99 @@ export default function EmployeeBilling() {
         }
       >
         {/* HEADER */}
-        <View className="px-6 pt-6 pb-4">
-          {/* Quick Stats */}
-          <View className="flex-row gap-3 mb-6">
-            {/* TOTAL EARNED */}
-            <View className="flex-1 bg-card rounded-[28px] border border-slate-700 p-5">
-              <Text className="text-[10px] uppercase tracking-[2px] text-text-secondary font-black mb-3">
+        <View className="bg-card p-1 rounded-3xl border border-card mb-6">
+          <View className="flex-row gap-3">
+            <View className="flex-1 bg-success/10 px-4 py-5 rounded-2xl border border-success/20">
+              <Text className="text-[9px] text-success font-black uppercase tracking-widest">
                 Total Earned
               </Text>
-              <View className="flex-row items-center justify-between">
-                <Text className="text-3xl font-black text-text-primary">
-                  ₹
-                  {bills
-                    .reduce((sum, b) => sum + Number(b.grandTotal), 0)
-                    .toLocaleString()}
-                </Text>
-                <View className="w-12 h-12 rounded-2xl bg-success/10 items-center justify-center border border-success/20">
-                  <Ionicons
-                    name="cash-outline"
-                    size={20}
-                    color={COLORS.success}
-                  />
-                </View>
-              </View>
+              <Text className="text-lg font-black text-success">
+                ₹
+                {bills
+                  .reduce((sum, b) => sum + Number(b.grandTotal), 0)
+                  .toLocaleString()}
+              </Text>
             </View>
-
-            {/* PENDING */}
-            <View className="flex-1 bg-card rounded-[28px] border border-slate-700 p-5">
-              <Text className="text-[10px] uppercase tracking-[2px] text-text-secondary font-black mb-3">
+            <View className="flex-1 bg-warning/10 px-4 py-5 rounded-2xl border border-warning/20">
+              <Text className="text-[9px] text-warning font-black uppercase tracking-widest">
                 Pending
               </Text>
-              <View className="flex-row items-center justify-between">
-                <Text className="text-3xl font-black text-text-primary">
-                  {bills.filter((b) => b.paymentStatus !== "Paid").length}
-                </Text>
-                <View className="w-12 h-12 rounded-2xl bg-warning/10 items-center justify-center border border-warning/20">
-                  <Ionicons
-                    name="time-outline"
-                    size={20}
-                    color={COLORS.warning}
-                  />
-                </View>
-              </View>
+              <Text className="text-lg font-black text-warning">
+                {bills.filter((b) => b.paymentStatus !== "Paid").length}
+              </Text>
             </View>
           </View>
+        </View>
 
-          {/* CREATE NEW BILLING BUTTON */}
-          <TouchableOpacity
-            onPress={() => router.push("/(employee)/add-billing" as any)}
-            className="mb-6 bg-primary py-4 rounded-2xl flex-row items-center justify-center gap-2"
-          >
-            <Ionicons name="add-circle" size={20} color="white" />
-            <Text className="text-text-primary font-black uppercase tracking-widest text-xs">
-              Create New Billing
-            </Text>
-          </TouchableOpacity>
-
-          {/* SEARCH */}
-          <View className="mb-6">
-            <View className="bg-slate-900/30 rounded-2xl flex-row items-center px-4 h-14 border border-slate-700">
-              <Ionicons name="search" size={16} color={COLORS.slate600} />
-              <TextInput
-                placeholder="Search invoice, customer..."
-                placeholderTextColor={COLORS.textMuted}
-                value={search}
-                onChangeText={setSearch}
-                className="flex-1 ml-3 text-white font-semibold text-xs"
-              />
+        {/* FILTERS */}
+        <View className="space-y-4 mb-6 p-3">
+          {/* Search Bar */}
+          <View className="relative mb-3">
+            <View className="absolute left-4 top-4 z-10">
+              <Ionicons name="search" size={20} color="#64748B" />
             </View>
+
+            <TextInput
+              placeholder="Search invoice, customer..."
+              placeholderTextColor="#64748B"
+              value={search}
+              onChangeText={setSearch}
+              className="w-full pl-12 pr-4 py-4 border border-slate-700 bg-slate-800/80 rounded-2xl text-text-primary font-bold shadow-lg"
+            />
           </View>
 
-          {/* FILTER PICKER */}
-          <View className="flex-row gap-3 mb-6">
-            <View className="flex-1 bg-slate-900/30 border border-slate-700 rounded-2xl px-3 py-1 overflow-hidden">
-              <Picker
-                selectedValue={statusFilter}
-                onValueChange={(value) => setStatusFilter(value)}
-                dropdownIconColor={COLORS.slate600}
-                style={{ color: COLORS.textPrimary }}
-                itemStyle={{ color: COLORS.textPrimary, fontSize: 14 }}
+          {/* Status Tabs */}
+          <View className="flex-row gap-3 p-5">
+            <TouchableOpacity
+              onPress={() => setStatusFilter("paid")}
+              className={`flex-1 py-3 rounded-2xl items-center border ${
+                statusFilter === "paid"
+                  ? "bg-success border-success"
+                  : "bg-slate-800/50 border-slate-700"
+              }`}
+            >
+              <Text
+                className={`font-black text-xs uppercase tracking-widest ${
+                  statusFilter === "paid" ? "text-white" : "text-slate-400"
+                }`}
               >
-                <Picker.Item label="All Status" value="all" />
-                <Picker.Item label="Paid" value="paid" />
-                <Picker.Item label="Pending" value="pending" />
-                <Picker.Item label="Partial" value="partial" />
-              </Picker>
-            </View>
+                Paid (
+                {
+                  bills.filter((b) => b.paymentStatus?.toLowerCase() === "paid")
+                    .length
+                }
+                )
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => setStatusFilter("pending")}
+              className={`flex-1 py-3 rounded-2xl items-center border ${
+                statusFilter === "pending"
+                  ? "bg-error border-error"
+                  : "bg-slate-800/50 border-slate-700"
+              }`}
+            >
+              <Text
+                className={`font-black text-xs uppercase tracking-widest ${
+                  statusFilter === "pending" ? "text-white" : "text-slate-400"
+                }`}
+              >
+                Pending (
+                {
+                  bills.filter((b) => b.paymentStatus?.toLowerCase() !== "paid")
+                    .length
+                }
+                )
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
 
         {/* BILLING CARDS */}
         <View className="px-6 pb-24">
           {loading && bills.length === 0 ? (
-            <View className="py-20 items-center bg-card rounded-[32px] border border-dashed border-slate-700">
+            <View className="py-15 items-center bg-card rounded-[32px] border border-dashed border-slate-700">
               <Ionicons
                 name="receipt-outline"
                 size={48}
@@ -512,6 +512,21 @@ export default function EmployeeBilling() {
           )}
         </View>
       </ScrollView>
+
+      {/* FLOATING ACTION BUTTON */}
+      <TouchableOpacity
+        onPress={() => router.push("/(employee)/add-billing" as any)}
+        className="absolute bottom-6 right-6 w-16 h-16 bg-primary rounded-full items-center justify-center shadow-2xl border-2 border-white/20"
+        style={{
+          elevation: 8,
+          shadowColor: COLORS.primary,
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.3,
+          shadowRadius: 8,
+        }}
+      >
+        <Ionicons name="add" size={28} color="white" />
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
