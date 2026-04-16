@@ -37,7 +37,7 @@ const SectionTitle = ({ title }: { title: string }) => (
 
 export default function AddBillingScreen() {
   const router = useRouter();
-  const { directServiceId } = useLocalSearchParams();
+  const { directServiceId, editBillId } = useLocalSearchParams();
   const { user: userProfile } = useAuth();
 
   const generateInvoiceNo = (currentCount = 0) =>
@@ -48,6 +48,8 @@ export default function AddBillingScreen() {
   const [products, setProducts] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [selectedService, setSelectedService] = useState<any>(null);
+  const [editingBill, setEditingBill] = useState<any>(null);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [parts, setParts] = useState<any[]>([]);
   const [issues, setIssues] = useState<any[]>([]);
   const [invoiceNo, setInvoiceNo] = useState<string>(generateInvoiceNo(0));
@@ -90,6 +92,57 @@ export default function AddBillingScreen() {
   useEffect(() => {
     setInvoiceNo(generateInvoiceNo(billingCount));
   }, [selectedService, billingMode, billingCount]);
+
+  useEffect(() => {
+    if (editBillId && !loading) {
+      loadBillForEditing(editBillId.toString());
+    }
+  }, [editBillId, loading]);
+
+  const loadBillForEditing = async (billId: string) => {
+    try {
+      const response = await api.get(`/billings/${billId}`);
+      const bill = response.data;
+
+      // Set edit mode
+      setIsEditMode(true);
+      setEditingBill(bill);
+
+      // Populate form with bill data
+      setInvoiceNo(bill.invoiceNo || "");
+      setLabour(bill.labour?.toString() || "");
+      setGstPercent(bill.gstPercent?.toString() || "18");
+      setWorkforceCharges(bill.workforceCharges?.toString() || "");
+
+      // Set billing mode based on whether there's a booking ID
+      if (bill.bookingId) {
+        setBillingMode("online");
+        // Find and select the service
+        const serviceResponse = await api.get(`/all-services`);
+        const service = serviceResponse.data.find(
+          (s: any) => s.bookingId === bill.bookingId,
+        );
+        if (service) {
+          setSelectedService(service);
+        }
+      } else {
+        setBillingMode("manual");
+        // Populate manual fields
+        setManualCustomerName(bill.customerName || "");
+        setManualContactNumber(bill.contactNumber || "");
+        setManualVehicleBrand(bill.vehicleBrand || "");
+        setManualVehicleModel(bill.vehicleModel || "");
+        setManualPlateNumber(bill.carNumber || "");
+      }
+
+      // Populate parts and issues
+      setParts(bill.parts || []);
+      setIssues(bill.issues || []);
+    } catch (error) {
+      console.error("Error loading bill for editing:", error);
+      Alert.alert("Error", "Failed to load bill data for editing");
+    }
+  };
 
   const filteredServices = useMemo(() => {
     const searchTerm = search.toLowerCase().trim();
@@ -385,34 +438,49 @@ export default function AddBillingScreen() {
         gstAmount,
         subTotal,
         grandTotal,
-        paymentStatus: "Pending",
-        paymentMode: "",
+        paymentStatus: editingBill?.paymentStatus || "Pending",
+        paymentMode: editingBill?.paymentMode || "",
         status: billingMode === "manual" ? "Manual Generated" : "Generated",
-        createdAt: new Date().toISOString(),
+        createdAt: editingBill?.createdAt || new Date().toISOString(),
       };
 
-      await api.post("/billings", payload);
+      if (isEditMode && editingBill) {
+        // Update existing bill
+        await api.put(`/billings/${editingBill.id}`, payload);
+        Alert.alert("Success", "Invoice updated successfully.", [
+          {
+            text: "OK",
+            onPress: () => router.replace("/(employee)/billing"),
+          },
+        ]);
+      } else {
+        // Create new bill
+        await api.post("/billings", payload);
 
-      if (billingMode === "online") {
-        await api
-          .put(`/all-services/${selectedService.id}/status`, {
-            serviceStatus: "Bill Generated",
-          })
-          .catch((err) => console.log("Status update failed:", err));
+        if (billingMode === "online") {
+          await api
+            .put(`/all-services/${selectedService.id}/status`, {
+              serviceStatus: "Bill Generated",
+            })
+            .catch((err) => console.log("Status update failed:", err));
+        }
+
+        const nextCount = billingCount + 1;
+        setBillingCount(nextCount);
+        resetForm(nextCount);
+        Alert.alert("Success", "Invoice created successfully.", [
+          {
+            text: "OK",
+            onPress: () => router.replace("/(employee)/billing"),
+          },
+        ]);
       }
-
-      const nextCount = billingCount + 1;
-      setBillingCount(nextCount);
-      resetForm(nextCount);
-      Alert.alert("Success", "Invoice created successfully.", [
-        {
-          text: "OK",
-          onPress: () => router.replace("/(employee)/billing"),
-        },
-      ]);
     } catch (error) {
       console.error(error);
-      Alert.alert("Error", "Failed to create invoice.");
+      Alert.alert(
+        "Error",
+        `Failed to ${isEditMode ? "update" : "create"} invoice.`,
+      );
     } finally {
       setSubmitting(false);
     }
@@ -435,7 +503,7 @@ export default function AddBillingScreen() {
               className="text-text-primary text-[17px] font-black uppercase tracking-tight"
               numberOfLines={1}
             >
-              Generate Billing
+              {isEditMode ? "Edit Billing" : "Generate Billing"}
             </Text>
           </View>
         </View>
@@ -961,7 +1029,7 @@ export default function AddBillingScreen() {
                     <ActivityIndicator color="white" />
                   ) : (
                     <Text className="text-white font-black uppercase tracking-widest">
-                      Commit Invoice
+                      {isEditMode ? "Update Invoice" : "Commit Invoice"}
                     </Text>
                   )}
                 </TouchableOpacity>
