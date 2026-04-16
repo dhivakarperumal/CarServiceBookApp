@@ -54,7 +54,7 @@ export default function AdminPagesLayout() {
        <Stack.Screen name="pricing" options={{ title: 'PRICING PACKAGES' }} />
        <Stack.Screen name="add-appointment" options={{ title: 'NEW APPOINTMENT' }} />
        <Stack.Screen name="add-booking" options={{ title: 'NEW BOOKING' }} />
-       <Stack.Screen name="booked-vehicles" options={{ title: 'VEHICLE SALES' }} />
+       <Stack.Screen name="booked-vehicles" options={{ title: 'VEHICLE BOOKED' }} />
        <Stack.Screen name="add-vehicle" options={{ title: 'ADD VEHICLE' }} />
        <Stack.Screen name="add-car-service" options={{ title: 'ADD CAR SERVICE' }} />
        <Stack.Screen name="add-pricing" options={{ title: 'ADD PRICING' }} />

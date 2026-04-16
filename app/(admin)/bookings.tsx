@@ -171,7 +171,6 @@ export default function AdminBookings() {
             "mechanic",
             "technician",
             "employee",
-            "staff",
             "technicians",
             "mechanics",
           ].includes(s.role?.toLowerCase()),
@@ -1331,7 +1330,7 @@ export default function AdminBookings() {
                       }
                       setFilterModal(null);
                     }}
-                    className={`p-4.5 rounded-full flex-row justify-between items-center ${isSelected ? "bg-primary" : "bg-slate-900/40 border border-slate-700"}`}
+                    className={`p-4.5 rounded-full  flex-row justify-between items-center ${isSelected ? "bg-primary" : "bg-slate-900/40 border border-slate-700"}`}
                   >
                     <Text
                       className={`font-bold p-4 text-[13px] ${isSelected ? "text-background " : "text-text-secondary"}`}

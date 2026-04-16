@@ -180,7 +180,7 @@ export default function BookedVehicles() {
     <SafeAreaView className="flex-1 bg-background">
       <Stack.Screen
         options={{
-          title: "Booked Vehicles",
+          title: "Vehicle Booked",
           headerShown: true,
           headerStyle: { backgroundColor: COLORS.background },
           headerTintColor: COLORS.white,

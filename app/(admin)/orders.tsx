@@ -330,7 +330,7 @@ export default function AllOrders() {
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 8, paddingBottom: 24 }}
+          contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 24 }}
         >
           <StatCard
             title="Total"
@@ -365,7 +365,7 @@ export default function AllOrders() {
         </ScrollView>
 
         {/* ── SEARCH & FILTERS ── */}
-        <View style={{ paddingHorizontal: 8, gap: 12, marginBottom: 24 }}>
+        <View style={{ paddingHorizontal: 20, gap: 12, marginBottom: 24 }}>
           {/* Search Bar */}
           <View
             style={{
@@ -473,7 +473,7 @@ export default function AllOrders() {
         </View>
 
         {/* ── ORDER LIST ── */}
-        <View style={{ paddingHorizontal: 8, gap: 12 }}>
+        <View style={{ paddingHorizontal: 20, gap: 12 }}>
           {paginated.length === 0 ? (
             <View
               style={{
@@ -484,7 +484,7 @@ export default function AllOrders() {
                 borderWidth: 1,
                 borderStyle: "dashed",
                 borderColor: COLORS.slate700,
-                marginHorizontal: 8
+                marginHorizontal: 20
               }}
             >
               <MaterialCommunityIcons
