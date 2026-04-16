@@ -82,7 +82,7 @@ export default function AddBillingScreen() {
       if (match) {
         selectService(match);
       } else {
-        fetchDirectService(directServiceId);
+        fetchDirectService(directServiceId as string);
       }
     }
   }, [directServiceId, services, loading]);
@@ -92,10 +92,10 @@ export default function AddBillingScreen() {
   }, [selectedService, billingMode, billingCount]);
 
   useEffect(() => {
-    if (id && services.length > 0) {
+    if (id) {
       fetchBillingForEdit(id as string);
     }
-  }, [id, services]);
+  }, [id]);
 
   const filteredServices = useMemo(() => {
     const searchTerm = search.toLowerCase().trim();
