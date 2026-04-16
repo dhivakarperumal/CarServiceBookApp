@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    FlatList,
-    Modal,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
-    RefreshControl
+  ActivityIndicator,
+  FlatList,
+  Modal,
+  RefreshControl,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../../contexts/AuthContext";
@@ -288,7 +288,7 @@ const ServiceStatus: React.FC = () => {
       });
 
       // console.log("ServiceStatus: processed bookings", userBookings);
-      setBookings(userBookings);
+      setBookings(userBookings.filter((booking: Booking) => booking.normalizedStatus !== "SERVICE_COMPLETED"));
 
       if (selectedBooking) {
         const refreshed = userBookings.find(

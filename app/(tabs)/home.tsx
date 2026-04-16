@@ -414,7 +414,22 @@ export default function HomeScreen({ navigation }: any) {
           booking.service_id || booking.id || booking.serviceId || null,
       }));
 
-      setServiceBookings(mappedServiceBookings);
+      setServiceBookings(
+        mappedServiceBookings.filter((booking) => {
+          const status = (booking.status || "").toUpperCase().trim();
+          const normalized = (booking.normalizedStatus || "").toUpperCase().trim();
+
+          return (
+            status !== "SERVICE COMPLETED" &&
+            status !== "SERVICE_COMPLETED" &&
+            status !== "COMPLETED" &&
+            status !== "DELIVERED" &&
+            normalized !== "SERVICE_COMPLETED" &&
+            normalized !== "COMPLETED" &&
+            normalized !== "DELIVERED"
+          );
+        })
+      );
 
       // Update selected booking if it's currently open
       if (selectedServiceBooking) {
@@ -616,7 +631,22 @@ export default function HomeScreen({ navigation }: any) {
           };
         }).filter((booking) => booking.normalizedStatus !== "SERVICE_COMPLETED");
 
-        setServiceBookings(mappedServiceBookings);
+        setServiceBookings(
+          mappedServiceBookings.filter((booking) => {
+            const status = (booking.status || "").toUpperCase().trim();
+            const normalized = (booking.normalizedStatus || "").toUpperCase().trim();
+
+            return (
+              status !== "SERVICE COMPLETED" &&
+              status !== "SERVICE_COMPLETED" &&
+              status !== "COMPLETED" &&
+              status !== "DELIVERED" &&
+              normalized !== "SERVICE_COMPLETED" &&
+              normalized !== "COMPLETED" &&
+              normalized !== "DELIVERED"
+            );
+          })
+        );
 
       } catch (error) {
         console.error('Error fetching bookings:', error);
@@ -921,49 +951,49 @@ export default function HomeScreen({ navigation }: any) {
 
       {/* ================= MY VEHICLE BOOKINGS ================= */}
       {!vehicleBookingLoading && vehicleBookings.length > 0 && (
-      <View className="px-5 mb-6">
-        <View className="flex-row items-center mb-4">
-          <View className="w-1 h-5 bg-white rounded mr-2" />
-          <Ionicons name="car-outline" size={18} color={COLORS.primary} />
-          <Text className="text-primary text-lg font-bold ml-2">
-            My Vehicle Bookings
-          </Text>
-        </View>
+        <View className="px-5 mb-6">
+          <View className="flex-row items-center mb-4">
+            <View className="w-1 h-5 bg-white rounded mr-2" />
+            <Ionicons name="car-outline" size={18} color={COLORS.primary} />
+            <Text className="text-primary text-lg font-bold ml-2">
+              My Vehicle Bookings
+            </Text>
+          </View>
 
-        {vehicleBookingLoading ? (
-          <ActivityIndicator size="small" color={COLORS.primary} />
-        ) : vehicleBookings.length === 0 ? (
-          <Text className="text-textSecondary">
-            No vehicle bookings found.
-          </Text>
-        ) : (
-          vehicleBookings.slice(0, 3).map((item) => (
-            <TouchableOpacity
-              key={item.id || item.bookingId}
-              onPress={() => setSelectedVehicleBooking(item)}
-              className="bg-card border border-gray700 p-4 mb-4 rounded-2xl"
-            >
-              <Text className="text-text-primary font-semibold">
-                Booking ID: {item.bookingId}
-              </Text>
-              <Text className="text-text-primary text-lg font-bold mt-1">
-                {item.vehicleName}
-              </Text>
-              <Text className="text-text-secondary text-sm mt-1">
-                {new Date(item.createdAt).toLocaleString()}
-              </Text>
-              <View className="flex-row justify-between items-center mt-4">
-                <Text className="bg-success/20 text-success px-3 py-1 rounded-full text-xs font-semibold">
-                  {item.status || "Booked"}
+          {vehicleBookingLoading ? (
+            <ActivityIndicator size="small" color={COLORS.primary} />
+          ) : vehicleBookings.length === 0 ? (
+            <Text className="text-textSecondary">
+              No vehicle bookings found.
+            </Text>
+          ) : (
+            vehicleBookings.slice(0, 3).map((item) => (
+              <TouchableOpacity
+                key={item.id || item.bookingId}
+                onPress={() => setSelectedVehicleBooking(item)}
+                className="bg-card border border-gray700 p-4 mb-4 rounded-2xl"
+              >
+                <Text className="text-text-primary font-semibold">
+                  Booking ID: {item.bookingId}
                 </Text>
-                <Text className="text-primary font-bold text-base">
-                  ₹{item.advanceAmount}
+                <Text className="text-text-primary text-lg font-bold mt-1">
+                  {item.vehicleName}
                 </Text>
-              </View>
-            </TouchableOpacity>
-          ))
-        )}
-      </View>
+                <Text className="text-text-secondary text-sm mt-1">
+                  {new Date(item.createdAt).toLocaleString()}
+                </Text>
+                <View className="flex-row justify-between items-center mt-4">
+                  <Text className="bg-success/20 text-success px-3 py-1 rounded-full text-xs font-semibold">
+                    {item.status || "Booked"}
+                  </Text>
+                  <Text className="text-primary font-bold text-base">
+                    ₹{item.advanceAmount}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            ))
+          )}
+        </View>
       )}
 
       {selectedServiceBooking && (
@@ -1123,66 +1153,66 @@ export default function HomeScreen({ navigation }: any) {
 
       {/* ================= CUSTOMER REVIEWS ================= */}
       {reviews.length > 0 && (
-      <View className="px-5 mb-6">
-        <View className="flex-row items-center mb-4">
-          <View className="w-1 h-5 bg-white rounded mr-2" />
-          <Ionicons name="star-outline" size={18} color={COLORS.primary} />
-          <Text className="text-primary text-lg font-bold ml-2">
-            Customer Reviews
-          </Text>
-        </View>
+        <View className="px-5 mb-6">
+          <View className="flex-row items-center mb-4">
+            <View className="w-1 h-5 bg-white rounded mr-2" />
+            <Ionicons name="star-outline" size={18} color={COLORS.primary} />
+            <Text className="text-primary text-lg font-bold ml-2">
+              Customer Reviews
+            </Text>
+          </View>
 
-        <Animated.FlatList
-          ref={reviewListRef}
-          data={extendedReviews}
-          horizontal
-          pagingEnabled
-          showsHorizontalScrollIndicator={false}
-          keyExtractor={(_, index) => index.toString()}
-          renderItem={({ item }) => (
-            <View
-              style={{
-                width: width - 40,
-                borderRadius: 20,
-              }}
-              className="bg-card p-5 border border-primary/10 overflow-hidden mr-4"
-            >
+          <Animated.FlatList
+            ref={reviewListRef}
+            data={extendedReviews}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(_, index) => index.toString()}
+            renderItem={({ item }) => (
+              <View
+                style={{
+                  width: width - 40,
+                  borderRadius: 20,
+                }}
+                className="bg-card p-5 border border-primary/10 overflow-hidden mr-4"
+              >
 
-              <View className="flex-row items-center mb-3">
-                <View className="w-12 h-12 rounded-xl bg-primary/10 items-center justify-center overflow-hidden">
-                  {item.image ? (
-                    <Image source={{ uri: item.image }} className="w-full h-full" />
-                  ) : (
-                    <Ionicons name="person" size={20} color={COLORS.primary} />
-                  )}
-                </View>
+                <View className="flex-row items-center mb-3">
+                  <View className="w-12 h-12 rounded-xl bg-primary/10 items-center justify-center overflow-hidden">
+                    {item.image ? (
+                      <Image source={{ uri: item.image }} className="w-full h-full" />
+                    ) : (
+                      <Ionicons name="person" size={20} color={COLORS.primary} />
+                    )}
+                  </View>
 
-                <View className="ml-3">
-                  <Text className="text-white font-bold">
-                    {item.name}
-                  </Text>
+                  <View className="ml-3">
+                    <Text className="text-white font-bold">
+                      {item.name}
+                    </Text>
 
-                  <View className="flex-row mt-1">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <Ionicons
-                        key={star}
-                        name={star <= item.rating ? "star" : "star-outline"}
-                        size={14}
-                        color={COLORS.rating}
-                      />
-                    ))}
+                    <View className="flex-row mt-1">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Ionicons
+                          key={star}
+                          name={star <= item.rating ? "star" : "star-outline"}
+                          size={14}
+                          color={COLORS.rating}
+                        />
+                      ))}
+                    </View>
                   </View>
                 </View>
+
+                <Text className="text-gray-400 text-xs">
+                  "{item.message}"
+                </Text>
+
               </View>
-
-              <Text className="text-gray-400 text-xs">
-                "{item.message}"
-              </Text>
-
-            </View>
-          )}
-        />
-      </View>
+            )}
+          />
+        </View>
       )}
 
 
