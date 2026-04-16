@@ -2,16 +2,16 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
-   ActivityIndicator,
-   Alert,
-   Modal,
-   RefreshControl,
-   SafeAreaView,
-   ScrollView,
-   Text,
-   TextInput,
-   TouchableOpacity,
-   View,
+  ActivityIndicator,
+  Alert,
+  Modal,
+  RefreshControl,
+  SafeAreaView,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { apiService } from "../../services/api";
 import { COLORS } from "../../theme/colors";
@@ -22,7 +22,6 @@ const BOOKING_STATUS = [
   "Call Verified",
   "Approved",
   "Cancelled",
-  "Service Completed",
 ];
 const APPT_STATUS = [
   "Appointment Booked",
@@ -234,8 +233,13 @@ export default function AdminBookings() {
             .includes(bookingSearch.toLowerCase()) ||
           (b.name || "").toLowerCase().includes(bookingSearch.toLowerCase()) ||
           (b.phone || "").includes(bookingSearch);
+
+        const bStatus = (b.status || "").toLowerCase();
         const matchStatus =
-          bookingStatusFilter === "All" || b.status === bookingStatusFilter;
+          bookingStatusFilter === "All"
+            ? !["cancelled", "bill completed"].includes(bStatus)
+            : b.status === bookingStatusFilter;
+
         const matchDate = filterByDate(
           b.created_at || b.createdAt,
           bookingDateFilter,
@@ -311,8 +315,9 @@ export default function AdminBookings() {
           ""
         ).toLowerCase();
         const matchStatus =
-          apptStatusFilter === "all" ||
-          aStatus.includes(apptStatusFilter.toLowerCase());
+          apptStatusFilter === "all"
+            ? !["cancelled", "bill completed"].includes(aStatus)
+            : aStatus.includes(apptStatusFilter.toLowerCase());
 
         const matchAssign =
           assignFilter === "all" ||
@@ -638,10 +643,10 @@ export default function AdminBookings() {
             filteredAppts.map((apt) => {
               const sc =
                 apptStatusColors[
-                  apt.status ||
-                    apt.serviceStatus ||
-                    apt.appointmentStatus ||
-                    "Appointment Booked"
+                apt.status ||
+                apt.serviceStatus ||
+                apt.appointmentStatus ||
+                "Appointment Booked"
                 ] || apptStatusColors["Appointment Booked"];
               const isAssigned = !!(
                 apt.assignedEmployeeName || apt.assignedEmployeeId
@@ -725,8 +730,8 @@ export default function AdminBookings() {
                         <Text className="text-slate-500 text-[10px] font-bold">
                           {apt.preferredDate
                             ? new Date(apt.preferredDate).toLocaleDateString(
-                                "en-GB",
-                              )
+                              "en-GB",
+                            )
                             : "N/A"}
                         </Text>
                       </View>
@@ -1119,12 +1124,12 @@ export default function AdminBookings() {
                       (selectedAppt?.assignedEmployeeId ||
                         selectedAppt?.assignedEmployee?._id)
                     ) && (
-                      <Ionicons
-                        name="checkmark-circle"
-                        size={16}
-                        color={COLORS.primary}
-                      />
-                    )}
+                        <Ionicons
+                          name="checkmark-circle"
+                          size={16}
+                          color={COLORS.primary}
+                        />
+                      )}
                   </TouchableOpacity>
                   {technicians.map((t: any) => {
                     const tId = t.id || t._id;
@@ -1290,7 +1295,7 @@ export default function AdminBookings() {
         <View className="flex-1 bg-black/60 justify-end">
           <View className="bg-card rounded-t-[32px] p-6 pb-12 border-t border-slate-700">
             <View className="w-12 h-1 bg-slate-600 rounded-full self-center mb-6" />
-            
+
             <Text className="text-white text-xl font-bold mb-6 px-2">
               Select {filterModal?.type === "status" ? "Status" : "Timeframe"}
             </Text>
