@@ -719,7 +719,7 @@ export default function ServiceCenter() {
               return (
                 <View
                   key={item.id}
-                  className="mb-4 bg-card rounded-[28px] border border-slate-700 overflow-hidden"
+                  className="mb-4 bg-card rounded-[28px] border border-slate-700 overflow-hidden relative"
                 >
                   <TouchableOpacity
                     onPress={() => toggleExpanded(item.id)}
@@ -749,11 +749,6 @@ export default function ServiceCenter() {
                             )}
                           </Text>
                         </View>
-                        <Ionicons
-                          name="chevron-down"
-                          size={12}
-                          color={COLORS.textMuted}
-                        />
                       </View>
                     </View>
 
@@ -778,6 +773,13 @@ export default function ServiceCenter() {
                           {item.phone || item.mobile}
                         </Text>
                       </View>
+                    </View>
+                    <View className="absolute bottom-5 right-5 rounded-full bg-primary p-1 flex items-center justify-center">
+                      <Ionicons
+                        name="chevron-down"
+                        size={14}
+                        color={COLORS.textPrimary}
+                      />
                     </View>
                   </TouchableOpacity>
 
