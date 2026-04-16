@@ -17,8 +17,6 @@ import { api } from "../../services/api";
 import { COLORS } from "../../theme/colors";
 
 const STATUS_STEPS = [
-  "Booked",
-  "Call Verified",
   "Approved",
   "Processing",
   "Waiting for Spare",
@@ -88,6 +86,7 @@ export default function Services() {
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
   const [selectedEmployeeId, setSelectedEmployeeId] = useState("");
   const [assigning, setAssigning] = useState(false);
+  const [expandedId, setExpandedId] = useState<any>(null);
 
   const [issueModalVisible, setIssueModalVisible] = useState(false);
   const [editingIssueId, setEditingIssueId] = useState<any>(null);
@@ -194,7 +193,13 @@ export default function Services() {
       ).toLowerCase();
       const matchStatus =
         statusFilter === "All"
-          ? !["cancelled", "bill completed"].includes(sStat)
+          ? ![
+              "cancelled",
+              "bill completed",
+              "booked",
+              "confirmed",
+              "appointment booked",
+            ].includes(sStat)
           : sStat.includes(statusFilter.toLowerCase());
 
       if (!matchSearch || !matchStatus) return false;
@@ -317,7 +322,6 @@ export default function Services() {
   const getStatusColor = (status: string) => {
     const mapped = getMappedStatus(status);
     switch (mapped) {
-      case "Booked":
       case "Approved":
         return COLORS.primary;
       case "Processing":
@@ -501,7 +505,7 @@ export default function Services() {
 
         {/* Search */}
         <View className="px-6 mb-8 gap-4">
-          <View className="flex-row items-center bg-white/5 border border-white/10 rounded-3xl px-6 py-4">
+          <View className="flex-row items-center bg-white/5 border border-white/10 rounded-3xl px-6 py-2">
             <Ionicons name="search" size={20} color={COLORS.textSecondary} />
             <TextInput
               placeholder="Search Registry..."
@@ -577,53 +581,130 @@ export default function Services() {
               const { showOptions, showBilling } = getButtonVisibility(mappedStatus);
               const hasAssignee = !!(item.assignedEmployeeId || item.assigned_employee_id);
 
-              return (
-                <View
-                  key={item.id || item._id}
-                  style={{ backgroundColor: COLORS.card }}
-                  className="p-4 rounded-[28px] border border-white/5 shadow-xl mb-3"
-                >
-                  {/* TOP ROW: Vehicle & Status */}
-                  <View className="flex-row justify-between items-center mb-3">
-                    <View className="flex-row items-center gap-2">
-                      <View
-                        className={`w-2 h-2 rounded-full ${item.vehicleType === "bike" ? "bg-orange-500" : "bg-blue-500"}`}
-                      />
-                      <Text className="text-white text-md font-black uppercase tracking-tight">
-                        {item.brand} {item.model}
-                      </Text>
-                    </View>
-                    <TouchableOpacity
-                      onPress={() => {
-                        setSelectedBooking(item);
-                        setStatusModalVisible(true);
-                      }}
-                      style={{ backgroundColor: statusColor + "15" }}
-                      className="px-2.5 py-1 rounded-lg border border-white/5"
-                    >
-                      <Text
-                        style={{ color: statusColor }}
-                        className="text-[7.5px] font-black uppercase tracking-widest"
-                      >
-                        {mappedStatus}
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
+               const isExpanded = expandedId === (item.id || item._id);
 
-                  {/* INFO ROW: Registry Details */}
-                  <View className="flex-row justify-between items-end mb-4 px-1">
-                    <View>
-                      <Text className="text-primary text-[10px] font-black uppercase tracking-widest bg-primary/5 self-start px-2 py-0.5 rounded-md mb-1.5">
-                        {item.appointmentId || item.bookingId || `#${item.id || item._id}`}
-                      </Text>
-                      <Text className="text-white/30 text-[9px] font-bold uppercase tracking-wide">
-                        {item.name} • {item.phone || "No Ph"} • {item.email || "No Email"}
-                      </Text>
-                      <Text className="text-white/20 text-[8px] font-black uppercase mt-0.5 tracking-widest">
-                        Mechanic: {item.assignedEmployeeName || item.assigned_employee_name || "Allocation Pending"}
-                      </Text>
-                    </View>
-                  </View>
+               return (
+                 <View
+                   key={item.id || item._id}
+                   style={{ backgroundColor: COLORS.card }}
+                   className="p-4 rounded-[28px] border border-white/5 shadow-xl mb-3"
+                 >
+                   {/* TOP ROW: Vehicle & Status */}
+                   <View className="flex-row justify-between items-center mb-3">
+                     <View className="flex-row items-center gap-2">
+                       <View
+                         className={`w-2 h-2 rounded-full ${item.vehicleType === "bike" ? "bg-orange-500" : "bg-blue-500"}`}
+                       />
+                       <Text className="text-white text-md font-black uppercase tracking-tight">
+                         {item.brand} {item.model}
+                       </Text>
+                     </View>
+                     <TouchableOpacity
+                       onPress={() => {
+                         setSelectedBooking(item);
+                         setStatusModalVisible(true);
+                       }}
+                       style={{ backgroundColor: statusColor + "15" }}
+                       className="px-2.5 py-1 rounded-lg border border-white/5"
+                     >
+                       <Text
+                         style={{ color: statusColor }}
+                         className="text-[7.5px] font-black uppercase tracking-widest"
+                       >
+                         {mappedStatus}
+                       </Text>
+                     </TouchableOpacity>
+                   </View>
+ 
+                   {/* INFO ROW: Registry Details */}
+                   <View className="flex-row justify-between items-end mb-4 px-1">
+                     <View className="flex-1">
+                       <TouchableOpacity
+                         onPress={() =>
+                           setExpandedId(isExpanded ? null : (item.id || item._id))
+                         }
+                         className="flex-row items-center gap-2 mb-1.5"
+                       >
+                         <Text className="text-primary text-[10px] font-black uppercase tracking-widest bg-primary/5 self-start px-2 py-0.5 rounded-md">
+                           {item.appointmentId || item.bookingId || `#${item.id || item._id}`}
+                         </Text>
+                         <Ionicons
+                           name={isExpanded ? "chevron-up" : "chevron-down"}
+                           size={10}
+                           color={COLORS.primary}
+                         />
+                       </TouchableOpacity>
+                       <Text className="text-white/30 text-[9px] font-bold uppercase tracking-wide">
+                         {item.name} • {item.phone || "No Ph"} • {item.email || "No Email"}
+                       </Text>
+                       <Text className="text-white/20 text-[8px] font-black uppercase mt-0.5 tracking-widest">
+                         Mechanic: {item.assignedEmployeeName || item.assigned_employee_name || "Allocation Pending"}
+                       </Text>
+                     </View>
+                   </View>
+ 
+                   {/* EXPANDED CONTENT: ISSUES & PARTS */}
+                   {isExpanded && (
+                     <View className="mb-4 pt-4 border-t border-white/5">
+                       {/* Issues Section */}
+                       <View className="mb-4">
+                         <Text className="text-white/20 text-[10px] font-black uppercase tracking-[2px] mb-2 px-1">
+                           Diagnostic Log
+                         </Text>
+                         {item.issues && item.issues.length > 0 ? (
+                           item.issues.map((iss: any, idx: number) => (
+                             <View
+                               key={idx}
+                               className="bg-white/5 p-3 rounded-xl mb-1.5 flex-row justify-between items-center border border-white/5"
+                             >
+                               <View className="flex-row items-center gap-3">
+                                 <View className="w-1.5 h-1.5 rounded-full bg-primary" />
+                                 <Text className="text-white text-[12px] font-black uppercase">
+                                   {iss.issue}
+                                 </Text>
+                               </View>
+                               <Text className="text-primary text-[12px] font-bold">
+                                 ₹{iss.issueAmount || 0}
+                               </Text>
+                             </View>
+                           ))
+                         ) : (
+                           <Text className="text-white/10 text-[10px] font-bold uppercase italic px-3 mb-1.5">
+                             No issues documented
+                           </Text>
+                         )}
+                       </View>
+ 
+                       {/* Parts Section */}
+                       <View>
+                         <Text className="text-white/20 text-[10px] font-black uppercase tracking-[2px] mb-2 px-1">
+                           Material Allocation
+                         </Text>
+                         {item.parts && item.parts.length > 0 ? (
+                           item.parts.map((part: any, idx: number) => (
+                             <View
+                               key={idx}
+                               className="bg-white/5 p-3 rounded-xl mb-1.5 flex-row justify-between items-center border border-white/5"
+                             >
+                               <View className="flex-row items-center gap-3">
+                                 <View className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                 <Text className="text-white/80 text-[12px] font-black uppercase">
+                                   {part.partName || part.name}
+                                 </Text>
+                               </View>
+                               <Text className="text-emerald-500 text-[12px] font-bold">
+                                 ₹{part.price || 0}
+                               </Text>
+                             </View>
+                           ))
+                         ) : (
+                           <Text className="text-white/10 text-[10px] font-bold uppercase italic px-3">
+                             No parts allocated
+                           </Text>
+                         )}
+                       </View>
+                     </View>
+                   )}
 
                   {/* ACTION ROW: Inline Controls */}
                   <View className="flex-row justify-between items-center bg-white/5 p-1.5 rounded-2xl border border-white/5">
@@ -1146,7 +1227,7 @@ export default function Services() {
                       setFilterModal(null);
                       setCurrentPage(1);
                     }}
-                    className={`p-4.5 rounded-2xl flex-row justify-between items-center ${isSelected ? "bg-primary" : "bg-slate-900/40 border border-slate-700"}`}
+                    className={`p-4.5 rounded-full py-3 px-3  flex-row justify-between items-center ${isSelected ? "bg-primary" : "bg-slate-900/40 border border-slate-700"}`}
                   >
                     <Text
                       className={`font-bold text-[13px] ${isSelected ? "text-background" : "text-text-secondary"}`}
