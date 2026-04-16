@@ -258,16 +258,20 @@ export default function AddBillingScreen() {
         );
 
         if (matchedService) {
-          setSelectedService(matchedService);
+          // Use selectService to populate parts and issues
+          await selectService(matchedService);
         } else {
           // fallback fetch service if not in dropdown list
           try {
             const serviceRes = await api.get(`/all-services/${bill.serviceId}`);
-            setSelectedService(serviceRes.data);
+            // Use selectService to populate parts and issues
+            await selectService(serviceRes.data);
           } catch (err) {
-            console.log("Service fetch failed");
+            console.log("Service fetch failed", err);
           }
         }
+      } else if (isManual) {
+        setSelectedService(null);
       }
 
       // ------------------------- 

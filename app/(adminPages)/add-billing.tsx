@@ -40,6 +40,8 @@ export default function AddBillingScreen() {
   const router = useRouter();
   const { directServiceId, id } = useLocalSearchParams();
   const { user: userProfile } = useAuth();
+  const serviceId = Array.isArray(directServiceId) ? directServiceId[0] : directServiceId;
+  const billingId = Array.isArray(id) ? id[0] : id;
 
   const generateInvoiceNo = (currentCount = 0) =>
     `INV${String(currentCount + 1).padStart(3, "0")}`;
@@ -76,27 +78,29 @@ export default function AddBillingScreen() {
   }, [userProfile?.id]);
 
   useEffect(() => {
-    if (directServiceId && !loading) {
+    if (serviceId && !loading) {
       const match = services.find(
-        (s) => s.id.toString() === directServiceId.toString(),
+        (s) => s.id.toString() === serviceId.toString(),
       );
       if (match) {
         selectService(match);
       } else {
-        fetchDirectService(directServiceId as string);
+        fetchDirectService(serviceId);
       }
     }
-  }, [directServiceId, services, loading]);
+  }, [serviceId, services, loading]);
 
   useEffect(() => {
-    setInvoiceNo(generateInvoiceNo(billingCount));
-  }, [selectedService, billingMode, billingCount]);
-
-  useEffect(() => {
-    if (id) {
-      fetchBillingForEdit(id as string);
+    if (!billingId) {
+      setInvoiceNo(generateInvoiceNo(billingCount));
     }
-  }, [id]);
+  }, [billingCount, billingId]);
+
+  useEffect(() => {
+    if (billingId) {
+      fetchBillingForEdit(billingId);
+    }
+  }, [billingId]);
 
   const filteredServices = useMemo(() => {
     const searchTerm = search.toLowerCase().trim();
@@ -352,19 +356,23 @@ export default function AddBillingScreen() {
         );
 
         if (matchedService) {
-          setSelectedService(matchedService);
+          // Use selectService to populate parts and issues
+          await selectService(matchedService);
         } else {
           // fallback fetch service if not in dropdown list
           try {
             const serviceRes = await api.get(`/all-services/${bill.serviceId}`);
-            setSelectedService(serviceRes.data);
+            // Use selectService to populate parts and issues
+            await selectService(serviceRes.data);
           } catch (err) {
-            console.log("Service fetch failed");
+            console.log("Service fetch failed", err);
           }
         }
+      } else if (isManual) {
+        setSelectedService(null);
       }
 
-      // -------------------------
+      // ------------------------- 
       // MANUAL BILLING PREFILL
       // -------------------------
       setManualCustomerName(bill.customerName || "");
