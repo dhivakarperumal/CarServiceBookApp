@@ -70,8 +70,20 @@ export default function BillingsLedger() {
         text: "Confirm",
         onPress: async () => {
           try {
-            await apiService.updateBillingStatus(id, "Paid");
-            fetchBillings();
+            await apiService.updateBillingStatus(id, {
+              paymentStatus: "Paid",
+            });
+
+            setBillings((prev) =>
+              prev.map((b) =>
+                b.id === id
+                  ? {
+                    ...b,
+                    paymentStatus: "Paid",
+                  }
+                  : b
+              )
+            );
           } catch {
             Alert.alert("Error", "Failed to update payment status");
           }
