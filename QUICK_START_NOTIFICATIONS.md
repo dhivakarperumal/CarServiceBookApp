@@ -12,8 +12,11 @@ Everything is automatically set up! Your push notification system is **ready to 
 5. ✅ Support for: Bookings, Appointments, Vehicle Bookings, Orders
 6. ✅ **NEW**: Employee assignment notifications
 7. ✅ **NEW**: Spare parts approval/rejection notifications
-8. ✅ Notification badge counter in Header
-9. ✅ Tap-to-navigate functionality
+8. ✅ **NEW**: Admin order notifications
+9. ✅ **NEW**: Admin employee status update notifications
+10. ✅ **NEW**: Admin vehicle booking notifications
+11. ✅ Notification badge counter in Header
+12. ✅ Tap-to-navigate functionality
 
 ## 🚀 Start Using It Now
 
@@ -33,6 +36,12 @@ Everything is automatically set up! Your push notification system is **ready to 
 - When assigned to a service → **"New Service Assignment" notification**
 - When spare parts are approved/rejected → **"Spare Parts Approved/Rejected" notification**
 - Tap notification → Navigate to assigned services page
+
+### Admin Notifications:
+- When users place orders → **"New Order Placed" notification with order ID and user name**
+- When employees update statuses → **"Employee Updated Status" notification**
+- When users book vehicles → **"New Vehicle Booking" notification**
+- Tap notification → Navigate to relevant admin panel screens
 
 ## 📋 Files Created
 

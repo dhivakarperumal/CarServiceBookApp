@@ -227,6 +227,87 @@ class PushNotificationService {
       type: 'spare_parts_status',
     });
   }
+
+  // Send notification to all admins
+  async sendToAdmins(title, body, data = {}) {
+    try {
+      // Get all admin user IDs - this would need to be implemented in your backend
+      // For now, we'll assume you have a way to get admin user IDs
+      const adminUserIds = await this.getAdminUserIds();
+
+      if (adminUserIds.length === 0) {
+        console.log('No admin users found');
+        return;
+      }
+
+      // Send to all admins
+      const notifications = adminUserIds.map(adminId =>
+        this.sendToUser(adminId, title, body, { ...data, type: 'admin_notification' })
+      );
+
+      return Promise.all(notifications);
+    } catch (error) {
+      console.error('Error sending notification to admins:', error);
+      throw error;
+    }
+  }
+
+  // Get admin user IDs - this needs to be implemented based on your user/role system
+  async getAdminUserIds() {
+    try {
+      // IMPLEMENT THIS: Query your database for users with role = 'admin'
+      // Example implementation:
+      // const admins = await db.query('SELECT id FROM users WHERE role = ?', ['admin']);
+      // return admins.map(admin => admin.id);
+      
+      // For now, return empty array - you MUST implement this in your backend
+      console.warn('getAdminUserIds() not implemented. Please implement this method to return array of admin user IDs.');
+      return [];
+    } catch (error) {
+      console.error('Error getting admin user IDs:', error);
+      return [];
+    }
+  }
+
+  // Send new order notification to admins
+  async sendNewOrderNotification(orderId, userName, status) {
+    const title = 'New Order Placed';
+    const body = `Order #${orderId} placed by ${userName} - Status: ${status}`;
+
+    return this.sendToAdmins(title, body, {
+      orderId: orderId.toString(),
+      userName,
+      status,
+      type: 'admin_order',
+    });
+  }
+
+  // Send employee status update notification to admins
+  async sendEmployeeStatusUpdateNotification(serviceType, serviceId, employeeName, newStatus) {
+    const title = 'Employee Updated Status';
+    const body = `${employeeName} updated ${serviceType} #${serviceId} to ${newStatus}`;
+
+    return this.sendToAdmins(title, body, {
+      serviceType,
+      serviceId: serviceId.toString(),
+      employeeName,
+      newStatus,
+      type: 'admin_employee_update',
+    });
+  }
+
+  // Send new vehicle booking notification to admins
+  async sendNewVehicleBookingNotification(vehicleBookingId, userName, status) {
+    const title = 'New Vehicle Booking';
+    const body = `Vehicle booking #${vehicleBookingId} by ${userName} - Status: ${status}`;
+
+    return this.sendToAdmins(title, body, {
+      vehicleBookingId: vehicleBookingId.toString(),
+      userName,
+      status,
+      type: 'admin_vehicle_booking',
+    });
+  }
 }
 ```
 

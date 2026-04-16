@@ -189,7 +189,65 @@ module.exports = { onServiceAssigned, onSparePartsStatusChanged };
 */
 
 /**
- * Example 5: Update Push Token on New Registration
+ * Example 5: Admin Notifications
+ * 
+ * Send notifications to admins for orders, employee updates, and vehicle bookings
+ */
+
+/*
+// When a new order is placed
+async function onNewOrderPlaced(orderId, userId, userName, status) {
+  try {
+    const pushService = require('../services/pushNotificationService');
+    
+    await pushService.sendNewOrderNotification(orderId, userName, status);
+    
+    console.log(`New order notification sent to admins for order ${orderId}`);
+  } catch (error) {
+    console.error('Error sending new order notification:', error);
+  }
+}
+
+// When employee updates booking/appointment status
+async function onEmployeeStatusUpdate(serviceType, serviceId, employeeId, employeeName, newStatus) {
+  try {
+    const pushService = require('../services/pushNotificationService');
+    
+    await pushService.sendEmployeeStatusUpdateNotification(
+      serviceType, // 'booking' or 'appointment'
+      serviceId,
+      employeeName,
+      newStatus
+    );
+    
+    console.log(`Employee status update notification sent to admins`);
+  } catch (error) {
+    console.error('Error sending employee status update notification:', error);
+  }
+}
+
+// When a new vehicle booking is made
+async function onNewVehicleBooking(vehicleBookingId, userId, userName, status) {
+  try {
+    const pushService = require('../services/pushNotificationService');
+    
+    await pushService.sendNewVehicleBookingNotification(vehicleBookingId, userName, status);
+    
+    console.log(`New vehicle booking notification sent to admins for booking ${vehicleBookingId}`);
+  } catch (error) {
+    console.error('Error sending new vehicle booking notification:', error);
+  }
+}
+
+module.exports = { 
+  onNewOrderPlaced, 
+  onEmployeeStatusUpdate, 
+  onNewVehicleBooking 
+};
+*/
+
+/**
+ * Example 6: Update Push Token on New Registration
 
 export const registerUserWithPushToken = async (userData: any) => {
   try {
