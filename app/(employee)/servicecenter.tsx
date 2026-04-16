@@ -19,6 +19,7 @@ import {
 } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
 import { api } from "../../services/api";
+import { COLORS } from "../../theme/colors";
 
 const { width, height } = Dimensions.get("window");
 
@@ -64,21 +65,53 @@ const getStatusColor = (status: string) => {
     case "Booked":
     case "Call Verified":
     case "Approved":
-      return "bg-primary text-text-primary";
+      return {
+        bg: "bg-primary/10",
+        text: "text-primary",
+        border: "border-primary",
+      };
     case "Processing":
-      return "bg-primary text-text-primary";
+      return {
+        bg: "bg-primary/10",
+        text: "text-primary",
+        border: "border-primary",
+      };
     case "Waiting for Spare":
-      return "bg-warning text-text-primary";
+      return {
+        bg: "bg-warning/10",
+        text: "text-warning",
+        border: "border-warning",
+      };
     case "Service Going on":
-      return "bg-warning text-text-primary";
+      return {
+        bg: "bg-warning/10",
+        text: "text-warning",
+        border: "border-warning",
+      };
     case "Bill Pending":
-      return "bg-error text-text-primary";
+      return {
+        bg: "bg-error/10",
+        text: "text-error",
+        border: "border-error",
+      };
     case "Bill Completed":
-      return "bg-accent text-text-primary";
+      return {
+        bg: "bg-accent/10",
+        text: "text-accent",
+        border: "border-accent",
+      };
     case "Service Completed":
-      return "bg-success text-text-primary";
+      return {
+        bg: "bg-success/10",
+        text: "text-success",
+        border: "border-success",
+      };
     default:
-      return "bg-text-muted text-text-primary";
+      return {
+        bg: "bg-slate-900/50",
+        text: "text-text-secondary",
+        border: "border-slate-700",
+      };
   }
 };
 
@@ -519,7 +552,7 @@ export default function ServiceCenter() {
   };
 
   return (
-    <SafeAreaView className="relative flex-1 bg-background">
+    <SafeAreaView className="flex-1 bg-background">
       <ScrollView
         contentContainerStyle={{
           paddingBottom: 200,
@@ -530,101 +563,90 @@ export default function ServiceCenter() {
         }
       >
         {/* HEADER */}
-        <View
-          className="bg-card px-5 pt-5 pb-4 border-b border-card"
-          style={{ flex: 0.2, minHeight: height * 0.2 }}
-        >
+        <View className="px-6 pt-6 pb-4">
           {/* Quick Stats */}
-          <View className="mb-4">
-            <View className="flex-row gap-3">
-              {/* TOTAL ASSIGNED */}
-              <View className="flex-1 rounded-[28px] bg-slate-950/95 border border-text-muted p-4">
-                <Text className="text-[10px] uppercase tracking-[0.3em] text-text-muted font-semibold mb-4">
-                  Total Assigned
+          <View className="flex-row gap-3 mb-6">
+            {/* TOTAL ASSIGNED */}
+            <View className="flex-1 bg-card rounded-[28px] border border-slate-700 p-5">
+              <Text className="text-[10px] uppercase tracking-[2px] text-text-secondary font-black mb-3">
+                Total Assigned
+              </Text>
+              <View className="flex-row items-center justify-between">
+                <Text className="text-3xl font-black text-text-primary">
+                  {stats.total}
                 </Text>
-
-                <View className="flex-row items-center justify-between">
-                  <Text className="text-3xl font-black text-text-primary">
-                    {stats.total}
-                  </Text>
-
-                  <View className="h-10 w-10 rounded-full bg-primary/10 items-center justify-center">
-                    <Ionicons
-                      name="clipboard-outline"
-                      size={18}
-                      color="#0EA5E9"
-                    />
-                  </View>
+                <View className="w-12 h-12 rounded-2xl bg-primary/10 items-center justify-center border border-primary/20">
+                  <Ionicons
+                    name="clipboard-outline"
+                    size={20}
+                    color={COLORS.primary}
+                  />
                 </View>
               </View>
+            </View>
 
-              {/* IN PROGRESS */}
-              <View className="flex-1 rounded-[28px] bg-slate-950/95 border border-text-muted p-4">
-                <Text className="text-[10px] uppercase tracking-[0.3em] text-text-muted font-semibold mb-4">
-                  In Progress
+            {/* IN PROGRESS */}
+            <View className="flex-1 bg-card rounded-[28px] border border-slate-700 p-5">
+              <Text className="text-[10px] uppercase tracking-[2px] text-text-secondary font-black mb-3">
+                In Progress
+              </Text>
+              <View className="flex-row items-center justify-between">
+                <Text className="text-3xl font-black text-text-primary">
+                  {stats.processing}
                 </Text>
-
-                <View className="flex-row items-center justify-between">
-                  <Text className="text-3xl font-black text-text-primary">
-                    {stats.processing}
-                  </Text>
-
-                  <View className="h-10 w-10 rounded-full bg-primary/10 items-center justify-center">
-                    <Ionicons
-                      name="construct-outline"
-                      size={18}
-                      color="#0EA5E9"
-                    />
-                  </View>
+                <View className="w-12 h-12 rounded-2xl bg-warning/10 items-center justify-center border border-warning/20">
+                  <Ionicons
+                    name="construct-outline"
+                    size={20}
+                    color={COLORS.warning}
+                  />
                 </View>
               </View>
+            </View>
 
-              {/* COMPLETED */}
-              <View className="flex-1 rounded-[28px] bg-slate-950/95 border border-text-muted p-4">
-                <Text className="text-[10px] uppercase tracking-[0.3em] text-text-muted font-semibold mb-4">
-                  Completed
+            {/* COMPLETED */}
+            <View className="flex-1 bg-card rounded-[28px] border border-slate-700 p-5">
+              <Text className="text-[10px] uppercase tracking-[2px] text-text-secondary font-black mb-3">
+                Completed
+              </Text>
+              <View className="flex-row items-center justify-between">
+                <Text className="text-3xl font-black text-text-primary">
+                  {stats.completed}
                 </Text>
-
-                <View className="flex-row items-center justify-between">
-                  <Text className="text-3xl font-black text-text-primary">
-                    {stats.completed}
-                  </Text>
-
-                  <View className="h-10 w-10 rounded-full bg-success/10 items-center justify-center">
-                    <Ionicons
-                      name="checkmark-circle-outline"
-                      size={18}
-                      color="#10B981"
-                    />
-                  </View>
+                <View className="w-12 h-12 rounded-2xl bg-success/10 items-center justify-center border border-success/20">
+                  <Ionicons
+                    name="checkmark-circle-outline"
+                    size={20}
+                    color={COLORS.success}
+                  />
                 </View>
               </View>
             </View>
           </View>
 
           {/* SEARCH */}
-          <View className="relative mb-5">
-            <View className="absolute left-4 top-3.5 z-10">
-              <Ionicons name="search" size={18} color="#64748b" />
+          <View className="mb-6">
+            <View className="bg-slate-900/30 rounded-2xl flex-row items-center px-4 h-14 border border-slate-700">
+              <Ionicons name="search" size={16} color={COLORS.slate600} />
+              <TextInput
+                placeholder="Search bookings, vehicles..."
+                placeholderTextColor={COLORS.textMuted}
+                value={search}
+                onChangeText={setSearch}
+                className="flex-1 ml-3 text-white font-semibold text-xs"
+              />
             </View>
-            <TextInput
-              placeholder="Search bookings, vehicles..."
-              placeholderTextColor="#64748b"
-              value={search}
-              onChangeText={setSearch}
-              className="w-full pl-12 pr-4 py-4 border border-slate-700 bg-slate-800/80 rounded-2xl text-text-primary font-bold shadow-lg"
-            />
           </View>
 
           {/* FILTER PICKERS */}
-          <View className="flex-row gap-3">
-            <View className="flex-1 bg-slate-800 border border-slate-700 rounded-2xl px-3 py-1 shadow-sm overflow-hidden">
+          <View className="flex-row gap-3 mb-6">
+            <View className="flex-1 bg-slate-900/30 border border-slate-700 rounded-2xl px-3 py-1 overflow-hidden">
               <Picker
                 selectedValue={dateFilter}
                 onValueChange={(value) => setDateFilter(value)}
-                dropdownIconColor="#64748B"
-                style={{ color: "#FFFFFF" }}
-                itemStyle={{ color: "#FFFFFF", fontSize: 14 }}
+                dropdownIconColor={COLORS.slate600}
+                style={{ color: COLORS.textPrimary }}
+                itemStyle={{ color: COLORS.textPrimary, fontSize: 14 }}
               >
                 <Picker.Item label="All" value="all" />
                 <Picker.Item label="Today" value="today" />
@@ -633,13 +655,13 @@ export default function ServiceCenter() {
               </Picker>
             </View>
 
-            <View className="flex-1 bg-slate-800 border border-slate-700 rounded-2xl px-3 py-1 shadow-sm overflow-hidden">
+            <View className="flex-1 bg-slate-900/30 border border-slate-700 rounded-2xl px-3 py-1 overflow-hidden">
               <Picker
                 selectedValue={mainTab}
                 onValueChange={(value) => setMainTab(value)}
-                dropdownIconColor="#64748B"
-                style={{ color: "#FFFFFF" }}
-                itemStyle={{ color: "#FFFFFF", fontSize: 14 }}
+                dropdownIconColor={COLORS.slate600}
+                style={{ color: COLORS.textPrimary }}
+                itemStyle={{ color: COLORS.textPrimary, fontSize: 14 }}
               >
                 <Picker.Item label="All" value="all" />
                 <Picker.Item label="Appointments" value="booked" />
@@ -647,17 +669,22 @@ export default function ServiceCenter() {
               </Picker>
             </View>
           </View>
-        </View>
 
-        {/* SUB TABS */}
-        <View className="flex-row gap-3">
+          {/* SUB TABS */}
           {!isMechanic && (
             <TouchableOpacity
               onPress={() => setSubTab("unassigned")}
-              className={`px-6 py-2 rounded-full border ${subTab === "unassigned" ? "bg-primary border-primary" : "bg-card border-card"}`}
+              className={`py-3.5 rounded-2xl items-center flex-row justify-center gap-2 border ${subTab === "unassigned" ? "bg-primary border-primary" : "bg-white/5 border-slate-700"}`}
             >
+              <Ionicons
+                name="person-remove-outline"
+                size={14}
+                color={
+                  subTab === "unassigned" ? "black" : "rgba(255,255,255,0.3)"
+                }
+              />
               <Text
-                className={`text-[10px] font-black uppercase tracking-widest ${subTab === "unassigned" ? "text-text-primary" : "text-text-muted"}`}
+                className={`font-black text-[10px] uppercase tracking-widest ${subTab === "unassigned" ? "text-background" : "text-slate-500"}`}
               >
                 Unassigned (
                 {services.filter((s) => !s.assignedEmployeeId).length})
@@ -667,80 +694,96 @@ export default function ServiceCenter() {
         </View>
 
         {/* SERVICE CARDS */}
-        <View className="px-3 pb-24 mt-3">
+        <View className="px-6 pb-24">
           {loading && services.length === 0 ? (
-            <View className="py-20 justify-center items-center">
-              <ActivityIndicator size="large" color="#0EA5E9" />
-              <Text className="text-text-secondary mt-4 font-bold tracking-widest text-[10px] uppercase">
-                Syncing workshop data...
+            <View className="py-20 items-center bg-card rounded-[32px] border border-dashed border-slate-700">
+              <Ionicons name="car-outline" size={48} color={COLORS.textMuted} />
+              <Text className="text-slate-500 font-black text-[10px] uppercase mt-4 tracking-[2px]">
+                Loading workshop data...
               </Text>
             </View>
           ) : filteredList.length === 0 ? (
-            <View className="bg-card rounded-3xl p-12 items-center border border-card border-dashed mt-10">
-              <Ionicons name="car-outline" size={48} color="#64748B" />
-              <Text className="text-text-secondary font-black mt-4">
-                No Vehicles Found
-              </Text>
-              <Text className="text-text-muted text-xs text-center mt-2 leading-4">
-                No matching records in the current queue.
+            <View className="py-20 items-center bg-card rounded-[32px] border border-dashed border-slate-700">
+              <Ionicons name="car-outline" size={48} color={COLORS.textMuted} />
+              <Text className="text-slate-500 font-black text-[10px] uppercase mt-4 tracking-[2px]">
+                No vehicles found
               </Text>
             </View>
           ) : (
             filteredList.map((item) => {
               const isExpanded = expandedItems.includes(item.id);
+              const statusColors = getStatusColor(
+                item.serviceStatus || "Booked",
+              );
 
               return (
                 <View
                   key={item.id}
-                  className="rounded-3xl border border-slate-700/40 bg-slate-950/95 p-6 mb-5 shadow-2xl backdrop-blur-lg"
+                  className="mb-4 bg-card rounded-[28px] border border-slate-700 overflow-hidden"
                 >
                   <TouchableOpacity
                     onPress={() => toggleExpanded(item.id)}
                     activeOpacity={0.8}
-                    className="mb-4"
+                    className="p-5"
                   >
-                    <View className="flex-row justify-between items-start">
-                      <View className="flex-1 pr-3">
-                        <View className="flex-row flex-wrap items-center gap-2 ">
-                          <Text
-                            numberOfLines={1}
-                            className="flex-shrink text-2xl font-black text-text-primary"
-                          >
-                            {item.name ||
-                              item.customer_name ||
-                              `${item.brand} ${item.model}`}
-                          </Text>
-                          <Text className="text-[12px] font-black uppercase tracking-widest text-text-primary">
-                            ID: {item.bookingId || `SER-${item.id}`}
-                          </Text>
-                        </View>
+                    <View className="flex-row justify-between items-start mb-4">
+                      <View>
+                        <Text className="text-white/20 text-[9px] font-black uppercase tracking-[2px]">
+                          {item.bookingId || `SER-${item.id}`}
+                        </Text>
+                        <Text className="text-white text-[17px] font-black mt-0.5 uppercase tracking-tight">
+                          {item.name ||
+                            item.customer_name ||
+                            `${item.brand} ${item.model}`}
+                        </Text>
+                      </View>
+                      <View className="items-end">
                         <View
-                          className={`self-start px-3 py-1 mt-3 rounded-full border ${getStatusColor(
-                            item.serviceStatus || "Booked",
-                          )}`}
+                          className={`px-3 py-1.5 rounded-full border mb-1 ${statusColors.bg} ${statusColors.border}`}
                         >
-                          <Text className="text-[10px] font-black uppercase tracking-widest">
+                          <Text
+                            className={`text-[8px] font-black uppercase tracking-widest ${statusColors.text}`}
+                          >
                             {getStatusDisplayName(
                               item.serviceStatus || "Booked",
                             )}
                           </Text>
                         </View>
+                        <Ionicons
+                          name="chevron-down"
+                          size={12}
+                          color={COLORS.textMuted}
+                        />
                       </View>
-                      <Ionicons
-                        name={
-                          isExpanded
-                            ? "chevron-up-circle"
-                            : "chevron-down-circle"
-                        }
-                        size={28}
-                        color="#0EA5E9"
-                      />
+                    </View>
+
+                    <View className="flex-row gap-2 flex-wrap">
+                      <View className="bg-slate-900/40 px-2.5 py-1.5 rounded-xl flex-row items-center gap-1.5">
+                        <Ionicons
+                          name="car-outline"
+                          size={12}
+                          color={COLORS.primary}
+                        />
+                        <Text className="text-text-secondary text-[10px] font-bold uppercase">
+                          {item.brand} {item.model}
+                        </Text>
+                      </View>
+                      <View className="bg-slate-900/40 px-2.5 py-1.5 rounded-xl flex-row items-center gap-1.5">
+                        <Ionicons
+                          name="call-outline"
+                          size={12}
+                          color={COLORS.primary}
+                        />
+                        <Text className="text-text-secondary text-[10px] font-bold">
+                          {item.phone || item.mobile}
+                        </Text>
+                      </View>
                     </View>
                   </TouchableOpacity>
 
                   {isExpanded && (
                     <>
-                      <View className="mb-6">
+                      <View className="mb-6 px-5 pt-4">
                         <Text className="text-[10px] font-black uppercase tracking-wider text-text-muted mb-2">
                           Brand / Model
                         </Text>
@@ -759,9 +802,9 @@ export default function ServiceCenter() {
                       </View>
 
                       {/* ISSUES SECTION */}
-                      <View className="bg-background rounded-2xl p-4 border border-card mb-5">
+                      <View className="bg-slate-900/40 px-5 py-4 border-t border-slate-700">
                         <View className="flex-row justify-between items-center mb-3">
-                          <Text className="text-[12px] font-black text-text-muted uppercase tracking-widest">
+                          <Text className="text-[10px] font-black text-text-muted uppercase tracking-widest">
                             Job Details / Issues
                           </Text>
                           {item.assignedEmployeeId &&
@@ -769,15 +812,10 @@ export default function ServiceCenter() {
                               .showAddIssue && (
                               <TouchableOpacity
                                 onPress={() => openIssueEditor(item)}
-                                className="flex-row items-center gap-1 p-2 bg-primary rounded-md"
+                                className="bg-primary px-4 py-2 rounded-md"
                               >
-                                <Ionicons
-                                  name="add"
-                                  size={14}
-                                  color="#FFFFFF"
-                                />
-                                <Text className="text-[10px] font-black text-text-primary uppercase tracking-widest">
-                                  Add Issues
+                                <Text className="text-background text-[9px] font-black uppercase tracking-widest">
+                                  Add Issue
                                 </Text>
                               </TouchableOpacity>
                             )}
@@ -786,12 +824,12 @@ export default function ServiceCenter() {
                           const bookingIssue = getBookingIssue(item);
                           let issueRows: any[] = [];
                           const seen = new Set();
-                          
+
                           if (bookingIssue) {
                             issueRows.push(bookingIssue);
                             seen.add(bookingIssue.issue.trim().toLowerCase());
                           }
-                          
+
                           (item.issues || []).forEach((iss: any) => {
                             const name = (iss.issue || "").trim().toLowerCase();
                             if (name && !seen.has(name)) {
@@ -805,82 +843,26 @@ export default function ServiceCenter() {
                               {issueRows.map((iss: any, idx: number) => (
                                 <View
                                   key={idx}
-                                  className="bg-card p-3 rounded-xl border border-card"
+                                  className="bg-slate-900/60 px-3 py-2 rounded-lg border border-slate-700"
                                 >
-                                  <View className="flex-row items-center justify-between mb-2">
-                                    <Text className="text-xs font-bold text-text-secondary leading-snug flex-1">
-                                      {iss.issue}
+                                  <Text className="text-text-secondary text-[10px] font-bold uppercase">
+                                    {iss.issue}
+                                  </Text>
+                                  {iss.issueAmount > 0 && (
+                                    <Text className="text-primary text-[9px] font-black uppercase mt-1">
+                                      ₹{iss.issueAmount}
                                     </Text>
-                                    {iss.isBookingIssue && (
-                                      <View className="bg-primary/20 px-2 py-0.5 rounded-full ml-2">
-                                        <Text className="text-[8px] font-black text-primary uppercase tracking-widest">
-                                          Booking Issue
-                                        </Text>
-                                      </View>
-                                    )}
-                                  </View>
-                                  <View className="flex-row justify-between items-center pt-2 border-t border-card">
-                                    <Text className="text-[10px] font-black text-success">
-                                      ₹{Number(iss.issueAmount || 0).toFixed(2)}
-                                    </Text>
-                                    <Text className="text-[8px] font-black text-text-muted uppercase tracking-widest">
-                                      {iss.issueStatus ||
-                                        iss.status ||
-                                        "pending"}
-                                    </Text>
-                                  </View>
+                                  )}
                                 </View>
                               ))}
                             </View>
                           ) : (
-                            <Text className="text-[12px] text-text-muted italic">
-                              No job issues recorded yet.
+                            <Text className="text-text-muted text-[10px] font-semibold italic">
+                              No issues listed
                             </Text>
                           );
                         })()}
                       </View>
-
-                      {/* SPARE PARTS */}
-                      {item.parts?.length > 0 && (
-                        <View className="bg-background rounded-2xl p-4 border border-card mb-6">
-                          <Text className="text-[10px] font-black text-text-muted uppercase tracking-widest mb-3">
-                            Assigned Parts
-                          </Text>
-                          <View className="gap-2">
-                            {item.parts.map((part: any, idx: number) => (
-                              <View
-                                key={part.id || idx}
-                                className="flex-row justify-between items-center bg-card p-2.5 rounded-xl border border-card"
-                              >
-                                <View>
-                                  <Text className="text-md font-bold text-text-primary">
-                                    {part.partName}
-                                  </Text>
-                                  <Text className="text-[12px] text-text-primary">
-                                    Qty: {part.qty || 1}
-                                  </Text>
-                                </View>
-                                <View className="items-end">
-                                  <Text className="text-md font-black text-text-primary">
-                                    ₹{Number(part.total || 0).toFixed(2)}
-                                  </Text>
-                                  <View
-                                    className={`px-2 py-1 rounded-md mt-2 border ${
-                                      part.status === "approved"
-                                        ? "bg-success border-success"
-                                        : "bg-warning border-warning"
-                                    }`}
-                                  >
-                                    <Text className="text-[10px] font-black uppercase text-text-primary">
-                                      {part.status || "pending"}
-                                    </Text>
-                                  </View>
-                                </View>
-                              </View>
-                            ))}
-                          </View>
-                        </View>
-                      )}
 
                       {/* STATUS UPDATE */}
                       {item.assignedEmployeeId && (
@@ -889,44 +871,50 @@ export default function ServiceCenter() {
                             setActiveServiceForStatus(item);
                             setStatusModalVisible(true);
                           }}
-                          className="bg-background border border-card rounded-2xl overflow-hidden mb-3"
+                          className="bg-slate-900/40 border border-slate-700 rounded-2xl overflow-hidden mx-5 mt-4 mb-4"
                         >
-                          <View className="flex-row items-center px-4 py-2">
+                          <View className="flex-row items-center justify-between px-4 py-2.5">
+                            <View className="flex-row items-center">
+                              <Ionicons
+                                name="construct-outline"
+                                size={14}
+                                color={COLORS.textMuted}
+                              />
+                              <Text className="text-[10px] font-black text-text-muted ml-2 uppercase tracking-widest">
+                                Status
+                              </Text>
+                            </View>
                             <Ionicons
-                              name="construct"
+                              name="chevron-down"
                               size={14}
-                              color="#64748B"
+                              color={COLORS.textMuted}
                             />
-                            <Text className="text-[10px] font-black text-text-muted ml-2 uppercase">
-                              Status
-                            </Text>
                           </View>
-                          <View className="px-4 pb-3 flex-row justify-between items-center">
+                          <View className="px-4 pb-3">
                             <Text className="text-text-primary font-bold text-sm">
                               {getStatusDisplayName(
                                 item.serviceStatus || "Booked",
                               )}
                             </Text>
-                            <Ionicons
-                              name="chevron-down"
-                              size={14}
-                              color="#64748B"
-                            />
                           </View>
                         </TouchableOpacity>
                       )}
 
                       {/* FOOTER ACTIONS */}
-                      <View className="flex-row gap-3">
+                      <View className="flex-row gap-3 px-5 pb-5">
                         <TouchableOpacity
                           onPress={() =>
                             router.push(
                               `/(employee)/service-details?id=${item.id}` as any,
                             )
                           }
-                          className="bg-primary/10 py-4 px-6 rounded-2xl items-center justify-center"
+                          className="bg-primary/10 py-4 px-6 rounded-2xl items-center justify-center border border-primary/20"
                         >
-                          <Ionicons name="eye" size={20} color="#0EA5E9" />
+                          <Ionicons
+                            name="eye"
+                            size={20}
+                            color={COLORS.primary}
+                          />
                         </TouchableOpacity>
 
                         {!item.assignedEmployeeId ? (
@@ -940,9 +928,9 @@ export default function ServiceCenter() {
                             <Ionicons
                               name="person-add"
                               size={16}
-                              color="#FFFFFF"
+                              color={COLORS.background}
                             />
-                            <Text className="text-text-primary font-black text-xs ml-2">
+                            <Text className="text-background font-black text-xs ml-2 uppercase tracking-widest">
                               ASSIGN MECHANIC
                             </Text>
                           </TouchableOpacity>
@@ -958,12 +946,12 @@ export default function ServiceCenter() {
                                   })
                                 }
                                 style={{ minWidth: 90 }}
-                                className="bg-success py-4 px-4 rounded-2xl items-center justify-center"
+                                className="bg-success/10 py-4 px-4 rounded-2xl items-center justify-center border border-success/20"
                               >
                                 <Ionicons
                                   name="cart"
                                   size={20}
-                                  color="#FFFFFF"
+                                  color={COLORS.success}
                                 />
                               </TouchableOpacity>
                             )}
@@ -979,12 +967,12 @@ export default function ServiceCenter() {
                                   })
                                 }
                                 style={{ minWidth: 90 }}
-                                className="bg-warning py-4 px-4 rounded-2xl items-center justify-center"
+                                className="bg-warning/10 py-4 px-4 rounded-2xl items-center justify-center border border-warning/20"
                               >
                                 <Ionicons
                                   name="receipt"
                                   size={20}
-                                  color="#FFFFFF"
+                                  color={COLORS.warning}
                                 />
                               </TouchableOpacity>
                             )}
@@ -997,16 +985,16 @@ export default function ServiceCenter() {
                                   setCloseModalVisible(true);
                                 }}
                                 style={{ minWidth: 90 }}
-                                className="bg-error py-4 px-4 rounded-2xl items-center justify-center flex-col"
+                                className="bg-error/10 py-4 px-4 rounded-2xl items-center justify-center flex-col border border-error/20"
                               >
-                                <Text className="text-text-primary font-black text-xs">
+                                <Text className="text-error font-black text-xs uppercase">
                                   {getHoursDifference(
                                     item.updatedAt || item.updated_at,
                                   ) >= 72
                                     ? "TIME OUT"
                                     : "NO RESPONSE"}
                                 </Text>
-                                <Text className="text-text-primary font-bold text-[10px] mt-1 opacity-70">
+                                <Text className="text-error font-bold text-[10px] mt-1 opacity-70">
                                   {getElapsedTime(
                                     item.updatedAt || item.updated_at,
                                   )}
@@ -1018,9 +1006,13 @@ export default function ServiceCenter() {
                       </View>
 
                       {item.assignedEmployeeName && (
-                        <View className="flex-row items-center gap-2 mt-4 pt-4 border-t border-card">
-                          <Ionicons name="settings" size={12} color="#64748B" />
-                          <Text className="text-xs font-bold text-text-secondary">
+                        <View className="flex-row items-center gap-2 mt-4 pt-4 px-5 border-t border-slate-700">
+                          <Ionicons
+                            name="settings"
+                            size={12}
+                            color={COLORS.textMuted}
+                          />
+                          <Text className="text-xs font-bold p-2 text-text-secondary">
                             Assigned to:{" "}
                             <Text className="text-primary">
                               {item.assignedEmployeeName}
@@ -1042,17 +1034,17 @@ export default function ServiceCenter() {
             onPress={() => router.push("/(employee)/add-billing" as any)}
             className="flex-row items-center gap-2 bg-primary px-5 py-4 rounded-full shadow-2xl"
           >
-            <Ionicons name="add" size={20} color="#FFFFFF" />
-            <Text className="text-text-primary font-black text-sm uppercase">
+            <Ionicons name="add" size={20} color={COLORS.background} />
+            <Text className="text-background font-black text-sm uppercase">
               New Invoice
             </Text>
           </TouchableOpacity>
         </View>
 
         {/* ASSIGN MODAL */}
-        <Modal visible={modalVisible} transparent={true} animationType="fade">
+        <Modal visible={modalVisible} transparent animationType="fade">
           <View className="flex-1 bg-black/60 justify-center p-6">
-            <View className="bg-card rounded-3xl p-8 border border-card">
+            <View className="bg-card rounded-3xl p-8 border border-slate-700">
               <Text className="text-2xl font-black text-text-primary text-center mb-2">
                 Assign Mechanic
               </Text>
@@ -1060,7 +1052,7 @@ export default function ServiceCenter() {
                 Select staff for this vehicle
               </Text>
 
-              <View className="bg-background border border-card rounded-2xl p-2 mb-8">
+              <View className="bg-slate-900/40 border border-slate-700 rounded-2xl p-2 mb-8">
                 {employees.map((emp) => (
                   <TouchableOpacity
                     key={emp.id}
@@ -1068,26 +1060,26 @@ export default function ServiceCenter() {
                     className={`flex-row items-center p-4 rounded-xl mb-1 ${selectedEmployeeId === emp.id.toString() ? "bg-primary" : ""}`}
                   >
                     <View
-                      className={`w-8 h-8 rounded-full items-center justify-center mr-3 ${selectedEmployeeId === emp.id.toString() ? "bg-white/20" : "bg-card"}`}
+                      className={`w-8 h-8 rounded-full items-center justify-center mr-3 ${selectedEmployeeId === emp.id.toString() ? "bg-white/20" : "bg-slate-900/40"}`}
                     >
                       <Ionicons
                         name="person"
                         size={16}
                         color={
                           selectedEmployeeId === emp.id.toString()
-                            ? "#FFFFFF"
-                            : "#64748B"
+                            ? COLORS.background
+                            : COLORS.textMuted
                         }
                       />
                     </View>
                     <View>
                       <Text
-                        className={`font-bold ${selectedEmployeeId === emp.id.toString() ? "text-text-primary" : "text-text-secondary"}`}
+                        className={`font-bold ${selectedEmployeeId === emp.id.toString() ? "text-background" : "text-text-secondary"}`}
                       >
                         {emp.name}
                       </Text>
                       <Text
-                        className={`text-[10px] ${selectedEmployeeId === emp.id.toString() ? "text-text-primary/70" : "text-text-muted"}`}
+                        className={`text-[10px] ${selectedEmployeeId === emp.id.toString() ? "text-background/70" : "text-text-muted"}`}
                       >
                         {emp.role || "Staff"}
                       </Text>
@@ -1102,19 +1094,23 @@ export default function ServiceCenter() {
                     setModalVisible(false);
                     setSelectedEmployeeId("");
                   }}
-                  className="flex-1 py-4 bg-card rounded-2xl items-center"
+                  className="flex-1 py-4 bg-slate-900/40 rounded-2xl items-center border border-slate-700"
                 >
-                  <Text className="text-text-secondary font-bold">Cancel</Text>
+                  <Text className="text-text-secondary font-black text-[11px] uppercase tracking-widest">
+                    Cancel
+                  </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={assignEmployee}
                   disabled={!selectedEmployeeId || assigning}
-                  className={`flex-1 py-4 bg-primary rounded-2xl items-center ${!selectedEmployeeId || assigning ? "opacity-50" : ""}`}
+                  className={`flex-1 py-4 rounded-2xl items-center ${!selectedEmployeeId || assigning ? "bg-slate-900/40 border border-slate-700" : "bg-primary"}`}
                 >
                   {assigning ? (
-                    <ActivityIndicator color="#FFFFFF" />
+                    <ActivityIndicator color={COLORS.primary} />
                   ) : (
-                    <Text className="text-text-primary font-bold">
+                    <Text
+                      className={`font-black text-[11px] uppercase tracking-widest ${!selectedEmployeeId || assigning ? "text-text-secondary" : "text-background"}`}
+                    >
                       Assign Now
                     </Text>
                   )}
@@ -1125,38 +1121,43 @@ export default function ServiceCenter() {
         </Modal>
 
         {/* ISSUE MODAL */}
-        <Modal
-          visible={issueModalVisible}
-          transparent={true}
-          animationType="slide"
-        >
+        <Modal visible={issueModalVisible} transparent animationType="slide">
           <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : undefined}
             className="flex-1 bg-black/60 justify-end"
           >
-            <View className="bg-card rounded-t-3xl p-8 pb-12 border-t border-card">
-              <View className="flex-row justify-between items-center mb-6">
-                <View>
-                  <Text className="text-2xl font-black text-text-primary">
-                    Manage Issues
-                  </Text>
-                  <Text className="text-text-muted text-[10px] font-black uppercase tracking-widest mt-1">
-                    Itemized service reporting
-                  </Text>
+            <View className="bg-card rounded-t-[40px] border-t border-slate-700 h-[80%] w-full">
+              <View className="flex-row justify-between items-center px-7 pt-7 pb-5 border-b border-slate-700">
+                <View className="flex-row items-center gap-3.5">
+                  <View className="w-11 h-11 rounded-2xl bg-sky-500/15 items-center justify-center border border-sky-500/20">
+                    <Ionicons
+                      name="construct-outline"
+                      size={20}
+                      color={COLORS.primary}
+                    />
+                  </View>
+                  <View>
+                    <Text className="text-text-primary text-xl font-black uppercase">
+                      Manage Issues
+                    </Text>
+                    <Text className="text-text-secondary text-[9px] font-black uppercase tracking-widest">
+                      Itemized service reporting
+                    </Text>
+                  </View>
                 </View>
                 <TouchableOpacity onPress={() => setIssueModalVisible(false)}>
-                  <Ionicons name="close" size={28} color="#64748B" />
+                  <Ionicons name="close" size={24} color={COLORS.textMuted} />
                 </TouchableOpacity>
               </View>
 
               <ScrollView
-                className="max-h-[50vh] mb-6"
+                className="max-h-[50vh] mb-6 px-7 pt-7"
                 showsVerticalScrollIndicator={false}
               >
                 {issueEntries.map((entry, idx) => (
                   <View
                     key={idx}
-                    className="bg-background border border-card rounded-3xl p-5 mb-4"
+                    className="bg-slate-900/40 border border-slate-700 rounded-2xl p-5 mb-4"
                   >
                     <View className="flex-row justify-between items-center mb-4">
                       <Text className="text-[10px] font-black text-text-muted uppercase tracking-widest">
@@ -1169,7 +1170,7 @@ export default function ServiceCenter() {
                           setIssueEntries(copy);
                         }}
                       >
-                        <Ionicons name="trash" size={16} color="#EF4444" />
+                        <Ionicons name="trash" size={16} color={COLORS.error} />
                       </TouchableOpacity>
                     </View>
 
@@ -1181,9 +1182,9 @@ export default function ServiceCenter() {
                         setIssueEntries(copy);
                       }}
                       placeholder="Describe car issue..."
-                      placeholderTextColor="#64748B"
+                      placeholderTextColor={COLORS.textMuted}
                       multiline
-                      className="bg-card border border-card rounded-2xl p-4 text-text-primary font-bold text-sm min-h-[80px]"
+                      className="bg-slate-900/60 border border-slate-700 rounded-2xl p-4 text-text-primary font-bold text-sm min-h-[80px]"
                     />
 
                     <View className="flex-row gap-4 mt-4 items-center">
@@ -1199,13 +1200,13 @@ export default function ServiceCenter() {
                             setIssueEntries(copy);
                           }}
                           placeholder="0.00"
-                          placeholderTextColor="#64748B"
+                          placeholderTextColor={COLORS.textMuted}
                           keyboardType="numeric"
-                          className="bg-card border border-card rounded-2xl pl-8 pr-4 py-3.5 text-text-primary font-black"
+                          className="bg-slate-900/60 border border-slate-700 rounded-2xl pl-8 pr-4 py-3.5 text-text-primary font-black"
                         />
                       </View>
                       <View
-                        className={`px-4 py-3 rounded-2xl border ${entry.issueStatus === "approved" ? "bg-success border-success" : "bg-card border-card"}`}
+                        className={`px-4 py-3 rounded-2xl border ${entry.issueStatus === "approved" ? "bg-success/10 border-success" : "bg-slate-900/40 border-slate-700"}`}
                       >
                         <Text
                           className={`text-[10px] font-black uppercase tracking-widest ${entry.issueStatus === "approved" ? "text-text-primary" : "text-text-muted"}`}
@@ -1224,10 +1225,10 @@ export default function ServiceCenter() {
                       { issue: "", issueAmount: "", issueStatus: "pending" },
                     ])
                   }
-                  className="flex-row items-center justify-center p-4 rounded-2xl border border-card border-dashed"
+                  className="flex-row items-center justify-center p-4 rounded-2xl bg-success border border-card border-dashed"
                 >
-                  <Ionicons name="add-circle" size={20} color="#64748B" />
-                  <Text className="text-text-muted font-bold ml-2 uppercase text-[10px] tracking-widest">
+                  <Ionicons name="add-circle" size={20} color="#fff" />
+                  <Text className="text-text-primary font-bold ml-2 uppercase text-[10px] tracking-widest">
                     Add another task
                   </Text>
                 </TouchableOpacity>
@@ -1236,7 +1237,7 @@ export default function ServiceCenter() {
               <TouchableOpacity
                 onPress={saveIssues}
                 disabled={savingIssues}
-                className={`w-full py-4 bg-primary rounded-2xl items-center ${savingIssues ? "opacity-30" : ""}`}
+                className={`w-full py-4 bg-primary p-5 rounded-2xl items-center ${savingIssues ? "opacity-30" : ""}`}
               >
                 {savingIssues ? (
                   <ActivityIndicator color="#FFFFFF" />
@@ -1251,106 +1252,54 @@ export default function ServiceCenter() {
         </Modal>
 
         {/* CLOSE BOOKING MODAL */}
-        <Modal
-          visible={closeModalVisible}
-          transparent={true}
-          animationType="fade"
-        >
-          <View className="flex-1 bg-black/60 justify-center items-center p-6">
-            <View className="w-full max-w-sm rounded-3xl bg-card p-8 border border-card shadow-2xl">
-              <View className="mb-6 items-center">
-                <View className="w-16 h-16 bg-error/10 rounded-full flex items-center justify-center mb-4 border border-error/30">
-                  <Ionicons name="alert-circle" size={28} color="#EF4444" />
-                </View>
-                <Text className="text-2xl font-black text-text-primary text-center uppercase tracking-tight">
-                  Close Booking
-                </Text>
-                <Text className="text-[10px] text-text-muted font-black uppercase tracking-widest mt-2 text-center">
-                  This action cannot be undone
-                </Text>
-                {selectedBooking &&
-                  getHoursDifference(
-                    selectedBooking.updatedAt || selectedBooking.updated_at,
-                  ) >= 72 && (
-                    <View className="mt-4 bg-error/15 border border-error/30 rounded-2xl px-4 py-3 flex-row items-center gap-3">
-                      <Ionicons name="time" size={16} color="#EF4444" />
-                      <View>
-                        <Text className="text-[9px] text-error font-black uppercase tracking-widest">
-                          Time Exceeded
-                        </Text>
-                        <Text className="text-[8px] text-error/70 font-bold">
-                          72+ hours since last update
-                        </Text>
-                      </View>
-                    </View>
-                  )}
+        <Modal visible={closeModalVisible} transparent animationType="slide">
+          <View className="flex-1 bg-black/60 justify-end">
+            <View className="bg-card rounded-t-[40px] p-8 pb-12 border-t border-slate-700">
+              <View className="w-12 h-1.5 bg-slate-600 rounded-full self-center mb-8" />
+
+              <Text className="text-text-primary text-xl font-black uppercase text-center mb-2">
+                Close Booking
+              </Text>
+              <Text className="text-error text-[9px] font-black uppercase tracking-widest text-center mb-6">
+                Reason Required
+              </Text>
+
+              <View className="bg-slate-900/40 rounded-2xl border border-slate-700 mb-4 min-h-[100px]">
+                <TextInput
+                  placeholder="DETAILED REASON"
+                  placeholderTextColor={COLORS.textMuted}
+                  value={closeReason}
+                  onChangeText={setCloseReason}
+                  multiline
+                  numberOfLines={4}
+                  className="flex-1 p-5 text-text-primary font-semibold text-xs leading-relaxed"
+                  style={{ textAlignVertical: "top" }}
+                />
               </View>
-              <View className="mb-6 space-y-4">
-                <View>
-                  <Text className="text-[9px] font-black text-text-muted uppercase tracking-widest mb-3">
-                    Reason for Closing
-                  </Text>
-                  <TextInput
-                    value={closeReason}
-                    onChangeText={setCloseReason}
-                    placeholder="e.g. Customer not approved spare parts / No response after 72 hours"
-                    placeholderTextColor="#64748B"
-                    multiline
-                    className="w-full min-h-[100px] rounded-2xl border border-card bg-background px-4 py-3 text-xs font-bold text-text-primary focus:bg-card focus:border-primary outline-none transition-all"
-                  />
-                </View>
-                <View className="space-y-2 mt-3">
-                  <Text className="text-[9px] font-black text-text-muted uppercase tracking-widest">
-                    Quick Templates
-                  </Text>
-                  <View className="flex-row gap-2 mt-4">
-                    <TouchableOpacity
-                      onPress={() =>
-                        setCloseReason("Customer not approve spare part")
-                      }
-                      className="flex-1 px-3 py-2 rounded-xl bg-background border border-warning/30 hover:border-warning transition-all"
-                    >
-                      <Text className="text-[8px] font-black uppercase tracking-widest text-warning text-center">
-                        Not Approved
-                      </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={() =>
-                        setCloseReason(
-                          "No response from customer after 72 hours",
-                        )
-                      }
-                      className="flex-1 px-3 py-2 rounded-xl bg-background border border-error/30 hover:border-error transition-all"
-                    >
-                      <Text className="text-[8px] font-black uppercase tracking-widest text-error text-center">
-                        No Response
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </View>
-              <View className="flex-row gap-3">
+
+              <View className="flex-row gap-4">
                 <TouchableOpacity
                   onPress={() => {
                     setCloseModalVisible(false);
                     setCloseReason("");
-                    setSelectedBooking(null);
                   }}
-                  className="flex-1 rounded-2xl bg-background border border-card py-4 items-center"
+                  className="flex-1 py-4 bg-slate-900/40 rounded-2xl items-center border border-slate-700"
                 >
-                  <Text className="text-[10px] font-black text-text-secondary uppercase tracking-widest">
+                  <Text className="text-text-secondary font-black text-[11px] uppercase tracking-widest">
                     Cancel
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={handleCloseBooking}
                   disabled={isClosing || !closeReason.trim()}
-                  className={`flex-1 rounded-2xl bg-error py-4 items-center ${isClosing || !closeReason.trim() ? "opacity-50" : ""}`}
+                  className={`flex-1 py-4 rounded-2xl items-center ${isClosing || !closeReason.trim() ? "bg-slate-900/40 border border-slate-700" : "bg-error"}`}
                 >
                   {isClosing ? (
-                    <ActivityIndicator color="#FFFFFF" />
+                    <ActivityIndicator color={COLORS.error} />
                   ) : (
-                    <Text className="text-[10px] font-black text-text-primary uppercase tracking-widest">
+                    <Text
+                      className={`font-black text-[11px] uppercase tracking-widest ${isClosing || !closeReason.trim() ? "text-text-secondary" : "text-text-primary"}`}
+                    >
                       Close Booking
                     </Text>
                   )}
@@ -1361,56 +1310,52 @@ export default function ServiceCenter() {
         </Modal>
 
         {/* STATUS SELECT MODAL */}
-        <Modal
-          visible={statusModalVisible}
-          transparent={true}
-          animationType="fade"
-        >
-          <View className="flex-1 bg-black/60 justify-center p-6">
-            <View className="bg-card rounded-3xl p-8 border border-card">
-              <Text className="text-2xl font-black text-text-primary text-center mb-6">
+        <Modal visible={statusModalVisible} transparent animationType="slide">
+          <View className="flex-1 bg-black/60 justify-end">
+            <View className="bg-card rounded-t-[40px] p-8 pb-12 border-t border-slate-700">
+              <View className="w-12 h-1.5 bg-slate-600 rounded-full self-center mb-8" />
+
+              <Text className="text-text-primary text-xl font-black uppercase text-center mb-6">
                 Update Status
               </Text>
 
-              <View className="bg-background border border-card rounded-3xl overflow-hidden max-h-[60vh]">
-                <ScrollView showsVerticalScrollIndicator={false}>
-                  {STATUS_STEPS.filter((s) => {
-                    const currentIndex = STATUS_STEPS.indexOf(
-                      activeServiceForStatus?.serviceStatus || "Booked",
-                    );
-                    const stepIndex = STATUS_STEPS.indexOf(s);
-                    return stepIndex >= currentIndex;
-                  }).map((s) => (
-                    <TouchableOpacity
-                      key={s}
-                      onPress={() => {
-                        handleStatusChange(activeServiceForStatus, s);
-                        setStatusModalVisible(false);
-                      }}
-                      className={`p-5 border-b border-card flex-row items-center justify-between ${activeServiceForStatus?.serviceStatus === s ? "bg-primary" : ""}`}
+              <View className="gap-2.5 mb-6">
+                {STATUS_STEPS.filter((s) => {
+                  const currentIndex = STATUS_STEPS.indexOf(
+                    activeServiceForStatus?.serviceStatus || "Booked",
+                  );
+                  const stepIndex = STATUS_STEPS.indexOf(s);
+                  return stepIndex >= currentIndex;
+                }).map((s) => (
+                  <TouchableOpacity
+                    key={s}
+                    onPress={() => {
+                      handleStatusChange(activeServiceForStatus, s);
+                      setStatusModalVisible(false);
+                    }}
+                    className={`p-4 rounded-2xl flex-row justify-between items-center border ${activeServiceForStatus?.serviceStatus === s ? "bg-primary border-primary" : "bg-slate-900/40 border-slate-700"}`}
+                  >
+                    <Text
+                      className={`font-black text-[11px] uppercase tracking-widest ${activeServiceForStatus?.serviceStatus === s ? "text-background" : "text-text-secondary"}`}
                     >
-                      <Text
-                        className={`font-black uppercase tracking-widest text-xs ${activeServiceForStatus?.serviceStatus === s ? "text-text-primary" : "text-text-secondary"}`}
-                      >
-                        {getStatusDisplayName(s)}
-                      </Text>
-                      {activeServiceForStatus?.serviceStatus === s && (
-                        <Ionicons
-                          name="checkmark-circle"
-                          size={16}
-                          color="#FFFFFF"
-                        />
-                      )}
-                    </TouchableOpacity>
-                  ))}
-                </ScrollView>
+                      {getStatusDisplayName(s)}
+                    </Text>
+                    {activeServiceForStatus?.serviceStatus === s && (
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={22}
+                        color={COLORS.background}
+                      />
+                    )}
+                  </TouchableOpacity>
+                ))}
               </View>
 
               <TouchableOpacity
                 onPress={() => setStatusModalVisible(false)}
-                className="mt-6 w-full py-4 bg-card rounded-2xl items-center"
+                className="py-3.5 px-5 bg-error rounded-2xl items-center border border-error"
               >
-                <Text className="text-text-primary bg-primary px-8 py-4 rounded-2xl font-bold uppercase tracking-widest text-[10px]">
+                <Text className="text-text-primary font-black text-[11px] uppercase tracking-widest">
                   Close
                 </Text>
               </TouchableOpacity>
