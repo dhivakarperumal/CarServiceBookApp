@@ -296,9 +296,14 @@ export default function ServiceCenter() {
       const text =
         `${s.bookingId || ""} ${s.name || ""} ${s.phone || ""} ${s.brand || ""} ${s.model || ""} ${s.vehicleNumber || ""}`.toLowerCase();
 
-      // Exclude fully billed/completed service center items
+      // Exclude fully billed/completed and canceled service center items
       const status = (s.serviceStatus || s.status || "").toLowerCase().trim();
-      if (status === "bill completed") return false;
+      if (
+        status === "bill completed" ||
+        status === "cancelled" ||
+        status === "canceled"
+      )
+        return false;
 
       // SEARCH FILTER
       if (search && !text.includes(search.toLowerCase())) return false;

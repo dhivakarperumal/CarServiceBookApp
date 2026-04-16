@@ -15,6 +15,29 @@ import {
 import { useAuth } from "../../contexts/AuthContext";
 import { api } from "../../services/api";
 
+const getStatusColors = (status: string) => {
+  const s = status?.toLowerCase() || "";
+  if (s.includes("completed")) {
+    return {
+      bg: "bg-success/10",
+      text: "text-success",
+      border: "border-success",
+    };
+  }
+  if (s.includes("cancel")) {
+    return {
+      bg: "bg-error/10",
+      text: "text-error",
+      border: "border-error",
+    };
+  }
+  return {
+    bg: "bg-slate-900/50",
+    text: "text-text-secondary",
+    border: "border-slate-700",
+  };
+};
+
 const CompletedHistory = () => {
   const { user } = useAuth();
   const authUser = user as any;
@@ -28,6 +51,7 @@ const CompletedHistory = () => {
   const [services, setServices] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [dateFilter, setDateFilter] = useState("all");
+  const [activeTab, setActiveTab] = useState("completed"); // completed | cancelled
   const [issueModalVisible, setIssueModalVisible] = useState(false);
   const [selectedServiceDetail, setSelectedServiceDetail] = useState<any>(null);
   const [activeModalTab, setActiveModalTab] = useState("issues");
@@ -67,7 +91,9 @@ const CompletedHistory = () => {
           (s.assignedEmployeeName || "").toLowerCase() === mechanic;
         const stat = (s.serviceStatus || s.status || "").toLowerCase();
 
-        return isMine && stat.includes("completed");
+        return (
+          isMine && (stat.includes("completed") || stat.includes("cancel"))
+        );
       })
       .map((s: any) => {
         const possibleIds = [s.id, s.bookingId, s.serviceId, s.appointmentId]
@@ -148,6 +174,13 @@ const CompletedHistory = () => {
         (item.vehicleNumber || "").toLowerCase().includes(txt) ||
         (item.brand + " " + item.model).toLowerCase().includes(txt);
 
+      // TAB FILTER
+      const stat = (item.serviceStatus || item.status || "").toLowerCase();
+      const matchesTab =
+        activeTab === "completed"
+          ? stat.includes("completed")
+          : stat.includes("cancel");
+
       let matchesDate = true;
 
       if (dateFilter !== "all") {
@@ -179,9 +212,9 @@ const CompletedHistory = () => {
         }
       }
 
-      return matchesSearch && matchesDate;
+      return matchesSearch && matchesDate && matchesTab;
     });
-  }, [services, search, dateFilter]);
+  }, [services, search, dateFilter, activeTab]);
 
   return (
     <SafeAreaView className="flex-1 bg-background">
@@ -194,7 +227,9 @@ const CompletedHistory = () => {
         {/* HEADER */}
         <View className="px-6 pt-6 pb-4">
           <Text className="text-text-primary text-[17px] font-black uppercase tracking-tight mb-6">
-            Completed History
+            {activeTab === "completed"
+              ? "Completed History"
+              : "Cancelled History"}
           </Text>
 
           {/* Stats Card */}
@@ -202,16 +237,64 @@ const CompletedHistory = () => {
             <View className="flex-row items-center justify-between">
               <View>
                 <Text className="text-[10px] font-black uppercase tracking-widest text-text-muted mb-2">
-                  Completed Jobs
+                  {activeTab === "completed"
+                    ? "Completed Jobs"
+                    : "Cancelled Jobs"}
                 </Text>
-                <Text className="text-[28px] font-black text-success">
+                <Text
+                  className={`text-[28px] font-black ${activeTab === "completed" ? "text-success" : "text-error"}`}
+                >
                   {filteredServices.length}
                 </Text>
               </View>
-              <View className="w-12 h-12 rounded-full bg-success/10 items-center justify-center">
-                <Ionicons name="checkmark-done" size={20} color="#10B981" />
+              <View
+                className={`w-12 h-12 rounded-full ${activeTab === "completed" ? "bg-success/10" : "bg-error/10"} items-center justify-center`}
+              >
+                <Ionicons
+                  name={
+                    activeTab === "completed"
+                      ? "checkmark-done"
+                      : "close-circle"
+                  }
+                  size={20}
+                  color={activeTab === "completed" ? "#10B981" : "#EF4444"}
+                />
               </View>
             </View>
+          </View>
+        </View>
+
+        {/* TABS */}
+        <View className="px-6 pb-4">
+          <View className="flex-row bg-slate-900/30 rounded-2xl p-1 border border-slate-700 mb-6">
+            <TouchableOpacity
+              onPress={() => setActiveTab("completed")}
+              className={`flex-1 py-3 rounded-xl items-center ${
+                activeTab === "completed" ? "bg-success" : ""
+              }`}
+            >
+              <Text
+                className={`text-sm font-black uppercase tracking-widest ${
+                  activeTab === "completed" ? "text-white" : "text-slate-400"
+                }`}
+              >
+                Completed
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setActiveTab("cancelled")}
+              className={`flex-1 py-3 rounded-xl items-center ${
+                activeTab === "cancelled" ? "bg-error" : ""
+              }`}
+            >
+              <Text
+                className={`text-sm font-black uppercase tracking-widest ${
+                  activeTab === "cancelled" ? "text-white" : "text-slate-400"
+                }`}
+              >
+                Cancelled
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -222,7 +305,7 @@ const CompletedHistory = () => {
             <View className="bg-slate-900/30 rounded-2xl flex-row items-center px-4 h-14 border border-slate-700">
               <Ionicons name="search" size={16} color="#64748B" />
               <TextInput
-                placeholder="Search completed services..."
+                placeholder={`Search ${activeTab} services...`}
                 placeholderTextColor="#64748B"
                 value={search}
                 onChangeText={setSearch}
@@ -239,11 +322,26 @@ const CompletedHistory = () => {
               dropdownIconColor="#64748B"
               style={{ color: "white" }}
             >
-              <Picker.Item label="All Time History" value="all" />
-              <Picker.Item label="Today's Completed" value="today" />
-              <Picker.Item label="Yesterday Jobs" value="yesterday" />
-              <Picker.Item label="Past Week" value="week" />
-              <Picker.Item label="Past Month" value="month" />
+              <Picker.Item
+                label={`All ${activeTab === "completed" ? "Completed" : "Cancelled"} History`}
+                value="all"
+              />
+              <Picker.Item
+                label={`Today's ${activeTab === "completed" ? "Completed" : "Cancelled"}`}
+                value="today"
+              />
+              <Picker.Item
+                label={`Yesterday ${activeTab === "completed" ? "Completed" : "Cancelled"}`}
+                value="yesterday"
+              />
+              <Picker.Item
+                label={`Past Week ${activeTab === "completed" ? "Completed" : "Cancelled"}`}
+                value="week"
+              />
+              <Picker.Item
+                label={`Past Month ${activeTab === "completed" ? "Completed" : "Cancelled"}`}
+                value="month"
+              />
             </Picker>
           </View>
         </View>
@@ -258,7 +356,7 @@ const CompletedHistory = () => {
                 color="#64748B"
               />
               <Text className="text-slate-500 font-black text-[10px] uppercase mt-4 tracking-[2px]">
-                No completed services found
+                No {activeTab} services found
               </Text>
             </View>
           ) : (
@@ -277,9 +375,13 @@ const CompletedHistory = () => {
                         {item.name || "Customer"}
                       </Text>
                     </View>
-                    <View className="bg-success/10 px-3 py-1.5 rounded-full border border-success">
-                      <Text className="text-success text-[8px] font-black uppercase tracking-widest">
-                        Completed
+                    <View
+                      className={`${getStatusColors(item.serviceStatus || item.status).bg} px-3 py-1.5 rounded-full border ${getStatusColors(item.serviceStatus || item.status).border}`}
+                    >
+                      <Text
+                        className={`${getStatusColors(item.serviceStatus || item.status).text} text-[8px] font-black uppercase tracking-widest`}
+                      >
+                        {item.serviceStatus || item.status || "Completed"}
                       </Text>
                     </View>
                   </View>
