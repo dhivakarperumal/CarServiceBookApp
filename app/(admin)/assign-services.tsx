@@ -151,7 +151,7 @@ export default function AdminAssignServices() {
             b.assignedEmployeeId ||
             b.assignedEmployeeName ||
             b.assigned_employee_id
-          ) && 
+          ) &&
           !(b.serviceStatus || b.status || b.appointmentStatus || "")
             .toLowerCase()
             .includes("completed"),
@@ -298,16 +298,16 @@ export default function AdminAssignServices() {
         contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
       >
-       
-       
+
+
 
 
 
         {/* SEARCH & FILTERS */}
-        <View className="px-6 mb-8 gap-4">
-        
+        <View className="px-6 mb-2 gap-4 mt-5">
 
-          <View className="flex-row gap-4 mb-8">
+
+          <View className="flex-row gap-4 mb-2">
             {[
               { id: "unassigned", label: `Unassigned (${stats.unassigned})`, icon: "person-remove" },
               { id: "assigned", label: `Assigned (${stats.assigned})`, icon: "person-add" },
@@ -331,7 +331,7 @@ export default function AdminAssignServices() {
           </View>
 
           <View className="flex-row gap-4 mb-4">
-            <View className="flex-1 flex-row items-center bg-white/5 border border-white/10 rounded-3xl px-5 py-2.5">
+            <View className="flex-1 flex-row items-center bg-white/5 border border-white/10 rounded-3xl px-5 py-2">
               <Ionicons name="search" size={18} color={COLORS.textSecondary} />
               <TextInput
                 placeholder="Search..."
@@ -348,7 +348,7 @@ export default function AdminAssignServices() {
             {/* Date Select Button */}
             <TouchableOpacity
               onPress={() => setFilterModal({ type: "date" })}
-              className="bg-white/5 border border-white/10 rounded-3xl px-4 py-2.5 items-center justify-center flex-row gap-2"
+              className="bg-white/5 border border-white/10 rounded-3xl px-4 py-2 items-center justify-center flex-row gap-2"
             >
               <View>
                 <Text className="text-white/30 text-[7px] font-black uppercase tracking-widest text-center">
@@ -373,146 +373,96 @@ export default function AdminAssignServices() {
               </Text>
             </View>
           ) : (
-            paginatedBookings.map((item: any) => (
-              <View
-                key={item.id || item._id}
-                style={{ backgroundColor: COLORS.card }}
-                className="p-8 rounded-3xl border border-white/5 shadow-xl relative overflow-hidden"
-              >
-                <View className="flex-row justify-between items-start mb-6">
-                  <View>
-                    <Text className="text-white/50 font-bold text-[13px] uppercase">
-                      DB-ID: {item.id || item._id}
-                    </Text>
-                    <Text className="text-white font-bold text-md uppercase mt-1">
+            paginatedBookings.map((item: any) => {
+              const hasAssignee = !!(
+                item.assignedEmployeeId ||
+                item.assignedEmployeeName ||
+                item.assigned_employee_id
+              );
+              const status = (
+                item.serviceStatus ||
+                item.status ||
+                item.appointmentStatus ||
+                "Booked"
+              ).toUpperCase();
+
+              return (
+                <View
+                  key={item.id || item._id}
+                  style={{ backgroundColor: COLORS.card }}
+                  className="p-4 rounded-[32px] border border-white/5 shadow-xl mb-2"
+                >
+                  {/* Header: ID + Status */}
+                  <View className="flex-row justify-between items-center mb-4">
+                    <Text className="text-white font-bold  text-md uppercase ">
                       {item.appointmentId ||
                         item.bookingId ||
-                        (item.id ? `ID-${item.id}` : "SVC-NEW")}
+                        `#${item.id || item._id}`}
                     </Text>
+                    <View className="bg-primary/10 px-3 py-1.5 rounded-full border border-primary/20">
+                      <Text className="text-primary text-[8px] font-black uppercase tracking-widest">
+                        {status}
+                      </Text>
+                    </View>
                   </View>
-                  <View className="flex-row gap-2">
-                    {item.isAppointment && (
-                      <View className="px-3 py-1.5 rounded-full border border-primary/30 bg-primary/10">
-                        <Text className="text-primary text-[8px] font-black uppercase">
-                          APPOINTMENT
+
+                  {/* Body: Vehicle Info */}
+                  <View className="mb-5">
+                    <View className="flex-row items-center gap-2.5 mb-1.5">
+                      <View className={`w-2 h-2 rounded-full ${item.vehicleType === "bike" ? "bg-orange-500" : "bg-blue-500"}`} />
+                      <Text className="text-white text-sm font-black uppercase tracking-tight">
+                        {item.brand} {item.model}
+                      </Text>
+                    </View>
+                    {(item.vehicleNumber || item.registrationNumber) && (
+                      <Text className="text-primary text-[12px] font-black uppercase tracking-widest bg-primary/5 self-start px-2 py-0.5 rounded-md">
+                        {item.vehicleNumber || item.registrationNumber}
+                      </Text>
+                    )}
+                  </View>
+
+                  {/* Divider */}
+                  <View className="h-[1px] bg-white/5 w-full mb-2" />
+
+                  {/* Footer: Tech/Customer + Action */}
+                  <View className="flex-row justify-between items-center">
+                    <View className="flex-row items-center gap-3">
+                      <View className="w-10 h-10 rounded-2xl bg-white/5 items-center justify-center border border-white/5">
+                        <Text className="text-white font-black text-xs">
+                          {item.name?.charAt(0).toUpperCase()}
                         </Text>
                       </View>
-                    )}
-                    <View
-                      className={`px-4 py-1.5 rounded-full border border-primary/20 bg-primary/10`}
-                    >
-                      <Text className="text-primary text-[9px] font-black uppercase">
-                        {(
-                          item.serviceStatus ||
-                          item.status ||
-                          item.appointmentStatus ||
-                          "BOOKED"
-                        ).toUpperCase()}
-                      </Text>
+                      <View>
+                        <Text className="text-white text-[13px] font-black uppercase">
+                          {item.name}
+                        </Text>
+                        <Text className="text-white/30 text-[9px] font-bold uppercase mt-0.5">
+                          {formatDateTime(item.created_at || item.createdAt).date}
+                        </Text>
+                      </View>
                     </View>
-                  </View>
-                </View>
 
-                <View className="mb-6">
-                  <View className="flex-row items-center gap-2 mb-2">
-                    <View
-                      className={`px-3 py-1 rounded-lg ${item.vehicleType === "bike" ? "bg-orange-500/20" : "bg-blue-500/20"}`}
-                    >
-                      <Text
-                        className={`text-[13px] font-black uppercase ${item.vehicleType === "bike" ? "text-orange-400" : "text-blue-400"}`}
-                      >
-                        {item.vehicleType || "Car"}
-                      </Text>
-                    </View>
-                    <Text className="text-white text-xl font-black uppercase">
-                      {item.brand} {item.model}
-                    </Text>
-                  </View>
-                  {(item.vehicleNumber || item.registrationNumber) && (
-                    <Text className="text-primary mt-1 font-bold text-sm bg-primary/10 px-3 py-1 rounded-lg self-start border border-primary/20">
-                      {item.vehicleNumber || item.registrationNumber}
-                    </Text>
-                  )}
-                </View>
-
-                <View className="bg-black/20 p-6 rounded-2xl gap-4 mb-8 border border-white/5">
-                  <View className="flex-row justify-between border-b border-white/5 pb-4 mb-2">
-                    <View className="flex-row items-center gap-3">
-                      <Ionicons
-                        name="calendar-outline"
-                        size={14}
-                        color="#666"
-                      />
-                      <Text className="text-white/60 font-bold text-[13px]">
-                        {formatDateTime(item.created_at || item.createdAt).date}
-                      </Text>
-                    </View>
-                    <View className="flex-row items-center gap-3">
-                      <Ionicons name="time-outline" size={14} color="#666" />
-                      <Text className="text-white/60 font-bold text-[10px]">
-                        {formatDateTime(item.created_at || item.createdAt).time}
-                      </Text>
-                    </View>
-                  </View>
-                  <View className="flex-row items-center gap-4">
-                    <View className="w-10 h-10 rounded-xl bg-white/5 items-center justify-center border border-white/5">
-                      <Text className="text-white font-black">
-                        {item.name?.charAt(0)}
-                      </Text>
-                    </View>
-                    <View className="flex-1">
-                      <Text className="text-text-muted text-[11px] font-black uppercase">
-                        Customer
-                      </Text>
-                      <Text className="text-text-primary text-md mt-1 font-black uppercase">
-                        {item.name}
-                      </Text>
-                    </View>
-                    {item.phone && (
+                    {!hasAssignee ? (
                       <TouchableOpacity
-                        onPress={() => {}}
-                        className="w-10 h-10 bg-primary/10 rounded-xl items-center justify-center border border-primary/20"
+                        onPress={() => openAssignModal(item)}
+                        className="bg-primary px-6 py-3 rounded-2xl shadow-lg shadow-primary/20"
                       >
-                        <Ionicons
-                          name="call"
-                          size={16}
-                          color={COLORS.primary}
-                        />
+                        <Text className="text-background font-black text-[10px] uppercase tracking-widest">
+                          Assign
+                        </Text>
                       </TouchableOpacity>
+                    ) : (
+                      <View className="flex-row items-center gap-2 bg-emerald-500/10 px-3 py-2 rounded-xl border border-emerald-500/20">
+                        <Ionicons name="construct" size={12} color="#10B981" />
+                        <Text className="text-emerald-500 font-black text-[9px] uppercase tracking-widest">
+                          {item.assignedEmployeeName || "Assigned"}
+                        </Text>
+                      </View>
                     )}
                   </View>
                 </View>
-                {!item.assignedEmployeeId &&
-                !item.assignedEmployeeName &&
-                !item.assignedEmployee?._id ? (
-                  <View className="flex-row justify-end items-center mt-2">
-                    <TouchableOpacity
-                      onPress={() => openAssignModal(item)}
-                      className="bg-primary px-8 py-4 rounded-2xl items-center shadow-xl shadow-primary/20 active:scale-[0.98]"
-                    >
-                      <View className="flex-row items-center gap-2">
-                        <Ionicons name="person-add" size={14} color={COLORS.background} />
-                        <Text className="text-background font-black text-[10px] uppercase tracking-widest">
-                          Assign Mechanic
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-                  </View>
-                ) : (
-                  <View className="w-full bg-white/5 py-4 px-6 rounded-xl flex-row justify-between items-center border border-white/10">
-                    <Text className="text-white/20 font-black text-[8px] uppercase">
-                      Secure Allocation Locked
-                    </Text>
-                    <View className="flex-row items-center gap-2">
-                       <Ionicons name="construct" size={14} color="#10B981" />
-                       <Text className="text-emerald-500 font-black text-[10px] uppercase tracking-widest">
-                         {item.assignedEmployeeName || item.assignedEmployee?.name || "Service Team"}
-                       </Text>
-                    </View>
-                  </View>
-                )}
-              </View>
-            ))
+              );
+            })
           )}
 
           {/* PAGINATION */}
@@ -658,17 +608,17 @@ export default function AdminAssignServices() {
                           .toLowerCase()
                           .includes("completed"),
                     ).length === 0 && (
-                      <View className="p-8 items-center border border-dashed border-white/10 rounded-2xl bg-black/20">
-                        <Ionicons
-                          name="documents-outline"
-                          size={32}
-                          color="rgba(255,255,255,0.1)"
-                        />
-                        <Text className="text-white/30 text-center text-[10px] font-black uppercase mt-3 tracking-widest">
-                          No Unassigned Protocols
-                        </Text>
-                      </View>
-                    )}
+                        <View className="p-8 items-center border border-dashed border-white/10 rounded-2xl bg-black/20">
+                          <Ionicons
+                            name="documents-outline"
+                            size={32}
+                            color="rgba(255,255,255,0.1)"
+                          />
+                          <Text className="text-white/30 text-center text-[10px] font-black uppercase mt-3 tracking-widest">
+                            No Unassigned Protocols
+                          </Text>
+                        </View>
+                      )}
                   </ScrollView>
                 </View>
               </View>
