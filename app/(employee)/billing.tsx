@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { Picker } from "@react-native-picker/picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
@@ -72,6 +73,8 @@ export default function EmployeeBilling() {
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("paid");
+  const [dateFilter, setDateFilter] = useState("all");
+  const [dateRange, setDateRange] = useState({ start: "", end: "" });
   const [expandedItems, setExpandedItems] = useState<(string | number)[]>([]);
 
   const toggleExpanded = (id: string | number) => {
@@ -175,8 +178,50 @@ export default function EmployeeBilling() {
     }
   };
 
-  const filteredBills = useMemo(() => {
+  const dateFilteredBills = useMemo(() => {
     return bills.filter((b) => {
+      let matchesDate = true;
+      const billDate = new Date(b.createdAt || b.created_at || b.date || "");
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      if (dateFilter !== "all") {
+        if (!billDate || isNaN(billDate.getTime())) {
+          matchesDate = false;
+        } else if (dateFilter === "today") {
+          matchesDate = billDate.toDateString() === today.toDateString();
+        } else if (dateFilter === "yesterday") {
+          const yesterday = new Date(today);
+          yesterday.setDate(today.getDate() - 1);
+          matchesDate = billDate.toDateString() === yesterday.toDateString();
+        } else if (dateFilter === "week") {
+          const lastWeek = new Date(today);
+          lastWeek.setDate(today.getDate() - 7);
+          matchesDate = billDate >= lastWeek;
+        } else if (dateFilter === "month") {
+          const lastMonth = new Date(today);
+          lastMonth.setMonth(today.getMonth() - 1);
+          matchesDate = billDate >= lastMonth;
+        } else if (dateFilter === "custom") {
+          const start = dateRange.start ? new Date(dateRange.start) : null;
+          const end = dateRange.end ? new Date(dateRange.end) : null;
+          if (end) end.setHours(23, 59, 59, 999);
+          if (start && end) {
+            matchesDate = billDate >= start && billDate <= end;
+          } else if (start) {
+            matchesDate = billDate >= start;
+          } else if (end) {
+            matchesDate = billDate <= end;
+          }
+        }
+      }
+
+      return matchesDate;
+    });
+  }, [bills, dateFilter, dateRange]);
+
+  const filteredBills = useMemo(() => {
+    return dateFilteredBills.filter((b) => {
       const text =
         `${b.invoiceNo} ${b.customerName} ${b.carNumber} ${b.bookingId}`.toLowerCase();
       const matchesSearch = text.includes(search.toLowerCase());
@@ -186,7 +231,7 @@ export default function EmployeeBilling() {
           : b.paymentStatus?.toLowerCase() !== "paid";
       return matchesSearch && matchesStatus;
     });
-  }, [bills, search, statusFilter]);
+  }, [dateFilteredBills, search, statusFilter, dateFilter, dateRange]);
 
   return (
     <SafeAreaView className="flex-1 bg-background">
@@ -208,7 +253,7 @@ export default function EmployeeBilling() {
               </Text>
               <Text className="text-lg font-black text-success">
                 ₹
-                {bills
+                {dateFilteredBills
                   .reduce((sum, b) => sum + Number(b.grandTotal), 0)
                   .toLocaleString()}
               </Text>
@@ -218,7 +263,11 @@ export default function EmployeeBilling() {
                 Pending
               </Text>
               <Text className="text-lg font-black text-warning">
-                {bills.filter((b) => b.paymentStatus !== "Paid").length}
+                {
+                  dateFilteredBills.filter(
+                    (b) => b.paymentStatus?.toLowerCase() !== "paid",
+                  ).length
+                }
               </Text>
             </View>
           </View>
@@ -241,6 +290,60 @@ export default function EmployeeBilling() {
             />
           </View>
 
+          <View className="flex-row gap-3 mb-3">
+            <View className="flex-1 bg-slate-900/30 border border-slate-700 rounded-2xl px-3 py-1 overflow-hidden">
+              <Picker
+                selectedValue={dateFilter}
+                onValueChange={(itemValue) => setDateFilter(itemValue)}
+                dropdownIconColor="#64748B"
+                style={{ color: "white" }}
+              >
+                {[
+                  { value: "all", label: "All Time" },
+                  { value: "today", label: "Today" },
+                  { value: "yesterday", label: "Yesterday" },
+                  { value: "week", label: "Past Week" },
+                  { value: "month", label: "Past Month" },
+                  { value: "custom", label: "Custom Range" },
+                ].map((option) => (
+                  <Picker.Item
+                    key={option.value}
+                    label={option.label}
+                    value={option.value}
+                  />
+                ))}
+              </Picker>
+            </View>
+          </View>
+
+          {dateFilter === "custom" && (
+            <View className="bg-slate-900/30 border border-slate-700 rounded-2xl p-4 mb-3 space-y-3">
+              <Text className="text-[12px] font-black uppercase tracking-wider text-text-muted">
+                Custom Date Range
+              </Text>
+              <View className="flex-row gap-3 flex-wrap">
+                <TextInput
+                  placeholder="Start YYYY-MM-DD"
+                  placeholderTextColor="#64748B"
+                  value={dateRange.start}
+                  onChangeText={(value) =>
+                    setDateRange((prev) => ({ ...prev, start: value }))
+                  }
+                  className="flex-1 px-4 py-3 bg-slate-900/50 border border-slate-700 rounded-2xl text-text-primary"
+                />
+                <TextInput
+                  placeholder="End YYYY-MM-DD"
+                  placeholderTextColor="#64748B"
+                  value={dateRange.end}
+                  onChangeText={(value) =>
+                    setDateRange((prev) => ({ ...prev, end: value }))
+                  }
+                  className="flex-1 px-4 py-3 bg-slate-900/50 border border-slate-700 rounded-2xl text-text-primary"
+                />
+              </View>
+            </View>
+          )}
+
           {/* Status Tabs */}
           <View className="flex-row gap-3 p-5">
             <TouchableOpacity
@@ -256,10 +359,7 @@ export default function EmployeeBilling() {
                   statusFilter === "paid" ? "text-white" : "text-slate-400"
                 }`}
               >
-                {`Paid (${
-                  bills.filter((b) => b.paymentStatus?.toLowerCase() === "paid")
-                    .length
-                })`}
+                {`Paid (${dateFilteredBills.filter((b) => b.paymentStatus?.toLowerCase() === "paid").length})`}
               </Text>
             </TouchableOpacity>
 
