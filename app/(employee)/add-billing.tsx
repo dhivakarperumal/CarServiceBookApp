@@ -95,6 +95,8 @@ export default function AddBillingScreen() {
   useEffect(() => {
     if (editBillId && !loading) {
       loadBillForEditing(editBillId.toString());
+    } else if (!editBillId) {
+      resetForm();
     }
   }, [editBillId, loading]);
 
@@ -139,7 +141,9 @@ export default function AddBillingScreen() {
       setInvoiceNo(bill.invoiceNo || "");
       // Use bill.labour as the workforce charge (single source of truth)
       setWorkforceCharges(
-        bill.labour != null ? String(bill.labour) : String(bill.workforceCharges || ""),
+        bill.labour != null
+          ? String(bill.labour)
+          : String(bill.workforceCharges || ""),
       );
       setGstPercent(String(bill.gstPercent ?? 18));
 
@@ -150,8 +154,7 @@ export default function AddBillingScreen() {
           qty: Number(p.qty || 0),
           price: Number(p.price || 0),
           total:
-            Number(p.total || 0) ||
-            Number(p.qty || 0) * Number(p.price || 0),
+            Number(p.total || 0) || Number(p.qty || 0) * Number(p.price || 0),
         })),
       );
 
@@ -315,17 +318,16 @@ export default function AddBillingScreen() {
       setInvoiceNo(bill.invoiceNo || "");
 
       const isManual =
-        bill.billingType?.toLowerCase() === "manual" ||
-        !bill.serviceId;
+        bill.billingType?.toLowerCase() === "manual" || !bill.serviceId;
 
       setBillingMode(isManual ? "manual" : "online");
 
-      // ------------------------- 
+      // -------------------------
       // ONLINE BILLING PREFILL
       // -------------------------
       if (!isManual && bill.serviceId) {
         const matchedService = services.find(
-          (s) => String(s.id) === String(bill.serviceId)
+          (s) => String(s.id) === String(bill.serviceId),
         );
 
         if (matchedService) {
@@ -345,20 +347,18 @@ export default function AddBillingScreen() {
         setSelectedService(null);
       }
 
-      // ------------------------- 
+      // -------------------------
       // MANUAL BILLING PREFILL
       // -------------------------
       setManualCustomerName(bill.customerName || "");
       setManualContactNumber(bill.mobileNumber || "");
-      setManualPlateNumber(
-        bill.plateNumber || bill.registrationNumber || ""
-      );
+      setManualPlateNumber(bill.plateNumber || bill.registrationNumber || "");
 
       const carParts = (bill.car || "").split(" ");
       setManualVehicleBrand(carParts[0] || "");
       setManualVehicleModel(carParts.slice(1).join(" ") || "");
 
-      // ------------------------- 
+      // -------------------------
       // PARTS PREFILL
       // -------------------------
       setParts(
@@ -367,19 +367,18 @@ export default function AddBillingScreen() {
           qty: Number(p.qty || 0),
           price: Number(p.price || 0),
           total:
-            Number(p.total || 0) ||
-            Number(p.qty || 0) * Number(p.price || 0),
-        }))
+            Number(p.total || 0) || Number(p.qty || 0) * Number(p.price || 0),
+        })),
       );
 
-      // ------------------------- 
+      // -------------------------
       // ISSUES PREFILL
       // -------------------------
       setIssues(
         (bill.issues || []).map((i: any) => ({
           issueName: i.issueName || i.issue || "",
           amount: Number(i.amount || 0),
-        }))
+        })),
       );
 
       setWorkforceCharges(String(bill.labour || 0));
@@ -450,6 +449,8 @@ export default function AddBillingScreen() {
   };
 
   const resetForm = (nextCount = billingCount) => {
+    setIsEditMode(false);
+    setEditingBill(null);
     setBillingMode("online");
     setSelectedService(null);
     setSearch("");
@@ -471,7 +472,9 @@ export default function AddBillingScreen() {
 
   const partsTotal = parts.reduce((sum, p) => sum + Number(p.total || 0), 0);
   const issueTotal =
-    billingMode === "online" ? issues.reduce((sum, i) => sum + Number(i.amount || 0), 0) : 0;
+    billingMode === "online"
+      ? issues.reduce((sum, i) => sum + Number(i.amount || 0), 0)
+      : 0;
   const labourAmount = Number(workforceCharges || 0);
   const gst = Number(gstPercent || 0);
 
@@ -565,7 +568,10 @@ export default function AddBillingScreen() {
           await api.patch(`/billings/${billId}`, payload);
         } catch (patchErr: any) {
           // Fallback to PUT if PATCH returns 404/405
-          if (patchErr?.response?.status === 404 || patchErr?.response?.status === 405) {
+          if (
+            patchErr?.response?.status === 404 ||
+            patchErr?.response?.status === 405
+          ) {
             await api.put(`/billings/${billId}`, payload);
           } else {
             throw patchErr;
