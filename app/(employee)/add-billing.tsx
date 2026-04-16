@@ -115,7 +115,7 @@ export default function AddBillingScreen() {
           .toLowerCase()
           .includes(newPartName.toLowerCase()),
       )
-      .slice(0, 4);
+      .slice(0, 6);
   }, [products, newPartName]);
 
   const fetchMyServices = async () => {
@@ -490,16 +490,6 @@ export default function AddBillingScreen() {
             ) : (
               <>
                 <View className="flex-row flex-wrap gap-4 mb-6">
-                  <View className="flex-1 min-w-[280px] bg-card rounded-[28px] p-6 border border-slate-700">
-                    <SectionTitle title="Quick Search" />
-                    <TextInput
-                      placeholder="Search Booking ID / Phone"
-                      placeholderTextColor="#64748B"
-                      value={search}
-                      onChangeText={setSearch}
-                      className="w-full bg-slate-900/30 border border-slate-700 rounded-2xl px-4 py-4 text-text-primary font-semibold"
-                    />
-                  </View>
 
                   <View className="flex-1 min-w-[280px] bg-card rounded-[28px] p-6 border border-slate-700">
                     <SectionTitle title="Verification Queue" />
@@ -578,18 +568,36 @@ export default function AddBillingScreen() {
                     )}
 
                     {selectedService && (
-                      <View className="mt-4 rounded-2xl border border-slate-700 bg-slate-900/30 p-4">
-                        <Text className="text-[10px] uppercase tracking-widest text-text-muted mb-2">
-                          Selected Verification Job
-                        </Text>
-                        <Text className="text-sm font-black text-text-primary">
-                          {selectedService.bookingId ||
-                            `Job ${selectedService.id}`}
-                        </Text>
-                        <Text className="text-[10px] text-text-muted mt-1">
-                          {selectedService.name} • {selectedService.brand}{" "}
-                          {selectedService.model}
-                        </Text>
+                      <View className="mt-4 rounded-2xl border border-slate-700 bg-gradient-to-r from-slate-900/50 to-slate-900/20 p-5">
+                        <View className="flex-row items-start justify-between mb-3">
+                          <View className="flex-1">
+                            <Text className="text-[10px] uppercase tracking-widest text-success font-black mb-1">
+                              ✓ Selected Job
+                            </Text>
+                            <Text className="text-base font-black text-text-primary">
+                              {selectedService.bookingId ||
+                                `Job ${selectedService.id}`}
+                            </Text>
+                            <Text className="text-[10px] text-text-muted mt-2">
+                              {selectedService.name}
+                            </Text>
+                            <Text className="text-[9px] text-text-muted mt-1">
+                              {selectedService.brand} {selectedService.model}
+                            </Text>
+                          </View>
+                          <TouchableOpacity
+                            onPress={() => {
+                              setSelectedService(null);
+                              setParts([]);
+                              setIssues([]);
+                            }}
+                            className="bg-error/20 border border-error rounded-xl px-3 py-2"
+                          >
+                            <Text className="text-[10px] font-black text-error uppercase tracking-widest">
+                              Unselect
+                            </Text>
+                          </TouchableOpacity>
+                        </View>
                       </View>
                     )}
                   </View>
@@ -658,154 +666,215 @@ export default function AddBillingScreen() {
                 </Text>
               </View>
 
-              <View className="flex-row flex-wrap gap-3 mb-4">
-                <TextInput
-                  placeholder="Type or select a product"
-                  placeholderTextColor="#64748B"
-                  value={newPartName}
-                  onChangeText={(value) => {
-                    setNewPartName(value);
-                    const match = products.find(
-                      (product) =>
-                        (product.name || "").toString().toLowerCase() ===
-                        value.toLowerCase(),
-                    );
-                    if (match && match.price != null) {
-                      setNewPartPrice(String(match.price));
-                    }
-                  }}
-                  className="flex-1 min-w-[220px] bg-slate-900/30 border border-slate-700 rounded-2xl px-4 py-4 text-text-primary font-bold"
-                />
-                <TextInput
-                  placeholder="Qty"
-                  placeholderTextColor="#64748B"
-                  value={newPartQty}
-                  onChangeText={setNewPartQty}
-                  keyboardType="numeric"
-                  className="w-24 bg-slate-900/30 border border-slate-700 rounded-2xl px-4 py-4 text-text-primary font-bold"
-                />
-                <TextInput
-                  placeholder="Unit Price"
-                  placeholderTextColor="#64748B"
-                  value={newPartPrice}
-                  onChangeText={setNewPartPrice}
-                  keyboardType="numeric"
-                  className="w-28 bg-slate-900/30 border border-slate-700 rounded-2xl px-4 py-4 text-text-primary font-bold"
-                />
-                <TouchableOpacity
-                  onPress={addManualPart}
-                  className="min-w-[140px] bg-primary rounded-2xl px-5 py-4 items-center justify-center"
-                >
-                  <Text className="text-white font-black uppercase tracking-widest text-xs">
-                    + Add Part
+              <View className="flex-col gap-4 mb-6">
+                <View className="bg-gradient-to-r from-slate-900/50 to-slate-900/20 rounded-3xl border border-slate-700/60 p-6">
+                  <Text className="text-[9px] uppercase tracking-widest text-text-muted font-black mb-4">
+                    ⚙️ Add New Part to Inventory
                   </Text>
-                </TouchableOpacity>
-              </View>
-              {matchingProducts.length > 0 && (
-                <View className="bg-slate-900/30 rounded-2xl border border-slate-700 p-3 mb-4">
-                  <Text className="text-[10px] uppercase tracking-widest text-text-muted mb-2">
-                    Suggested products from inventory
-                  </Text>
-                  {matchingProducts.map((product) => (
+                  <View className="flex-row flex-wrap gap-3">
+                    <View className="flex-1 min-w-[220px]">
+                      <TextInput
+                        placeholder="Search or type part name"
+                        placeholderTextColor="#64748B"
+                        value={newPartName}
+                        onChangeText={(value) => {
+                          setNewPartName(value);
+                          const match = products.find(
+                            (product) =>
+                              (product.name || "").toString().toLowerCase() ===
+                              value.toLowerCase(),
+                          );
+                          if (match && match.price != null) {
+                            setNewPartPrice(String(match.price));
+                          }
+                        }}
+                        className="w-full bg-slate-900/40 border border-slate-700/60 rounded-2xl px-5 py-4 text-text-primary font-bold text-sm"
+                      />
+                    </View>
+                    <View className="w-24">
+                      <TextInput
+                        placeholder="Qty"
+                        placeholderTextColor="#64748B"
+                        value={newPartQty}
+                        onChangeText={setNewPartQty}
+                        keyboardType="numeric"
+                        className="w-full bg-slate-900/40 border border-slate-700/60 rounded-2xl px-4 py-4 text-text-primary font-bold text-center text-sm"
+                      />
+                    </View>
+                    <View className="w-28">
+                      <TextInput
+                        placeholder="Unit Price"
+                        placeholderTextColor="#64748B"
+                        value={newPartPrice}
+                        onChangeText={setNewPartPrice}
+                        keyboardType="numeric"
+                        className="w-full bg-slate-900/40 border border-slate-700/60 rounded-2xl px-4 py-4 text-text-primary font-bold text-center text-sm"
+                      />
+                    </View>
                     <TouchableOpacity
-                      key={product.id || product.name}
-                      onPress={() => {
-                        setNewPartName(product.name || "");
-                        setNewPartPrice(
-                          String(product.price || product.offerPrice || "0"),
-                        );
-                      }}
-                      className="rounded-xl px-3 py-3 bg-slate-900/50 mb-2"
+                      onPress={addManualPart}
+                      className="min-w-[140px] bg-gradient-to-r from-primary to-accent rounded-2xl px-5 py-4 items-center justify-center border border-primary/40 shadow-lg"
                     >
-                      <Text className="text-sm font-black text-text-primary">
-                        {product.name}
-                      </Text>
-                      <Text className="text-[10px] text-text-muted mt-1">
-                        ₹{product.price || product.offerPrice || "0"}
+                      <Text className="text-white font-black uppercase tracking-widest text-xs">
+                        + Add Part
                       </Text>
                     </TouchableOpacity>
-                  ))}
+                  </View>
+                </View>
+              </View>
+
+              {matchingProducts.length > 0 && (
+                <View className="bg-gradient-to-r from-slate-900/50 to-slate-900/20 rounded-3xl border border-slate-700/60 p-5 mb-6">
+                  <View className="flex-row items-center gap-2 mb-4">
+                    <Ionicons name="layers-outline" size={16} color="#0EA5E9" />
+                    <Text className="text-[10px] uppercase tracking-widest font-black text-primary">
+                      Matching Spare Parts Found
+                    </Text>
+                  </View>
+                  <View className="gap-3">
+                    {matchingProducts.map((product) => (
+                      <TouchableOpacity
+                        key={product.id || product.name}
+                        onPress={() => {
+                          setNewPartName(product.name || "");
+                          setNewPartPrice(
+                            String(product.price || product.offerPrice || "0"),
+                          );
+                        }}
+                        className="bg-gradient-to-r from-slate-900/40 to-slate-900/20 rounded-2xl border border-slate-700/50 p-4 flex-row items-center justify-between"
+                      >
+                        <View className="flex-1">
+                          <Text className="text-sm font-black text-text-primary">
+                            {product.name}
+                          </Text>
+                          <View className="flex-row items-center gap-2 mt-2">
+                            <View className="bg-primary/20 rounded-lg px-2 py-1 border border-primary/40">
+                              <Text className="text-[10px] font-black text-primary">
+                                {product.category || "Spare Part"}
+                              </Text>
+                            </View>
+                          </View>
+                        </View>
+                        <View className="items-end">
+                          <Text className="text-lg font-black text-accent">
+                            ₹{product.price || product.offerPrice || "0"}
+                          </Text>
+                          <Ionicons
+                            name="add-circle-outline"
+                            size={20}
+                            color="#0EA5E9"
+                          />
+                        </View>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
                 </View>
               )}
 
-              <View className="bg-slate-900/30 rounded-2xl overflow-hidden border border-slate-700">
-                <View className="flex-row items-center px-5 py-4 bg-slate-900/50">
-                  <Text className="w-12 text-[10px] font-black uppercase text-text-muted">
-                    S.NO
-                  </Text>
-                  <Text className="flex-1 text-[10px] font-black uppercase text-text-muted">
-                    Description
-                  </Text>
-                  <Text className="w-14 text-[10px] font-black uppercase text-text-muted text-right">
-                    Qty
-                  </Text>
-                  <Text className="w-20 text-[10px] font-black uppercase text-text-muted text-right">
-                    Unit
-                  </Text>
-                  <Text className="w-24 text-[10px] font-black uppercase text-text-muted text-right">
-                    Subtotal
-                  </Text>
-                  <Text className="w-20 text-[10px] font-black uppercase text-text-muted text-right">
-                    Action
-                  </Text>
-                </View>
-
+              <View>
                 {parts.length === 0 ? (
-                  <View className="px-5 py-12 items-center justify-center">
-                    <Ionicons name="refresh" size={28} color="#64748B" />
-                    <Text className="text-text-muted uppercase tracking-widest mt-4">
-                      Awaiting inventory log...
+                  <View className="px-6 py-16 items-center justify-center bg-gradient-to-b from-slate-900/30 to-slate-900/10 rounded-3xl border-2 border-dashed border-slate-700">
+                    <Ionicons name="layers-outline" size={42} color="#0EA5E9" />
+                    <Text className="text-text-muted uppercase tracking-widest mt-5 font-bold text-sm">
+                      No Parts Added Yet
+                    </Text>
+                    <Text className="text-[10px] text-text-muted mt-2 text-center max-w-xs">
+                      Add spare parts using the form above
                     </Text>
                   </View>
                 ) : (
-                  parts.map((part, index) => (
-                    <View
-                      key={`${part.partName}-${index}`}
-                      className="flex-row items-center px-5 py-4 border-t border-slate-700"
-                    >
-                      <Text className="w-12 text-xs font-black text-text-primary">
-                        {index + 1}
-                      </Text>
-                      <View className="flex-1">
-                        <TextInput
-                          value={part.partName}
-                          onChangeText={(value) =>
-                            updatePart(index, "partName", value)
-                          }
-                          placeholder="Part description"
-                          placeholderTextColor="#94A3B8"
-                          className="text-xs font-bold text-text-primary bg-slate-900/50 rounded-xl px-3 py-2"
-                        />
-                      </View>
-                      <TextInput
-                        keyboardType="numeric"
-                        value={part.qty === 0 ? "" : String(part.qty)}
-                        onChangeText={(value) =>
-                          updatePart(index, "qty", value)
-                        }
-                        className="w-14 text-right text-xs text-text-secondary bg-slate-900/50 rounded-xl px-3 py-2"
-                      />
-                      <TextInput
-                        keyboardType="numeric"
-                        value={part.price === 0 ? "" : String(part.price)}
-                        onChangeText={(value) =>
-                          updatePart(index, "price", value)
-                        }
-                        className="w-20 text-right text-xs text-text-secondary bg-slate-900/50 rounded-xl px-3 py-2"
-                      />
-                      <Text className="w-24 text-xs font-black text-text-primary text-right">
-                        ₹{part.total.toLocaleString()}
-                      </Text>
-                      <TouchableOpacity
-                        onPress={() => removePart(index)}
-                        className="w-20 items-end"
+                  <View className="gap-4">
+                    {parts.map((part, index) => (
+                      <View
+                        key={`${part.partName}-${index}`}
+                        className="bg-gradient-to-r from-slate-900/40 to-slate-900/20 rounded-3xl border border-slate-700/60 p-5 shadow-lg"
                       >
-                        <Text className="text-xs text-error font-black">
-                          Remove
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-                  ))
+                        <View className="flex-row items-start justify-between mb-4">
+                          <View className="flex-1">
+                            <View className="flex-row items-center gap-2 mb-3">
+                              <View className="w-8 h-8 bg-primary/20 rounded-full items-center justify-center border border-primary/40">
+                                <Text className="text-[11px] font-black text-primary">
+                                  {index + 1}
+                                </Text>
+                              </View>
+                              <View className="flex-1">
+                                <TextInput
+                                  value={part.partName}
+                                  onChangeText={(value) =>
+                                    updatePart(index, "partName", value)
+                                  }
+                                  placeholder="Part description"
+                                  placeholderTextColor="#94A3B8"
+                                  className="text-sm font-bold text-text-primary"
+                                />
+                              </View>
+                            </View>
+                          </View>
+                          <TouchableOpacity
+                            onPress={() => removePart(index)}
+                            className="bg-error/15 rounded-xl p-2 border border-error/30"
+                          >
+                            <Ionicons
+                              name="trash-outline"
+                              size={16}
+                              color="#EF4444"
+                            />
+                          </TouchableOpacity>
+                        </View>
+
+                        <View className="flex-row gap-3 mb-3">
+                          <View className="flex-1 bg-slate-900/50 rounded-2xl border border-slate-700/50 p-4">
+                            <Text className="text-[8px] uppercase tracking-widest text-text-muted font-black mb-2">
+                              Quantity
+                            </Text>
+                            <TextInput
+                              keyboardType="numeric"
+                              value={part.qty === 0 ? "" : String(part.qty)}
+                              onChangeText={(value) =>
+                                updatePart(index, "qty", value)
+                              }
+                              placeholder="0"
+                              placeholderTextColor="#64748B"
+                              className="text-base font-black text-text-primary"
+                            />
+                          </View>
+                          <View className="flex-1 bg-slate-900/50 rounded-2xl border border-slate-700/50 p-4">
+                            <Text className="text-[8px] uppercase tracking-widest text-text-muted font-black mb-2">
+                              Unit Price (₹)
+                            </Text>
+                            <TextInput
+                              keyboardType="numeric"
+                              value={part.price === 0 ? "" : String(part.price)}
+                              onChangeText={(value) =>
+                                updatePart(index, "price", value)
+                              }
+                              placeholder="0"
+                              placeholderTextColor="#64748B"
+                              className="text-base font-black text-text-primary"
+                            />
+                          </View>
+                        </View>
+
+                        <View className="bg-gradient-to-r from-primary/10 to-accent/10 rounded-2xl border border-primary/20 p-4">
+                          <View className="flex-row items-center justify-between">
+                            <View>
+                              <Text className="text-[8px] uppercase tracking-widest text-text-muted font-black mb-1">
+                                Subtotal
+                              </Text>
+                              <Text className="text-2xl font-black text-primary">
+                                ₹{part.total.toLocaleString()}
+                              </Text>
+                            </View>
+                            <View className="bg-primary/20 rounded-xl px-3 py-2 border border-primary/40">
+                              <Text className="text-[10px] font-black text-primary">
+                                {part.qty} × ₹{part.price.toLocaleString()}
+                              </Text>
+                            </View>
+                          </View>
+                        </View>
+                      </View>
+                    ))}
+                  </View>
                 )}
               </View>
             </View>
