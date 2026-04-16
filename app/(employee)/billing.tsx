@@ -512,19 +512,17 @@ export default function EmployeeBilling() {
       </ScrollView>
 
       {/* FLOATING ACTION BUTTON */}
-      <TouchableOpacity
-        onPress={() => router.push("/(employee)/add-billing" as any)}
-        className="absolute bottom-6 right-6 w-16 h-16 bg-primary rounded-full items-center justify-center shadow-2xl border-2 border-white/20"
-        style={{
-          elevation: 8,
-          shadowColor: COLORS.primary,
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.3,
-          shadowRadius: 8,
-        }}
-      >
-        <Ionicons name="add" size={28} color="white" />
-      </TouchableOpacity>
+      <View className="absolute bottom-6 right-6 z-40">
+        <TouchableOpacity
+          onPress={() => router.push("/(employee)/add-billing" as any)}
+          className="flex-row items-center gap-3 bg-primary px-4 py-3 rounded-full shadow-2xl border border-white/10"
+        >
+          <Ionicons name="add" size={24} color="white" />
+          <Text className="text-white font-black text-sm uppercase tracking-[1px]">
+            New Billing
+          </Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 }
