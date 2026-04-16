@@ -105,6 +105,7 @@ function AdminHeader({ routeName }: { routeName: string }) {
       subtitle: "Staff assignments",
     },
     services: { title: "Services", subtitle: "Service management" },
+    orders: { title: "Orders", subtitle: "Customer purchases" },
     products: { title: "Products", subtitle: "Inventory management" },
     vehicles: { title: "Vehicles", subtitle: "Vehicle records" },
     users: { title: "Users", subtitle: "User management" },
@@ -364,11 +365,21 @@ export default function AdminLayout() {
         }}
       />
       <Tabs.Screen
+        name="orders"
+        options={{
+          title: "Orders",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="cart-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="products"
         options={{
           title: "Products",
+          href: null,
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="cart-outline" size={size} color={color} />
+            <Ionicons name="cube-outline" size={size} color={color} />
           ),
         }}
       />

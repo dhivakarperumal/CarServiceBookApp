@@ -37,7 +37,6 @@ const AllProducts = () => {
     if (!isRefreshing) setLoading(true);
     try {
       const res = await api.get("/products");
-      // Handle the case where response might not be an array
       const data = Array.isArray(res.data) ? res.data : res.data?.data || [];
       setProducts(data);
     } catch (error) {
@@ -134,11 +133,11 @@ const AllProducts = () => {
       return (
         <View className="relative bg-slate-950 border border-slate-800 rounded-3xl p-4 mb-4 flex-row items-center overflow-hidden shadow-2xl">
   
-  {/* Glow effect */}
-  <View className="absolute -top-10 -right-10 w-28 h-28 rounded-full bg-sky-500/10" />
+          {/* Glow effect */}
+          <View className="absolute -top-10 -right-10 w-28 h-28 rounded-full bg-sky-500/10" />
 
-  {/* Glass overlay */}
-  <View className="absolute inset-0 bg-white/[0.02]" />
+          {/* Glass overlay */}
+          <View className="absolute inset-0 bg-white/[0.02]" />
           <View className="relative">
             <Image
               source={{
@@ -301,7 +300,7 @@ const AllProducts = () => {
       <Stack.Screen
         options={{
           headerShown: true,
-          title: "Products Inventory",
+          title: "Products",
           headerTitleStyle: {
             color: COLORS.textPrimary,
             fontWeight: "900",
@@ -320,14 +319,12 @@ const AllProducts = () => {
         }}
       />
       <View className="p-4 flex-1">
-        {/* REMOVED PREVIOUS CUSTOM HEADER */}
-
         {/* SEARCH & FILTERS */}
         <View className="mb-6">
           <View className="flex-row items-center bg-card border border-slate-700 rounded-2xl px-4 py-2 mb-4">
             <Ionicons name="search" size={18} color={COLORS.textMuted} />
             <TextInput
-              placeholder="Search components, parts, products..."
+              placeholder="Search products..."
               placeholderTextColor={COLORS.textMuted}
               className="flex-1 ml-3 text-text-primary text-xs py-1"
               value={search}
@@ -420,8 +417,7 @@ const AllProducts = () => {
               No Products Found
             </Text>
             <Text className="text-text-secondary text-xs text-center">
-              Try adjusting your filters or search terms to find what you're
-              looking for.
+              Try adjusting your filters or search terms.
             </Text>
           </View>
         ) : (
@@ -448,7 +444,7 @@ const AllProducts = () => {
                   <TouchableOpacity
                     disabled={page === 1}
                     onPress={() => setPage((p) => p - 1)}
-                    className={`w-10 h-10 rounded-2xl items-center justify-center border border-slate-600 ${page === 1 ? "bg-background" : "bg-card shadow-sm"}`}
+                    className={`w-10 h-10 rounded-2xl items-center justify-center border border-slate-600 ${page === 1 ? "bg-transparent" : "bg-card shadow-sm"}`}
                   >
                     <Ionicons
                       name="chevron-back"
@@ -459,17 +455,14 @@ const AllProducts = () => {
 
                   <View className="bg-card px-4 py-2 rounded-2xl border border-slate-600 shadow-sm">
                     <Text className="text-text-primary text-xs font-black">
-                      PAGE {page}{" "}
-                      <Text className="text-text-secondary">
-                        / {totalPages}
-                      </Text>
+                      PAGE {page} / {totalPages}
                     </Text>
                   </View>
 
                   <TouchableOpacity
                     disabled={page === totalPages}
                     onPress={() => setPage((p) => p + 1)}
-                    className={`w-10 h-10 rounded-2xl items-center justify-center border border-slate-600 ${page === totalPages ? "bg-background" : "bg-card shadow-sm"}`}
+                    className={`w-10 h-10 rounded-2xl items-center justify-center border border-slate-600 ${page === totalPages ? "bg-transparent" : "bg-card shadow-sm"}`}
                   >
                     <Ionicons
                       name="chevron-forward"
