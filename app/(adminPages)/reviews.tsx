@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import { useRouter } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -15,6 +15,7 @@ import {
   View
 } from "react-native";
 import { api } from "../../services/api";
+import { COLORS } from "../../theme/colors";
 
 export default function ReviewsSettings() {
   const router = useRouter();

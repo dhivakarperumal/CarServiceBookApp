@@ -1,5 +1,5 @@
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -334,6 +334,31 @@ export default function AllOrders() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.background }}>
+      <Stack.Screen options={{ headerShown: false }} />
+      
+      {/* Premium Header */}
+      <View style={{ paddingHorizontal: 20, paddingTop: 16, paddingBottom: 8 }}>
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+            <TouchableOpacity 
+              onPress={() => router.back()}
+              style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: COLORS.card, borderWidth: 1, borderColor: COLORS.slate700, alignItems: "center", justifyContent: "center" }}
+            >
+              <Ionicons name="arrow-back" size={20} color={COLORS.primary} />
+            </TouchableOpacity>
+            <View>
+              <Text style={{ color: "white", fontSize: 24, fontWeight: "900", letterSpacing: -0.5 }}>Orders</Text>
+              <Text style={{ color: COLORS.textSecondary, fontSize: 10, fontWeight: "900", textTransform: 'uppercase', letterSpacing: 1 }}>Fleet Fulfillment</Text>
+            </View>
+          </View>
+          <View style={{ alignItems: "flex-end" }}>
+            <View style={{ backgroundColor: COLORS.primary + '10', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 20, borderWidth: 1, borderColor: COLORS.primary + '20' }}>
+               <Text style={{ color: COLORS.primary, fontSize: 10, fontWeight: "900" }}>{filtered.length} Orders</Text>
+            </View>
+          </View>
+        </View>
+      </View>
+
       <ScrollView
         contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}

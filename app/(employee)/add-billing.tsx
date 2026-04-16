@@ -2,16 +2,16 @@ import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    SafeAreaView,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
 import { api } from "../../services/api";
@@ -24,7 +24,7 @@ const CustomInput = ({ label, required, ...props }: any) => (
     <TextInput
       {...props}
       placeholderTextColor="#94A3B8"
-      className="w-full bg-slate-950/80 rounded-2xl border border-slate-800 px-5 py-4 text-text-primary font-bold"
+      className="w-full bg-slate-900/30 rounded-xl border border-slate-700 px-5 py-4 text-text-primary font-bold"
     />
   </View>
 );
@@ -82,7 +82,7 @@ export default function AddBillingScreen() {
       if (match) {
         selectService(match);
       } else {
-        fetchDirectService(directServiceId as string);
+        fetchDirectService(directServiceId.toString());
       }
     }
   }, [directServiceId, services, loading]);
@@ -121,7 +121,7 @@ export default function AddBillingScreen() {
           .toLowerCase()
           .includes(newPartName.toLowerCase()),
       )
-      .slice(0, 4);
+      .slice(0, 6);
   }, [products, newPartName]);
 
   const fetchMyServices = async () => {
@@ -521,501 +521,563 @@ export default function AddBillingScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        className="flex-1"
-      >
-        <View className="p-5 mt-6">
-          <View className="mb-6">
-            <View className="flex-row items-center gap-4 ">
-              <TouchableOpacity
-                onPress={() => router.back()}
-                className="p-3 bg-card rounded-2xl border border-card"
-              >
-                <Ionicons name="chevron-back" size={24} color="#FFFFFF" />
-              </TouchableOpacity>
-              <View className="flex-1 min-w-0">
-                <Text
-                  className="text-4xl font-black text-text-primary tracking-tight"
-                  numberOfLines={1}
-                >
-                  Generate Billing
-                </Text>
-              </View>
-            </View>
+      {/* FIXED HEADER */}
+      <View className="px-6 pt-8 pb-4 bg-background border-b border-slate-800">
+        <View className="flex-row items-center gap-4">
+          <TouchableOpacity
+            onPress={() => router.back()}
+            className="p-3 bg-slate-900/30 rounded-2xl border border-slate-700"
+          >
+            <Ionicons name="chevron-back" size={20} color="#64748B" />
+          </TouchableOpacity>
 
-            <View className="mt-4 self-start flex-row flex-nowrap items-center rounded-full bg-slate-900/90 p-1 border border-slate-700">
-              {[
-                { mode: "online", label: "Online Booking" },
-                { mode: "manual", label: "Manual Entry" },
-              ].map((option) => (
-                <TouchableOpacity
-                  key={option.mode}
-                  onPress={() => {
-                    setBillingMode(option.mode as "online" | "manual");
-                    if (option.mode === "manual") {
-                      setSelectedService(null);
-                      setIssues([]);
-                    }
-                  }}
-                  className={`px-4 py-3 rounded-full ${billingMode === option.mode ? "bg-primary" : "bg-slate-900"}`}
-                >
-                  <Text
-                    className={`text-[10px] font-black uppercase tracking-wider ${billingMode === option.mode ? "text-text-primary" : "text-text-muted"}`}
-                  >
-                    {option.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            <Text className="text-[14px] uppercase tracking-[0.35em] text-text-primary font-black mt-4 ml-1">
-              Invoice No :{invoiceNo}
+          <View className="flex-1 min-w-0">
+            <Text
+              className="text-text-primary text-[17px] font-black uppercase tracking-tight"
+              numberOfLines={1}
+            >
+              Generate Billing
             </Text>
           </View>
         </View>
 
+        <View className="mt-4 w-full flex-row items-center rounded-full bg-slate-900/90 p-1 border border-slate-700">
+          {[
+            { mode: "online", label: "Online Booking" },
+            { mode: "manual", label: "Manual Entry" },
+          ].map((option) => (
+            <TouchableOpacity
+              key={option.mode}
+              onPress={() => {
+                setBillingMode(option.mode as "online" | "manual");
+                if (option.mode === "manual") {
+                  setSelectedService(null);
+                  setIssues([]);
+                }
+              }}
+              className={`flex-1 py-3 rounded-full items-center justify-center ${billingMode === option.mode ? "bg-primary" : "bg-slate-900"}`}
+            >
+              <Text
+                className={`text-[10px] font-black uppercase tracking-wider ${billingMode === option.mode ? "text-text-primary" : "text-text-muted"}`}
+              >
+                {option.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <Text className="text-[14px] uppercase tracking-[0.35em] text-text-primary font-black mt-4 ml-1">
+          Invoice No :{invoiceNo}
+        </Text>
+      </View>
+
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        className="flex-1"
+      >
         <ScrollView
-          className="flex-1 px-5"
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          {loading && services.length === 0 ? (
-            <View className="py-20 justify-center items-center">
-              <ActivityIndicator size="large" color="#0EA5E9" />
-              <Text className="text-text-secondary mt-4 font-medium tracking-widest text-[10px] uppercase">
-                Preparing invoice engine...
-              </Text>
-            </View>
-          ) : (
-            <>
-              <View className="flex-row flex-wrap gap-4 mb-6">
-                <View className="flex-1 min-w-[280px] bg-card rounded-[2rem] p-5 border border-card shadow-xl shadow-slate-900/20">
-                  <SectionTitle title="Quick Search" />
-                  <TextInput
-                    placeholder="Search Booking ID / Phone"
-                    placeholderTextColor="#64748B"
-                    value={search}
-                    onChangeText={setSearch}
-                    className="w-full bg-background border border-slate-800 rounded-2xl px-4 py-4 text-text-primary font-semibold"
-                  />
-                </View>
-
-                <View className="flex-1 min-w-[280px] bg-card rounded-[2rem] p-5 border border-card shadow-xl shadow-slate-900/20">
-                  <SectionTitle title="Verification Queue" />
-                  <Text className="text-[10px] uppercase tracking-widest text-text-muted mb-4">
-                    Jobs pulled from https://cars.qtechx.com/api/all-services/
-                  </Text>
-
-                  {filteredServices.length === 0 ? (
-                    <View className="rounded-3xl border border-slate-800 bg-slate-950/80 px-4 py-5">
-                      <Text className="text-[10px] text-text-muted uppercase tracking-widest">
-                        No pending billing jobs found.
+          {/* CONTENT */}
+          <View className="px-6 pt-7 pb-24">
+            {loading && services.length === 0 ? (
+              <View className="py-20 items-center bg-card rounded-[32px] border border-dashed border-slate-700">
+                <Ionicons name="refresh-circle" size={48} color="#0EA5E9" />
+                <Text className="text-slate-500 font-black text-[10px] uppercase mt-4 tracking-[2px]">
+                  Preparing invoice engine...
+                </Text>
+              </View>
+            ) : (
+              <>
+                {billingMode === "online" && (
+                  <View className="flex-row flex-wrap gap-4 mb-6">
+                    <View className="flex-1 min-w-[280px] bg-card rounded-[28px] p-6 border border-slate-700">
+                      <SectionTitle title="Verification Queue" />
+                      <Text className="text-[10px] uppercase tracking-widest text-text-muted mb-4">
+                        Jobs pulled from
+                        https://cars.qtechx.com/api/all-services/
                       </Text>
-                      <Text className="text-sm font-black text-text-primary mt-2">
-                        Try searching by Booking ID, phone, or vehicle model.
-                      </Text>
-                    </View>
-                  ) : (
-                    <View className="rounded-3xl border border-slate-800 bg-slate-950/80 overflow-hidden">
-                      <TouchableOpacity
-                        activeOpacity={0.8}
-                        onPress={() => setServiceDropdownOpen((prev) => !prev)}
-                        className="flex-row items-center justify-between px-4 py-4 bg-slate-900/80 border-b border-slate-800"
-                      >
-                        <Text
-                          className={`text-sm font-black ${selectedService ? "text-text-primary" : "text-text-muted"}`}
-                        >
-                          {selectedService
-                            ? `${selectedService.bookingId || `Job ${selectedService.id}`} | ${selectedService.name}`
-                            : "-- Select Assigned Job --"}
-                        </Text>
-                        <Ionicons
-                          name={serviceDropdownOpen ? "chevron-up" : "chevron-down"}
-                          size={18}
-                          color="#94A3B8"
-                        />
-                      </TouchableOpacity>
 
-                      {serviceDropdownOpen && (
-                        <ScrollView
-                          className="max-h-56 bg-slate-950/90"
-                          showsVerticalScrollIndicator
-                        >
-                          {filteredServices.map((service) => (
-                            <TouchableOpacity
-                              key={service.id}
-                              onPress={() => {
-                                if (selectedService?.id === service.id) {
-                                  setSelectedService(null);
-                                  setParts([]);
-                                  setIssues([]);
-                                  setServiceDropdownOpen(false);
-                                  return;
-                                }
-                                selectService(service);
-                              }}
-                              className={`px-4 py-4 border-b border-slate-800 ${selectedService?.id === service.id ? "bg-slate-900" : "bg-slate-950/70"}`}
+                      {filteredServices.length === 0 ? (
+                        <View className="rounded-2xl border border-slate-700 bg-slate-900/30 px-4 py-5">
+                          <Text className="text-[10px] text-text-muted uppercase tracking-widest">
+                            No pending billing jobs found.
+                          </Text>
+                          <Text className="text-sm font-black text-text-primary mt-2">
+                            Try searching by Booking ID, phone, or vehicle
+                            model.
+                          </Text>
+                        </View>
+                      ) : (
+                        <View className="rounded-2xl border border-slate-700 bg-slate-900/30 overflow-hidden">
+                          <TouchableOpacity
+                            activeOpacity={0.8}
+                            onPress={() =>
+                              setServiceDropdownOpen((prev) => !prev)
+                            }
+                            className="flex-row items-center justify-between px-4 py-4 bg-slate-900/50 border-b border-slate-700"
+                          >
+                            <Text
+                              className={`text-sm font-black ${selectedService ? "text-text-primary" : "text-text-muted"}`}
                             >
-                              <Text className="text-sm font-black text-text-primary">
-                                {service.bookingId || `Job ${service.id}`}
+                              {selectedService
+                                ? `${selectedService.bookingId || `Job ${selectedService.id}`} | ${selectedService.name}`
+                                : "-- Select Assigned Job --"}
+                            </Text>
+                            <Ionicons
+                              name={
+                                serviceDropdownOpen
+                                  ? "chevron-up"
+                                  : "chevron-down"
+                              }
+                              size={18}
+                              color="#94A3B8"
+                            />
+                          </TouchableOpacity>
+
+                          {serviceDropdownOpen && (
+                            <ScrollView
+                              className="max-h-56 bg-slate-900/30"
+                              showsVerticalScrollIndicator
+                            >
+                              {filteredServices.map((service) => (
+                                <TouchableOpacity
+                                  key={service.id}
+                                  onPress={() => {
+                                    if (selectedService?.id === service.id) {
+                                      setSelectedService(null);
+                                      setParts([]);
+                                      setIssues([]);
+                                      setServiceDropdownOpen(false);
+                                      return;
+                                    }
+                                    selectService(service);
+                                  }}
+                                  className={`px-4 py-4 border-b border-slate-700 ${selectedService?.id === service.id ? "bg-slate-900/50" : "bg-slate-900/20"}`}
+                                >
+                                  <Text className="text-sm font-black text-text-primary">
+                                    {service.bookingId || `Job ${service.id}`}
+                                  </Text>
+                                  <Text className="text-[10px] text-text-muted uppercase tracking-widest mt-1">
+                                    {service.name} • {service.brand}{" "}
+                                    {service.model}
+                                  </Text>
+                                </TouchableOpacity>
+                              ))}
+                            </ScrollView>
+                          )}
+                        </View>
+                      )}
+
+                      {selectedService && (
+                        <View className="mt-4 rounded-2xl border border-slate-700 bg-gradient-to-r from-slate-900/50 to-slate-900/20 p-5">
+                          <View className="flex-row items-start justify-between mb-3">
+                            <View className="flex-1">
+                              <Text className="text-[10px] uppercase tracking-widest text-success font-black mb-1">
+                                ✓ Selected Job
                               </Text>
-                              <Text className="text-[10px] text-text-muted uppercase tracking-widest mt-1">
-                                {service.name} • {service.brand} {service.model}
+                              <Text className="text-base font-black text-text-primary">
+                                {selectedService.bookingId ||
+                                  `Job ${selectedService.id}`}
+                              </Text>
+                              <Text className="text-[10px] text-text-muted mt-2">
+                                {selectedService.name}
+                              </Text>
+                              <Text className="text-[9px] text-text-muted mt-1">
+                                {selectedService.brand} {selectedService.model}
+                              </Text>
+                            </View>
+                            <TouchableOpacity
+                              onPress={() => {
+                                setSelectedService(null);
+                                setParts([]);
+                                setIssues([]);
+                              }}
+                              className="bg-error/20 border border-error rounded-xl px-3 py-2"
+                            >
+                              <Text className="text-[10px] font-black text-error uppercase tracking-widest">
+                                Unselect
                               </Text>
                             </TouchableOpacity>
-                          ))}
-                        </ScrollView>
+                          </View>
+                        </View>
                       )}
                     </View>
-                  )}
+                  </View>
+                )}
+              </>
+            )}
 
-                  {selectedService && (
-                    <View className="mt-4 rounded-3xl border border-slate-800 bg-slate-900/70 p-4">
-                      <Text className="text-[10px] uppercase tracking-widest text-text-muted mb-2">
-                        Selected Verification Job
-                      </Text>
-                      <Text className="text-sm font-black text-text-primary">
-                        {selectedService.bookingId || `Job ${selectedService.id}`}
-                      </Text>
-                      <Text className="text-[10px] text-text-muted mt-1">
-                        {selectedService.name} • {selectedService.brand}{" "}
-                        {selectedService.model}
-                      </Text>
-                    </View>
-                  )}
-                </View>
-
-                <View className="w-full bg-card rounded-[2rem] p-5 border border-card shadow-xl shadow-slate-900/20">
-                  <SectionTitle title="Accounting Summary" />
-                  <View className="flex-row flex-wrap gap-3">
-                    <View className="flex-1 min-w-[160px] bg-background/70 rounded-3xl p-4 border border-slate-800">
-                      <Text className="text-[9px] uppercase tracking-widest text-text-muted mb-3">
-                        Workforce Charges
-                      </Text>
-                      <Text className="text-2xl font-black text-text-primary">
-                        ₹{Number(workforceCharges || labour || 0).toLocaleString()}
-                      </Text>
-                    </View>
-                    <View className="flex-1 min-w-[160px] bg-background/70 rounded-3xl p-4 border border-slate-800">
-                      <Text className="text-[9px] uppercase tracking-widest text-text-muted mb-3">
-                        Taxation Layer (%)
-                      </Text>
-                      <Text className="text-2xl font-black text-text-primary">
-                        {gst || 0}%
-                      </Text>
-                    </View>
+            {billingMode === "manual" && (
+              <View className="bg-card rounded-[28px] p-6 mb-6 border border-slate-700">
+                <Text className="text-xl font-black text-text-primary mb-4">
+                  Walk-In Information
+                </Text>
+                <View className="flex-row flex-wrap gap-4">
+                  <View className="flex-1 min-w-[280px]">
+                    <CustomInput
+                      label="Customer Name"
+                      value={manualCustomerName}
+                      onChangeText={setManualCustomerName}
+                      placeholder="Enter Customer Full Name"
+                    />
+                  </View>
+                  <View className="flex-1 min-w-[280px]">
+                    <CustomInput
+                      label="Contact Number"
+                      value={manualContactNumber}
+                      onChangeText={setManualContactNumber}
+                      keyboardType="phone-pad"
+                      placeholder="Ex: +91 98765 4321"
+                    />
+                  </View>
+                  <View className="flex-1 min-w-[280px]">
+                    <CustomInput
+                      label="Vehicle Brand"
+                      value={manualVehicleBrand}
+                      onChangeText={setManualVehicleBrand}
+                      placeholder="Ex: Honda Motors"
+                    />
+                  </View>
+                  <View className="flex-1 min-w-[280px]">
+                    <CustomInput
+                      label="Vehicle Model"
+                      value={manualVehicleModel}
+                      onChangeText={setManualVehicleModel}
+                      placeholder="Ex: Unicorn 160 BS6"
+                    />
+                  </View>
+                  <View className="flex-1 min-w-[280px]">
+                    <CustomInput
+                      label="Plate Number"
+                      value={manualPlateNumber}
+                      onChangeText={setManualPlateNumber}
+                      placeholder="Ex: MH-12-XX-123"
+                    />
                   </View>
                 </View>
-              </View>
-            </>
-          )}
-
-          {billingMode === "manual" && (
-            <View className="bg-card rounded-[2rem] p-6 mb-6 border border-card shadow-xl shadow-slate-900/20">
-              <Text className="text-xl font-black text-text-primary mb-4">
-                Walk-In Information
-              </Text>
-              <View className="flex-row flex-wrap gap-4">
-                <View className="flex-1 min-w-[280px]">
-                  <CustomInput
-                    label="Customer Name"
-                    value={manualCustomerName}
-                    onChangeText={setManualCustomerName}
-                    placeholder="Enter Customer Full Name"
-                  />
-                </View>
-                <View className="flex-1 min-w-[280px]">
-                  <CustomInput
-                    label="Contact Number"
-                    value={manualContactNumber}
-                    onChangeText={setManualContactNumber}
-                    keyboardType="phone-pad"
-                    placeholder="Ex: +91 98765 4321"
-                  />
-                </View>
-                <View className="flex-1 min-w-[280px]">
-                  <CustomInput
-                    label="Vehicle Brand"
-                    value={manualVehicleBrand}
-                    onChangeText={setManualVehicleBrand}
-                    placeholder="Ex: Honda Motors"
-                  />
-                </View>
-                <View className="flex-1 min-w-[280px]">
-                  <CustomInput
-                    label="Vehicle Model"
-                    value={manualVehicleModel}
-                    onChangeText={setManualVehicleModel}
-                    placeholder="Ex: Unicorn 160 BS6"
-                  />
-                </View>
-                <View className="flex-1 min-w-[280px]">
-                  <CustomInput
-                    label="Plate Number"
-                    value={manualPlateNumber}
-                    onChangeText={setManualPlateNumber}
-                    placeholder="Ex: MH-12-XX-123"
-                  />
-                </View>
-              </View>
-            </View>
-          )}
-
-          <View className="bg-card rounded-[2rem] p-6 mb-6 border border-card shadow-xl shadow-slate-900/20">
-            <View className="flex-col gap-2 items-center justify-between mb-5">
-              <Text className="text-xl font-black text-text-primary">
-                Spare Parts Inventory
-              </Text>
-              <Text className="text-[10px] uppercase tracking-widest text-text-muted">
-                List of components used in this service cycle
-              </Text>
-            </View>
-
-            <View className="flex-row flex-wrap gap-3 mb-4">
-              <TextInput
-                placeholder="Type or select a product"
-                placeholderTextColor="#64748B"
-                value={newPartName}
-                onChangeText={(value) => {
-                  setNewPartName(value);
-                  const match = products.find(
-                    (product) =>
-                      (product.name || "").toString().toLowerCase() ===
-                      value.toLowerCase(),
-                  );
-                  if (match && match.price != null) {
-                    setNewPartPrice(String(match.price));
-                  }
-                }}
-                className="flex-1 min-w-[220px] bg-background border border-slate-800 rounded-2xl px-4 py-4 text-text-primary font-bold"
-              />
-              <TextInput
-                placeholder="Qty"
-                placeholderTextColor="#64748B"
-                value={newPartQty}
-                onChangeText={setNewPartQty}
-                keyboardType="numeric"
-                className="w-24 bg-background border border-slate-800 rounded-2xl px-4 py-4 text-text-primary font-bold"
-              />
-              <TextInput
-                placeholder="Unit Price"
-                placeholderTextColor="#64748B"
-                value={newPartPrice}
-                onChangeText={setNewPartPrice}
-                keyboardType="numeric"
-                className="w-28 bg-background border border-slate-800 rounded-2xl px-4 py-4 text-text-primary font-bold"
-              />
-              <TouchableOpacity
-                onPress={addManualPart}
-                className="min-w-[140px] bg-[#111827] rounded-3xl px-5 py-4 items-center justify-center"
-              >
-                <Text className="text-text-primary bg-primary p-3 rounded-xl font-black">
-                  + Add Part
-                </Text>
-              </TouchableOpacity>
-            </View>
-            {matchingProducts.length > 0 && (
-              <View className="bg-slate-950/80 rounded-3xl border border-slate-800 p-3 mb-4">
-                <Text className="text-[10px] uppercase tracking-widest text-text-muted mb-2">
-                  Suggested products from inventory
-                </Text>
-                {matchingProducts.map((product) => (
-                  <TouchableOpacity
-                    key={product.id || product.name}
-                    onPress={() => {
-                      setNewPartName(product.name || "");
-                      setNewPartPrice(
-                        String(product.price || product.offerPrice || "0"),
-                      );
-                    }}
-                    className="rounded-2xl px-3 py-3 bg-slate-900/80 mb-2"
-                  >
-                    <Text className="text-sm font-black text-text-primary">
-                      {product.name}
-                    </Text>
-                    <Text className="text-[10px] text-text-muted mt-1">
-                      ₹{product.price || product.offerPrice || "0"}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
               </View>
             )}
 
-            <View className="bg-slate-950/80 rounded-[2rem] overflow-hidden border border-slate-800">
-              <View className="flex-row items-center px-5 py-4 bg-slate-900">
-                <Text className="w-12 text-[10px] font-black uppercase text-text-muted">
-                  S.NO
+            <View className="bg-card rounded-[28px] p-6 mb-6 border border-slate-700">
+              <View className="flex-col gap-2 items-center justify-between mb-5">
+                <Text className="text-xl font-black text-text-primary">
+                  Spare Parts Inventory
                 </Text>
-                <Text className="flex-1 text-[10px] font-black uppercase text-text-muted">
-                  Description
-                </Text>
-                <Text className="w-14 text-[10px] font-black uppercase text-text-muted text-right">
-                  Qty
-                </Text>
-                <Text className="w-20 text-[10px] font-black uppercase text-text-muted text-right">
-                  Unit
-                </Text>
-                <Text className="w-24 text-[10px] font-black uppercase text-text-muted text-right">
-                  Subtotal
-                </Text>
-                <Text className="w-20 text-[10px] font-black uppercase text-text-muted text-right">
-                  Action
+                <Text className="text-[10px] uppercase tracking-widest text-text-muted">
+                  List of components used in this service cycle
                 </Text>
               </View>
 
-              {parts.length === 0 ? (
-                <View className="px-5 py-12 items-center justify-center">
-                  <Ionicons name="refresh" size={28} color="#64748B" />
-                  <Text className="text-text-muted uppercase tracking-widest mt-4">
-                    Awaiting inventory log...
+              <View className="flex-col gap-4 mb-6">
+                <View className="bg-gradient-to-r from-slate-900/50 to-slate-900/20 rounded-3xl border border-slate-700/60 p-6">
+                  <Text className="text-[9px] uppercase tracking-widest text-text-muted font-black mb-4">
+                    ⚙️ Add New Part to Inventory
                   </Text>
-                </View>
-              ) : (
-                parts.map((part, index) => (
-                  <View
-                    key={`${part.partName}-${index}`}
-                    className="flex-row items-center px-5 py-4 border-t border-slate-800"
-                  >
-                    <Text className="w-12 text-xs font-black text-text-primary">
-                      {index + 1}
-                    </Text>
-                    <View className="flex-1">
+                  <View className="flex-row flex-wrap gap-3">
+                    <View className="flex-1 min-w-[220px]">
                       <TextInput
-                        value={part.partName}
-                        onChangeText={(value) =>
-                          updatePart(index, "partName", value)
-                        }
-                        placeholder="Part description"
-                        placeholderTextColor="#94A3B8"
-                        className="text-xs font-bold text-text-primary bg-slate-950/70 rounded-2xl px-3 py-2"
+                        placeholder="Search or type part name"
+                        placeholderTextColor="#64748B"
+                        value={newPartName}
+                        onChangeText={(value) => {
+                          setNewPartName(value);
+                          const match = products.find(
+                            (product) =>
+                              (product.name || "").toString().toLowerCase() ===
+                              value.toLowerCase(),
+                          );
+                          if (match && match.price != null) {
+                            setNewPartPrice(String(match.price));
+                          }
+                        }}
+                        className="w-full bg-slate-900/40 border border-slate-700/60 rounded-2xl px-5 py-4 text-text-primary font-bold text-sm"
                       />
                     </View>
-                    <TextInput
-                      keyboardType="numeric"
-                      value={part.qty === 0 ? "" : String(part.qty)}
-                      onChangeText={(value) => updatePart(index, "qty", value)}
-                      className="w-14 text-right text-xs text-text-secondary bg-slate-950/70 rounded-2xl px-3 py-2"
-                    />
-                    <TextInput
-                      keyboardType="numeric"
-                      value={part.price === 0 ? "" : String(part.price)}
-                      onChangeText={(value) =>
-                        updatePart(index, "price", value)
-                      }
-                      className="w-20 text-right text-xs text-text-secondary bg-slate-950/70 rounded-2xl px-3 py-2"
-                    />
-                    <Text className="w-24 text-xs font-black text-text-primary text-right">
-                      ₹{part.total.toLocaleString()}
-                    </Text>
+                    <View className="w-24">
+                      <TextInput
+                        placeholder="Qty"
+                        placeholderTextColor="#64748B"
+                        value={newPartQty}
+                        onChangeText={setNewPartQty}
+                        keyboardType="numeric"
+                        className="w-full bg-slate-900/40 border border-slate-700/60 rounded-2xl px-4 py-4 text-text-primary font-bold text-center text-sm"
+                      />
+                    </View>
+                    <View className="w-28">
+                      <TextInput
+                        placeholder="Unit Price"
+                        placeholderTextColor="#64748B"
+                        value={newPartPrice}
+                        onChangeText={setNewPartPrice}
+                        keyboardType="numeric"
+                        className="w-full bg-slate-900/40 border border-slate-700/60 rounded-2xl px-4 py-4 text-text-primary font-bold text-center text-sm"
+                      />
+                    </View>
                     <TouchableOpacity
-                      onPress={() => removePart(index)}
-                      className="w-20 items-end"
+                      onPress={addManualPart}
+                      className="min-w-[140px] bg-gradient-to-r from-primary to-accent rounded-2xl px-5 py-4 items-center justify-center border border-primary/40 shadow-lg"
                     >
-                      <Text className="text-xs text-error font-black">
-                        Remove
+                      <Text className="text-white font-black uppercase tracking-widest text-xs">
+                        + Add Part
                       </Text>
                     </TouchableOpacity>
                   </View>
-                ))
+                </View>
+              </View>
+
+              {matchingProducts.length > 0 && (
+                <View className="bg-gradient-to-r from-slate-900/50 to-slate-900/20 rounded-3xl border border-slate-700/60 p-5 mb-6">
+                  <View className="flex-row items-center gap-2 mb-4">
+                    <Ionicons name="layers-outline" size={16} color="#0EA5E9" />
+                    <Text className="text-[10px] uppercase tracking-widest font-black text-primary">
+                      Matching Spare Parts Found
+                    </Text>
+                  </View>
+                  <View className="gap-3">
+                    {matchingProducts.map((product) => (
+                      <TouchableOpacity
+                        key={product.id || product.name}
+                        onPress={() => {
+                          setNewPartName(product.name || "");
+                          setNewPartPrice(
+                            String(product.price || product.offerPrice || "0"),
+                          );
+                        }}
+                        className="bg-gradient-to-r from-slate-900/40 to-slate-900/20 rounded-2xl border border-slate-700/50 p-4 flex-row items-center justify-between"
+                      >
+                        <View className="flex-1">
+                          <Text className="text-sm font-black text-text-primary">
+                            {product.name}
+                          </Text>
+                          <View className="flex-row items-center gap-2 mt-2">
+                            <View className="bg-primary/20 rounded-lg px-2 py-1 border border-primary/40">
+                              <Text className="text-[10px] font-black text-primary">
+                                {product.category || "Spare Part"}
+                              </Text>
+                            </View>
+                          </View>
+                        </View>
+                        <View className="items-end">
+                          <Text className="text-lg font-black text-accent">
+                            ₹{product.price || product.offerPrice || "0"}
+                          </Text>
+                          <Ionicons
+                            name="add-circle-outline"
+                            size={20}
+                            color="#0EA5E9"
+                          />
+                        </View>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
               )}
-            </View>
-          </View>
 
-          <View className="flex-row flex-wrap gap-4 mb-20 items-start">
-            <View className="flex-1 min-w-[300px] bg-card rounded-[2rem] p-6 border border-card shadow-xl shadow-slate-900/20">
-              <Text className="text-xl font-black text-text-primary mb-4">
-                Accounting Summary
-              </Text>
-              <View className="space-y-4">
-                <View className="bg-background/80 rounded-3xl p-4 border border-slate-800">
-                  <Text className="text-[10px] uppercase tracking-widest text-text-muted mb-2">
-                    Workforce Charges (₹)
-                  </Text>
-                  <TextInput
-                    placeholder="0"
-                    placeholderTextColor="#64748B"
-                    keyboardType="numeric"
-                    value={workforceCharges}
-                    onChangeText={setWorkforceCharges}
-                    className="w-full bg-slate-950/80 border border-slate-800 rounded-2xl px-4 py-4 text-text-primary font-bold"
-                  />
-                </View>
+              <View>
+                {parts.length === 0 ? (
+                  <View className="px-6 py-16 items-center justify-center bg-gradient-to-b from-slate-900/30 to-slate-900/10 rounded-3xl border-2 border-dashed border-slate-700">
+                    <Ionicons name="layers-outline" size={42} color="#0EA5E9" />
+                    <Text className="text-text-muted uppercase tracking-widest mt-5 font-bold text-sm">
+                      No Parts Added Yet
+                    </Text>
+                    <Text className="text-[10px] text-text-muted mt-2 text-center max-w-xs">
+                      Add spare parts using the form above
+                    </Text>
+                  </View>
+                ) : (
+                  <View className="gap-4">
+                    {parts.map((part, index) => (
+                      <View
+                        key={`${part.partName}-${index}`}
+                        className="bg-gradient-to-r from-slate-900/40 to-slate-900/20 rounded-3xl border border-slate-700/60 p-5 shadow-lg"
+                      >
+                        <View className="flex-row items-start justify-between mb-4">
+                          <View className="flex-1">
+                            <View className="flex-row items-center gap-2 mb-3">
+                              <View className="w-8 h-8 bg-primary/20 rounded-full items-center justify-center border border-primary/40">
+                                <Text className="text-[11px] font-black text-primary">
+                                  {index + 1}
+                                </Text>
+                              </View>
+                              <View className="flex-1">
+                                <TextInput
+                                  value={part.partName}
+                                  onChangeText={(value) =>
+                                    updatePart(index, "partName", value)
+                                  }
+                                  placeholder="Part description"
+                                  placeholderTextColor="#94A3B8"
+                                  className="text-sm font-bold text-text-primary"
+                                />
+                              </View>
+                            </View>
+                          </View>
+                          <TouchableOpacity
+                            onPress={() => removePart(index)}
+                            className="bg-error/15 rounded-xl p-2 border border-error/30"
+                          >
+                            <Ionicons
+                              name="trash-outline"
+                              size={16}
+                              color="#EF4444"
+                            />
+                          </TouchableOpacity>
+                        </View>
 
-                <View className="bg-background/80 rounded-3xl mt-4 p-4 border border-slate-800">
-                  <Text className="text-[10px] uppercase tracking-widest text-text-muted mb-2">
-                    Taxation Layer (%)
-                  </Text>
-                  <TextInput
-                    placeholder="18"
-                    placeholderTextColor="#64748B"
-                    keyboardType="numeric"
-                    value={gstPercent}
-                    onChangeText={setGstPercent}
-                    className="w-full bg-slate-950/80 border border-slate-800 rounded-2xl px-4 py-4 text-text-primary font-bold"
-                  />
-                </View>
+                        <View className="flex-row gap-3 mb-3">
+                          <View className="flex-1 bg-slate-900/50 rounded-2xl border border-slate-700/50 p-4">
+                            <Text className="text-[8px] uppercase tracking-widest text-text-muted font-black mb-2">
+                              Quantity
+                            </Text>
+                            <TextInput
+                              keyboardType="numeric"
+                              value={part.qty === 0 ? "" : String(part.qty)}
+                              onChangeText={(value) =>
+                                updatePart(index, "qty", value)
+                              }
+                              placeholder="0"
+                              placeholderTextColor="#64748B"
+                              className="text-base font-black text-text-primary"
+                            />
+                          </View>
+                          <View className="flex-1 bg-slate-900/50 rounded-2xl border border-slate-700/50 p-4">
+                            <Text className="text-[8px] uppercase tracking-widest text-text-muted font-black mb-2">
+                              Unit Price (₹)
+                            </Text>
+                            <TextInput
+                              keyboardType="numeric"
+                              value={part.price === 0 ? "" : String(part.price)}
+                              onChangeText={(value) =>
+                                updatePart(index, "price", value)
+                              }
+                              placeholder="0"
+                              placeholderTextColor="#64748B"
+                              className="text-base font-black text-text-primary"
+                            />
+                          </View>
+                        </View>
 
-                <View className="bg-background/80 rounded-3xl mt-4 p-4 border border-slate-800">
-                  <Text className="text-[10px] uppercase tracking-widest text-text-muted mb-3">
-                    Subtotal
-                  </Text>
-                  <Text className="text-2xl font-black text-text-primary">
-                    ₹{subTotal.toLocaleString()}
-                  </Text>
-                </View>
-
-                <View className="bg-background/80 rounded-3xl mt-4 p-4 border border-slate-800">
-                  <Text className="text-[10px] uppercase tracking-widest text-text-muted mb-3">
-                    Tax Amount
-                  </Text>
-                  <Text className="text-2xl font-black text-text-primary">
-                    ₹{gstAmount.toFixed(2)}
-                  </Text>
-                </View>
-
-                <View className="bg-[#0f172a] rounded-[2rem] mt-4 p-6 border border-slate-800 shadow-xl">
-                  <Text className="text-[10px] uppercase tracking-widest text-text-muted mb-3">
-                    Grand Payable Total
-                  </Text>
-                  <Text className="text-4xl font-black text-emerald-400">
-                    ₹{grandTotal.toLocaleString()}
-                  </Text>
-                </View>
+                        <View className="bg-gradient-to-r from-primary/10 to-accent/10 rounded-2xl border border-primary/20 p-4">
+                          <View className="flex-row items-center justify-between">
+                            <View>
+                              <Text className="text-[8px] uppercase tracking-widest text-text-muted font-black mb-1">
+                                Subtotal
+                              </Text>
+                              <Text className="text-2xl font-black text-primary">
+                                ₹{part.total.toLocaleString()}
+                              </Text>
+                            </View>
+                            <View className="bg-primary/20 rounded-xl px-3 py-2 border border-primary/40">
+                              <Text className="text-[10px] font-black text-primary">
+                                {part.qty} × ₹{part.price.toLocaleString()}
+                              </Text>
+                            </View>
+                          </View>
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                )}
               </View>
             </View>
 
-            <View className="w-full bg-card rounded-[2rem] p-6 border border-card shadow-xl shadow-slate-900/20">
-              <Text className="text-xl font-black text-text-primary mb-4">
-                Review & Commit
-              </Text>
-              <Text className="text-[10px] uppercase tracking-widest text-text-muted mb-4">
-                Finalize invoice details and submit to billing history.
-              </Text>
-              <TouchableOpacity
-                onPress={handleGenerateBill}
-                disabled={submitting}
-                className={`w-full py-5 rounded-[1.5rem] items-center justify-center ${submitting ? "bg-slate-600" : "bg-primary shadow-xl shadow-primary/30"}`}
-              >
-                {submitting ? (
-                  <ActivityIndicator color="white" />
-                ) : (
-                  <Text className="text-white font-black uppercase tracking-widest">
-                    Commit Invoice
-                  </Text>
-                )}
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => {
-                  resetForm();
-                  router.replace("/(employee)/billing");
-                }}
-                className="mt-4 py-4 rounded-[1.5rem] border border-slate-700 items-center justify-center"
-              >
-                <Text className="text-text-muted font-black uppercase tracking-widest">
-                  Cancel Operation
+            <View className="flex-row flex-wrap gap-4 mb-20 items-start">
+              <View className="flex-1 min-w-[300px] bg-card rounded-[28px] p-6 border border-slate-700">
+                <Text className="text-xl font-black text-text-primary mb-4">
+                  Accounting Summary
                 </Text>
-              </TouchableOpacity>
+                <View className="space-y-4">
+                  <View className="bg-slate-900/30 rounded-2xl p-4 border border-slate-700">
+                    <Text className="text-[10px] uppercase tracking-widest text-text-muted mb-2">
+                      Workforce Charges (₹)
+                    </Text>
+                    <TextInput
+                      placeholder="0"
+                      placeholderTextColor="#64748B"
+                      keyboardType="numeric"
+                      value={workforceCharges}
+                      onChangeText={setWorkforceCharges}
+                      className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-4 text-text-primary font-bold"
+                    />
+                  </View>
+
+                  <View className="bg-slate-900/30 rounded-2xl mt-2 p-4 border border-slate-700">
+                    <Text className="text-[10px] uppercase tracking-widest text-text-muted mb-2">
+                      Taxation Layer (%)
+                    </Text>
+                    <TextInput
+                      placeholder="18"
+                      placeholderTextColor="#64748B"
+                      keyboardType="numeric"
+                      value={gstPercent}
+                      onChangeText={setGstPercent}
+                      className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-4 text-text-primary font-bold"
+                    />
+                  </View>
+
+                  <View className="bg-slate-900/30 rounded-2xl mt-2 p-4 border border-slate-700">
+                    <Text className="text-[10px] uppercase tracking-widest text-text-muted mb-3">
+                      Subtotal
+                    </Text>
+                    <Text className="text-2xl font-black text-text-primary">
+                      ₹{subTotal.toLocaleString()}
+                    </Text>
+                  </View>
+
+                  <View className="bg-slate-900/30 rounded-2xl mt-2 p-4 border border-slate-700">
+                    <Text className="text-[10px] uppercase tracking-widest text-text-muted mb-3">
+                      Tax Amount
+                    </Text>
+                    <Text className="text-2xl font-black text-text-primary">
+                      ₹{gstAmount.toFixed(2)}
+                    </Text>
+                  </View>
+
+                  <View className="bg-slate-900/50 rounded-2xl mt-2 p-6 border border-slate-700">
+                    <Text className="text-[10px] uppercase tracking-widest text-text-muted mb-3">
+                      Grand Payable Total
+                    </Text>
+                    <Text className="text-4xl font-black text-emerald-400">
+                      ₹{grandTotal.toLocaleString()}
+                    </Text>
+                  </View>
+                </View>
+              </View>
+
+              <View className="w-full bg-card rounded-[28px] mt-2 p-6 border border-slate-700">
+                <Text className="text-xl font-black text-text-primary mb-4">
+                  Review & Commit
+                </Text>
+                <Text className="text-[10px] uppercase tracking-widest text-text-muted mb-4">
+                  Finalize invoice details and submit to billing history.
+                </Text>
+                <TouchableOpacity
+                  onPress={handleGenerateBill}
+                  disabled={submitting}
+                  className={`w-full py-5 rounded-2xl items-center justify-center ${submitting ? "bg-slate-600" : "bg-primary"}`}
+                >
+                  {submitting ? (
+                    <ActivityIndicator color="white" />
+                  ) : (
+                    <Text className="text-white font-black uppercase tracking-widest">
+                      Commit Invoice
+                    </Text>
+                  )}
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    resetForm();
+                    router.replace("/(employee)/billing");
+                  }}
+                  className="mt-4 py-4 rounded-2xl border border-slate-700 items-center justify-center"
+                >
+                  <Text className="text-text-muted font-black uppercase tracking-widest">
+                    Cancel Operation
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </ScrollView>

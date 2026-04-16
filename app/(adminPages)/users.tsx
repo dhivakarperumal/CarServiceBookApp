@@ -13,7 +13,9 @@ import {
   FlatList
 } from 'react-native';
 import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
+import { Stack, useRouter } from 'expo-router';
 import { apiService } from '../../services/api';
+import { COLORS } from '../../theme/colors';
 
 interface PlatformUser {
   id: string | number;
@@ -27,6 +29,7 @@ interface PlatformUser {
 }
 
 export default function AdminUsers() {
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [users, setUsers] = useState<PlatformUser[]>([]);
@@ -185,12 +188,37 @@ export default function AdminUsers() {
 
   return (
     <SafeAreaView className="flex-1 bg-slate-950">
+      <Stack.Screen options={{ headerShown: false }} />
+      
+      {/* Premium Header */}
+      <View className="px-5 pt-8 pb-1">
+        <View className="flex-row items-center justify-between">
+          <View className="flex-row items-center gap-3">
+            <TouchableOpacity 
+              onPress={() => router.back()}
+              className="w-10 h-10 rounded-2xl bg-slate-900 border border-slate-800 items-center justify-center"
+            >
+              <Ionicons name="arrow-back" size={20} color={COLORS.primary} />
+            </TouchableOpacity>
+            <View>
+              <Text className="text-white text-2xl font-black uppercase tracking-tight">Users</Text>
+              
+            </View>
+          </View>
+          <View className="items-end">
+            <View className="bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
+              <Text className="text-primary text-[10px] font-black uppercase">{filtered.length} Results</Text>
+            </View>
+          </View>
+        </View>
+      </View>
+
       <View className="flex-1">
 
 
         {/* STATS CARDS */}
-        <View className="px-6 flex-row gap-3 mb-8">
-          <View className="flex-1 bg-slate-900/50 p-5 rounded-[32px] border border-white/5 relative overflow-hidden">
+        <View className="px-6 flex-row gap-3 mt-7 mb-8">
+          <View className="flex-1 bg-slate-900/50 p-5 rounded-xl border border-white/5 relative overflow-hidden">
             <View className="w-10 h-10 bg-sky-500/10 rounded-2xl items-center justify-center mb-3">
               <Ionicons name="people" size={18} color="#0ea5e9" />
             </View>
@@ -199,7 +227,7 @@ export default function AdminUsers() {
             <View className="absolute -top-2 -right-2 w-12 h-12 bg-sky-500/5 rounded-full" />
           </View>
 
-          <View className="flex-1 bg-slate-900/50 p-5 rounded-[32px] border border-white/5 relative overflow-hidden">
+          <View className="flex-1 bg-slate-900/50 p-5 rounded-xl border border-white/5 relative overflow-hidden">
             <View className="w-10 h-10 bg-emerald-500/10 rounded-2xl items-center justify-center mb-3">
               <Ionicons name="shield-checkmark" size={18} color="#10b981" />
             </View>
@@ -208,7 +236,7 @@ export default function AdminUsers() {
             <View className="absolute -top-2 -right-2 w-12 h-12 bg-emerald-500/5 rounded-full" />
           </View>
 
-          <View className="flex-1 bg-slate-900/50 p-5 rounded-[32px] border border-white/5 relative overflow-hidden">
+          <View className="flex-1 bg-slate-900/50 p-5 rounded-xl border border-white/5 relative overflow-hidden">
             <View className="w-10 h-10 bg-indigo-500/10 rounded-2xl items-center justify-center mb-3">
               <Ionicons name="finger-print" size={18} color="#6366f1" />
             </View>
@@ -235,7 +263,7 @@ export default function AdminUsers() {
           {/* CHIPS */}
           <ScrollView horizontal showsHorizontalScrollIndicator={false} className="max-h-12">
             <View className="flex-row gap-2 pr-6">
-              {['all', 'admin', 'mechanic', 'staff', 'customer'].map((f) => (
+              {['all', 'admin', 'mechanic','user'].map((f) => (
                 <TouchableOpacity
                   key={f}
                   onPress={() => setRoleFilter(f)}

@@ -218,31 +218,30 @@ const StockDetails = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <Stack.Screen
-        options={{
-          headerShown: true,
-          title: "Warehouse Distribution",
-          headerTitleStyle: {
-            color: COLORS.textPrimary,
-            fontWeight: "900",
-            fontSize: 16,
-          },
-          headerStyle: { backgroundColor: COLORS.background },
-          headerTintColor: COLORS.textPrimary,
-          headerLeft: () => (
-            <TouchableOpacity
+      <Stack.Screen options={{ headerShown: false }} />
+      
+      {/* Premium Header */}
+      <View className="px-5 pt-8 pb-1 ">
+        <View className="flex-row items-center justify-between">
+          <View className="flex-row items-center gap-3">
+            <TouchableOpacity 
               onPress={() => router.back()}
-              className="ml-2 w-8 h-8 items-center justify-center rounded-xl bg-card-light border border-slate-700"
+              className="w-10 h-10 rounded-2xl bg-slate-900 border border-slate-800 items-center justify-center"
             >
-              <Ionicons
-                name="arrow-back"
-                size={20}
-                color={COLORS.textPrimary}
-              />
+              <Ionicons name="arrow-back" size={20} color={COLORS.primary} />
             </TouchableOpacity>
-          ),
-        }}
-      />
+            <View>
+              <Text className="text-white text-2xl font-black uppercase tracking-tight">Stock</Text>
+             
+            </View>
+          </View>
+          <View className="items-end">
+            <View className="bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
+              <Text className="text-primary text-[10px] font-black uppercase">{filteredProducts.length} Items</Text>
+            </View>
+          </View>
+        </View>
+      </View>
 
       <View className="p-4 flex-1">
         {/* TOP CONTROLS */}

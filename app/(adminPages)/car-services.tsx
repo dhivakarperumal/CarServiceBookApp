@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -14,6 +14,7 @@ import {
   View
 } from "react-native";
 import { apiService } from "../../services/api";
+import { COLORS } from "../../theme/colors";
 
 export default function CarServicesList() {
   const router = useRouter();

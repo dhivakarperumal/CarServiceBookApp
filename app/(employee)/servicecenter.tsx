@@ -296,9 +296,14 @@ export default function ServiceCenter() {
       const text =
         `${s.bookingId || ""} ${s.name || ""} ${s.phone || ""} ${s.brand || ""} ${s.model || ""} ${s.vehicleNumber || ""}`.toLowerCase();
 
-      // Exclude fully billed/completed service center items
+      // Exclude fully billed/completed and canceled service center items
       const status = (s.serviceStatus || s.status || "").toLowerCase().trim();
-      if (status === "bill completed") return false;
+      if (
+        status === "bill completed" ||
+        status === "cancelled" ||
+        status === "canceled"
+      )
+        return false;
 
       // SEARCH FILTER
       if (search && !text.includes(search.toLowerCase())) return false;
@@ -719,7 +724,7 @@ export default function ServiceCenter() {
               return (
                 <View
                   key={item.id}
-                  className="mb-4 bg-card rounded-[28px] border border-slate-700 overflow-hidden"
+                  className="mb-4 bg-card rounded-[28px] border border-slate-700 overflow-hidden relative"
                 >
                   <TouchableOpacity
                     onPress={() => toggleExpanded(item.id)}
@@ -749,11 +754,6 @@ export default function ServiceCenter() {
                             )}
                           </Text>
                         </View>
-                        <Ionicons
-                          name="chevron-down"
-                          size={12}
-                          color={COLORS.textMuted}
-                        />
                       </View>
                     </View>
 
@@ -778,6 +778,13 @@ export default function ServiceCenter() {
                           {item.phone || item.mobile}
                         </Text>
                       </View>
+                    </View>
+                    <View className="absolute bottom-5 right-5 rounded-full bg-primary p-1 flex items-center justify-center">
+                      <Ionicons
+                        name="chevron-down"
+                        size={14}
+                        color={COLORS.textPrimary}
+                      />
                     </View>
                   </TouchableOpacity>
 
@@ -1026,19 +1033,6 @@ export default function ServiceCenter() {
               );
             })
           )}
-        </View>
-
-        {/* FIXED NEW INVOICE BUTTON */}
-        <View className="absolute right-5 bottom-6 z-30">
-          <TouchableOpacity
-            onPress={() => router.push("/(employee)/add-billing" as any)}
-            className="flex-row items-center gap-2 bg-primary px-5 py-4 rounded-full shadow-2xl"
-          >
-            <Ionicons name="add" size={20} color={COLORS.background} />
-            <Text className="text-background font-black text-sm uppercase">
-              New Invoice
-            </Text>
-          </TouchableOpacity>
         </View>
 
         {/* ASSIGN MODAL */}
@@ -1372,6 +1366,19 @@ export default function ServiceCenter() {
           </View>
         </Modal>
       </ScrollView>
+
+      {/* FIXED NEW INVOICE BUTTON - OUTSIDE SCROLL */}
+      <View className="absolute bottom-6 right-6 z-40">
+        <TouchableOpacity
+          onPress={() => router.push("/(employee)/add-billing" as any)}
+          className="flex-row items-center gap-3 bg-primary px-4 py-3 rounded-full shadow-2xl border border-white/10"
+        >
+          <Ionicons name="add" size={24} color="white" />
+          <Text className="text-white font-black text-sm uppercase tracking-[1px]">
+            New Invoice
+          </Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 }

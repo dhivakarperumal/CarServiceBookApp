@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -119,19 +119,30 @@ export default function BillingsLedger() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      {/* HEADER */}
-      {/* <View className="p-4 border-b border-white/5 flex-row justify-between items-center">
-        <Text className="text-white font-black text-xl tracking-tighter">
-          Billing Ledger
-        </Text>
-
-        <TouchableOpacity
-          onPress={() => router.push("/(adminPages)/add-billing")}
-          className="w-12 h-12 bg-primary rounded-2xl items-center justify-center"
-        >
-          <Ionicons name="add" size={22} color={COLORS.background} />
-        </TouchableOpacity>
-      </View> */}
+      <Stack.Screen options={{ headerShown: false }} />
+      
+      {/* Premium Header */}
+      <View className="px-5 pt-8 pb-2">
+        <View className="flex-row items-center justify-between">
+          <View className="flex-row items-center gap-3">
+            <TouchableOpacity 
+              onPress={() => router.back()}
+              className="w-10 h-10 rounded-2xl bg-slate-900 border border-slate-800 items-center justify-center"
+            >
+              <Ionicons name="arrow-back" size={20} color={COLORS.primary} />
+            </TouchableOpacity>
+            <View>
+              <Text className="text-white text-2xl font-black uppercase tracking-tight">Billings</Text>
+             
+            </View>
+          </View>
+          <View className="items-end">
+            <View className="bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
+              <Text className="text-primary text-[10px] font-black uppercase">{filteredBillings.length} Invoices</Text>
+            </View>
+          </View>
+        </View>
+      </View>
 
       {/* STATS */}
       <View className="p-4 flex-row justify-between">

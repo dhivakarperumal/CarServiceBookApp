@@ -22,8 +22,14 @@ import { COLORS } from "../../theme/colors";
 dayjs.extend(isBetween);
 
 const formatValue = (num: number) => {
-  if (num >= 100000) return (num / 100000).toFixed(1) + " L";
-  if (num >= 1000) return (num / 1000).toFixed(1) + " K";
+  if (num >= 100000) {
+    const v = num / 100000;
+    return (v % 1 === 0 ? v.toFixed(0) : v.toFixed(1)) + " L";
+  }
+  if (num >= 1000) {
+    const v = num / 1000;
+    return (v % 1 === 0 ? v.toFixed(0) : v.toFixed(1)) + " K";
+  }
   return num.toLocaleString();
 };
 
@@ -199,7 +205,7 @@ export default function BookedVehicles() {
     <SafeAreaView className="flex-1 bg-background">
       <Stack.Screen
         options={{
-          title: "Booked Vehicles",
+          title: "Vehicle Booked",
           headerShown: true,
           headerStyle: { backgroundColor: COLORS.background },
           headerTintColor: COLORS.white,

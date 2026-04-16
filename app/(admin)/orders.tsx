@@ -1,3 +1,4 @@
+import { Picker } from "@react-native-picker/picker";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
@@ -17,6 +18,18 @@ import { api } from "../../services/api";
 import { COLORS } from "../../theme/colors";
 
 /* ─── HELPERS ─── */
+const formatValue = (num: number) => {
+  if (num >= 100000) {
+    const v = num / 100000;
+    return (v % 1 === 0 ? v.toFixed(0) : v.toFixed(1)) + " L";
+  }
+  if (num >= 1000) {
+    const v = num / 1000;
+    return (v % 1 === 0 ? v.toFixed(0) : v.toFixed(1)) + " K";
+  }
+  return num.toLocaleString();
+};
+
 const normalizeKey = (s: string) =>
   String(s || "")
     .toLowerCase()
@@ -150,7 +163,7 @@ export default function AllOrders() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("orderplaced");
   const [paymentFilter, setPaymentFilter] = useState("all");
   const [deliveryOnly, setDeliveryOnly] = useState(false);
 
@@ -265,43 +278,6 @@ export default function AllOrders() {
     }
   };
 
-  /* ─── STATUS FILTER CHIP ─── */
-  const filterChip = (
-    label: string,
-    value: string,
-    current: string,
-    setter: (v: string) => void,
-  ) => {
-    const active = current === value;
-    return (
-      <TouchableOpacity
-        key={value}
-        onPress={() => setter(active ? "all" : value)}
-        style={{
-          paddingHorizontal: 14,
-          paddingVertical: 8,
-          borderRadius: 20,
-          marginRight: 8,
-          backgroundColor: active ? COLORS.primary : COLORS.card,
-          borderWidth: 1,
-          borderColor: active ? COLORS.primary : COLORS.slate700,
-        }}
-      >
-        <Text
-          style={{
-            color: active ? "white" : COLORS.textSecondary,
-            fontSize: 9,
-            fontWeight: "900",
-            textTransform: "uppercase",
-            letterSpacing: 1,
-          }}
-        >
-          {label}
-        </Text>
-      </TouchableOpacity>
-    );
-  };
-
   /* ─── AVAILABLE NEXT STATUSES ─── */
   const getNextStatuses = (currentStatus: string) => {
     const currentIdx = ORDER_STATUS_LIST.findIndex(
@@ -354,7 +330,7 @@ export default function AllOrders() {
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 24 }}
+          contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 24 }}
         >
           <StatCard
             title="Total"
@@ -382,29 +358,30 @@ export default function AllOrders() {
           />
           <StatCard
             title="Revenue"
-            value={`₹${stats.revenue.toLocaleString("en-IN")}`}
+            value={`₹${formatValue(stats.revenue)}`}
             iconName="cash-outline"
             iconColor={COLORS.warning}
           />
         </ScrollView>
 
-        {/* ── SEARCH ── */}
-        <View style={{ paddingHorizontal: 24, marginBottom: 16 }}>
+        {/* ── SEARCH & FILTERS ── */}
+        <View style={{ paddingHorizontal: 20, gap: 12, marginBottom: 24 }}>
+          {/* Search Bar */}
           <View
             style={{
               flexDirection: "row",
               alignItems: "center",
               backgroundColor: COLORS.card,
-              borderRadius: 16,
+              borderRadius: 24,
               paddingHorizontal: 16,
-              height: 52,
+              height: 56,
               borderWidth: 1,
               borderColor: COLORS.slate700,
             }}
           >
-            <Ionicons name="search" size={16} color={COLORS.textMuted} />
+            <Ionicons name="search" size={18} color={COLORS.textMuted} />
             <TextInput
-              placeholder="Search Order ID or Member..."
+              placeholder="Search Order ID or Customer..."
               placeholderTextColor={COLORS.textMuted}
               value={search}
               onChangeText={(v) => {
@@ -415,91 +392,99 @@ export default function AllOrders() {
                 flex: 1,
                 marginLeft: 12,
                 color: "white",
-                fontWeight: "600",
-                fontSize: 13,
+                fontWeight: "700",
+                fontSize: 14,
               }}
             />
             {search.length > 0 && (
               <TouchableOpacity onPress={() => setSearch("")}>
                 <Ionicons
                   name="close-circle"
-                  size={18}
+                  size={20}
                   color={COLORS.textMuted}
                 />
               </TouchableOpacity>
             )}
           </View>
-        </View>
 
-        {/* ── STATUS FILTER CHIPS ── */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 16 }}
-        >
-          {filterChip("All", "all", statusFilter, setStatusFilter)}
-          {ORDER_STATUS_LIST.map((s) =>
-            filterChip(s.label, s.id, statusFilter, setStatusFilter),
-          )}
-        </ScrollView>
+          {/* Select Options (Pickers) */}
+          <View className="flex-row gap-2">
+            <View className="flex-1 bg-card border border-slate-700 rounded-2xl overflow-hidden h-12 justify-center">
+              <Picker
+                selectedValue={statusFilter}
+                onValueChange={(val) => setStatusFilter(val)}
+                dropdownIconColor={COLORS.primary}
+                style={{ color: "white", backgroundColor: "transparent" }}
+              >
+                <Picker.Item label="All Status" value="all" style={{ fontSize: 12, color: COLORS.background }} />
+                {ORDER_STATUS_LIST.map(s => (
+                  <Picker.Item key={s.id} label={s.label} value={s.id} style={{ fontSize: 12, color: COLORS.background }} />
+                ))}
+              </Picker>
+            </View>
 
-        {/* ── PAYMENT + DELIVERY FILTERS ── */}
-        <View
-          style={{
-            paddingHorizontal: 24,
-            flexDirection: "row",
-            gap: 8,
-            marginBottom: 24,
-            flexWrap: "wrap",
-          }}
-        >
-          {filterChip("All Payments", "all", paymentFilter, setPaymentFilter)}
-          {filterChip("Paid", "paid", paymentFilter, setPaymentFilter)}
-          {filterChip("Pending", "pending", paymentFilter, setPaymentFilter)}
+            <View className="flex-1 bg-card border border-slate-700 rounded-2xl overflow-hidden h-12 justify-center">
+              <Picker
+                selectedValue={paymentFilter}
+                onValueChange={(val) => setPaymentFilter(val)}
+                dropdownIconColor={COLORS.primary}
+                style={{ color: "white", backgroundColor: "transparent" }}
+              >
+                <Picker.Item label="All Payments" value="all" style={{ fontSize: 12, color: COLORS.background }} />
+                <Picker.Item label="Paid" value="paid" style={{ fontSize: 12, color: COLORS.background }} />
+                <Picker.Item label="Pending" value="pending" style={{ fontSize: 12, color: COLORS.background }} />
+              </Picker>
+            </View>
+          </View>
+
+          {/* Special Toggle */}
           <TouchableOpacity
             onPress={() => setDeliveryOnly((prev) => !prev)}
             style={{
-              paddingHorizontal: 14,
-              paddingVertical: 8,
-              borderRadius: 20,
+              paddingHorizontal: 16,
+              paddingVertical: 10,
+              borderRadius: 16,
               backgroundColor: deliveryOnly ? COLORS.primary : COLORS.card,
               borderWidth: 1,
               borderColor: deliveryOnly ? COLORS.primary : COLORS.slate700,
               flexDirection: "row",
               alignItems: "center",
-              gap: 6,
+              gap: 8,
+              alignSelf: 'flex-start'
             }}
           >
             <Ionicons
               name="bicycle-outline"
-              size={13}
+              size={14}
               color={deliveryOnly ? "white" : COLORS.textSecondary}
             />
             <Text
               style={{
                 color: deliveryOnly ? "white" : COLORS.textSecondary,
-                fontSize: 9,
+                fontSize: 10,
                 fontWeight: "900",
                 textTransform: "uppercase",
+                letterSpacing: 1
               }}
             >
-              Delivery Only
+              Filter Delivered
             </Text>
           </TouchableOpacity>
         </View>
 
         {/* ── ORDER LIST ── */}
-        <View style={{ paddingHorizontal: 24, gap: 12 }}>
+        <View style={{ paddingHorizontal: 20, gap: 12 }}>
           {paginated.length === 0 ? (
             <View
               style={{
                 paddingVertical: 80,
                 alignItems: "center",
                 backgroundColor: COLORS.card,
-                borderRadius: 32,
+                borderRadius: 40,
                 borderWidth: 1,
                 borderStyle: "dashed",
                 borderColor: COLORS.slate700,
+                marginHorizontal: 20
               }}
             >
               <MaterialCommunityIcons

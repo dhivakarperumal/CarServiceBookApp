@@ -108,7 +108,7 @@ function AdminHeader({ routeName }: { routeName: string }) {
     orders: { title: "Orders", subtitle: "Customer purchases" },
     products: { title: "Products", subtitle: "Inventory management" },
     vehicles: { title: "Vehicles", subtitle: "Vehicle inventory" },
-    "booked-vehicles": { title: "Bookings", subtitle: "Sales & reservations" },
+    "booked-vehicles": { title: "Vehicle Booked", subtitle: "Sales & reservations" },
     users: { title: "Users", subtitle: "User management" },
     settings: { title: "Settings", subtitle: "Admin settings" },
   };
