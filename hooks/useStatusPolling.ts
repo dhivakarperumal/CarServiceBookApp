@@ -19,7 +19,7 @@ export const useStatusPolling = () => {
     try {
       const [bookingsRes, appointmentsRes, vehicleRes, ordersRes] = await Promise.all([
         api.get("/bookings").catch(() => ({ data: [] })),
-        api.get("/appointments/my", { params: { uid: user.uid } }).catch(() => ({ data: [] })),
+        api.get("/appointments/all", { params: { uid: user.uid } }).catch(() => ({ data: [] })),
         api.get(`/vehicle-bookings/user/${user.id}`).catch(() => ({ data: [] })),
         api.get(`/orders/user/${user.id}`).catch(() => ({ data: [] })),
       ]);

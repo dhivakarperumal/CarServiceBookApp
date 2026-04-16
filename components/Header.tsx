@@ -125,7 +125,7 @@ const Header: React.FC = () => {
     try {
       const [bookingsRes, appointmentsRes, vehicleRes, ordersRes] = await Promise.all([
         api.get("/bookings"),
-        api.get("/appointments/my", { params: { uid: user.uid } }),
+        api.get("/appointments/all", { params: { uid: user.uid } }),
         api.get(`/vehicle-bookings/user/${user.id}`),
         api.get(`/orders/user/${user.id}`),
       ]);
