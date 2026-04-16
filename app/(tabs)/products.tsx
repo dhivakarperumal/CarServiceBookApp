@@ -1,24 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  ActivityIndicator,
-  Alert,
-  Image,
-  Dimensions,
-  Modal,
-  TextInput,
-  ScrollView,
-} from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import { apiService } from '../../services/api';
-import { COLORS } from '../../theme/colors';
-import { useCart } from '../../contexts/CartContext';
-import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Slider from '@react-native-community/slider';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import {
+    ActivityIndicator,
+    Alert,
+    Dimensions,
+    FlatList,
+    Image,
+    Modal,
+    RefreshControl,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+import { useCart } from '../../contexts/CartContext';
+import { apiService } from '../../services/api';
+import { COLORS } from '../../theme/colors';
 
 const { width } = Dimensions.get('window');
 
@@ -45,6 +46,7 @@ interface ApiProduct {
 export default function ProductsScreen() {
   const [products, setProducts] = useState<ApiProduct[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const { addToCart } = useCart();
 
   const getLabel = (value: string) => {
@@ -145,6 +147,18 @@ export default function ProductsScreen() {
       console.error('Error fetching products:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      const data = await apiService.getProducts();
+      setProducts(data as unknown as ApiProduct[]);
+    } catch (error) {
+      console.error('Error refreshing products:', error);
+    } finally {
+      setRefreshing(false);
     }
   };
 
@@ -290,6 +304,9 @@ export default function ProductsScreen() {
             columnWrapperStyle={{ justifyContent: 'space-between' }}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 40 }}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.primary} />
+            }
             ListEmptyComponent={() => (
               <View className="flex-1 items-center pt-15">
                 <Text className="text-[#94A3B8] text-sm">No products available at the moment</Text>

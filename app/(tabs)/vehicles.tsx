@@ -1,12 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, Dimensions, FlatList, Image, Modal, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Dimensions, FlatList, Image, Modal, RefreshControl, SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { api, apiService, Vehicle } from '../../services/api';
 // @ts-ignore
+import { useRouter } from "expo-router";
 import RazorpayCheckout from 'react-native-razorpay';
 import { useAuth } from "../../contexts/AuthContext";
-import { useRouter } from "expo-router";
 
 const { width } = Dimensions.get('window');
 const COLUMN_WIDTH = (width - 48) / 2;
@@ -15,6 +15,7 @@ export default function VehiclesScreen() {
    const [vehicles, setVehicles] = useState<Vehicle[]>([]);
    const router = useRouter();
    const [loading, setLoading] = useState(true);
+   const [refreshing, setRefreshing] = useState(false);
    const [search, setSearch] = useState("");
    const [filterType, setFilterType] = useState("all");
    const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
@@ -42,6 +43,18 @@ export default function VehiclesScreen() {
          }
       } finally {
          setLoading(false);
+      }
+   };
+
+   const onRefresh = async () => {
+      setRefreshing(true);
+      try {
+         const data = await apiService.getVehicles();
+         setVehicles(data || []);
+      } catch (error: any) {
+         console.error('Error refreshing vehicles:', error);
+      } finally {
+         setRefreshing(false);
       }
    };
 
@@ -410,6 +423,9 @@ export default function VehiclesScreen() {
                   columnWrapperStyle={{ justifyContent: 'space-between', paddingHorizontal: 20 }}
                   showsVerticalScrollIndicator={false}
                   contentContainerStyle={{ paddingBottom: 50 }}
+                  refreshControl={
+                     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#0EA5E9" />
+                  }
                   ListEmptyComponent={() => (
                      <View className="items-center py-20 px-5">
                         <Text className="text-gray-400 text-lg text-center font-medium">No vehicles found matching your criteria</Text>

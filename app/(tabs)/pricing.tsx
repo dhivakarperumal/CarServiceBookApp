@@ -1,18 +1,20 @@
 import React, { useEffect, useState } from "react";
 import {
-    View,
-    FlatList,
     ActivityIndicator,
+    FlatList,
+    RefreshControl,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { api } from "../../services/api";
 import PricingCard from "@/components/PricingCard";
-import { COLORS, withOpacity } from "../../theme/colors";
+import { api } from "../../services/api";
+import { COLORS } from "../../theme/colors";
 
 export default function PricingScreen() {
     const [packages, setPackages] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
 
     useEffect(() => {
         const fetchPricingPackages = async () => {
@@ -28,6 +30,18 @@ export default function PricingScreen() {
 
         fetchPricingPackages();
     }, []);
+
+    const onRefresh = async () => {
+        setRefreshing(true);
+        try {
+            const res = await api.get("/pricing_packages");
+            setPackages(res.data || []);
+        } catch (err) {
+            console.error("Failed to refresh pricing packages", err);
+        } finally {
+            setRefreshing(false);
+        }
+    };
 
     return (
         <SafeAreaView
@@ -59,6 +73,9 @@ export default function PricingScreen() {
                             paddingTop: 20,
                             paddingBottom: 50,
                         }}
+                        refreshControl={
+                            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.primary} />
+                        }
                         renderItem={({ item }) => (
                             <PricingCard pkg={item} />
                         )}

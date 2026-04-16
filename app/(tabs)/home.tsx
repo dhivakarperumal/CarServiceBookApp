@@ -5,6 +5,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Animated, Dimensions, Image, Linking, Modal,
+  RefreshControl,
   ScrollView,
   Text,
   TextInput,
@@ -121,6 +122,7 @@ export default function HomeScreen({ navigation }: any) {
   const [serviceBookingLoading, setServiceBookingLoading] = useState<boolean>(true);
   const [vehicleBookingLoading, setVehicleBookingLoading] = useState<boolean>(true);
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
+  const [refreshing, setRefreshing] = useState(false);
   const { user } = useAuth();
   const authUser = user as any;
   const username = authUser?.username || authUser?.name || "";
@@ -133,6 +135,34 @@ export default function HomeScreen({ navigation }: any) {
     if (img.startsWith("http")) return img;
 
     return `https://cars.qtechx.com/${img}`;
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      // Fetch services
+      const servicesData = await apiService.getServices();
+      setServices(servicesData);
+
+      // Fetch bookings and reviews
+      await Promise.all([
+        (async () => {
+          const bookingsData = await apiService.getBookings();
+          setAllBookings(bookingsData);
+        })(),
+        (async () => {
+          const reviewsRes = await api.get("/reviews");
+          const approvedReviews = (reviewsRes.data || []).filter(
+            (r: any) => r.status === 1 || r.status === true
+          );
+          setReviews(approvedReviews);
+        })(),
+      ]);
+    } catch (error) {
+      console.error('Error refreshing home page:', error);
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   const serviceListRef = useRef<any>(null);
@@ -766,6 +796,9 @@ export default function HomeScreen({ navigation }: any) {
         paddingBottom: 50,
         paddingTop: 10,
       }}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.primary} />
+      }
     >
 
       {/* ================= BANNER ================= */}
