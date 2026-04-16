@@ -244,12 +244,10 @@ export default function EmployeeBilling() {
                   statusFilter === "paid" ? "text-white" : "text-slate-400"
                 }`}
               >
-                Paid (
-                {
+                {`Paid (${
                   bills.filter((b) => b.paymentStatus?.toLowerCase() === "paid")
                     .length
-                }
-                )
+                })`}
               </Text>
             </TouchableOpacity>
 
@@ -266,12 +264,10 @@ export default function EmployeeBilling() {
                   statusFilter === "pending" ? "text-white" : "text-slate-400"
                 }`}
               >
-                Pending (
-                {
+                {`Pending (${
                   bills.filter((b) => b.paymentStatus?.toLowerCase() !== "paid")
                     .length
-                }
-                )
+                })`}
               </Text>
             </TouchableOpacity>
           </View>

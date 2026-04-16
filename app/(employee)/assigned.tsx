@@ -3,16 +3,15 @@ import { Picker } from "@react-native-picker/picker";
 import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Dimensions,
-  RefreshControl,
-  SafeAreaView,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Alert,
+    Dimensions,
+    RefreshControl,
+    SafeAreaView,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
 } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
 import { api } from "../../services/api";
@@ -28,42 +27,42 @@ const getStatusClasses = (status: string): StatusStyle => {
   const s = status?.toString().trim();
   const map: { [key: string]: StatusStyle } = {
     Pending: {
-      container: "bg-warning/20 border-warning/30",
+      container: "bg-warning/10 border-warning",
       text: "text-warning",
     },
     Assigned: {
-      container: "bg-primary-dark/20 border-primary-dark/30",
-      text: "text-primary-dark",
-    },
-    Approved: {
-      container: "bg-primary-dark/20 border-primary-dark/30",
-      text: "text-primary-dark",
-    },
-    "Service Going on": {
-      container: "bg-primary/20 border-primary/30",
+      container: "bg-primary/10 border-primary",
       text: "text-primary",
     },
+    Approved: {
+      container: "bg-primary/10 border-primary",
+      text: "text-primary",
+    },
+    "Service Going on": {
+      container: "bg-warning/10 border-warning",
+      text: "text-warning",
+    },
     "Bill Pending": {
-      container: "bg-accent/20 border-accent/30",
-      text: "text-accent",
+      container: "bg-error/10 border-error",
+      text: "text-error",
     },
     "Bill Completed": {
-      container: "bg-success/20 border-success/30",
+      container: "bg-success/10 border-success",
       text: "text-success",
     },
     "Service Completed": {
-      container: "bg-success/20 border-success/30",
+      container: "bg-success/10 border-success",
       text: "text-success",
     },
     Completed: {
-      container: "bg-success/20 border-success/30",
+      container: "bg-success/10 border-success",
       text: "text-success",
     },
   };
   return (
     map[s] || {
-      container: "bg-text-muted/20 border-text-muted/30",
-      text: "text-text-muted",
+      container: "bg-slate-900/50 border-slate-700",
+      text: "text-text-secondary",
     }
   );
 };
@@ -73,10 +72,10 @@ const StatusBadge = ({ status }: { status: string }) => {
 
   return (
     <View
-      className={`self-start px-3 py-1 rounded-full border ${styles.container}`}
+      className={`px-3 py-1.5 rounded-full border mb-1 ${styles.container}`}
     >
       <Text
-        className={`text-[10px] font-black uppercase tracking-wider ${styles.text}`}
+        className={`text-[8px] font-black uppercase tracking-widest ${styles.text}`}
       >
         {status?.toString().trim() || "Assigned"}
       </Text>
@@ -219,11 +218,8 @@ export default function AssignedHistory() {
   return (
     <SafeAreaView className="flex-1 bg-background">
       <ScrollView
-        className="flex-1"
         contentContainerStyle={{
-          paddingHorizontal: 20,
-          paddingTop: 20,
-          paddingBottom: 100,
+          paddingBottom: 200,
         }}
         showsVerticalScrollIndicator={false}
         refreshControl={
@@ -231,7 +227,7 @@ export default function AssignedHistory() {
         }
       >
         {/* HEADER */}
-        <View className="mb-6">
+        <View className="px-6 pt-6 pb-4">
           {/* Stats */}
           <View className="flex-row gap-4">
             {/* Total Tasks */}
@@ -277,29 +273,28 @@ export default function AssignedHistory() {
         </View>
 
         {/* FILTERS */}
-        <View className="space-y-5 mb-6">
+        <View className="px-6 pb-4">
           {/* Search Bar */}
-          <View className="relative mb-3">
-            <View className="absolute left-4 top-4 z-10">
-              <Ionicons name="search" size={20} color="#64748B" />
+          <View className="mb-6">
+            <View className="bg-slate-900/30 rounded-2xl flex-row items-center px-4 h-14 border border-slate-700">
+              <Ionicons name="search" size={16} color="#64748B" />
+              <TextInput
+                placeholder="Search by vehicle, ID, customer..."
+                placeholderTextColor="#64748B"
+                value={search}
+                onChangeText={setSearch}
+                className="flex-1 ml-3 text-white font-semibold text-xs"
+              />
             </View>
-
-            <TextInput
-              placeholder="Search by vehicle, ID, customer..."
-              placeholderTextColor="#64748B"
-              value={search}
-              onChangeText={setSearch}
-              className="w-full pl-12 pr-4 py-4 border border-slate-700 bg-slate-800/80 rounded-2xl text-text-primary font-bold shadow-lg"
-            />
           </View>
 
           {/* Filters */}
-          <View className="flex-row gap-3 mt-3">
-            <View className="bg-slate-800 border border-slate-700 rounded-2xl px-3 py-1 shadow-sm flex-1">
+          <View className="flex-row gap-3 mb-6">
+            <View className="flex-1 bg-slate-900/30 border border-slate-700 rounded-2xl px-3 py-1 overflow-hidden">
               <Picker
                 selectedValue={filterStatus}
                 onValueChange={(itemValue) => setFilterStatus(itemValue)}
-                dropdownIconColor="#94A3B8"
+                dropdownIconColor="#64748B"
                 style={{ color: "white" }}
               >
                 {[
@@ -321,11 +316,11 @@ export default function AssignedHistory() {
               </Picker>
             </View>
 
-            <View className="bg-slate-800 border border-slate-700 rounded-2xl px-3 py-1 shadow-sm flex-1">
+            <View className="flex-1 bg-slate-900/30 border border-slate-700 rounded-2xl px-3 py-1 overflow-hidden">
               <Picker
                 selectedValue={dateFilter}
                 onValueChange={(itemValue) => setDateFilter(itemValue)}
-                dropdownIconColor="#94A3B8"
+                dropdownIconColor="#64748B"
                 style={{ color: "white" }}
               >
                 {[
@@ -347,218 +342,187 @@ export default function AssignedHistory() {
           </View>
 
           {dateFilter === "custom" && (
-            <View className="bg-slate-800 border border-slate-700 rounded-2xl p-4 mt-4 space-y-3">
-              <Text className="text-xs font-black uppercase tracking-widest text-text-muted">
+            <View className="bg-slate-900/30 border border-slate-700 rounded-2xl p-4 mb-6 space-y-3">
+              <Text className="text-[12px] font-black uppercase tracking-wider text-text-muted">
                 Custom Date Range
               </Text>
               <View className="flex-row gap-3 flex-wrap">
                 <TextInput
                   placeholder="Start YYYY-MM-DD"
-                  placeholderTextColor="#94A3B8"
+                  placeholderTextColor="#64748B"
                   value={dateRange.start}
                   onChangeText={(value) =>
                     setDateRange((prev) => ({ ...prev, start: value }))
                   }
-                  className="flex-1 px-4 py-3 bg-slate-900 border border-slate-700 rounded-2xl text-text-primary"
+                  className="flex-1 px-4 py-3 bg-slate-900/50 border border-slate-700 rounded-2xl text-text-primary"
                 />
                 <TextInput
                   placeholder="End YYYY-MM-DD"
-                  placeholderTextColor="#94A3B8"
+                  placeholderTextColor="#64748B"
                   value={dateRange.end}
                   onChangeText={(value) =>
                     setDateRange((prev) => ({ ...prev, end: value }))
                   }
-                  className="flex-1 px-4 py-3 bg-slate-900 border border-slate-700 rounded-2xl text-text-primary"
+                  className="flex-1 px-4 py-3 bg-slate-900/50 border border-slate-700 rounded-2xl text-text-primary"
                 />
               </View>
             </View>
           )}
         </View>
 
-        {/* LIST */}
-        {loading && services.length === 0 ? (
-          <View className="py-20 justify-center items-center">
-            <ActivityIndicator size="large" color="#0EA5E9" />
-            <Text className="text-[10px] font-black uppercase tracking-widest mt-4 text-text-secondary">
-              Syncing your service history...
-            </Text>
-          </View>
-        ) : filteredServices.length === 0 ? (
-          <View className="rounded-[2rem] p-12 items-center border border-dashed bg-card border-card">
-            <View className="w-20 h-20 rounded-full items-center justify-center mb-4 border bg-background border-card">
-              <Ionicons name="car-outline" size={40} color="#64748B" />
+        {/* SERVICE CARDS */}
+        <View className="px-6 pb-24">
+          {loading && services.length === 0 ? (
+            <View className="py-20 items-center bg-card rounded-[32px] border border-dashed border-slate-700">
+              <Ionicons name="car-outline" size={48} color="#64748B" />
+              <Text className="text-slate-500 font-black text-[10px] uppercase mt-4 tracking-[2px]">
+                Loading assigned services...
+              </Text>
             </View>
-            <Text className="text-lg font-black mt-2 text-center text-text-primary">
-              No Services Found
-            </Text>
-            <Text className="text-center mt-2 px-4 italic leading-5 text-text-secondary">
-              Try adjusting your filters or search terms.
-            </Text>
-          </View>
-        ) : (
-          <View className="pb-20">
-            {filteredServices.map((item) => {
+          ) : filteredServices.length === 0 ? (
+            <View className="py-20 items-center bg-card rounded-[32px] border border-dashed border-slate-700">
+              <Ionicons name="car-outline" size={48} color="#64748B" />
+              <Text className="text-slate-500 font-black text-[10px] uppercase mt-4 tracking-[2px]">
+                No services found
+              </Text>
+            </View>
+          ) : (
+            filteredServices.map((item) => {
               const isExpanded = expandedItems.has(item.id);
+              const statusColors = getStatusClasses(
+                item.serviceStatus || item.status,
+              );
+
               return (
-                <TouchableOpacity
+                <View
                   key={item.id}
-                  onPress={() => toggleExpanded(item.id)}
-                  activeOpacity={0.7}
-                  className="rounded-3xl border border-slate-700/40 bg-slate-950/95 p-6 mb-5 shadow-2xl backdrop-blur-lg"
+                  className="mb-4 bg-card rounded-[28px] border border-slate-700 overflow-hidden"
                 >
-                  {/* Header Row - Always Visible */}
-                  <View className="flex-row justify-between items-start">
-                    <View className="flex-1 pr-3">
-                      <View className="flex-row items-center gap-3 mb-3">
-                        <Text className="text-2xl font-black text-text-primary">
+                  <TouchableOpacity
+                    onPress={() => toggleExpanded(item.id)}
+                    activeOpacity={0.8}
+                    className="p-5"
+                  >
+                    <View className="flex-row justify-between items-start mb-4">
+                      <View>
+                        <Text className="text-text-primary text-[10px] font-black uppercase tracking-[2px]">
+                          {item.bookingId || `SER-${item.id}`}
+                        </Text>
+                        <Text className="text-white text-[17px] font-black mt-0.5 uppercase tracking-tight">
                           {item.customer_name ||
                             item.name ||
                             `${item.brand} ${item.model}`}
                         </Text>
-                        <Text className="text-[12px] font-black uppercase tracking-widest text-text-primary">
-                          ID: {item.bookingId || item.id}
+                      </View>
+                      <View className="items-end">
+                        <View
+                          className={`px-3 py-1.5 rounded-full border mb-1 ${statusColors.container}`}
+                        >
+                          <Text
+                            className={`text-[8px] font-black uppercase tracking-widest ${statusColors.text}`}
+                          >
+                            {item.serviceStatus || item.status}
+                          </Text>
+                        </View>
+                        <Ionicons
+                          name="chevron-down"
+                          size={12}
+                          color="#64748B"
+                        />
+                      </View>
+                    </View>
+
+                    <View className="flex-row gap-2 flex-wrap">
+                      <View className="bg-slate-900/40 px-2.5 py-1.5 rounded-xl flex-row items-center gap-1.5">
+                        <Ionicons
+                          name="car-outline"
+                          size={12}
+                          color="#0EA5E9"
+                        />
+                        <Text className="text-text-secondary text-[10px] font-bold uppercase">
+                          {item.brand} {item.model}
                         </Text>
                       </View>
-                      <StatusBadge status={item.serviceStatus || item.status} />
+                      <View className="bg-slate-900/40 px-2.5 py-1.5 rounded-xl flex-row items-center gap-1.5">
+                        <Ionicons
+                          name="call-outline"
+                          size={12}
+                          color="#0EA5E9"
+                        />
+                        <Text className="text-text-secondary text-[10px] font-bold">
+                          {item.phone || item.mobile}
+                        </Text>
+                      </View>
                     </View>
-                    <Ionicons
-                      name={
-                        isExpanded ? "chevron-up-circle" : "chevron-down-circle"
-                      }
-                      size={28}
-                      color="#0EA5E9"
-                    />
-                  </View>
+                  </TouchableOpacity>
 
-                  {/* Expanded Details */}
                   {isExpanded && (
-                    <View className="mt-6 pt-6 border-t border-card">
-                      <Text className="text-[10px] font-black uppercase tracking-wider text-text-muted mb-2">
-                        Brand / Model
-                      </Text>
-                      <Text className="text-xl font-black text-text-primary mb-4">
-                        {item.brand} {item.model}
-                      </Text>
-                      <Text className="text-sm font-black uppercase tracking-wider text-primary mb-6">
-                        {item.vehicle_number ||
-                          item.vehicleNumber ||
-                          "NO PLATE"}
-                      </Text>
+                    <>
+                      <View className="mb-6 px-5 pt-4">
+                        <Text className="text-[10px] font-black uppercase tracking-wider text-text-muted mb-2">
+                          Brand / Model
+                        </Text>
+                        <Text className="text-xl font-black text-text-primary">
+                          {item.brand} {item.model}
+                        </Text>
+                        <Text className="text-sm font-black text-primary mt-4 uppercase mb-2">
+                          {item.vehicle_number ||
+                            item.vehicleNumber ||
+                            "NO PLATE"}
+                        </Text>
+                        <Text className="text-sm text-text-secondary font-medium">
+                          Customer: {item.customer_name || item.name} •{" "}
+                          {item.phone || item.mobile}
+                        </Text>
+                      </View>
 
-                      {/* Info Blocks */}
-                      <View className="space-y-5 mb-6">
-                        {/* Issue */}
-                        <View className="flex-row items-start gap-4">
-                          <View className="w-11 h-11 rounded-2xl flex items-center justify-center border border-warning/20 bg-warning/10 shadow-sm">
-                            <Ionicons
-                              name="alert-circle"
-                              size={20}
-                              color="#F59E0B"
-                            />
-                          </View>
+                      {/* Issue */}
+                      <View className="bg-slate-900/30 rounded-2xl p-4 mx-5 mb-5 border border-slate-700">
+                        <Text className="text-[12px] font-black text-text-muted uppercase tracking-widest mb-3">
+                          Reported Issue
+                        </Text>
+                        <Text className="text-sm font-bold text-text-primary">
+                          {item.carIssue || item.issue || "General Inspection"}
+                        </Text>
+                      </View>
 
-                          <View className="flex-1">
-                            <Text className="text-[12px] font-black uppercase tracking-wider text-text-muted">
-                              Reported Issue
+                      {/* Parts Cost */}
+                      {(item.parts_cost > 0 || item.partsTotal > 0) && (
+                        <View className="bg-slate-900/30 rounded-2xl p-4 mx-5 mb-5 border border-slate-700">
+                          <View className="flex-row justify-between items-center">
+                            <Text className="text-[12px] font-black text-text-muted uppercase tracking-widest">
+                              Parts Cost
                             </Text>
-
-                            <Text className="text-md font-bold leading-snug mt-1 text-text-primary">
-                              {item.carIssue ||
-                                item.issue ||
-                                "General Inspection"}
-                            </Text>
-                          </View>
-                        </View>
-
-                        {/* Customer */}
-                        <View className="flex-row items-center gap-4 pt-5 border-t border-card">
-                          <View className="w-11 h-11 rounded-2xl flex items-center justify-center border border-primary/20 bg-primary/10 shadow-sm">
-                            <Ionicons name="person" size={18} color="#0EA5E9" />
-                          </View>
-
-                          <View className="flex-1">
-                            <Text className="text-[12px] font-black uppercase tracking-wider text-text-muted">
-                              Customer
-                            </Text>
-
-                            <Text className="text-md font-black mt-1 truncate text-text-primary">
-                              {item.customer_name || item.name}
-                            </Text>
-
-                            <View className="flex-row items-center gap-1 mt-2">
-                              <Ionicons
-                                name="call-outline"
-                                size={12}
-                                color="#fff"
-                              />
-                              <Text className="text-md font-bold text-text-primary">
-                                {item.phone || item.mobile || "N/A"}
-                              </Text>
-                            </View>
-                          </View>
-                        </View>
-
-                        {/* Parts Cost */}
-                        {(item.parts_cost > 0 || item.partsTotal > 0) && (
-                          <View className="flex-row items-center justify-between p-4 rounded-2xl border border-success/20 bg-success/10 shadow-sm mt-5">
-                            <View className="flex-row items-center gap-3">
-                              <View className="w-9 h-9 rounded-xl items-center justify-center bg-success shadow">
-                                <Text className="text-white font-black text-xs">
-                                  ₹
-                                </Text>
-                              </View>
-
-                              <Text className="text-[10px] font-black uppercase tracking-wider text-success">
-                                Parts Cost
-                              </Text>
-                            </View>
-
                             <Text className="text-lg font-black text-success">
                               ₹{item.parts_cost || item.partsTotal}
                             </Text>
                           </View>
-                        )}
-                      </View>
-
-                      {/* Bottom Row */}
-                      <View className="flex-row items-center justify-between pt-6 border-t border-card">
-                        <View className="flex-row items-center gap-2">
-                          <Ionicons
-                            name="calendar-outline"
-                            size={14}
-                            color="#fff"
-                          />
-                          <Text className="text-[11px] font-bold text-text-primary">
-                            {item.created_at
-                              ? new Date(item.created_at).toLocaleDateString()
-                              : "N/A"}
-                          </Text>
                         </View>
+                      )}
 
+                      {/* View Details Button */}
+                      <View className="px-5 pb-5">
                         <TouchableOpacity
                           onPress={() =>
                             router.push(
                               `/(employee)/service-details?id=${item.id}` as any,
                             )
                           }
-                          className="px-4 py-2 rounded-xl bg-primary/10 border border-primary/20"
+                          className="bg-primary py-3.5 rounded-2xl flex-row items-center justify-center gap-2"
                         >
-                          <View className="flex-row items-center gap-1">
-                            <Text className="text-[11px] font-black uppercase tracking-widest text-primary">
-                              View Details
-                            </Text>
-
-                            <Ionicons name="eye" size={14} color="#0EA5E9" />
-                          </View>
+                          <Text className="text-white text-[11px] font-black uppercase tracking-widest">
+                            View Details
+                          </Text>
+                          <Ionicons name="eye" size={14} color="white" />
                         </TouchableOpacity>
                       </View>
-                    </View>
+                    </>
                   )}
-                </TouchableOpacity>
+                </View>
               );
-            })}
-          </View>
-        )}
+            })
+          )}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
