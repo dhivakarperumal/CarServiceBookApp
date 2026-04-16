@@ -107,6 +107,7 @@ export default function AdminBookings() {
   const [bookingRefreshing, setBookingRefreshing] = useState(false);
   const [bookingSearch, setBookingSearch] = useState("");
   const [bookingStatusFilter, setBookingStatusFilter] = useState("All");
+  const [bookingDateFilter, setBookingDateFilter] = useState("All Time");
   const [statusPopup, setStatusPopup] = useState<{
     booking: any;
     type: "status" | "approved" | "cancel";
@@ -120,11 +121,18 @@ export default function AdminBookings() {
   const [apptRefreshing, setApptRefreshing] = useState(false);
   const [apptSearch, setApptSearch] = useState("");
   const [apptStatusFilter, setApptStatusFilter] = useState("all");
+  const [apptDateFilter, setApptDateFilter] = useState("All Time");
   const [assignFilter, setAssignFilter] = useState("all");
   const [technicians, setTechnicians] = useState<any[]>([]);
   const [selectedAppt, setSelectedAppt] = useState<any | null>(null);
   const [pendingChanges, setPendingChanges] = useState<any>({});
   const [saving, setSaving] = useState(false);
+
+  /* Filter UI State */
+  const [filterModal, setFilterModal] = useState<{
+    type: "status" | "date";
+    tab: "booking" | "appointment";
+  } | null>(null);
 
   /* ─── DATA FETCHING ─── */
   const fetchBookings = async () => {
@@ -188,6 +196,35 @@ export default function AdminBookings() {
   }, []);
 
   /* ─── BOOKINGS LOGIC ─── */
+  const filterByDate = (dateStr: string, filter: string) => {
+    if (filter === "All Time" || !dateStr) return true;
+    const date = new Date(dateStr);
+    const now = new Date();
+    const startOfDay = (d: Date) =>
+      new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+
+    if (filter === "Today") {
+      return startOfDay(date) === startOfDay(now);
+    }
+    if (filter === "Yesterday") {
+      const yesterday = new Date(now);
+      yesterday.setDate(now.getDate() - 1);
+      return startOfDay(date) === startOfDay(yesterday);
+    }
+    if (filter === "This Week") {
+      const dayOfWeek = now.getDay();
+      const weekStart = new Date(now);
+      weekStart.setDate(now.getDate() - dayOfWeek);
+      weekStart.setHours(0, 0, 0, 0);
+      return date >= weekStart && date <= now;
+    }
+    if (filter === "This Month") {
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      return date >= monthStart && date <= now;
+    }
+    return true;
+  };
+
   const filteredBookings = useMemo(
     () =>
       bookings.filter((b) => {
@@ -199,9 +236,13 @@ export default function AdminBookings() {
           (b.phone || "").includes(bookingSearch);
         const matchStatus =
           bookingStatusFilter === "All" || b.status === bookingStatusFilter;
-        return matchSearch && matchStatus;
+        const matchDate = filterByDate(
+          b.created_at || b.createdAt,
+          bookingDateFilter,
+        );
+        return matchSearch && matchStatus && matchDate;
       }),
-    [bookings, bookingSearch, bookingStatusFilter],
+    [bookings, bookingSearch, bookingStatusFilter, bookingDateFilter],
   );
 
   const updateBookingStatus = async (
@@ -278,9 +319,15 @@ export default function AdminBookings() {
           (assignFilter === "assigned"
             ? !!(a.assignedEmployeeId || a.assignedEmployeeName)
             : !(a.assignedEmployeeId || a.assignedEmployeeName));
-        return matchSearch && matchStatus && matchAssign;
+
+        const matchDate = filterByDate(
+          a.preferredDate || a.created_at || a.createdAt,
+          apptDateFilter,
+        );
+
+        return matchSearch && matchStatus && matchAssign && matchDate;
       }),
-    [appointments, apptSearch, apptStatusFilter, assignFilter],
+    [appointments, apptSearch, apptStatusFilter, assignFilter, apptDateFilter],
   );
 
   const openApptModal = (apt: any) => {
@@ -399,6 +446,48 @@ export default function AdminBookings() {
               />
             </TouchableOpacity>
           )}
+        </View>
+
+        {/* SELECT OPTIONS (FILTERS) */}
+        <View className="px-6 pb-6 flex-row gap-3">
+          {/* Status Select */}
+          <TouchableOpacity
+            onPress={() => setFilterModal({ type: "status", tab: activeTab })}
+            className="flex-1 bg-slate-900/30 border border-slate-700 rounded-2xl px-4 h-14 flex-row justify-between items-center"
+          >
+            <View>
+              <Text className="text-slate-500 text-[8px] font-black uppercase tracking-widest">
+                Status
+              </Text>
+              <Text
+                className="text-white text-[11px] font-bold uppercase truncate"
+                numberOfLines={1}
+              >
+                {activeTab === "booking"
+                  ? bookingStatusFilter
+                  : apptStatusFilter === "all"
+                    ? "All Status"
+                    : apptStatusFilter}
+              </Text>
+            </View>
+            <Ionicons name="chevron-down" size={14} color={COLORS.primary} />
+          </TouchableOpacity>
+
+          {/* Date Select */}
+          <TouchableOpacity
+            onPress={() => setFilterModal({ type: "date", tab: activeTab })}
+            className="flex-1 bg-slate-900/30 border border-slate-700 rounded-2xl px-4 h-14 flex-row justify-between items-center"
+          >
+            <View>
+              <Text className="text-slate-500 text-[8px] font-black uppercase tracking-widest">
+                Timeframe
+              </Text>
+              <Text className="text-white text-[11px] font-bold uppercase">
+                {activeTab === "booking" ? bookingDateFilter : apptDateFilter}
+              </Text>
+            </View>
+            <Ionicons name="calendar-outline" size={14} color={COLORS.primary} />
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -1188,6 +1277,83 @@ export default function AdminBookings() {
       >
         <Ionicons name="add" size={28} color="white" />
       </TouchableOpacity>
+
+      {/* ────────────────────────────
+          FILTER SELECT MODAL
+      ──────────────────────────── */}
+      <Modal
+        visible={!!filterModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setFilterModal(null)}
+      >
+        <View className="flex-1 bg-black/60 justify-end">
+          <View className="bg-card rounded-t-[32px] p-6 pb-12 border-t border-slate-700">
+            <View className="w-12 h-1 bg-slate-600 rounded-full self-center mb-6" />
+            
+            <Text className="text-white text-xl font-bold mb-6 px-2">
+              Select {filterModal?.type === "status" ? "Status" : "Timeframe"}
+            </Text>
+
+            <View className="gap-2.5">
+              {(filterModal?.type === "status"
+                ? filterModal.tab === "booking"
+                  ? ["All", ...BOOKING_STATUS]
+                  : ["all", ...APPT_STATUS]
+                : ["All Time", "Today", "Yesterday", "This Week", "This Month"]
+              ).map((option) => {
+                const isSelected =
+                  filterModal?.type === "status"
+                    ? filterModal.tab === "booking"
+                      ? bookingStatusFilter === option
+                      : apptStatusFilter === option
+                    : filterModal?.tab === "booking"
+                      ? bookingDateFilter === option
+                      : apptDateFilter === option;
+
+                return (
+                  <TouchableOpacity
+                    key={option}
+                    onPress={() => {
+                      if (filterModal?.type === "status") {
+                        if (filterModal.tab === "booking")
+                          setBookingStatusFilter(option);
+                        else setApptStatusFilter(option);
+                      } else {
+                        if (filterModal.tab === "booking")
+                          setBookingDateFilter(option);
+                        else setApptDateFilter(option);
+                      }
+                      setFilterModal(null);
+                    }}
+                    className={`p-4.5 rounded-full flex-row justify-between items-center ${isSelected ? "bg-primary" : "bg-slate-900/40 border border-slate-700"}`}
+                  >
+                    <Text
+                      className={`font-bold p-4 text-[13px] ${isSelected ? "text-background " : "text-text-secondary"}`}
+                    >
+                      {option === "all" ? "All Status" : option}
+                    </Text>
+                    {isSelected && (
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={20}
+                        color={COLORS.background}
+                      />
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
+            <TouchableOpacity
+              onPress={() => setFilterModal(null)}
+              className="mt-6 p-4.5 items-center underline"
+            >
+              <Text className="text-slate-500 font-bold">Dismiss</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
