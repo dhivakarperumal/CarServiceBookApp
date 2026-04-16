@@ -117,7 +117,7 @@ export default function BillingsLedger() {
           <Text className="text-white font-black text-lg mt-1">
             ₹
             {billings
-              .reduce((s, b) => s + Number(b.grandTotal || 0), 0)
+              .reduce((s, b) => s + Number(b.grandTotal || b.total || 0), 0)
               .toLocaleString()}
           </Text>
         </View>
@@ -213,7 +213,7 @@ export default function BillingsLedger() {
                     Grand Total
                   </Text>
                   <Text className="text-white font-black text-lg">
-                    ₹{Number(b.grandTotal || 0).toLocaleString()}
+                    ₹{Number(b.grandTotal || b.total || 0).toLocaleString()}
                   </Text>
                 </View>
 

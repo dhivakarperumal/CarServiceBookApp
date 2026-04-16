@@ -181,7 +181,7 @@ const ProductBilling = () => {
       /* 2. Create Order Manifest with redundant data for high-fidelity persistence */
       const orderData = {
         orderId,
-        // Flat keys for backend flexibility
+        invoiceNo: orderId, // Use orderId as invoiceNo for consistency
         customerName: isOnline ? shipping.name : customer.name,
         customerPhone: isOnline ? shipping.phone : customer.phone,
         customerMobile: isOnline ? shipping.phone : customer.phone,
@@ -195,6 +195,8 @@ const ProductBilling = () => {
         orderType,
         items: cart,
         total: grandTotal,
+        grandTotal: grandTotal, // Include grandTotal for the billings ledger
+        car: `${cart.length} Product(s)`, // Use car field for item summary
         paymentMethod: isOnline ? "ONLINE" : "CASH",
         paymentStatus: isOnline ? "Paid" : "Pending",
         status: "OrderPlaced",
