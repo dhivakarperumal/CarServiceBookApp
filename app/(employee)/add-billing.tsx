@@ -58,7 +58,6 @@ export default function AddBillingScreen() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
-  const [labour, setLabour] = useState("");
   const [gstPercent, setGstPercent] = useState("18");
   const [workforceCharges, setWorkforceCharges] = useState("");
 
@@ -108,36 +107,61 @@ export default function AddBillingScreen() {
       setIsEditMode(true);
       setEditingBill(bill);
 
-      // Populate form with bill data
-      setInvoiceNo(bill.invoiceNo || "");
-      setLabour(bill.labour?.toString() || "");
-      setGstPercent(bill.gstPercent?.toString() || "18");
-      setWorkforceCharges(bill.workforceCharges?.toString() || "");
-
-      // Set billing mode based on whether there's a booking ID
-      if (bill.bookingId) {
+      // Set billing mode
+      if (bill.serviceId || bill.bookingId) {
         setBillingMode("online");
-        // Find and select the service
-        const serviceResponse = await api.get(`/all-services`);
-        const service = serviceResponse.data.find(
-          (s: any) => s.bookingId === bill.bookingId,
-        );
-        if (service) {
-          setSelectedService(service);
-        }
+        // Set selected service for display only — do NOT call selectService() as it overwrites saved data
+        try {
+          const serviceRes = await api.get("/all-services");
+          const service = serviceRes.data.find(
+            (s: any) =>
+              (bill.serviceId && String(s.id) === String(bill.serviceId)) ||
+              (bill.bookingId && s.bookingId === bill.bookingId),
+          );
+          if (service) setSelectedService(service);
+        } catch (_) {}
       } else {
         setBillingMode("manual");
-        // Populate manual fields
         setManualCustomerName(bill.customerName || "");
-        setManualContactNumber(bill.contactNumber || "");
-        setManualVehicleBrand(bill.vehicleBrand || "");
-        setManualVehicleModel(bill.vehicleModel || "");
-        setManualPlateNumber(bill.carNumber || "");
+        setManualContactNumber(bill.contactNumber || bill.mobileNumber || "");
+        setManualVehicleBrand(
+          bill.vehicleBrand || (bill.car || "").split(" ")[0] || "",
+        );
+        setManualVehicleModel(
+          bill.vehicleModel ||
+            (bill.car || "").split(" ").slice(1).join(" ") ||
+            "",
+        );
+        setManualPlateNumber(bill.carNumber || bill.plateNumber || "");
       }
 
-      // Populate parts and issues
-      setParts(bill.parts || []);
-      setIssues(bill.issues || []);
+      // Restore saved invoice number and charges
+      setInvoiceNo(bill.invoiceNo || "");
+      // Use bill.labour as the workforce charge (single source of truth)
+      setWorkforceCharges(
+        bill.labour != null ? String(bill.labour) : String(bill.workforceCharges || ""),
+      );
+      setGstPercent(String(bill.gstPercent ?? 18));
+
+      // Restore parts DIRECTLY from the saved bill — do NOT re-fetch from service
+      setParts(
+        (bill.parts || []).map((p: any) => ({
+          partName: p.partName || "",
+          qty: Number(p.qty || 0),
+          price: Number(p.price || 0),
+          total:
+            Number(p.total || 0) ||
+            Number(p.qty || 0) * Number(p.price || 0),
+        })),
+      );
+
+      // Restore issues DIRECTLY from the saved bill
+      setIssues(
+        (bill.issues || []).map((i: any) => ({
+          issueName: i.issueName || i.issue || "",
+          amount: Number(i.amount || i.issueAmount || 0),
+        })),
+      );
     } catch (error) {
       console.error("Error loading bill for editing:", error);
       Alert.alert("Error", "Failed to load bill data for editing");
@@ -432,7 +456,6 @@ export default function AddBillingScreen() {
     setServiceDropdownOpen(false);
     setParts([]);
     setIssues([]);
-    setLabour("");
     setWorkforceCharges("");
     setGstPercent("18");
     setManualCustomerName("");
@@ -446,10 +469,10 @@ export default function AddBillingScreen() {
     setInvoiceNo(generateInvoiceNo(nextCount));
   };
 
-  const partsTotal = parts.reduce((sum, p) => sum + p.total, 0);
+  const partsTotal = parts.reduce((sum, p) => sum + Number(p.total || 0), 0);
   const issueTotal =
-    billingMode === "online" ? issues.reduce((sum, i) => sum + i.amount, 0) : 0;
-  const labourAmount = Number(labour || workforceCharges || 0);
+    billingMode === "online" ? issues.reduce((sum, i) => sum + Number(i.amount || 0), 0) : 0;
+  const labourAmount = Number(workforceCharges || 0);
   const gst = Number(gstPercent || 0);
 
   const subTotal = partsTotal + issueTotal + labourAmount;
@@ -532,8 +555,22 @@ export default function AddBillingScreen() {
       };
 
       if (isEditMode && editingBill) {
-        // Update existing bill
-        await api.put(`/billings/${editingBill.id}`, payload);
+        // Use the bill ID — support both 'id' and '_id' field names
+        const billId = editingBill.id || editingBill._id;
+        if (!billId) {
+          throw new Error("Bill ID is missing — cannot update.");
+        }
+        // Backend supports PATCH (not PUT) for billing updates
+        try {
+          await api.patch(`/billings/${billId}`, payload);
+        } catch (patchErr: any) {
+          // Fallback to PUT if PATCH returns 404/405
+          if (patchErr?.response?.status === 404 || patchErr?.response?.status === 405) {
+            await api.put(`/billings/${billId}`, payload);
+          } else {
+            throw patchErr;
+          }
+        }
         Alert.alert("Success", "Invoice updated successfully.", [
           {
             text: "OK",

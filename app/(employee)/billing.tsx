@@ -452,13 +452,13 @@ export default function EmployeeBilling() {
                                     {part.partName}
                                   </Text>
                                   <Text className="text-xs text-text-secondary">
-                                    Qty: {part.quantity}
+                                    Qty: {part.qty || part.quantity || 0}
                                   </Text>
                                 </View>
                                 <Text className="text-sm font-black text-text-secondary">
                                   ₹
                                   {Number(
-                                    part.totalPrice || 0,
+                                    part.total || part.totalPrice || 0,
                                   ).toLocaleString()}
                                 </Text>
                               </View>
