@@ -73,9 +73,15 @@ export default function Services() {
   const [issueEntries, setIssueEntries] = useState<any>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
   const [dateFilter, setDateFilter] = useState("All Time");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
+
+  /* Filter UI State */
+  const [filterModal, setFilterModal] = useState<{
+    type: "status" | "date";
+  } | null>(null);
 
   const [modalVisible, setModalVisible] = useState(false);
   const [statusModalVisible, setStatusModalVisible] = useState(false);
@@ -180,10 +186,18 @@ export default function Services() {
         sPhone.includes(searchLower) ||
         sVehicle.includes(searchLower);
 
-      if (!matchSearch) return false;
+      const sStat = (
+        s.serviceStatus ||
+        s.status ||
+        s.appointmentStatus ||
+        ""
+      ).toLowerCase();
+      const matchStatus =
+        statusFilter === "All"
+          ? !["cancelled", "bill completed"].includes(sStat)
+          : sStat.includes(statusFilter.toLowerCase());
 
-
-
+      if (!matchSearch || !matchStatus) return false;
       const bDateStr = s.created_at || s.createdAt || s.preferredDate || s.date || s.bookingDate;
       if (dateFilter === "All Time") return true;
       if (!bDateStr) return false;
@@ -502,19 +516,39 @@ export default function Services() {
           </View>
 
           <View className="flex-row gap-3">
-
-
+            {/* Status Select */}
             <TouchableOpacity
-              onPress={() => {
-                const options = ["All Time", "Today", "Yesterday", "This Week", "This Month"];
-                const nextIdx = (options.indexOf(dateFilter) + 1) % options.length;
-                setDateFilter(options[nextIdx]);
-                setCurrentPage(1);
-              }}
-              className="bg-white/5 border border-white/10 rounded-2xl px-6 py-3 items-center justify-center min-w-[100px]"
+              onPress={() => setFilterModal({ type: "status" })}
+              className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-4 py-2.5 flex-row justify-between items-center"
             >
-              <Text className="text-text-muted text-[8px] font-black uppercase mb-0.5">Timeframe</Text>
-              <Text className="text-white text-[10px] font-black uppercase tracking-widest">{dateFilter}</Text>
+              <View>
+                <Text className="text-white/30 text-[7px] font-black uppercase tracking-widest text-center">
+                  Status
+                </Text>
+                <Text
+                  className="text-white text-[10px] font-black uppercase truncate"
+                  numberOfLines={1}
+                >
+                  {statusFilter}
+                </Text>
+              </View>
+              <Ionicons name="chevron-down" size={12} color={COLORS.primary} />
+            </TouchableOpacity>
+
+            {/* Timeframe Select */}
+            <TouchableOpacity
+              onPress={() => setFilterModal({ type: "date" })}
+              className="flex-1 bg-white/5 border border-white/10 rounded-2xl px-4 py-2.5 flex-row justify-between items-center"
+            >
+              <View>
+                <Text className="text-white/30 text-[7px] font-black uppercase tracking-widest text-center">
+                  Timeframe
+                </Text>
+                <Text className="text-white text-[10px] font-black uppercase">
+                  {dateFilter}
+                </Text>
+              </View>
+              <Ionicons name="calendar-outline" size={12} color={COLORS.primary} />
             </TouchableOpacity>
           </View>
 
@@ -535,199 +569,115 @@ export default function Services() {
               </Text>
             </View>
           ) : (
-            paginatedData.map((item: any) => (
-              <View
-                key={item.id || item._id}
-                style={{ backgroundColor: COLORS.card }}
-                className="p-8 rounded-3xl border border-white/5 shadow-xl"
-              >
-                <View className="flex-row justify-between items-start mb-8">
-                  <View>
-                    <Text className="text-text-muted font-black text-[13px] uppercase">
-                      DB-ID: {item.id || item._id}
-                    </Text>
-                    <Text className="text-white font-black text-md mt-1 uppercase">
-                      {item.appointmentId ||
-                        item.bookingId ||
-                        (item.id ? `ID-${item.id}` : "SVC-NEW")}
-                    </Text>
-                  </View>
-                  <View className="flex-row gap-2">
-                    {item.isAppointment && (
-                      <View className="px-3 py-1.5 rounded-full border border-primary/30 bg-primary/10">
-                        <Text className="text-primary text-[8px] font-black uppercase">
-                          APPOINTMENT
-                        </Text>
-                      </View>
-                    )}
+            paginatedData.map((item: any) => {
+              const mappedStatus = getMappedStatus(
+                item.serviceStatus || item.status || item.appointmentStatus,
+              );
+              const statusColor = getStatusColor(mappedStatus);
+              const { showOptions, showBilling } = getButtonVisibility(mappedStatus);
+              const hasAssignee = !!(item.assignedEmployeeId || item.assigned_employee_id);
+
+              return (
+                <View
+                  key={item.id || item._id}
+                  style={{ backgroundColor: COLORS.card }}
+                  className="p-4 rounded-[28px] border border-white/5 shadow-xl mb-3"
+                >
+                  {/* TOP ROW: Vehicle & Status */}
+                  <View className="flex-row justify-between items-center mb-3">
+                    <View className="flex-row items-center gap-2">
+                      <View
+                        className={`w-2 h-2 rounded-full ${item.vehicleType === "bike" ? "bg-orange-500" : "bg-blue-500"}`}
+                      />
+                      <Text className="text-white text-md font-black uppercase tracking-tight">
+                        {item.brand} {item.model}
+                      </Text>
+                    </View>
                     <TouchableOpacity
                       onPress={() => {
                         setSelectedBooking(item);
                         setStatusModalVisible(true);
                       }}
-                      style={{
-                        backgroundColor:
-                          getStatusColor(
-                            item.serviceStatus ||
-                              item.status ||
-                              item.appointmentStatus,
-                          ) + "20",
-                        borderColor:
-                          getStatusColor(
-                            item.serviceStatus ||
-                              item.status ||
-                              item.appointmentStatus,
-                          ) + "40",
-                      }}
-                      className="px-4 py-2 rounded-full border"
+                      style={{ backgroundColor: statusColor + "15" }}
+                      className="px-2.5 py-1 rounded-lg border border-white/5"
                     >
                       <Text
-                        style={{
-                          color: getStatusColor(
-                            item.serviceStatus ||
-                              item.status ||
-                              item.appointmentStatus,
-                          ),
-                        }}
-                        className="text-[9px] font-black uppercase"
+                        style={{ color: statusColor }}
+                        className="text-[7.5px] font-black uppercase tracking-widest"
                       >
-                        {getMappedStatus(
-                          item.serviceStatus ||
-                            item.status ||
-                            item.appointmentStatus,
-                        )}
+                        {mappedStatus}
                       </Text>
                     </TouchableOpacity>
                   </View>
-                </View>
 
-                <View className="mb-6 flex-row justify-between items-end">
-                  <View>
-                    <Text className="text-text-muted text-[10px] uppercase font-black mb-1">
-                      Vehicle Specification
-                    </Text>
-                    <Text className="text-primary text-lg font-black uppercase italic">
-                      {item.brand} {item.model}
-                    </Text>
-                  </View>
-                  {(item.vehicleNumber || item.registrationNumber) && (
-                    <View className="bg-primary/10 px-3 py-1.5 rounded-xl border border-primary/20">
-                      <Text className="text-primary text-[12px] font-black uppercase tracking-widest">
-                        {item.vehicleNumber || item.registrationNumber}
-                      </Text>
-                    </View>
-                  )}
-                </View>
-
-                <View className="bg-black/20 rounded-2xl p-6 gap-4 mb-8 border border-white/5">
-                  <View className="flex-row items-center gap-4">
-                    <View className="w-10 h-10 rounded-xl bg-white/5 items-center justify-center border border-white/5">
-                      <Text className="text-white font-black">
-                        {item.name?.charAt(0)}
-                      </Text>
-                    </View>
-                    <View className="flex-1">
-                      <Text className="text-text-muted text-[12px] uppercase font-black">
-                        Client
-                      </Text>
-                      <Text className="text-white text-sm font-black mt-1 uppercase">
-                        {item.name}
-                      </Text>
-                    </View>
-                    {item.phone && (
-                      <View className="p-2 bg-primary/10 rounded-lg">
-                        <Ionicons
-                          name="call"
-                          size={14}
-                          color={COLORS.primary}
-                        />
-                      </View>
-                    )}
-                  </View>
-                  <View className="flex-row items-center gap-4">
-                    <View className="w-10 h-10 rounded-xl bg-white/5 items-center justify-center border border-white/5">
-                      <Ionicons
-                        name="construct"
-                        size={14}
-                        color={COLORS.primary}
-                      />
-                    </View>
+                  {/* INFO ROW: Registry Details */}
+                  <View className="flex-row justify-between items-end mb-4 px-1">
                     <View>
-                      <Text className="text-text-muted text-[10px] uppercase font-black">
-                        Mechanic
+                      <Text className="text-primary text-[10px] font-black uppercase tracking-widest bg-primary/5 self-start px-2 py-0.5 rounded-md mb-1.5">
+                        {item.appointmentId || item.bookingId || `#${item.id || item._id}`}
                       </Text>
-                      <Text className="text-white text-sm font-black mt-1 uppercase">
-                        {item.assignedEmployeeName ||
-                          item.assigned_employee_name ||
-                          "Allocation Pending"}
+                      <Text className="text-white/30 text-[9px] font-bold uppercase tracking-wide">
+                        {item.name} • {item.phone || "No Ph"} • {item.email || "No Email"}
+                      </Text>
+                      <Text className="text-white/20 text-[8px] font-black uppercase mt-0.5 tracking-widest">
+                        Mechanic: {item.assignedEmployeeName || item.assigned_employee_name || "Allocation Pending"}
                       </Text>
                     </View>
                   </View>
-                </View>
 
-                <View className="flex-row gap-3">
-                  {!(item.assignedEmployeeId || item.assigned_employee_id) && (
-                    <TouchableOpacity
-                      onPress={() => {
-                        setSelectedBooking(item);
-                        setModalVisible(true);
-                      }}
-                      className="flex-1 bg-primary py-4 rounded-xl items-center shadow-xl shadow-primary/20"
-                    >
-                      <Text className="text-background font-black text-[10px] uppercase">
-                        Assign
-                      </Text>
-                    </TouchableOpacity>
-                  )}
-                  {getButtonVisibility(item.serviceStatus || "Booked").showOptions && (
-                    <TouchableOpacity
-                      onPress={() => handleOpenIssueModal(item)}
-                      className="w-12 h-12 bg-white/5 border border-white/10 rounded-xl items-center justify-center"
-                    >
-                      <Ionicons name="options-outline" size={20} color="white" />
-                    </TouchableOpacity>
-                  )}
-                  <TouchableOpacity
-                    onPress={() =>
-                      router.push({
-                        pathname: "/(employee)/service-details",
-                        params: { id: item.id || item._id },
-                      })
-                    }
-                    className="w-12 h-12 bg-white/5 border border-white/10 rounded-xl items-center justify-center"
-                  >
-                    <Ionicons name="eye-outline" size={20} color="white" />
-                  </TouchableOpacity>
-                  {getButtonVisibility(item.serviceStatus || "Booked").showBilling && (
-                    <TouchableOpacity
-                      onPress={() =>
-                        router.push({
-                          pathname: "/(adminPages)/add-billing",
-                          params: { directServiceId: item.id || item._id },
-                        })
-                      }
-                      className="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 rounded-xl items-center justify-center"
-                    >
-                      <Ionicons
-                        name="receipt-outline"
-                        size={20}
-                        color={COLORS.success}
-                      />
-                    </TouchableOpacity>
-                  )}
-                  <TouchableOpacity
-                    onPress={() => handleDelete(item.id || item._id)}
-                    className="w-12 h-12 bg-red-500/10 border border-red-500/20 rounded-xl items-center justify-center"
-                  >
-                    <Ionicons
-                      name="trash-outline"
-                      size={20}
-                      color={COLORS.error}
-                    />
-                  </TouchableOpacity>
+                  {/* ACTION ROW: Inline Controls */}
+                  <View className="flex-row justify-between items-center bg-white/5 p-1.5 rounded-2xl border border-white/5">
+                    <View className="flex-row gap-1.5">
+                      {showOptions && (
+                        <TouchableOpacity
+                          onPress={() => handleOpenIssueModal(item)}
+                          className="w-10 h-10 bg-white/5 rounded-xl items-center justify-center border border-white/10"
+                        >
+                          <Ionicons name="options-outline" size={16} color="white" />
+                        </TouchableOpacity>
+                      )}
+
+                      {showBilling && (
+                        <TouchableOpacity
+                          onPress={() =>
+                            router.push({
+                              pathname: "/(adminPages)/add-billing",
+                              params: { directServiceId: item.id || item._id },
+                            })
+                          }
+                          className="w-10 h-10 bg-emerald-500/10 rounded-xl items-center justify-center border border-emerald-500/20"
+                        >
+                          <Ionicons name="receipt-outline" size={16} color={COLORS.success} />
+                        </TouchableOpacity>
+                      )}
+                    </View>
+
+                    <View className="flex-row gap-1.5">
+                      {!hasAssignee && (
+                        <TouchableOpacity
+                          onPress={() => {
+                            setSelectedBooking(item);
+                            setModalVisible(true);
+                          }}
+                          className="bg-primary px-4 h-10 rounded-xl items-center justify-center border border-white/10"
+                        >
+                          <Text className="text-background font-black text-[9px] uppercase tracking-widest">
+                            Assign
+                          </Text>
+                        </TouchableOpacity>
+                      )}
+                      
+                      <TouchableOpacity
+                        onPress={() => handleDelete(item.id || item._id)}
+                        className="w-10 h-10 bg-red-500/10 rounded-xl items-center justify-center border border-red-500/20"
+                      >
+                        <Ionicons name="trash-outline" size={16} color={COLORS.error} />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
                 </View>
-              </View>
-            ))
+              );
+            })
           )}
 
           {/* Pagination */}
@@ -1154,6 +1104,73 @@ export default function Services() {
                 )}
               </TouchableOpacity>
             </View>
+          </View>
+        </View>
+      </Modal>
+      {/* ────────────────────────────
+          FILTER SELECT MODAL
+      ──────────────────────────── */}
+      <Modal
+        visible={!!filterModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setFilterModal(null)}
+      >
+        <View className="flex-1 bg-black/60 justify-end">
+          <View className="bg-card rounded-t-[32px] p-6 pb-12 border-t border-slate-700">
+            <View className="w-12 h-1 bg-slate-600 rounded-full self-center mb-6" />
+
+            <Text className="text-white text-xl font-bold mb-6 px-2">
+              Select {filterModal?.type === "status" ? "Status" : "Timeframe"}
+            </Text>
+
+            <View className="gap-2.5">
+              {(filterModal?.type === "status"
+                ? ["All", ...STATUS_STEPS]
+                : ["All Time", "Today", "Yesterday", "This Week", "This Month"]
+              ).map((option) => {
+                const isSelected =
+                  filterModal?.type === "status"
+                    ? statusFilter === option
+                    : dateFilter === option;
+
+                return (
+                  <TouchableOpacity
+                    key={option}
+                    onPress={() => {
+                      if (filterModal?.type === "status") {
+                        setStatusFilter(option);
+                      } else {
+                        setDateFilter(option);
+                      }
+                      setFilterModal(null);
+                      setCurrentPage(1);
+                    }}
+                    className={`p-4.5 rounded-2xl flex-row justify-between items-center ${isSelected ? "bg-primary" : "bg-slate-900/40 border border-slate-700"}`}
+                  >
+                    <Text
+                      className={`font-bold text-[13px] ${isSelected ? "text-background" : "text-text-secondary"}`}
+                    >
+                      {option}
+                    </Text>
+                    {isSelected && (
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={20}
+                        color={COLORS.background}
+                      />
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
+            <TouchableOpacity
+              onPress={() => setFilterModal(null)}
+              className="mt-6 p-4.5 items-center underline"
+            >
+              <Text className="text-slate-500 font-bold">Dismiss</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
