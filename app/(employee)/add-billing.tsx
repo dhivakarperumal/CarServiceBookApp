@@ -37,7 +37,7 @@ const SectionTitle = ({ title }: { title: string }) => (
 
 export default function AddBillingScreen() {
   const router = useRouter();
-  const { directServiceId } = useLocalSearchParams();
+  const { directServiceId, id } = useLocalSearchParams();
   const { user: userProfile } = useAuth();
 
   const generateInvoiceNo = (currentCount = 0) =>
@@ -90,6 +90,12 @@ export default function AddBillingScreen() {
   useEffect(() => {
     setInvoiceNo(generateInvoiceNo(billingCount));
   }, [selectedService, billingMode, billingCount]);
+
+  useEffect(() => {
+    if (id && services.length > 0) {
+      fetchBillingForEdit(id as string);
+    }
+  }, [id, services]);
 
   const filteredServices = useMemo(() => {
     const searchTerm = search.toLowerCase().trim();
@@ -225,6 +231,89 @@ export default function AddBillingScreen() {
     } catch (err) {
       console.error(err);
       Alert.alert("Error", "Failed to load service");
+    }
+  };
+
+  const fetchBillingForEdit = async (billingId: string) => {
+    try {
+      setLoading(true);
+
+      const res = await api.get(`/billings/${billingId}`);
+      const bill = res.data;
+
+      setInvoiceNo(bill.invoiceNo || "");
+
+      const isManual =
+        bill.billingType?.toLowerCase() === "manual" ||
+        !bill.serviceId;
+
+      setBillingMode(isManual ? "manual" : "online");
+
+      // ------------------------- 
+      // ONLINE BILLING PREFILL
+      // -------------------------
+      if (!isManual && bill.serviceId) {
+        const matchedService = services.find(
+          (s) => String(s.id) === String(bill.serviceId)
+        );
+
+        if (matchedService) {
+          setSelectedService(matchedService);
+        } else {
+          // fallback fetch service if not in dropdown list
+          try {
+            const serviceRes = await api.get(`/all-services/${bill.serviceId}`);
+            setSelectedService(serviceRes.data);
+          } catch (err) {
+            console.log("Service fetch failed");
+          }
+        }
+      }
+
+      // ------------------------- 
+      // MANUAL BILLING PREFILL
+      // -------------------------
+      setManualCustomerName(bill.customerName || "");
+      setManualContactNumber(bill.mobileNumber || "");
+      setManualPlateNumber(
+        bill.plateNumber || bill.registrationNumber || ""
+      );
+
+      const carParts = (bill.car || "").split(" ");
+      setManualVehicleBrand(carParts[0] || "");
+      setManualVehicleModel(carParts.slice(1).join(" ") || "");
+
+      // ------------------------- 
+      // PARTS PREFILL
+      // -------------------------
+      setParts(
+        (bill.parts || []).map((p: any) => ({
+          partName: p.partName || "",
+          qty: Number(p.qty || 0),
+          price: Number(p.price || 0),
+          total:
+            Number(p.total || 0) ||
+            Number(p.qty || 0) * Number(p.price || 0),
+        }))
+      );
+
+      // ------------------------- 
+      // ISSUES PREFILL
+      // -------------------------
+      setIssues(
+        (bill.issues || []).map((i: any) => ({
+          issueName: i.issueName || i.issue || "",
+          amount: Number(i.amount || 0),
+        }))
+      );
+
+      setWorkforceCharges(String(bill.labour || 0));
+      setGstPercent(String(bill.gstPercent || 18));
+    } catch (err) {
+      console.error(err);
+      Alert.alert("Error", "Failed to load invoice details");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -391,7 +480,11 @@ export default function AddBillingScreen() {
         createdAt: new Date().toISOString(),
       };
 
-      await api.post("/billings", payload);
+      if (id) {
+        await api.put(`/billings/${id}`, payload);
+      } else {
+        await api.post("/billings", payload);
+      }
 
       if (billingMode === "online") {
         await api
@@ -404,12 +497,16 @@ export default function AddBillingScreen() {
       const nextCount = billingCount + 1;
       setBillingCount(nextCount);
       resetForm(nextCount);
-      Alert.alert("Success", "Invoice created successfully.", [
-        {
-          text: "OK",
-          onPress: () => router.replace("/(employee)/billing"),
-        },
-      ]);
+      Alert.alert(
+        "Success",
+        id ? "Invoice updated successfully." : "Invoice created successfully.",
+        [
+          {
+            text: "OK",
+            onPress: () => router.replace("/(employee)/billing"),
+          },
+        ]
+      );
     } catch (error) {
       console.error(error);
       Alert.alert("Error", "Failed to create invoice.");

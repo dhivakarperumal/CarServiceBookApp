@@ -3,15 +3,15 @@ import { Picker } from "@react-native-picker/picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Dimensions,
-  RefreshControl,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    Dimensions,
+    RefreshControl,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../../contexts/AuthContext";
@@ -450,6 +450,22 @@ export default function EmployeeBilling() {
 
                   {/* Actions */}
                   <View className="flex-row gap-3">
+                    {/* Edit Button */}
+                    <TouchableOpacity
+                      onPress={() =>
+                        router.push({
+                          pathname: "/(employee)/add-billing",
+                          params: { id: bill.id },
+                        })
+                      }
+                      className="flex-1 bg-warning py-3.5 rounded-2xl flex-row items-center justify-center gap-2 shadow-lg"
+                    >
+                      <Ionicons name="create" size={17} color="#FFFFFF" />
+                      <Text className="text-white text-[11px] font-black uppercase tracking-widest">
+                        Edit Bill
+                      </Text>
+                    </TouchableOpacity>
+
                     {/* Premium Print Button */}
                     <TouchableOpacity
                       onPress={() =>
