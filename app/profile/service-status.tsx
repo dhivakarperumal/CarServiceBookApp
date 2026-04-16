@@ -95,6 +95,7 @@ const STATUS_NORMALIZER: Record<string, string> = {
 
 const ServiceStatus: React.FC = () => {
   const { user } = useAuth() as any;
+  // console.log("UID:", user?.uid);
 
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [spareParts, setSpareParts] = useState<SpareService[]>([]);
@@ -118,7 +119,8 @@ const ServiceStatus: React.FC = () => {
       // console.log("ServiceStatus: fetching bookings and all-services for", user.email);
       const [bookingsRes, appointmentsRes, servicesRes] = await Promise.all([
         api.get("/bookings"),
-        api.get("/appointments/my", { params: { uid: user.uid } }),
+        api.get("/appointments/all", { params: { uid: user.uid } }),
+
         api.get("/all-services"),
       ]);
 
@@ -139,20 +141,39 @@ const ServiceStatus: React.FC = () => {
       //   servicesRaw.length
       // );
 
-      const appointmentData = appointmentsRaw.map((apt: any) => ({
+      const userAppointments = appointmentsRaw.filter((apt: any) => {
+        const aptEmail = apt.email?.toLowerCase()?.trim();
+        const userEmail = user?.email?.toLowerCase()?.trim();
+
+        return (
+          apt.uid === user?.uid ||
+          apt.uid === user?.id ||
+          apt.userId === user?.uid ||
+          apt.userId === user?.id ||
+          aptEmail === userEmail
+        );
+      });
+
+      const appointmentData = userAppointments.map((apt: any) => ({
         ...apt,
         id: apt.id || apt.appointmentId,
-        bookingId: apt.appointmentId,
+        bookingId: apt.appointmentId || apt.bookingId,
         name: apt.name || apt.customerName,
         phone: apt.phone || apt.mobile,
         bookingType: "Appointment",
 
-        // important mappings
         issue: apt.serviceType,
         vehicleNumber: apt.registrationNumber,
+        brand: apt.brand,
+        model: apt.model,
+        address: apt.address || apt.location,
+        location: apt.location,
+        preferredDate: apt.preferredDate,
+        assignedEmployeeName: apt.assignedEmployeeName,
 
         status: apt.status,
-        normalizedStatus: STATUS_NORMALIZER[apt.status] || apt.status,
+        normalizedStatus:
+          STATUS_NORMALIZER[apt.status] || apt.status,
       }));
 
       const userServices = servicesRaw.filter((service: any) => {
