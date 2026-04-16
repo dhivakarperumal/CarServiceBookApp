@@ -3,13 +3,14 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
+    ActivityIndicator,
+    Alert,
+    Image,
+    RefreshControl,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
 } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -26,8 +27,23 @@ export default function RegisterScreen() {
   const [loading, setLoading] = useState(false);
   const [secure, setSecure] = useState(true);
   const [secureConfirm, setSecureConfirm] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   const { register } = useAuth();
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    // Simulate refresh action - clear form fields
+    setUsername('');
+    setEmail('');
+    setMobile('');
+    setPassword('');
+    setConfirmPassword('');
+    setAdminCode('');
+    setSecure(true);
+    setSecureConfirm(true);
+    setRefreshing(false);
+  };
 
   const isValidEmail = (email: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -87,6 +103,9 @@ export default function RegisterScreen() {
         enableOnAndroid
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={COLORS.primary} />
+        }
       >
 
         {/* Username */}

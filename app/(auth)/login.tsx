@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  RefreshControl,
   Text,
   TextInput,
   TouchableOpacity,
@@ -20,8 +21,18 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [secure, setSecure] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   const { login } = useAuth();
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    // Simulate refresh action - can clear form or reset state
+    setIdentifier('');
+    setPassword('');
+    setSecure(true);
+    setRefreshing(false);
+  };
 
   const handleLogin = async () => {
     if (loading) return;
@@ -32,7 +43,7 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       const userData = await login(identifier, password);
-      
+
       // Determine dashboard based on role
       const roleStr = userData?.role?.toLowerCase() || '';
       console.log('Login successful, role:', roleStr);
@@ -51,6 +62,13 @@ export default function LoginScreen() {
       enableOnAndroid={true}
       extraScrollHeight={20}
       keyboardShouldPersistTaps="handled"
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          tintColor={COLORS.primary}
+        />
+      }
     >
       {/* Logo */}
       <View className="items-center mb-10">
