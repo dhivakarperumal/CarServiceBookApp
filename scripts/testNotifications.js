@@ -2,15 +2,15 @@
 // Run this in Expo Go to test local notifications
 
 import {
-  sendEmployeeAssignmentNotification,
-  sendSparePartsStatusNotification,
-  sendAdminOrderNotification,
-  sendAdminEmployeeUpdateNotification,
-  sendAdminVehicleBookingNotification,
-  sendBookingNotification,
-  sendAppointmentNotification,
-  sendOrderNotification,
-  sendVehicleBookingNotification
+    sendAdminEmployeeUpdateNotification,
+    sendAdminOrderNotification,
+    sendAdminVehicleBookingNotification,
+    sendAppointmentNotification,
+    sendBookingNotification,
+    sendEmployeeAssignmentNotification,
+    sendOrderNotification,
+    sendSparePartsStatusNotification,
+    sendVehicleBookingNotification
 } from '../services/notificationService';
 
 export const testNotifications = () => {
