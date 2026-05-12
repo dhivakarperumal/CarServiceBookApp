@@ -867,62 +867,7 @@ export default function AddBillingScreen() {
                 </Text>
               </View>
 
-              <View className="flex-col gap-4 mb-6">
-                <View className="bg-gradient-to-r from-slate-900/50 to-slate-900/20 rounded-3xl border border-slate-700/60 p-6">
-                  <Text className="text-[9px] uppercase tracking-widest text-text-muted font-black mb-4">
-                    ⚙️ Add New Part to Inventory
-                  </Text>
-                  <View className="flex-row flex-wrap gap-3">
-                    <View className="flex-1 min-w-[220px]">
-                      <TextInput
-                        placeholder="Search or type part name"
-                        placeholderTextColor="#64748B"
-                        value={newPartName}
-                        onChangeText={(value) => {
-                          setNewPartName(value);
-                          const match = products.find(
-                            (product) =>
-                              (product.name || "").toString().toLowerCase() ===
-                              value.toLowerCase(),
-                          );
-                          if (match && match.price != null) {
-                            setNewPartPrice(String(match.price));
-                          }
-                        }}
-                        className="w-full bg-slate-900/40 border border-slate-700/60 rounded-2xl px-5 py-4 text-text-primary font-bold text-sm"
-                      />
-                    </View>
-                    <View className="w-24">
-                      <TextInput
-                        placeholder="Qty"
-                        placeholderTextColor="#64748B"
-                        value={newPartQty}
-                        onChangeText={setNewPartQty}
-                        keyboardType="numeric"
-                        className="w-full bg-slate-900/40 border border-slate-700/60 rounded-2xl px-4 py-4 text-text-primary font-bold text-center text-sm"
-                      />
-                    </View>
-                    <View className="w-28">
-                      <TextInput
-                        placeholder="Unit Price"
-                        placeholderTextColor="#64748B"
-                        value={newPartPrice}
-                        onChangeText={setNewPartPrice}
-                        keyboardType="numeric"
-                        className="w-full bg-slate-900/40 border border-slate-700/60 rounded-2xl px-4 py-4 text-text-primary font-bold text-center text-sm"
-                      />
-                    </View>
-                    <TouchableOpacity
-                      onPress={addManualPart}
-                      className="min-w-[140px] bg-gradient-to-r from-primary to-accent rounded-2xl px-5 py-4 items-center justify-center border border-primary/40 shadow-lg"
-                    >
-                      <Text className="text-white font-black uppercase tracking-widest text-xs">
-                        + Add Part
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </View>
+              
 
               {matchingProducts.length > 0 && (
                 <View className="bg-gradient-to-r from-slate-900/50 to-slate-900/20 rounded-3xl border border-slate-700/60 p-5 mb-6">
@@ -1077,6 +1022,63 @@ export default function AddBillingScreen() {
                     ))}
                   </View>
                 )}
+              </View>
+
+              <View className="flex-col gap-4 mt-3 mb-6">
+                <View className="bg-gradient-to-r from-slate-900/50 to-slate-900/20 rounded-3xl border border-slate-700/60 p-6">
+                  <Text className="text-[9px] uppercase tracking-widest text-text-muted font-black mb-4">
+                    ⚙️ Add New Part to Inventory
+                  </Text>
+                  <View className="flex-row flex-wrap gap-3">
+                    <View className="flex-1 min-w-[220px]">
+                      <TextInput
+                        placeholder="Search or type part name"
+                        placeholderTextColor="#64748B"
+                        value={newPartName}
+                        onChangeText={(value) => {
+                          setNewPartName(value);
+                          const match = products.find(
+                            (product) =>
+                              (product.name || "").toString().toLowerCase() ===
+                              value.toLowerCase(),
+                          );
+                          if (match && match.price != null) {
+                            setNewPartPrice(String(match.price));
+                          }
+                        }}
+                        className="w-full bg-slate-900/40 border border-slate-700/60 rounded-2xl px-5 py-4 text-text-primary font-bold text-sm"
+                      />
+                    </View>
+                    <View className="w-24">
+                      <TextInput
+                        placeholder="Qty"
+                        placeholderTextColor="#64748B"
+                        value={newPartQty}
+                        onChangeText={setNewPartQty}
+                        keyboardType="numeric"
+                        className="w-full bg-slate-900/40 border border-slate-700/60 rounded-2xl px-4 py-4 text-text-primary font-bold text-center text-sm"
+                      />
+                    </View>
+                    <View className="w-28">
+                      <TextInput
+                        placeholder="Unit Price"
+                        placeholderTextColor="#64748B"
+                        value={newPartPrice}
+                        onChangeText={setNewPartPrice}
+                        keyboardType="numeric"
+                        className="w-full bg-slate-900/40 border border-slate-700/60 rounded-2xl px-4 py-4 text-text-primary font-bold text-center text-sm"
+                      />
+                    </View>
+                    <TouchableOpacity
+                      onPress={addManualPart}
+                      className="min-w-[140px] bg-gradient-to-r from-primary to-accent rounded-2xl px-5 py-4 items-center justify-center border border-primary/40 shadow-lg"
+                    >
+                      <Text className="text-white font-black uppercase tracking-widest text-xs">
+                        + Add Part
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
               </View>
             </View>
 
