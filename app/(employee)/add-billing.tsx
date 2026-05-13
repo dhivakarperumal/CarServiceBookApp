@@ -867,56 +867,6 @@ export default function AddBillingScreen() {
                 </Text>
               </View>
 
-              
-
-              {matchingProducts.length > 0 && (
-                <View className="bg-gradient-to-r from-slate-900/50 to-slate-900/20 rounded-3xl border border-slate-700/60 p-5 mb-6">
-                  <View className="flex-row items-center gap-2 mb-4">
-                    <Ionicons name="layers-outline" size={16} color="#0EA5E9" />
-                    <Text className="text-[10px] uppercase tracking-widest font-black text-primary">
-                      Matching Spare Parts Found
-                    </Text>
-                  </View>
-                  <View className="gap-3">
-                    {matchingProducts.map((product) => (
-                      <TouchableOpacity
-                        key={product.id || product.name}
-                        onPress={() => {
-                          setNewPartName(product.name || "");
-                          setNewPartPrice(
-                            String(product.price || product.offerPrice || "0"),
-                          );
-                        }}
-                        className="bg-gradient-to-r from-slate-900/40 to-slate-900/20 rounded-2xl border border-slate-700/50 p-4 flex-row items-center justify-between"
-                      >
-                        <View className="flex-1">
-                          <Text className="text-sm font-black text-text-primary">
-                            {product.name}
-                          </Text>
-                          <View className="flex-row items-center gap-2 mt-2">
-                            <View className="bg-primary/20 rounded-lg px-2 py-1 border border-primary/40">
-                              <Text className="text-[10px] font-black text-primary">
-                                {product.category || "Spare Part"}
-                              </Text>
-                            </View>
-                          </View>
-                        </View>
-                        <View className="items-end">
-                          <Text className="text-lg font-black text-accent">
-                            ₹{product.price || product.offerPrice || "0"}
-                          </Text>
-                          <Ionicons
-                            name="add-circle-outline"
-                            size={20}
-                            color="#0EA5E9"
-                          />
-                        </View>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                </View>
-              )}
-
               <View>
                 {parts.length === 0 ? (
                   <View className="px-6 py-16 items-center justify-center bg-gradient-to-b from-slate-900/30 to-slate-900/10 rounded-3xl border-2 border-dashed border-slate-700">
@@ -1080,6 +1030,55 @@ export default function AddBillingScreen() {
                   </View>
                 </View>
               </View>
+
+              {matchingProducts.length > 0 && (
+                <View className="bg-gradient-to-r from-slate-900/50 to-slate-900/20 rounded-3xl border border-slate-700/60 p-5 mb-6">
+                  <View className="flex-row items-center gap-2 mb-4">
+                    <Ionicons name="layers-outline" size={16} color="#0EA5E9" />
+                    <Text className="text-[10px] uppercase tracking-widest font-black text-primary">
+                      Matching Spare Parts Found
+                    </Text>
+                  </View>
+                  <View className="gap-3">
+                    {matchingProducts.map((product) => (
+                      <TouchableOpacity
+                        key={product.id || product.name}
+                        onPress={() => {
+                          setNewPartName(product.name || "");
+                          setNewPartPrice(
+                            String(product.price || product.offerPrice || "0"),
+                          );
+                        }}
+                        className="bg-gradient-to-r from-slate-900/40 to-slate-900/20 rounded-2xl border border-slate-700/50 p-4 flex-row items-center justify-between"
+                      >
+                        <View className="flex-1">
+                          <Text className="text-sm font-black text-text-primary">
+                            {product.name}
+                          </Text>
+                          <View className="flex-row items-center gap-2 mt-2">
+                            <View className="bg-primary/20 rounded-lg px-2 py-1 border border-primary/40">
+                              <Text className="text-[10px] font-black text-primary">
+                                {product.category || "Spare Part"}
+                              </Text>
+                            </View>
+                          </View>
+                        </View>
+                        <View className="items-end">
+                          <Text className="text-lg font-black text-accent">
+                            ₹{product.price || product.offerPrice || "0"}
+                          </Text>
+                          <Ionicons
+                            name="add-circle-outline"
+                            size={20}
+                            color="#0EA5E9"
+                          />
+                        </View>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+              )}
+
             </View>
 
             <View className="flex-row flex-wrap gap-4 mb-20 items-start">
