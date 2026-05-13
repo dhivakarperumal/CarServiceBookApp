@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
     ActivityIndicator,
@@ -75,21 +75,29 @@ const CustomSelect = ({
   onSelect,
   error,
   required,
+  onOpenChange,
 }: any) => {
   const [open, setOpen] = useState(false);
 
+  const toggleOpen = (nextOpen: boolean) => {
+    setOpen(nextOpen);
+    onOpenChange?.(nextOpen);
+  };
+
   return (
-    <View className="mb-5">
+    <View className="mb-5 relative">
       <Text className="text-[11px] font-black text-slate-400 uppercase tracking-wider mb-2.5 ml-1">
         {label} {required && <Text className="text-red-500">*</Text>}
       </Text>
       <TouchableOpacity
-        onPress={() => setOpen(!open)}
+        onPress={() => toggleOpen(!open)}
         className={`w-full bg-slate-900/50 rounded-2xl border px-5 py-4 flex-row justify-between items-center transition-all ${
           error ? "border-red-500" : "border-white/10"
         }`}
       >
-        <Text className={`font-bold text-[15px] ${value ? "text-white" : "text-slate-500"}`}>
+        <Text
+          className={`font-bold text-[15px] ${value ? "text-white" : "text-slate-500"}`}
+        >
           {value || "Select option"}
         </Text>
         <Ionicons
@@ -101,18 +109,28 @@ const CustomSelect = ({
 
       {open && (
         <View className="absolute top-full left-0 right-0 bg-slate-900 border border-white/10 rounded-2xl mt-2 z-50 shadow-2xl overflow-hidden">
-          {options.map((opt: string) => (
-            <TouchableOpacity
-              key={opt}
-              onPress={() => {
-                onSelect(opt);
-                setOpen(false);
-              }}
-              className="px-5 py-4 border-b border-white/5 last:border-0 active:bg-slate-800/50"
-            >
-              <Text className="text-white font-bold capitalize text-[15px]">{opt}</Text>
-            </TouchableOpacity>
-          ))}
+          <ScrollView
+            style={{ maxHeight: 260 }}
+            nestedScrollEnabled={true}
+            showsVerticalScrollIndicator={true}
+            keyboardShouldPersistTaps="handled"
+            onStartShouldSetResponder={() => true}
+          >
+            {options.map((opt: string) => (
+              <TouchableOpacity
+                key={opt}
+                onPress={() => {
+                  onSelect(opt);
+                  toggleOpen(false);
+                }}
+                className="px-5 py-4 border-b border-white/5 last:border-0 active:bg-slate-800/50"
+              >
+                <Text className="text-white font-bold capitalize text-[15px]">
+                  {opt}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
         </View>
       )}
 
@@ -130,6 +148,7 @@ export default function AddServiceVehicle() {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const [form, setForm] = useState({
     name: "",
@@ -239,9 +258,6 @@ export default function AddServiceVehicle() {
       <SafeAreaView className="flex-1 bg-[#0F172A]">
         <View className="flex-1 items-center justify-center px-6 py-8">
           {/* Success Icon */}
-         
-
-         
 
           {/* Booking ID Card */}
           <View className="w-full bg-gradient-to-b from-slate-900/60 to-slate-900/30 border border-white/5 rounded-3xl p-8 mb-12 shadow-2xl items-center">
@@ -300,7 +316,14 @@ export default function AddServiceVehicle() {
   /* ===== FORM ===== */
   return (
     <SafeAreaView className="flex-1 bg-[#0F172A]">
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        className="flex-1"
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        nestedScrollEnabled={true}
+        scrollEnabled={!dropdownOpen}
+        contentContainerStyle={{ paddingBottom: 120 }}
+      >
         {/* HEADER */}
         <View className="px-6 pt-4 pb-6 border-b border-white/5">
           <View className="flex-row items-center gap-4 mb-4">
@@ -393,6 +416,7 @@ export default function AddServiceVehicle() {
                 onSelect={(val: string) => handleChange("vehicleType", val)}
                 error={errors.vehicleType}
                 required
+                onOpenChange={setDropdownOpen}
               />
 
               <CustomInput
@@ -446,6 +470,7 @@ export default function AddServiceVehicle() {
                 options={ISSUE_OPTIONS}
                 onSelect={(val: string) => handleChange("issue", val)}
                 error={errors.issue}
+                onOpenChange={setDropdownOpen}
               />
 
               {form.issue === "Others" && (
@@ -453,7 +478,9 @@ export default function AddServiceVehicle() {
                   label="Describe the Issue"
                   placeholder="Describe the problem in detail..."
                   value={form.otherIssue}
-                  onChangeText={(val: string) => handleChange("otherIssue", val)}
+                  onChangeText={(val: string) =>
+                    handleChange("otherIssue", val)
+                  }
                   multiline
                   numberOfLines={3}
                 />
@@ -467,7 +494,9 @@ export default function AddServiceVehicle() {
               className="mt-10 rounded-2xl overflow-hidden shadow-xl active:shadow-lg"
             >
               <LinearGradient
-                colors={submitting ? ["#64748B", "#475569"] : ["#2563EB", "#0EA5E9"]}
+                colors={
+                  submitting ? ["#64748B", "#475569"] : ["#2563EB", "#0EA5E9"]
+                }
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 className="px-6 py-5 items-center justify-center"
