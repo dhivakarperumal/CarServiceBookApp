@@ -16,7 +16,6 @@ import {
 import { useAuth } from "../../contexts/AuthContext";
 import { api } from "../../services/api";
 
-
 const CustomInput = ({ label, required, ...props }: any) => (
   <View className="mb-4">
     <Text className="mb-2 text-[10px] uppercase font-black text-text-muted tracking-wider ml-1">
@@ -40,7 +39,9 @@ export default function AddBillingScreen() {
   const router = useRouter();
   const { directServiceId, id } = useLocalSearchParams();
   const { user: userProfile } = useAuth();
-  const serviceId = Array.isArray(directServiceId) ? directServiceId[0] : directServiceId;
+  const serviceId = Array.isArray(directServiceId)
+    ? directServiceId[0]
+    : directServiceId;
   const billingId = Array.isArray(id) ? id[0] : id;
 
   const generateInvoiceNo = (currentCount = 0) =>
@@ -60,8 +61,9 @@ export default function AddBillingScreen() {
   const [submitting, setSubmitting] = useState(false);
 
   const [labour, setLabour] = useState("");
-  const [gstPercent, setGstPercent] = useState("18");
-  const [workforceCharges, setWorkforceCharges] = useState("");
+  const [gstPercent, setGstPercent] = useState("0");
+  const [discount, setDiscount] = useState("0");
+  const [workforceCharges, setWorkforceCharges] = useState("0");
 
   const [manualCustomerName, setManualCustomerName] = useState("");
   const [manualContactNumber, setManualContactNumber] = useState("");
@@ -106,10 +108,13 @@ export default function AddBillingScreen() {
     const searchTerm = search.toLowerCase().trim();
     if (!searchTerm) return services;
     return services.filter((s) => {
-      const text = `${s.bookingId || s.booking_id || s.id || ""} ${s.name || s.customer_name || ""
-        } ${s.phone || s.mobile || s.contactNumber || ""} ${s.brand || s.vehicleBrand || ""
-        } ${s.model || s.vehicleModel || ""} ${s.vehicleNumber || s.regNo || s.registrationNumber || ""
-        }`.toLowerCase();
+      const text = `${s.bookingId || s.booking_id || s.id || ""} ${
+        s.name || s.customer_name || ""
+      } ${s.phone || s.mobile || s.contactNumber || ""} ${
+        s.brand || s.vehicleBrand || ""
+      } ${s.model || s.vehicleModel || ""} ${
+        s.vehicleNumber || s.regNo || s.registrationNumber || ""
+      }`.toLowerCase();
       return text.includes(searchTerm);
     });
   }, [services, search]);
@@ -140,25 +145,53 @@ export default function AddBillingScreen() {
         (userProfile as any)?.displayName ||
         (userProfile as any)?.name ||
         "";
+      const userRole = (userProfile?.role || "").toLowerCase();
+      const isAdmin = userRole === "admin";
 
-      const myServices = (serviceRes.data || []).filter((s: any) => {
-        const assignedMatch =
-          (s.assignedEmployeeName || s.assigned_to || s.assignedEmployee || "")
+      let myServices = [];
+      if (isAdmin) {
+        // Admin can see all services that are billable
+        myServices = (serviceRes.data || []).filter((s: any) => {
+          const status = (s.serviceStatus || s.status || s.service_status || "")
             .toString()
-            .toLowerCase() === mechanicName.toLowerCase();
-        const status = (s.serviceStatus || s.status || s.service_status || "")
-          .toString()
-          .trim()
-          .toLowerCase();
-        const isBillPending = [
-          "bill pending",
-          "waiting for bill",
-          "service completed",
-          "pending billing",
-          "billing pending",
-        ].includes(status);
-        return assignedMatch && isBillPending;
-      });
+            .trim()
+            .toLowerCase();
+          const isBillable = [
+            "bill pending",
+            "waiting for bill",
+            "service completed",
+            "pending billing",
+            "billing pending",
+            "completed",
+          ].includes(status);
+          return isBillable;
+        });
+      } else {
+        // Regular users only see their assigned services
+        myServices = (serviceRes.data || []).filter((s: any) => {
+          const assignedMatch =
+            (
+              s.assignedEmployeeName ||
+              s.assigned_to ||
+              s.assignedEmployee ||
+              ""
+            )
+              .toString()
+              .toLowerCase() === mechanicName.toLowerCase();
+          const status = (s.serviceStatus || s.status || s.service_status || "")
+            .toString()
+            .trim()
+            .toLowerCase();
+          const isBillPending = [
+            "bill pending",
+            "waiting for bill",
+            "service completed",
+            "pending billing",
+            "billing pending",
+          ].includes(status);
+          return assignedMatch && isBillPending;
+        });
+      }
 
       setServices(myServices);
       setProducts(Array.isArray(productRes.data) ? productRes.data : []);
@@ -214,18 +247,18 @@ export default function AddBillingScreen() {
       const res = await api.get(`/all-services/${id}`);
       const service = res.data;
 
-      // Check if assigned to this mechanic
+      // Check if assigned to this user (admin can access any service)
       const mechanicName =
         userProfile?.username ||
         (userProfile as any)?.displayName ||
         (userProfile as any)?.name ||
         "";
-
       const isAdmin = (userProfile?.role || "").toLowerCase() === "admin";
+
       if (
         !isAdmin &&
         (service.assignedEmployeeName || "").toLowerCase() !==
-        mechanicName.toLowerCase()
+          mechanicName.toLowerCase()
       ) {
         Alert.alert("Error", "Service not assigned to you");
         return;
@@ -287,7 +320,8 @@ export default function AddBillingScreen() {
         } else {
           updated.partName = value;
         }
-        updated.total = (Number(updated.qty) || 0) * (Number(updated.price) || 0);
+        updated.total =
+          (Number(updated.qty) || 0) * (Number(updated.price) || 0);
         return updated;
       }),
     );
@@ -305,8 +339,9 @@ export default function AddBillingScreen() {
     setParts([]);
     setIssues([]);
     setLabour("");
-    setWorkforceCharges("");
-    setGstPercent("18");
+    setWorkforceCharges("0");
+    setGstPercent("0");
+    setDiscount("0");
     setManualCustomerName("");
     setManualContactNumber("");
     setManualVehicleBrand("");
@@ -320,17 +355,20 @@ export default function AddBillingScreen() {
 
   const partsTotal = parts.reduce((sum, p) => sum + (Number(p.total) || 0), 0);
   const issueTotal =
-    billingMode === "online" ? issues.reduce((sum, i) => sum + (Number(i.amount) || 0), 0) : 0;
+    billingMode === "online"
+      ? issues.reduce((sum, i) => sum + (Number(i.amount) || 0), 0)
+      : 0;
 
   const labNum = Number(labour || workforceCharges || 0);
   const labourAmount = isNaN(labNum) ? 0 : labNum;
 
   const gstNum = Number(gstPercent || 0);
   const gst = isNaN(gstNum) ? 0 : gstNum;
+  const discountAmount = Number(discount || 0);
 
   const subTotal = (partsTotal || 0) + (issueTotal || 0) + (labourAmount || 0);
   const gstAmount = (subTotal * gst) / 100;
-  const grandTotal = subTotal + gstAmount;
+  const grandTotal = subTotal + gstAmount - discountAmount;
 
   const fetchBillingForEdit = async (billingId: string) => {
     try {
@@ -342,8 +380,7 @@ export default function AddBillingScreen() {
       setInvoiceNo(bill.invoiceNo || "");
 
       const isManual =
-        bill.billingType?.toLowerCase() === "manual" ||
-        !bill.serviceId;
+        bill.billingType?.toLowerCase() === "manual" || !bill.serviceId;
 
       setBillingMode(isManual ? "manual" : "online");
 
@@ -352,7 +389,7 @@ export default function AddBillingScreen() {
       // -------------------------
       if (!isManual && bill.serviceId) {
         const matchedService = services.find(
-          (s) => String(s.id) === String(bill.serviceId)
+          (s) => String(s.id) === String(bill.serviceId),
         );
 
         if (matchedService) {
@@ -372,14 +409,12 @@ export default function AddBillingScreen() {
         setSelectedService(null);
       }
 
-      // ------------------------- 
+      // -------------------------
       // MANUAL BILLING PREFILL
       // -------------------------
       setManualCustomerName(bill.customerName || "");
       setManualContactNumber(bill.mobileNumber || "");
-      setManualPlateNumber(
-        bill.plateNumber || bill.registrationNumber || ""
-      );
+      setManualPlateNumber(bill.plateNumber || bill.registrationNumber || "");
 
       const carParts = (bill.car || "").split(" ");
       setManualVehicleBrand(carParts[0] || "");
@@ -394,9 +429,8 @@ export default function AddBillingScreen() {
           qty: Number(p.qty || 0),
           price: Number(p.price || 0),
           total:
-            Number(p.total || 0) ||
-            Number(p.qty || 0) * Number(p.price || 0),
-        }))
+            Number(p.total || 0) || Number(p.qty || 0) * Number(p.price || 0),
+        })),
       );
 
       // -------------------------
@@ -406,11 +440,12 @@ export default function AddBillingScreen() {
         (bill.issues || []).map((i: any) => ({
           issueName: i.issueName || i.issue || "",
           amount: Number(i.amount || 0),
-        }))
+        })),
       );
 
       setWorkforceCharges(String(bill.labour || 0));
-      setGstPercent(String(bill.gstPercent || 18));
+      setGstPercent(String(bill.gstPercent || 0));
+      setDiscount(String(bill.discount || 0));
     } catch (err) {
       console.error(err);
       Alert.alert("Error", "Failed to load invoice details");
@@ -465,7 +500,9 @@ export default function AddBillingScreen() {
           ? `${manualVehicleBrand.trim()} ${manualVehicleModel.trim()}`.trim()
           : `${selectedService?.brand || ""} ${selectedService?.model || ""}`.trim();
       const uid =
-        billingMode === "manual" ? userProfile?.id || "manual" : selectedService?.uid;
+        billingMode === "manual"
+          ? userProfile?.id || "manual"
+          : selectedService?.uid;
 
       const payload = {
         invoiceNo,
@@ -479,6 +516,10 @@ export default function AddBillingScreen() {
           billingMode === "manual"
             ? manualPlateNumber.trim()
             : selectedService.regNo || selectedService.plateNumber || "",
+        registrationNumber:
+          billingMode === "manual"
+            ? manualPlateNumber.trim()
+            : selectedService.regNo || selectedService.plateNumber || "",
         parts,
         issues: billingMode === "online" ? issues : [],
         partsTotal,
@@ -486,16 +527,36 @@ export default function AddBillingScreen() {
         labour: labourAmount,
         gstPercent: gst,
         gstAmount,
+        discount: discountAmount,
         subTotal,
         grandTotal,
         paymentStatus: "Pending",
         paymentMode: "",
         status: billingMode === "manual" ? "Manual Generated" : "Generated",
+        billingType: billingMode,
+        assignedEmployeeName:
+          userProfile?.username ||
+          (userProfile as any)?.displayName ||
+          (userProfile as any)?.name ||
+          "",
         createdAt: new Date().toISOString(),
       };
 
-      if (id) {
-        await api.put(`/billings/${id}`, payload);
+      if (billingId) {
+        // Use PATCH for updates
+        try {
+          await api.patch(`/billings/${billingId}`, payload);
+        } catch (patchErr: any) {
+          // Fallback to PUT if PATCH returns 404/405
+          if (
+            patchErr?.response?.status === 404 ||
+            patchErr?.response?.status === 405
+          ) {
+            await api.put(`/billings/${billingId}`, payload);
+          } else {
+            throw patchErr;
+          }
+        }
       } else {
         await api.post("/billings", payload);
       }
@@ -503,7 +564,7 @@ export default function AddBillingScreen() {
       if (billingMode === "online") {
         await api
           .put(`/all-services/${selectedService.id}/status`, {
-            serviceStatus: "Bill Completed",
+            serviceStatus: "Bill Generated",
           })
           .catch((err) => console.log("Status update failed:", err));
       }
@@ -513,13 +574,15 @@ export default function AddBillingScreen() {
       resetForm(nextCount);
       Alert.alert(
         "Success",
-        id ? "Invoice updated successfully." : "Invoice created successfully.",
+        billingId
+          ? "Invoice updated successfully."
+          : "Invoice created successfully.",
         [
           {
             text: "OK",
-            onPress: () => router.replace("/(admin)/services"),
+            onPress: () => router.replace("/(admin)/billings"),
           },
-        ]
+        ],
       );
     } catch (error) {
       console.error(error);
@@ -537,7 +600,6 @@ export default function AddBillingScreen() {
       >
         <View className="p-5 mt-6">
           <View className="mb-6">
-
             <View className="mt-4 w-full flex-row items-center rounded-full bg-slate-900/90 p-1 border border-slate-700">
               {[
                 { mode: "online", label: "Online Booking" },
@@ -552,14 +614,16 @@ export default function AddBillingScreen() {
                       setIssues([]);
                     }
                   }}
-                  className={`flex-1 py-3 rounded-full items-center ${billingMode === option.mode ? "bg-primary" : "bg-slate-900"
-                    }`}
+                  className={`flex-1 py-3 rounded-full items-center ${
+                    billingMode === option.mode ? "bg-primary" : "bg-slate-900"
+                  }`}
                 >
                   <Text
-                    className={`text-[10px] font-black uppercase tracking-wider ${billingMode === option.mode
-                      ? "text-text-primary"
-                      : "text-text-muted"
-                      }`}
+                    className={`text-[10px] font-black uppercase tracking-wider ${
+                      billingMode === option.mode
+                        ? "text-text-primary"
+                        : "text-text-muted"
+                    }`}
                   >
                     {option.label}
                   </Text>
@@ -570,7 +634,6 @@ export default function AddBillingScreen() {
             <Text className="text-[14px] uppercase tracking-[0.35em] text-text-primary font-black mt-4 ml-1">
               Invoice No : {invoiceNo}
             </Text>
-
           </View>
         </View>
 
@@ -630,16 +693,22 @@ export default function AddBillingScreen() {
                             : "-- Select Assigned Job --"}
                         </Text>
                         <Ionicons
-                          name={serviceDropdownOpen ? "chevron-up" : "chevron-down"}
+                          name={
+                            serviceDropdownOpen ? "chevron-up" : "chevron-down"
+                          }
                           size={18}
                           color="#94A3B8"
                         />
                       </TouchableOpacity>
 
                       {serviceDropdownOpen && (
+                        <View className="max-h-72">
                         <ScrollView
                           className="max-h-56 bg-slate-950/90"
-                          showsVerticalScrollIndicator
+                          nestedScrollEnabled={true}
+                          showsVerticalScrollIndicator={true}
+                          keyboardShouldPersistTaps="handled"
+                          contentContainerStyle={{ paddingBottom: 4 }}
                         >
                           {filteredServices.map((service) => (
                             <TouchableOpacity
@@ -665,6 +734,7 @@ export default function AddBillingScreen() {
                             </TouchableOpacity>
                           ))}
                         </ScrollView>
+                        </View>
                       )}
                     </View>
                   )}
@@ -675,7 +745,8 @@ export default function AddBillingScreen() {
                         Selected Verification Job
                       </Text>
                       <Text className="text-sm font-black text-text-primary">
-                        {selectedService.bookingId || `Job ${selectedService.id}`}
+                        {selectedService.bookingId ||
+                          `Job ${selectedService.id}`}
                       </Text>
                       <Text className="text-[10px] text-text-muted mt-1">
                         {selectedService.name} • {selectedService.brand}{" "}
@@ -684,8 +755,6 @@ export default function AddBillingScreen() {
                     </View>
                   )}
                 </View>
-
-
               </View>
             </>
           )}
@@ -752,7 +821,6 @@ export default function AddBillingScreen() {
             </View>
 
             <View className="flex-row items-center gap-2 mb-4">
-
               <TextInput
                 placeholder="Product"
                 placeholderTextColor="#64748B"
@@ -761,7 +829,8 @@ export default function AddBillingScreen() {
                   setNewPartName(value);
                   const match = products.find(
                     (product) =>
-                      (product.name || "").toLowerCase() === value.toLowerCase()
+                      (product.name || "").toLowerCase() ===
+                      value.toLowerCase(),
                   );
                   if (match && match.price != null) {
                     setNewPartPrice(String(match.price));
@@ -792,11 +861,8 @@ export default function AddBillingScreen() {
                 onPress={addManualPart}
                 className="bg-primary rounded-xl px-4 py-3 items-center justify-center"
               >
-                <Text className="text-white font-black text-xs">
-                  + Add
-                </Text>
+                <Text className="text-white font-black text-xs">+ Add</Text>
               </TouchableOpacity>
-
             </View>
             {matchingProducts.length > 0 && (
               <View className="bg-slate-950/80 rounded-3xl border border-slate-800 p-0 mb-4">
@@ -919,8 +985,10 @@ export default function AddBillingScreen() {
                     placeholder="0"
                     placeholderTextColor="#64748B"
                     keyboardType="numeric"
-                    value={workforceCharges}
-                    onChangeText={setWorkforceCharges}
+                    value={workforceCharges === "0" ? "" : workforceCharges}
+                    onChangeText={(val) =>
+                      setWorkforceCharges(val === "" ? "0" : val)
+                    }
                     className="w-full bg-slate-950/80 border border-slate-800 rounded-2xl px-4 py-4 text-text-primary font-bold"
                   />
                 </View>
@@ -930,12 +998,28 @@ export default function AddBillingScreen() {
                     Taxation Layer (%)
                   </Text>
                   <TextInput
-                    placeholder="18"
+                    placeholder="0"
                     placeholderTextColor="#64748B"
                     keyboardType="numeric"
-                    value={gstPercent}
-                    onChangeText={setGstPercent}
+                    value={gstPercent === "0" ? "" : gstPercent}
+                    onChangeText={(val) =>
+                      setGstPercent(val === "" ? "0" : val)
+                    }
                     className="w-full bg-slate-950/80 border border-slate-800 rounded-2xl px-4 py-4 text-text-primary font-bold"
+                  />
+                </View>
+
+                <View className="bg-red-500/10 rounded-3xl mt-4 p-4 border border-red-500/30">
+                  <Text className="text-[10px] uppercase tracking-widest text-red-500 font-black mb-2">
+                    Loyalty Discount (₹)
+                  </Text>
+                  <TextInput
+                    placeholder="0"
+                    placeholderTextColor="#64748B"
+                    keyboardType="numeric"
+                    value={discount}
+                    onChangeText={setDiscount}
+                    className="w-full bg-red-500/20 border border-red-500/30 rounded-2xl px-4 py-4 text-red-500 font-bold"
                   />
                 </View>
 
@@ -954,6 +1038,15 @@ export default function AddBillingScreen() {
                   </Text>
                   <Text className="text-2xl font-black text-text-primary">
                     ₹{gstAmount.toFixed(2)}
+                  </Text>
+                </View>
+
+                <View className="bg-background/80 rounded-3xl mt-4 p-4 border border-slate-800">
+                  <Text className="text-[10px] uppercase tracking-widest text-red-500 font-black mb-3">
+                    Applied Discount
+                  </Text>
+                  <Text className="text-2xl font-black text-red-500">
+                    - ₹{discountAmount.toLocaleString()}
                   </Text>
                 </View>
 
@@ -991,7 +1084,7 @@ export default function AddBillingScreen() {
               <TouchableOpacity
                 onPress={() => {
                   resetForm();
-                  router.replace("/(admin)/services");
+                  router.replace("/(admin)/billings");
                 }}
                 className="mt-4 py-4 rounded-[1.5rem] border border-slate-700 items-center justify-center"
               >
