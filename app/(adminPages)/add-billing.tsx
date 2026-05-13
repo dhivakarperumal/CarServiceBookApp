@@ -580,7 +580,7 @@ export default function AddBillingScreen() {
         [
           {
             text: "OK",
-            onPress: () => router.replace("/(admin)/billings"),
+            onPress: () => router.replace("/(adminPages)/billings" as any),
           },
         ],
       );
@@ -703,37 +703,38 @@ export default function AddBillingScreen() {
 
                       {serviceDropdownOpen && (
                         <View className="max-h-72">
-                        <ScrollView
-                          className="max-h-56 bg-slate-950/90"
-                          nestedScrollEnabled={true}
-                          showsVerticalScrollIndicator={true}
-                          keyboardShouldPersistTaps="handled"
-                          contentContainerStyle={{ paddingBottom: 4 }}
-                        >
-                          {filteredServices.map((service) => (
-                            <TouchableOpacity
-                              key={service.id}
-                              onPress={() => {
-                                if (selectedService?.id === service.id) {
-                                  setSelectedService(null);
-                                  setParts([]);
-                                  setIssues([]);
-                                  setServiceDropdownOpen(false);
-                                  return;
-                                }
-                                selectService(service);
-                              }}
-                              className={`px-4 py-4 border-b border-slate-800 ${selectedService?.id === service.id ? "bg-slate-900" : "bg-slate-950/70"}`}
-                            >
-                              <Text className="text-sm font-black text-text-primary">
-                                {service.bookingId || `Job ${service.id}`}
-                              </Text>
-                              <Text className="text-[10px] text-text-muted uppercase tracking-widest mt-1">
-                                {service.name} • {service.brand} {service.model}
-                              </Text>
-                            </TouchableOpacity>
-                          ))}
-                        </ScrollView>
+                          <ScrollView
+                            className="max-h-56 bg-slate-950/90"
+                            nestedScrollEnabled={true}
+                            showsVerticalScrollIndicator={true}
+                            keyboardShouldPersistTaps="handled"
+                            contentContainerStyle={{ paddingBottom: 4 }}
+                          >
+                            {filteredServices.map((service) => (
+                              <TouchableOpacity
+                                key={service.id}
+                                onPress={() => {
+                                  if (selectedService?.id === service.id) {
+                                    setSelectedService(null);
+                                    setParts([]);
+                                    setIssues([]);
+                                    setServiceDropdownOpen(false);
+                                    return;
+                                  }
+                                  selectService(service);
+                                }}
+                                className={`px-4 py-4 border-b border-slate-800 ${selectedService?.id === service.id ? "bg-slate-900" : "bg-slate-950/70"}`}
+                              >
+                                <Text className="text-sm font-black text-text-primary">
+                                  {service.bookingId || `Job ${service.id}`}
+                                </Text>
+                                <Text className="text-[10px] text-text-muted uppercase tracking-widest mt-1">
+                                  {service.name} • {service.brand}{" "}
+                                  {service.model}
+                                </Text>
+                              </TouchableOpacity>
+                            ))}
+                          </ScrollView>
                         </View>
                       )}
                     </View>
@@ -1084,7 +1085,7 @@ export default function AddBillingScreen() {
               <TouchableOpacity
                 onPress={() => {
                   resetForm();
-                  router.replace("/(admin)/billings");
+                  router.replace("/(adminPages)/billings" as any);
                 }}
                 className="mt-4 py-4 rounded-[1.5rem] border border-slate-700 items-center justify-center"
               >
