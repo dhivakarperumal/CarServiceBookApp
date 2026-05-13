@@ -91,7 +91,6 @@ export default function AdminAssignServices() {
     }
   };
 
-
   const dateFilteredList = useMemo(() => {
     return bookings.filter((b) => {
       const search = searchText.toLowerCase();
@@ -298,19 +297,20 @@ export default function AdminAssignServices() {
         contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
       >
-
-
-
-
-
         {/* SEARCH & FILTERS */}
         <View className="px-6 mb-2 gap-4 mt-5">
-
-
           <View className="flex-row gap-4 mb-2">
             {[
-              { id: "unassigned", label: `Unassigned (${stats.unassigned})`, icon: "person-remove" },
-              { id: "assigned", label: `Assigned (${stats.assigned})`, icon: "person-add" },
+              {
+                id: "unassigned",
+                label: `Unassigned (${stats.unassigned})`,
+                icon: "person-remove",
+              },
+              {
+                id: "assigned",
+                label: `Assigned (${stats.assigned})`,
+                icon: "person-add",
+              },
             ].map((s) => (
               <TouchableOpacity
                 key={s.id}
@@ -320,7 +320,11 @@ export default function AdminAssignServices() {
                 }}
                 className={`flex-1 flex-row items-center justify-center gap-2 py-4 rounded-3xl border ${tab === s.id ? "bg-primary/20 border-primary/50" : "bg-white/5 border-white/10"}`}
               >
-                <Ionicons name={s.icon as any} size={16} color={tab === s.id ? COLORS.primary : "#64748B"} />
+                <Ionicons
+                  name={s.icon as any}
+                  size={16}
+                  color={tab === s.id ? COLORS.primary : "#64748B"}
+                />
                 <Text
                   className={`text-[10px] font-black uppercase tracking-widest ${tab === s.id ? "text-primary" : "text-white/40"}`}
                 >
@@ -409,7 +413,9 @@ export default function AdminAssignServices() {
                   {/* Body: Vehicle Info */}
                   <View className="mb-5">
                     <View className="flex-row items-center gap-2.5 mb-1.5">
-                      <View className={`w-2 h-2 rounded-full ${item.vehicleType === "bike" ? "bg-orange-500" : "bg-blue-500"}`} />
+                      <View
+                        className={`w-2 h-2 rounded-full ${item.vehicleType === "bike" ? "bg-orange-500" : "bg-blue-500"}`}
+                      />
                       <Text className="text-white text-sm font-black uppercase tracking-tight">
                         {item.brand} {item.model}
                       </Text>
@@ -437,7 +443,10 @@ export default function AdminAssignServices() {
                           {item.name}
                         </Text>
                         <Text className="text-white/30 text-[9px] font-bold uppercase mt-0.5">
-                          {formatDateTime(item.created_at || item.createdAt).date}
+                          {
+                            formatDateTime(item.created_at || item.createdAt)
+                              .date
+                          }
                         </Text>
                       </View>
                     </View>
@@ -608,17 +617,17 @@ export default function AdminAssignServices() {
                           .toLowerCase()
                           .includes("completed"),
                     ).length === 0 && (
-                        <View className="p-8 items-center border border-dashed border-white/10 rounded-2xl bg-black/20">
-                          <Ionicons
-                            name="documents-outline"
-                            size={32}
-                            color="rgba(255,255,255,0.1)"
-                          />
-                          <Text className="text-white/30 text-center text-[10px] font-black uppercase mt-3 tracking-widest">
-                            No Unassigned Protocols
-                          </Text>
-                        </View>
-                      )}
+                      <View className="p-8 items-center border border-dashed border-white/10 rounded-2xl bg-black/20">
+                        <Ionicons
+                          name="documents-outline"
+                          size={32}
+                          color="rgba(255,255,255,0.1)"
+                        />
+                        <Text className="text-white/30 text-center text-[10px] font-black uppercase mt-3 tracking-widest">
+                          No Unassigned Protocols
+                        </Text>
+                      </View>
+                    )}
                   </ScrollView>
                 </View>
               </View>
@@ -714,55 +723,74 @@ export default function AdminAssignServices() {
         animationType="slide"
         onRequestClose={() => setFilterModal(null)}
       >
-        <View className="flex-1 bg-black/60 justify-end">
-          <View className="bg-card rounded-t-[32px] p-6 pb-12 border-t border-slate-700">
-            <View className="w-12 h-1 bg-slate-600 rounded-full self-center mb-6" />
+        <TouchableOpacity
+          className="flex-1 bg-black/60 justify-end"
+          activeOpacity={1}
+          onPress={() => setFilterModal(null)}
+        >
+          <TouchableOpacity
+            className="bg-card border-t border-slate-700 rounded-t-3xl p-8"
+            activeOpacity={1}
+            onPress={() => {}}
+          >
+            <View className="w-10 h-1 bg-slate-600 rounded-full self-center mb-6" />
 
-            <Text className="text-white text-xl font-bold mb-6 px-2">
-              Select Timeframe
-            </Text>
+            <View className="mb-8">
+              <Text className="text-white text-2xl font-black uppercase tracking-tight">
+                Select Timeframe
+              </Text>
+              <Text className="text-text-secondary text-[10px] font-black uppercase tracking-widest mt-1">
+                Filter by date range
+              </Text>
+            </View>
 
-            <View className="gap-2.5">
-              {["All Time", "Today", "Yesterday", "This Week", "This Month"].map(
-                (option) => {
-                  const isSelected = dateFilter === option;
+            <View className="space-y-3 mb-8">
+              {[
+                "All Time",
+                "Today",
+                "Yesterday",
+                "This Week",
+                "This Month",
+              ].map((option) => {
+                const isSelected = dateFilter === option;
 
-                  return (
-                    <TouchableOpacity
-                      key={option}
-                      onPress={() => {
-                        setDateFilter(option);
-                        setFilterModal(null);
-                        setCurrentPage(1);
-                      }}
-                      className={`p-4.5 rounded-2xl flex-row justify-between items-center ${isSelected ? "bg-primary" : "bg-slate-900/40 border border-slate-700"}`}
+                return (
+                  <TouchableOpacity
+                    key={option}
+                    onPress={() => {
+                      setDateFilter(option);
+                      setFilterModal(null);
+                      setCurrentPage(1);
+                    }}
+                    className={`p-4 rounded-2xl flex-row mt-3 justify-between items-center border ${isSelected ? "bg-primary/20 border-primary" : "bg-slate-900/20 border-slate-700"}`}
+                  >
+                    <Text
+                      className={`font-black text-[13px] uppercase tracking-wider ${isSelected ? "text-primary" : "text-text-secondary"}`}
                     >
-                      <Text
-                        className={`font-bold text-[13px] ${isSelected ? "text-background" : "text-text-secondary"}`}
-                      >
-                        {option}
-                      </Text>
-                      {isSelected && (
-                        <Ionicons
-                          name="checkmark-circle"
-                          size={20}
-                          color={COLORS.background}
-                        />
-                      )}
-                    </TouchableOpacity>
-                  );
-                },
-              )}
+                      {option}
+                    </Text>
+                    {isSelected && (
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={22}
+                        color={COLORS.primary}
+                      />
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
             </View>
 
             <TouchableOpacity
               onPress={() => setFilterModal(null)}
-              className="mt-6 p-4.5 items-center"
+              className="h-14 bg-slate-900/50 rounded-2xl items-center justify-center border border-slate-700"
             >
-              <Text className="text-slate-500 font-bold underline">Dismiss</Text>
+              <Text className="text-text-secondary font-black uppercase tracking-widest text-[10px]">
+                Close
+              </Text>
             </TouchableOpacity>
-          </View>
-        </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
       </Modal>
     </SafeAreaView>
   );

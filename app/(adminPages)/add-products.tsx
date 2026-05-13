@@ -3,16 +3,16 @@ import * as ImagePicker from "expo-image-picker";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  SafeAreaView,
-  ScrollView,
-  Switch,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
+    ActivityIndicator,
+    Alert,
+    Image,
+    SafeAreaView,
+    ScrollView,
+    Switch,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { api } from "../../services/api";
@@ -100,6 +100,12 @@ const AdminAddProduct = () => {
   /* LOAD EDIT DATA */
   useEffect(() => {
     if (editData) {
+      // If the data needs full load (lightweight param), fetch from API
+      if (editData._needsFullLoad) {
+        fetchEditData(editData.docId || editData.id);
+        return;
+      }
+
       let cleanThumbnail = editData.thumbnail || "";
       if (
         typeof cleanThumbnail === "string" &&
@@ -144,6 +150,60 @@ const AdminAddProduct = () => {
       setThumbnail(cleanThumbnail);
     }
   }, []);
+
+  /* FETCH EDIT DATA FROM API */
+  const fetchEditData = async (productId: string) => {
+    try {
+      const res = await api.get(`/products/${productId}`);
+      const fullData = res.data?.data || res.data;
+
+      let cleanThumbnail = fullData.thumbnail || "";
+      if (
+        typeof cleanThumbnail === "string" &&
+        cleanThumbnail.startsWith("[")
+      ) {
+        try {
+          const parsed = JSON.parse(cleanThumbnail);
+          cleanThumbnail =
+            Array.isArray(parsed) && parsed.length > 0 ? parsed[0] : "";
+        } catch (e) {
+          console.error("Malformed thumbnail:", e);
+        }
+      }
+
+      setProduct({
+        ...fullData,
+        tags: Array.isArray(fullData.tags)
+          ? fullData.tags.join(", ")
+          : fullData.tags || "",
+        warrantyAvailable: fullData?.warranty?.available || false,
+        warrantyMonths: fullData?.warranty?.available
+          ? String(fullData?.warranty?.months || "")
+          : "",
+        returnAvailable: fullData?.returnPolicy?.available || false,
+        returnDays: fullData?.returnPolicy?.available
+          ? String(fullData?.returnPolicy?.days || "")
+          : "",
+        rating: String(fullData?.rating || ""),
+        mrp: String(fullData.mrp || ""),
+        offer: String(fullData.offer || ""),
+        offerPrice: String(fullData.offerPrice || ""),
+      });
+      setVariants(
+        fullData.variants?.map((v: any) => ({
+          sku: v.sku || "",
+          position: v.position || "",
+          material: v.material || "",
+          stock: String(v.stock || ""),
+        })) || [{ sku: "", position: "", material: "", stock: "" }],
+      );
+      setImages(fullData.images || []);
+      setThumbnail(cleanThumbnail);
+    } catch (error) {
+      console.error("Failed to fetch product data:", error);
+      Alert.alert("Error", "Failed to load product data. Please try again.");
+    }
+  };
 
   /* GENERATE PRODUCT ID */
   const generateProductId = async () => {
@@ -195,7 +255,7 @@ const AdminAddProduct = () => {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ["images"],
         allowsMultipleSelection: true,
-        quality: 0.6,
+        quality: 0.2,
         base64: true,
       });
 
@@ -285,7 +345,7 @@ const AdminAddProduct = () => {
         Alert.alert("Success", `Product ${productId} Updated Successfully`);
       }
 
-      router.replace("/(admin)/products");
+      router.replace("/(adminPages)/products");
     } catch (error: any) {
       console.error(error);
       Alert.alert(
@@ -571,55 +631,48 @@ const AdminAddProduct = () => {
                 </TouchableOpacity>
               </View>
 
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                className="flex-row mb-6"
-              >
+              <View className="flex-row flex-wrap gap-4 mb-6">
                 {images.length === 0 ? (
-                  <View className="w-32 h-32 bg-slate-950/80 rounded-2xl border border-slate-800 border-dashed items-center justify-center">
-                    <MaterialIcons name="image" size={24} color="#475569" />
-                    <Text className="text-text-muted text-[8px] font-black uppercase mt-2">
-                      No Images
+                  <View className="w-32 h-32 bg-slate-950/80 rounded-3xl border border-slate-800 border-dashed items-center justify-center">
+                    <MaterialIcons name="image" size={28} color="#475569" />
+                    <Text className="text-text-muted text-[9px] font-black uppercase mt-2 text-center">
+                      No Images Added
                     </Text>
                   </View>
                 ) : (
                   images.map((img, i) => (
                     <View
                       key={i}
-                      className={`mr-4 relative ${thumbnail === img ? "border-2 border-sky-500 p-0.5 rounded-2xl" : ""}`}
+                      className={`relative w-32 h-32 rounded-3xl overflow-hidden border ${thumbnail === img ? "border-sky-500" : "border-slate-800"}`}
                     >
                       <Image
                         source={{ uri: img }}
-                        className="w-32 h-32 rounded-2xl bg-slate-950"
+                        className="w-full h-full"
+                        resizeMode="cover"
+                        progressiveRenderingEnabled={true}
                       />
+
+                      <View className="absolute inset-0 bg-black/10" />
+
                       <TouchableOpacity
                         onPress={() => removeImage(i)}
-                        className="absolute -top-2 -right-2 bg-red-500 w-6 h-6 rounded-full items-center justify-center border-2 border-slate-950 shadow-lg"
+                        className="absolute top-2 right-2 bg-red-500 w-7 h-7 rounded-full items-center justify-center border-2 border-slate-950 shadow-lg"
                       >
                         <Ionicons name="close" size={14} color="white" />
                       </TouchableOpacity>
-                      {thumbnail !== img && (
-                        <TouchableOpacity
-                          onPress={() => setThumbnail(img)}
-                          className="absolute bottom-2 left-2 bg-slate-900 px-2 py-1 rounded-lg border border-slate-700"
-                        >
-                          <Text className="text-white text-[7px] font-black uppercase">
-                            Set Main
-                          </Text>
-                        </TouchableOpacity>
-                      )}
-                      {thumbnail === img && (
-                        <View className="absolute bottom-2 left-2 bg-sky-500 px-2 py-1 rounded-lg">
-                          <Text className="text-white text-[7px] font-black uppercase">
-                            Main Image
-                          </Text>
-                        </View>
-                      )}
+
+                      <TouchableOpacity
+                        onPress={() => setThumbnail(img)}
+                        className={`absolute bottom-2 left-2 px-2 py-1 rounded-full ${thumbnail === img ? "bg-sky-500" : "bg-slate-900/90 border border-slate-700"}`}
+                      >
+                        <Text className="text-white text-[8px] font-black uppercase">
+                          {thumbnail === img ? "Main" : "Set Main"}
+                        </Text>
+                      </TouchableOpacity>
                     </View>
                   ))
                 )}
-              </ScrollView>
+              </View>
             </View>
 
             {/* ADDITIONAL OPTIONS */}

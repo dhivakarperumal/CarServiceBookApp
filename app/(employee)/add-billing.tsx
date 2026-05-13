@@ -37,7 +37,7 @@ const SectionTitle = ({ title }: { title: string }) => (
 
 export default function AddBillingScreen() {
   const router = useRouter();
-  const { directServiceId, id } = useLocalSearchParams();
+  const { directServiceId, editBillId } = useLocalSearchParams();
   const { user: userProfile } = useAuth();
 
   const generateInvoiceNo = (currentCount = 0) =>
@@ -48,6 +48,8 @@ export default function AddBillingScreen() {
   const [products, setProducts] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [selectedService, setSelectedService] = useState<any>(null);
+  const [editingBill, setEditingBill] = useState<any>(null);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [parts, setParts] = useState<any[]>([]);
   const [issues, setIssues] = useState<any[]>([]);
   const [invoiceNo, setInvoiceNo] = useState<string>(generateInvoiceNo(0));
@@ -56,7 +58,6 @@ export default function AddBillingScreen() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
-  const [labour, setLabour] = useState("");
   const [gstPercent, setGstPercent] = useState("18");
   const [workforceCharges, setWorkforceCharges] = useState("");
 
@@ -92,10 +93,83 @@ export default function AddBillingScreen() {
   }, [selectedService, billingMode, billingCount]);
 
   useEffect(() => {
-    if (id) {
-      fetchBillingForEdit(id as string);
+    if (editBillId && !loading) {
+      loadBillForEditing(editBillId.toString());
+    } else if (!editBillId) {
+      resetForm();
     }
-  }, [id]);
+  }, [editBillId, loading]);
+
+  const loadBillForEditing = async (billId: string) => {
+    try {
+      const response = await api.get(`/billings/${billId}`);
+      const bill = response.data;
+
+      // Set edit mode
+      setIsEditMode(true);
+      setEditingBill(bill);
+
+      // Set billing mode
+      if (bill.serviceId || bill.bookingId) {
+        setBillingMode("online");
+        // Set selected service for display only — do NOT call selectService() as it overwrites saved data
+        try {
+          const serviceRes = await api.get("/all-services");
+          const service = serviceRes.data.find(
+            (s: any) =>
+              (bill.serviceId && String(s.id) === String(bill.serviceId)) ||
+              (bill.bookingId && s.bookingId === bill.bookingId),
+          );
+          if (service) setSelectedService(service);
+        } catch (_) {}
+      } else {
+        setBillingMode("manual");
+        setManualCustomerName(bill.customerName || "");
+        setManualContactNumber(bill.contactNumber || bill.mobileNumber || "");
+        setManualVehicleBrand(
+          bill.vehicleBrand || (bill.car || "").split(" ")[0] || "",
+        );
+        setManualVehicleModel(
+          bill.vehicleModel ||
+            (bill.car || "").split(" ").slice(1).join(" ") ||
+            "",
+        );
+        setManualPlateNumber(bill.carNumber || bill.plateNumber || "");
+      }
+
+      // Restore saved invoice number and charges
+      setInvoiceNo(bill.invoiceNo || "");
+      // Use bill.labour as the workforce charge (single source of truth)
+      setWorkforceCharges(
+        bill.labour != null
+          ? String(bill.labour)
+          : String(bill.workforceCharges || ""),
+      );
+      setGstPercent(String(bill.gstPercent ?? 18));
+
+      // Restore parts DIRECTLY from the saved bill — do NOT re-fetch from service
+      setParts(
+        (bill.parts || []).map((p: any) => ({
+          partName: p.partName || "",
+          qty: Number(p.qty || 0),
+          price: Number(p.price || 0),
+          total:
+            Number(p.total || 0) || Number(p.qty || 0) * Number(p.price || 0),
+        })),
+      );
+
+      // Restore issues DIRECTLY from the saved bill
+      setIssues(
+        (bill.issues || []).map((i: any) => ({
+          issueName: i.issueName || i.issue || "",
+          amount: Number(i.amount || i.issueAmount || 0),
+        })),
+      );
+    } catch (error) {
+      console.error("Error loading bill for editing:", error);
+      Alert.alert("Error", "Failed to load bill data for editing");
+    }
+  };
 
   const filteredServices = useMemo(() => {
     const searchTerm = search.toLowerCase().trim();
@@ -244,17 +318,16 @@ export default function AddBillingScreen() {
       setInvoiceNo(bill.invoiceNo || "");
 
       const isManual =
-        bill.billingType?.toLowerCase() === "manual" ||
-        !bill.serviceId;
+        bill.billingType?.toLowerCase() === "manual" || !bill.serviceId;
 
       setBillingMode(isManual ? "manual" : "online");
 
-      // ------------------------- 
+      // -------------------------
       // ONLINE BILLING PREFILL
       // -------------------------
       if (!isManual && bill.serviceId) {
         const matchedService = services.find(
-          (s) => String(s.id) === String(bill.serviceId)
+          (s) => String(s.id) === String(bill.serviceId),
         );
 
         if (matchedService) {
@@ -274,20 +347,18 @@ export default function AddBillingScreen() {
         setSelectedService(null);
       }
 
-      // ------------------------- 
+      // -------------------------
       // MANUAL BILLING PREFILL
       // -------------------------
       setManualCustomerName(bill.customerName || "");
       setManualContactNumber(bill.mobileNumber || "");
-      setManualPlateNumber(
-        bill.plateNumber || bill.registrationNumber || ""
-      );
+      setManualPlateNumber(bill.plateNumber || bill.registrationNumber || "");
 
       const carParts = (bill.car || "").split(" ");
       setManualVehicleBrand(carParts[0] || "");
       setManualVehicleModel(carParts.slice(1).join(" ") || "");
 
-      // ------------------------- 
+      // -------------------------
       // PARTS PREFILL
       // -------------------------
       setParts(
@@ -296,19 +367,18 @@ export default function AddBillingScreen() {
           qty: Number(p.qty || 0),
           price: Number(p.price || 0),
           total:
-            Number(p.total || 0) ||
-            Number(p.qty || 0) * Number(p.price || 0),
-        }))
+            Number(p.total || 0) || Number(p.qty || 0) * Number(p.price || 0),
+        })),
       );
 
-      // ------------------------- 
+      // -------------------------
       // ISSUES PREFILL
       // -------------------------
       setIssues(
         (bill.issues || []).map((i: any) => ({
           issueName: i.issueName || i.issue || "",
           amount: Number(i.amount || 0),
-        }))
+        })),
       );
 
       setWorkforceCharges(String(bill.labour || 0));
@@ -379,13 +449,14 @@ export default function AddBillingScreen() {
   };
 
   const resetForm = (nextCount = billingCount) => {
+    setIsEditMode(false);
+    setEditingBill(null);
     setBillingMode("online");
     setSelectedService(null);
     setSearch("");
     setServiceDropdownOpen(false);
     setParts([]);
     setIssues([]);
-    setLabour("");
     setWorkforceCharges("");
     setGstPercent("18");
     setManualCustomerName("");
@@ -399,10 +470,12 @@ export default function AddBillingScreen() {
     setInvoiceNo(generateInvoiceNo(nextCount));
   };
 
-  const partsTotal = parts.reduce((sum, p) => sum + p.total, 0);
+  const partsTotal = parts.reduce((sum, p) => sum + Number(p.total || 0), 0);
   const issueTotal =
-    billingMode === "online" ? issues.reduce((sum, i) => sum + i.amount, 0) : 0;
-  const labourAmount = Number(labour || workforceCharges || 0);
+    billingMode === "online"
+      ? issues.reduce((sum, i) => sum + Number(i.amount || 0), 0)
+      : 0;
+  const labourAmount = Number(workforceCharges || 0);
   const gst = Number(gstPercent || 0);
 
   const subTotal = partsTotal + issueTotal + labourAmount;
@@ -478,42 +551,66 @@ export default function AddBillingScreen() {
         gstAmount,
         subTotal,
         grandTotal,
-        paymentStatus: "Pending",
-        paymentMode: "",
+        paymentStatus: editingBill?.paymentStatus || "Pending",
+        paymentMode: editingBill?.paymentMode || "",
         status: billingMode === "manual" ? "Manual Generated" : "Generated",
-        createdAt: new Date().toISOString(),
+        createdAt: editingBill?.createdAt || new Date().toISOString(),
       };
 
-      if (id) {
-        await api.put(`/billings/${id}`, payload);
-      } else {
-        await api.post("/billings", payload);
-      }
-
-      if (billingMode === "online") {
-        await api
-          .put(`/all-services/${selectedService.id}/status`, {
-            serviceStatus: "Bill Generated",
-          })
-          .catch((err) => console.log("Status update failed:", err));
-      }
-
-      const nextCount = billingCount + 1;
-      setBillingCount(nextCount);
-      resetForm(nextCount);
-      Alert.alert(
-        "Success",
-        id ? "Invoice updated successfully." : "Invoice created successfully.",
-        [
+      if (isEditMode && editingBill) {
+        // Use the bill ID — support both 'id' and '_id' field names
+        const billId = editingBill.id || editingBill._id;
+        if (!billId) {
+          throw new Error("Bill ID is missing — cannot update.");
+        }
+        // Backend supports PATCH (not PUT) for billing updates
+        try {
+          await api.patch(`/billings/${billId}`, payload);
+        } catch (patchErr: any) {
+          // Fallback to PUT if PATCH returns 404/405
+          if (
+            patchErr?.response?.status === 404 ||
+            patchErr?.response?.status === 405
+          ) {
+            await api.put(`/billings/${billId}`, payload);
+          } else {
+            throw patchErr;
+          }
+        }
+        Alert.alert("Success", "Invoice updated successfully.", [
           {
             text: "OK",
             onPress: () => router.replace("/(employee)/billing"),
           },
-        ]
-      );
+        ]);
+      } else {
+        // Create new bill
+        await api.post("/billings", payload);
+
+        if (billingMode === "online") {
+          await api
+            .put(`/all-services/${selectedService.id}/status`, {
+              serviceStatus: "Bill Generated",
+            })
+            .catch((err) => console.log("Status update failed:", err));
+        }
+
+        const nextCount = billingCount + 1;
+        setBillingCount(nextCount);
+        resetForm(nextCount);
+        Alert.alert("Success", "Invoice created successfully.", [
+          {
+            text: "OK",
+            onPress: () => router.replace("/(employee)/billing"),
+          },
+        ]);
+      }
     } catch (error) {
       console.error(error);
-      Alert.alert("Error", "Failed to create invoice.");
+      Alert.alert(
+        "Error",
+        `Failed to ${isEditMode ? "update" : "create"} invoice.`,
+      );
     } finally {
       setSubmitting(false);
     }
@@ -536,7 +633,7 @@ export default function AddBillingScreen() {
               className="text-text-primary text-[17px] font-black uppercase tracking-tight"
               numberOfLines={1}
             >
-              Generate Billing
+              {isEditMode ? "Edit Billing" : "Generate Billing"}
             </Text>
           </View>
         </View>
@@ -770,111 +867,6 @@ export default function AddBillingScreen() {
                 </Text>
               </View>
 
-              <View className="flex-col gap-4 mb-6">
-                <View className="bg-gradient-to-r from-slate-900/50 to-slate-900/20 rounded-3xl border border-slate-700/60 p-6">
-                  <Text className="text-[9px] uppercase tracking-widest text-text-muted font-black mb-4">
-                    ⚙️ Add New Part to Inventory
-                  </Text>
-                  <View className="flex-row flex-wrap gap-3">
-                    <View className="flex-1 min-w-[220px]">
-                      <TextInput
-                        placeholder="Search or type part name"
-                        placeholderTextColor="#64748B"
-                        value={newPartName}
-                        onChangeText={(value) => {
-                          setNewPartName(value);
-                          const match = products.find(
-                            (product) =>
-                              (product.name || "").toString().toLowerCase() ===
-                              value.toLowerCase(),
-                          );
-                          if (match && match.price != null) {
-                            setNewPartPrice(String(match.price));
-                          }
-                        }}
-                        className="w-full bg-slate-900/40 border border-slate-700/60 rounded-2xl px-5 py-4 text-text-primary font-bold text-sm"
-                      />
-                    </View>
-                    <View className="w-24">
-                      <TextInput
-                        placeholder="Qty"
-                        placeholderTextColor="#64748B"
-                        value={newPartQty}
-                        onChangeText={setNewPartQty}
-                        keyboardType="numeric"
-                        className="w-full bg-slate-900/40 border border-slate-700/60 rounded-2xl px-4 py-4 text-text-primary font-bold text-center text-sm"
-                      />
-                    </View>
-                    <View className="w-28">
-                      <TextInput
-                        placeholder="Unit Price"
-                        placeholderTextColor="#64748B"
-                        value={newPartPrice}
-                        onChangeText={setNewPartPrice}
-                        keyboardType="numeric"
-                        className="w-full bg-slate-900/40 border border-slate-700/60 rounded-2xl px-4 py-4 text-text-primary font-bold text-center text-sm"
-                      />
-                    </View>
-                    <TouchableOpacity
-                      onPress={addManualPart}
-                      className="min-w-[140px] bg-gradient-to-r from-primary to-accent rounded-2xl px-5 py-4 items-center justify-center border border-primary/40 shadow-lg"
-                    >
-                      <Text className="text-white font-black uppercase tracking-widest text-xs">
-                        + Add Part
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </View>
-
-              {matchingProducts.length > 0 && (
-                <View className="bg-gradient-to-r from-slate-900/50 to-slate-900/20 rounded-3xl border border-slate-700/60 p-5 mb-6">
-                  <View className="flex-row items-center gap-2 mb-4">
-                    <Ionicons name="layers-outline" size={16} color="#0EA5E9" />
-                    <Text className="text-[10px] uppercase tracking-widest font-black text-primary">
-                      Matching Spare Parts Found
-                    </Text>
-                  </View>
-                  <View className="gap-3">
-                    {matchingProducts.map((product) => (
-                      <TouchableOpacity
-                        key={product.id || product.name}
-                        onPress={() => {
-                          setNewPartName(product.name || "");
-                          setNewPartPrice(
-                            String(product.price || product.offerPrice || "0"),
-                          );
-                        }}
-                        className="bg-gradient-to-r from-slate-900/40 to-slate-900/20 rounded-2xl border border-slate-700/50 p-4 flex-row items-center justify-between"
-                      >
-                        <View className="flex-1">
-                          <Text className="text-sm font-black text-text-primary">
-                            {product.name}
-                          </Text>
-                          <View className="flex-row items-center gap-2 mt-2">
-                            <View className="bg-primary/20 rounded-lg px-2 py-1 border border-primary/40">
-                              <Text className="text-[10px] font-black text-primary">
-                                {product.category || "Spare Part"}
-                              </Text>
-                            </View>
-                          </View>
-                        </View>
-                        <View className="items-end">
-                          <Text className="text-lg font-black text-accent">
-                            ₹{product.price || product.offerPrice || "0"}
-                          </Text>
-                          <Ionicons
-                            name="add-circle-outline"
-                            size={20}
-                            color="#0EA5E9"
-                          />
-                        </View>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                </View>
-              )}
-
               <View>
                 {parts.length === 0 ? (
                   <View className="px-6 py-16 items-center justify-center bg-gradient-to-b from-slate-900/30 to-slate-900/10 rounded-3xl border-2 border-dashed border-slate-700">
@@ -981,6 +973,112 @@ export default function AddBillingScreen() {
                   </View>
                 )}
               </View>
+
+              <View className="flex-col gap-4 mt-3 mb-6">
+                <View className="bg-gradient-to-r from-slate-900/50 to-slate-900/20 rounded-3xl border border-slate-700/60 p-6">
+                  <Text className="text-[9px] uppercase tracking-widest text-text-muted font-black mb-4">
+                    ⚙️ Add New Part to Inventory
+                  </Text>
+                  <View className="flex-row flex-wrap gap-3">
+                    <View className="flex-1 min-w-[220px]">
+                      <TextInput
+                        placeholder="Search or type part name"
+                        placeholderTextColor="#64748B"
+                        value={newPartName}
+                        onChangeText={(value) => {
+                          setNewPartName(value);
+                          const match = products.find(
+                            (product) =>
+                              (product.name || "").toString().toLowerCase() ===
+                              value.toLowerCase(),
+                          );
+                          if (match && match.price != null) {
+                            setNewPartPrice(String(match.price));
+                          }
+                        }}
+                        className="w-full bg-slate-900/40 border border-slate-700/60 rounded-2xl px-5 py-4 text-text-primary font-bold text-sm"
+                      />
+                    </View>
+                    <View className="w-24">
+                      <TextInput
+                        placeholder="Qty"
+                        placeholderTextColor="#64748B"
+                        value={newPartQty}
+                        onChangeText={setNewPartQty}
+                        keyboardType="numeric"
+                        className="w-full bg-slate-900/40 border border-slate-700/60 rounded-2xl px-4 py-4 text-text-primary font-bold text-center text-sm"
+                      />
+                    </View>
+                    <View className="w-28">
+                      <TextInput
+                        placeholder="Unit Price"
+                        placeholderTextColor="#64748B"
+                        value={newPartPrice}
+                        onChangeText={setNewPartPrice}
+                        keyboardType="numeric"
+                        className="w-full bg-slate-900/40 border border-slate-700/60 rounded-2xl px-4 py-4 text-text-primary font-bold text-center text-sm"
+                      />
+                    </View>
+                    <TouchableOpacity
+                      onPress={addManualPart}
+                      className="min-w-[140px] bg-gradient-to-r from-primary to-accent rounded-2xl px-5 py-4 items-center justify-center border border-primary/40 shadow-lg"
+                    >
+                      <Text className="text-white font-black uppercase tracking-widest text-xs">
+                        + Add Part
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+
+              {matchingProducts.length > 0 && (
+                <View className="bg-gradient-to-r from-slate-900/50 to-slate-900/20 rounded-3xl border border-slate-700/60 p-5 mb-6">
+                  <View className="flex-row items-center gap-2 mb-4">
+                    <Ionicons name="layers-outline" size={16} color="#0EA5E9" />
+                    <Text className="text-[10px] uppercase tracking-widest font-black text-primary">
+                      Matching Spare Parts Found
+                    </Text>
+                  </View>
+                  <View className="gap-3">
+                    {matchingProducts.map((product) => (
+                      <TouchableOpacity
+                        key={product.id || product.name}
+                        onPress={() => {
+                          setNewPartName(product.name || "");
+                          setNewPartPrice(
+                            String(product.price || product.offerPrice || "0"),
+                          );
+                        }}
+                        className="bg-gradient-to-r from-slate-900/40 to-slate-900/20 rounded-2xl border border-slate-700/50 p-4 flex-row items-center justify-between"
+                      >
+                        <View className="flex-1">
+                          <Text className="text-sm font-black text-text-primary">
+                            {product.name}
+                          </Text>
+                          <View className="flex-row items-center gap-2 mt-2">
+                            <View className="bg-primary/20 rounded-lg px-2 py-1 border border-primary/40">
+                              <Text className="text-[10px] font-black text-primary">
+                                {product.category || "Spare Part"}
+                              </Text>
+                            </View>
+                          </View>
+                        </View>
+                        <View className="items-end">
+                          <Text className="text-lg font-black text-accent">
+                            ₹{product.price || product.offerPrice || "0"}
+                          </Text>
+                          <Ionicons
+                            name="add-circle-outline"
+                            size={20}
+                            color="#0EA5E9"
+                          />
+                        </View>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+              )}
+
             </View>
 
             <View className="flex-row flex-wrap gap-4 mb-20 items-start">
@@ -1062,7 +1160,7 @@ export default function AddBillingScreen() {
                     <ActivityIndicator color="white" />
                   ) : (
                     <Text className="text-white font-black uppercase tracking-widest">
-                      Commit Invoice
+                      {isEditMode ? "Update Invoice" : "Commit Invoice"}
                     </Text>
                   )}
                 </TouchableOpacity>

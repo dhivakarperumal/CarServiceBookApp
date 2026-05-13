@@ -89,10 +89,10 @@ const CompletedHistory = () => {
       .filter((s: any) => {
         const isMine =
           (s.assignedEmployeeName || "").toLowerCase() === mechanic;
-        const stat = (s.serviceStatus || s.status || "").toLowerCase();
+        const stat = (s.serviceStatus || s.status || "").toLowerCase().trim();
 
         return (
-          isMine && (stat.includes("completed") || stat.includes("cancel"))
+          isMine && (stat === "bill completed" || stat === "cancelled" || stat === "cancel")
         );
       })
       .map((s: any) => {
@@ -175,11 +175,11 @@ const CompletedHistory = () => {
         (item.brand + " " + item.model).toLowerCase().includes(txt);
 
       // TAB FILTER
-      const stat = (item.serviceStatus || item.status || "").toLowerCase();
+      const stat = (item.serviceStatus || item.status || "").toLowerCase().trim();
       const matchesTab =
         activeTab === "completed"
-          ? stat.includes("completed")
-          : stat.includes("cancel");
+          ? stat === "bill completed"
+          : (stat === "cancelled" || stat === "cancel");
 
       let matchesDate = true;
 

@@ -338,6 +338,22 @@ export const apiService = {
     }
   },
 
+  updateBilling: async (id: number | string, data: any): Promise<any> => {
+    try {
+      // Try PATCH first (partial update — preferred)
+      const response = await api.patch(`/billings/${id}`, data);
+      return response.data;
+    } catch (patchErr: any) {
+      if (patchErr?.response?.status === 404 || patchErr?.response?.status === 405) {
+        // Fallback to PUT (full replace)
+        const response = await api.put(`/billings/${id}`, data);
+        return response.data;
+      }
+      console.error('Error updating billing:', patchErr);
+      throw patchErr;
+    }
+  },
+
   deleteBilling: async (id: number | string): Promise<any> => {
     try {
       const response = await api.delete(`/billings/${id}`);

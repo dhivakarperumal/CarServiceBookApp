@@ -263,14 +263,16 @@ export default function AdminDashboard() {
                 title="Inventory"
                 icon="cube-outline"
                 color="bg-orange-500"
-                onPress={() => router.push("/(admin)/products" as any)}
+                onPress={() =>
+                  router.push("/(adminPages)/stock-details" as any)
+                }
               />
 
               <QuickAction
                 title="Products"
                 icon="cart-outline"
                 color="bg-rose-500"
-                onPress={() => router.push("/(admin)/products" as any)}
+                onPress={() => router.push("/(adminPages)/products" as any)}
               />
             </View>
           </View>
@@ -598,7 +600,7 @@ export default function AdminDashboard() {
                 Inventory Status
               </Text>
               <TouchableOpacity
-                onPress={() => router.push("/(admin)/products")}
+                onPress={() => router.push("/(adminPages)/inventory")}
               >
                 <Text className="text-sky-500 text-[10px] font-black uppercase">
                   Inventory →
@@ -621,10 +623,7 @@ export default function AdminDashboard() {
               <View className="p-1">
                 {stats.inventory && stats.inventory.length > 0 ? (
                   stats.inventory.slice(0, 5).map((item: any, i: number) => (
-                    <View
-                      key={i}
-                      className="flex-row p-3  items-center"
-                    >
+                    <View key={i} className="flex-row p-3  items-center">
                       <Text className="flex-1 text-white text-[10px] font-bold">
                         {item.name || item.partName || "Spare Part"}
                       </Text>
