@@ -532,7 +532,7 @@ export default function AddBillingScreen() {
         grandTotal,
         paymentStatus: "Pending",
         paymentMode: "",
-        status: billingMode === "manual" ? "Manual Generated" : "Generated",
+        status: "Bill Pending",
         billingType: billingMode,
         assignedEmployeeName:
           userProfile?.username ||
@@ -564,7 +564,7 @@ export default function AddBillingScreen() {
       if (billingMode === "online") {
         await api
           .put(`/all-services/${selectedService.id}/status`, {
-            serviceStatus: "Bill Generated",
+            serviceStatus: "Bill Pending",
           })
           .catch((err) => console.log("Status update failed:", err));
       }
