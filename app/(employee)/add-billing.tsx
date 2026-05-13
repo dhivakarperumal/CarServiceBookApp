@@ -75,6 +75,11 @@ export default function AddBillingScreen() {
     fetchMyServices();
   }, [userProfile?.id]);
 
+  // Initialize form on mount only
+  useEffect(() => {
+    resetForm();
+  }, []);
+
   useEffect(() => {
     if (directServiceId && !loading) {
       const match = services.find(
@@ -95,8 +100,6 @@ export default function AddBillingScreen() {
   useEffect(() => {
     if (editBillId && !loading) {
       loadBillForEditing(editBillId.toString());
-    } else if (!editBillId) {
-      resetForm();
     }
   }, [editBillId, loading]);
 
@@ -553,7 +556,7 @@ export default function AddBillingScreen() {
         grandTotal,
         paymentStatus: editingBill?.paymentStatus || "Pending",
         paymentMode: editingBill?.paymentMode || "",
-        status: billingMode === "manual" ? "Manual Generated" : "Generated",
+        status: billingMode === "manual" ? "Bill Pending" : "Bill Pending",
         createdAt: editingBill?.createdAt || new Date().toISOString(),
       };
 
@@ -590,7 +593,7 @@ export default function AddBillingScreen() {
         if (billingMode === "online") {
           await api
             .put(`/all-services/${selectedService.id}/status`, {
-              serviceStatus: "Bill Generated",
+              serviceStatus: "Bill Pending",
             })
             .catch((err) => console.log("Status update failed:", err));
         }
@@ -1078,7 +1081,6 @@ export default function AddBillingScreen() {
                   </View>
                 </View>
               )}
-
             </View>
 
             <View className="flex-row flex-wrap gap-4 mb-20 items-start">

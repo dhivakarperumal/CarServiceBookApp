@@ -168,9 +168,22 @@ export default function EmployeeBilling() {
 
   const handleMarkAsPaid = async (billId: number | string) => {
     try {
-      await api.patch(`/billings/${billId}/payment-status`, {
+      // Find the bill to get serviceId
+      const bill = bills.find((b) => b.id === billId);
+      
+      // Update billing status
+      await api.patch(`/billings/${billId}`, {
         paymentStatus: "Paid",
+        status: "Bill Completed",
       });
+
+      // Update service status to Bill Completed if serviceId exists
+      if (bill?.serviceId) {
+        await api.put(`/all-services/${bill.serviceId}/status`, {
+          serviceStatus: "Bill Completed",
+        });
+      }
+
       Alert.alert("Success", "Bill marked as paid successfully!");
       // Refresh the data to update the UI
       loadData(false);
