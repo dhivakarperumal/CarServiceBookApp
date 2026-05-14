@@ -58,7 +58,7 @@ export default function AddBillingScreen() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
-  const [gstPercent, setGstPercent] = useState("18");
+  const [gstPercent, setGstPercent] = useState("0");
   const [workforceCharges, setWorkforceCharges] = useState("");
 
   const [manualCustomerName, setManualCustomerName] = useState("");
@@ -148,7 +148,7 @@ export default function AddBillingScreen() {
           ? String(bill.labour)
           : String(bill.workforceCharges || ""),
       );
-      setGstPercent(String(bill.gstPercent ?? 18));
+      setGstPercent(String(bill.gstPercent ?? 0));
 
       // Restore parts DIRECTLY from the saved bill — do NOT re-fetch from service
       setParts(
@@ -385,7 +385,7 @@ export default function AddBillingScreen() {
       );
 
       setWorkforceCharges(String(bill.labour || 0));
-      setGstPercent(String(bill.gstPercent || 18));
+      setGstPercent(String(bill.gstPercent || 0));
     } catch (err) {
       console.error(err);
       Alert.alert("Error", "Failed to load invoice details");
@@ -461,7 +461,7 @@ export default function AddBillingScreen() {
     setParts([]);
     setIssues([]);
     setWorkforceCharges("");
-    setGstPercent("18");
+    setGstPercent("0");
     setManualCustomerName("");
     setManualContactNumber("");
     setManualVehicleBrand("");
@@ -1098,7 +1098,7 @@ export default function AddBillingScreen() {
                       Taxation Layer (%)
                     </Text>
                     <TextInput
-                      placeholder="18"
+                      placeholder="0"
                       placeholderTextColor="#64748B"
                       keyboardType="numeric"
                       value={gstPercent}
