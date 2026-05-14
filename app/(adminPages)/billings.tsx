@@ -171,7 +171,10 @@ export default function BillingsLedger() {
           <Text className="text-white font-black text-lg mt-1">
             ₹
             {formatValue(
-              billings.reduce((s, b) => s + Number(b.grandTotal || 0), 0)
+              billings.reduce(
+                (s, b) => s + Number(b.grandTotal || b.total || 0),
+                0
+              )
             )}
           </Text>
         </View>

@@ -75,14 +75,15 @@ const CompletedHistory = () => {
     const billMap: Record<string, number> = {};
 
     bills.forEach((b: any) => {
-      const keys = [b.bookingId, b.serviceId, b.appointmentId, b.id]
-        .filter(Boolean)
-        .map((k: any) => k.toString());
-
-      const amount = b.grandTotal || b.totalAmount || b.total_amount || 0;
-      keys.forEach((k) => {
-        billMap[k] = amount;
-      });
+      // Use more specific keys to avoid ID collisions between different tables
+      const amount = b.grandTotal || b.total || b.subTotal || 0;
+      
+      if (b.serviceId) {
+        billMap[`serv_${b.serviceId}`] = amount;
+      }
+      if (b.bookingId) {
+        billMap[`book_${b.bookingId}`] = amount;
+      }
     });
 
     const filtered = (servRes.data || [])
@@ -100,13 +101,12 @@ const CompletedHistory = () => {
           .filter(Boolean)
           .map((id: any) => id.toString());
 
+        // Prioritize serviceId match first, then bookingId
         let amount = 0;
-
-        for (let id of possibleIds) {
-          if (billMap[id] !== undefined) {
-            amount = billMap[id];
-            break;
-          }
+        if (s.id && billMap[`serv_${s.id}`] !== undefined) {
+          amount = billMap[`serv_${s.id}`];
+        } else if (s.bookingId && billMap[`book_${s.bookingId}`] !== undefined) {
+          amount = billMap[`book_${s.bookingId}`];
         }
 
         return {

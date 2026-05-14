@@ -270,7 +270,7 @@ export default function EmployeeBilling() {
               <Text className="text-lg font-black text-success">
                 ₹
                 {dateFilteredBills
-                  .reduce((sum, b) => sum + Number(b.grandTotal), 0)
+                  .reduce((sum, b) => sum + Number(b.grandTotal || b.total || 0), 0)
                   .toLocaleString()}
               </Text>
             </View>
