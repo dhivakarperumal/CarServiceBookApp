@@ -14,7 +14,8 @@ import {
   View,
 } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
-import { api } from "../../services/api";
+import { api, apiService } from "../../services/api";
+
 
 const CustomInput = ({ label, required, ...props }: any) => (
   <View className="mb-4">
@@ -532,7 +533,7 @@ export default function AddBillingScreen() {
         grandTotal,
         paymentStatus: "Pending",
         paymentMode: "",
-        status: billingMode === "manual" ? "Manual Generated" : "Generated",
+        status: "Bill Pending",
         billingType: billingMode,
         assignedEmployeeName:
           userProfile?.username ||
@@ -557,14 +558,16 @@ export default function AddBillingScreen() {
             throw patchErr;
           }
         }
+      if (id) {
+        await apiService.updateBilling(id, payload);
       } else {
-        await api.post("/billings", payload);
+        await apiService.createBilling(payload);
       }
 
       if (billingMode === "online") {
-        await api
+        await apiService.api
           .put(`/all-services/${selectedService.id}/status`, {
-            serviceStatus: "Bill Generated",
+            serviceStatus: "Bill Pending",
           })
           .catch((err) => console.log("Status update failed:", err));
       }

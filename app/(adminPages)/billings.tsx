@@ -64,27 +64,45 @@ export default function BillingsLedger() {
   );
 
   const handleMarkPaid = async (id: any) => {
+    const bill = billings.find((b) => (b.id || b._id || b.ID) === id);
+    if (!bill) return;
+
     Alert.alert("Confirm Payment", "Mark this invoice as fully PAID?", [
       { text: "Cancel", style: "cancel" },
       {
         text: "Confirm",
         onPress: async () => {
           try {
+            // 1. Update Billing Record Status
             await apiService.updateBillingStatus(id, {
               paymentStatus: "Paid",
+              status: "Paid",
             });
 
+            // 2. Update Linked Service Status if exists
+            if (bill.serviceId) {
+              await apiService.api
+                .put(`/all-services/${bill.serviceId}/status`, {
+                  serviceStatus: "Bill Completed",
+                })
+                .catch((err) => console.log("Service status update failed:", err));
+            }
+
+            // 3. Update Local State
             setBillings((prev) =>
               prev.map((b) =>
-                b.id === id
+                (b.id || b._id || b.ID) === id
                   ? {
                     ...b,
                     paymentStatus: "Paid",
+                    status: "Paid",
                   }
                   : b
               )
             );
-          } catch {
+            Alert.alert("Success", "Billing marked as paid and service completed.");
+          } catch (err) {
+            console.error(err);
             Alert.alert("Error", "Failed to update payment status");
           }
         },
@@ -252,7 +270,7 @@ export default function BillingsLedger() {
                 <View className="flex-row gap-2">
                   {b.paymentStatus?.toLowerCase() !== "paid" && (
                     <TouchableOpacity
-                      onPress={() => handleMarkPaid(b.id)}
+                      onPress={() => handleMarkPaid(b.id || b._id || b.ID)}
                       className="bg-emerald-500 px-4 h-10 rounded-xl items-center justify-center"
                     >
                       <Text className="text-black font-black text-[9px] uppercase">
@@ -260,34 +278,22 @@ export default function BillingsLedger() {
                       </Text>
                     </TouchableOpacity>
                   )}
-                  <View className="flex-row gap-2">
-                    {b.paymentStatus?.toLowerCase() !== "paid" && (
-                      <TouchableOpacity
-                        onPress={() => handleMarkPaid(b.id)}
-                        className="bg-emerald-500 px-4 h-10 rounded-xl items-center justify-center"
-                      >
-                        <Text className="text-black font-black text-[9px] uppercase">
-                          Paid
-                        </Text>
-                      </TouchableOpacity>
-                    )}
 
-                    <TouchableOpacity
-                      onPress={() =>
-                        router.push(`/(adminPages)/add-billing?id=${b.id}` as any)
-                      }
-                      className="bg-blue-500 px-4 h-10 rounded-xl items-center justify-center"
-                    >
-                      <Ionicons name="create-outline" size={18} color="white" />
-                    </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() =>
+                      router.push(`/(adminPages)/add-billing?id=${b.id || b._id || b.ID}` as any)
+                    }
+                    className="bg-blue-500 px-4 h-10 rounded-xl items-center justify-center"
+                  >
+                    <Ionicons name="create-outline" size={18} color="white" />
+                  </TouchableOpacity>
 
-                    <TouchableOpacity
-                      onPress={() => handleDelete(b.id)}
-                      className="bg-red-500 px-4 h-10 rounded-xl items-center justify-center"
-                    >
-                      <Ionicons name="trash-outline" size={18} color="white" />
-                    </TouchableOpacity>
-                  </View>
+                  <TouchableOpacity
+                    onPress={() => handleDelete(b.id || b._id || b.ID)}
+                    className="bg-red-500 px-4 h-10 rounded-xl items-center justify-center"
+                  >
+                    <Ionicons name="trash-outline" size={18} color="white" />
+                  </TouchableOpacity>
                 </View>
               </View>
             </View>

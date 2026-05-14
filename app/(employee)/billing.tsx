@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../../contexts/AuthContext";
-import { api } from "../../services/api";
+import { api, apiService } from "../../services/api";
 import { COLORS } from "../../theme/colors";
 
 const { width } = Dimensions.get("window");
@@ -167,6 +167,7 @@ export default function EmployeeBilling() {
   };
 
   const handleMarkAsPaid = async (billId: number | string) => {
+    const bill = bills.find((b) => b.id === billId);
     try {
       // Find the bill to get serviceId
       const bill = bills.find((b) => b.id === billId);
