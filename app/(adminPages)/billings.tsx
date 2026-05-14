@@ -76,7 +76,7 @@ export default function BillingsLedger() {
             // 1. Update Billing Record Status
             await apiService.updateBillingStatus(id, {
               paymentStatus: "Paid",
-              status: "Paid",
+              status: "Bill Completed",
             });
 
             // 2. Update Linked Service Status if exists

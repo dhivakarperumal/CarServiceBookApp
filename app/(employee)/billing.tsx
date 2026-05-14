@@ -172,8 +172,8 @@ export default function EmployeeBilling() {
       // Find the bill to get serviceId
       const bill = bills.find((b) => b.id === billId);
       
-      // Update billing status
-      await api.patch(`/billings/${billId}`, {
+      // Update billing status safely to prevent data loss
+      await apiService.updateBillingStatus(billId, {
         paymentStatus: "Paid",
         status: "Bill Completed",
       });
