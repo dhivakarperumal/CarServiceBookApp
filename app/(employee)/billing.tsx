@@ -172,8 +172,8 @@ export default function EmployeeBilling() {
       // Find the bill to get serviceId
       const bill = bills.find((b) => b.id === billId);
       
-      // Update billing status
-      await api.patch(`/billings/${billId}`, {
+      // Update billing status safely to prevent data loss
+      await apiService.updateBillingStatus(billId, {
         paymentStatus: "Paid",
         status: "Bill Completed",
       });
@@ -270,7 +270,7 @@ export default function EmployeeBilling() {
               <Text className="text-lg font-black text-success">
                 ₹
                 {dateFilteredBills
-                  .reduce((sum, b) => sum + Number(b.grandTotal), 0)
+                  .reduce((sum, b) => sum + Number(b.grandTotal || b.total || 0), 0)
                   .toLocaleString()}
               </Text>
             </View>

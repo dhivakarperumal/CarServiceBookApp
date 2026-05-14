@@ -76,7 +76,7 @@ export default function BillingsLedger() {
             // 1. Update Billing Record Status
             await apiService.updateBillingStatus(id, {
               paymentStatus: "Paid",
-              status: "Paid",
+              status: "Bill Completed",
             });
 
             // 2. Update Linked Service Status if exists
@@ -171,7 +171,10 @@ export default function BillingsLedger() {
           <Text className="text-white font-black text-lg mt-1">
             ₹
             {formatValue(
-              billings.reduce((s, b) => s + Number(b.grandTotal || 0), 0)
+              billings.reduce(
+                (s, b) => s + Number(b.grandTotal || b.total || 0),
+                0
+              )
             )}
           </Text>
         </View>

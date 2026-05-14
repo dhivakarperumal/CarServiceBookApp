@@ -544,22 +544,7 @@ export default function AddBillingScreen() {
       };
 
       if (billingId) {
-        // Use PATCH for updates
-        try {
-          await api.patch(`/billings/${billingId}`, payload);
-        } catch (patchErr: any) {
-          // Fallback to PUT if PATCH returns 404/405
-          if (
-            patchErr?.response?.status === 404 ||
-            patchErr?.response?.status === 405
-          ) {
-            await api.put(`/billings/${billingId}`, payload);
-          } else {
-            throw patchErr;
-          }
-        }
-      if (id) {
-        await apiService.updateBilling(id, payload);
+        await apiService.updateBilling(billingId, payload);
       } else {
         await apiService.createBilling(payload);
       }
