@@ -3,19 +3,19 @@ import { Picker } from "@react-native-picker/picker";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Dimensions,
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  RefreshControl,
-  SafeAreaView,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    Dimensions,
+    KeyboardAvoidingView,
+    Modal,
+    Platform,
+    RefreshControl,
+    SafeAreaView,
+    ScrollView,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
 import { api } from "../../services/api";
@@ -56,7 +56,7 @@ const getButtonVisibility = (status: string) => {
     showAddSpare:
       currentIndex >= STATUS_STEPS.indexOf("Processing") &&
       currentIndex < STATUS_STEPS.indexOf("Service Completed"),
-    showBilling: status === "Bill Pending",
+    showBilling: status === "Bill Pending" || status === "Service Completed",
   };
 };
 

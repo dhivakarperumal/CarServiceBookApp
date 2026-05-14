@@ -13,14 +13,13 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import { api } from "../../services/api";
 import { COLORS } from "../../theme/colors";
 
 const { width } = Dimensions.get("window");
 const COLUMN_WIDTH = (width - 48) / 2;
-const ITEMS_PER_PAGE = 10;
 
 const AllProducts = () => {
   const router = useRouter();
@@ -28,7 +27,6 @@ const AllProducts = () => {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   const [view, setView] = useState<"list" | "grid">("list");
-  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -86,9 +84,31 @@ const AllProducts = () => {
 
   /* EDIT */
   const handleEdit = (product: any) => {
+    // Create a lightweight edit object without large base64 images to speed up navigation
+    const editObj = {
+      id: product.id,
+      docId: product.docId,
+      name: product.name,
+      slug: product.slug,
+      brand: product.brand,
+      description: product.description,
+      mrp: product.mrp,
+      offer: product.offer,
+      offerPrice: product.offerPrice,
+      category: product.category,
+      warranty: product.warranty,
+      returnPolicy: product.returnPolicy,
+      rating: product.rating,
+      tags: product.tags,
+      isFeatured: product.isFeatured,
+      isActive: product.isActive,
+      variants: product.variants,
+      // Mark as placeholder to fetch full data on edit page
+      _needsFullLoad: true,
+    };
     router.push({
       pathname: "/(adminPages)/add-products",
-      params: { editData: JSON.stringify(product) },
+      params: { editData: JSON.stringify(editObj) },
     });
   };
 
@@ -114,13 +134,6 @@ const AllProducts = () => {
       return true;
     });
 
-  /* PAGINATION */
-  const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
-  const paginatedProducts = filteredProducts.slice(
-    (page - 1) * ITEMS_PER_PAGE,
-    page * ITEMS_PER_PAGE,
-  );
-
   const renderProductItem = ({ item, index }: { item: any; index: number }) => {
     const imageUrl =
       item.images && item.images.length > 0
@@ -132,7 +145,6 @@ const AllProducts = () => {
     if (view === "list") {
       return (
         <View className="relative bg-slate-950 border border-slate-800 rounded-3xl p-4 mb-4 flex-row items-center overflow-hidden shadow-2xl">
-  
           {/* Glow effect */}
           <View className="absolute -top-10 -right-10 w-28 h-28 rounded-full bg-sky-500/10" />
 
@@ -298,25 +310,28 @@ const AllProducts = () => {
   return (
     <SafeAreaView className="flex-1 bg-background">
       <Stack.Screen options={{ headerShown: false }} />
-      
+
       {/* Premium Header */}
       <View className="px-5 pt-8 pb-1">
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center gap-3">
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={() => router.back()}
               className="w-10 h-10 rounded-2xl bg-slate-900 border border-slate-800 items-center justify-center"
             >
               <Ionicons name="arrow-back" size={20} color={COLORS.primary} />
             </TouchableOpacity>
             <View>
-              <Text className="text-white text-2xl font-black uppercase tracking-tight">Products</Text>
-
+              <Text className="text-white text-2xl font-black uppercase tracking-tight">
+                Products
+              </Text>
             </View>
           </View>
           <View className="items-end">
             <View className="bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
-              <Text className="text-primary text-[10px] font-black uppercase">{filteredProducts.length} Items</Text>
+              <Text className="text-primary text-[10px] font-black uppercase">
+                {filteredProducts.length} Items
+              </Text>
             </View>
           </View>
         </View>
@@ -334,7 +349,6 @@ const AllProducts = () => {
               value={search}
               onChangeText={(txt) => {
                 setSearch(txt);
-                setPage(1);
               }}
             />
           </View>
@@ -354,7 +368,6 @@ const AllProducts = () => {
                 key={f.id}
                 onPress={() => {
                   setFilter(f.id);
-                  setPage(1);
                 }}
                 className={`mr-2 px-4 py-2 rounded-full border ${filter === f.id ? "bg-primary border-primary" : "bg-card border-slate-700"}`}
               >
@@ -408,7 +421,7 @@ const AllProducts = () => {
               Accessing Secure Database...
             </Text>
           </View>
-        ) : paginatedProducts.length === 0 ? (
+        ) : filteredProducts.length === 0 ? (
           <View className="flex-1 items-center justify-center p-10">
             <View className="w-20 h-20 bg-card rounded-full items-center justify-center mb-4 border border-slate-600 border-dashed">
               <MaterialIcons
@@ -426,7 +439,7 @@ const AllProducts = () => {
           </View>
         ) : (
           <FlatList
-            data={paginatedProducts}
+            data={filteredProducts}
             keyExtractor={(item) =>
               (item.docId || item.id || Math.random()).toString()
             }
@@ -441,45 +454,6 @@ const AllProducts = () => {
                 onRefresh={onRefresh}
                 tintColor={COLORS.primary}
               />
-            }
-            ListFooterComponent={
-              totalPages > 1 ? (
-                <View className="flex-row items-center justify-center mt-6 gap-2">
-                  <TouchableOpacity
-                    disabled={page === 1}
-                    onPress={() => setPage((p) => p - 1)}
-                    className={`w-10 h-10 rounded-2xl items-center justify-center border border-slate-600 ${page === 1 ? "bg-transparent" : "bg-card shadow-sm"}`}
-                  >
-                    <Ionicons
-                      name="chevron-back"
-                      size={20}
-                      color={page === 1 ? COLORS.slate600 : COLORS.textPrimary}
-                    />
-                  </TouchableOpacity>
-
-                  <View className="bg-card px-4 py-2 rounded-2xl border border-slate-600 shadow-sm">
-                    <Text className="text-text-primary text-xs font-black">
-                      PAGE {page} / {totalPages}
-                    </Text>
-                  </View>
-
-                  <TouchableOpacity
-                    disabled={page === totalPages}
-                    onPress={() => setPage((p) => p + 1)}
-                    className={`w-10 h-10 rounded-2xl items-center justify-center border border-slate-600 ${page === totalPages ? "bg-transparent" : "bg-card shadow-sm"}`}
-                  >
-                    <Ionicons
-                      name="chevron-forward"
-                      size={20}
-                      color={
-                        page === totalPages
-                          ? COLORS.slate600
-                          : COLORS.textPrimary
-                      }
-                    />
-                  </TouchableOpacity>
-                </View>
-              ) : null
             }
           />
         )}

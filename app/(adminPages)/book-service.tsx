@@ -3,14 +3,14 @@ import * as Location from "expo-location";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    SafeAreaView,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  SafeAreaView,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { api } from "../../services/api";
 
@@ -406,8 +406,6 @@ export default function BookService() {
   return (
     <SafeAreaView className="flex-1 bg-slate-950">
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-   
-
         {/* FORM CARD */}
         <View className="p-6">
           <View className="bg-slate-900 rounded-3xl border border-slate-800 p-6 shadow-xl">
@@ -467,13 +465,13 @@ export default function BookService() {
                   }}
                   className={`flex-1 p-4 rounded-2xl border-2 ${
                     vehicleType === type
-                      ? "border-sky-500 bg-sky-500/20"
+                      ? "border-blue-500 bg-blue-500/20"
                       : "border-slate-700 bg-slate-800"
                   }`}
                 >
                   <Text
                     className={`text-center font-black uppercase ${
-                      vehicleType === type ? "text-sky-500" : "text-slate-400"
+                      vehicleType === type ? "text-white" : "text-slate-400"
                     }`}
                   >
                     {type === "car" ? "🚗 Car" : "🏍️ Bike"}
@@ -556,14 +554,14 @@ export default function BookService() {
                   onPress={() => setServiceType(type.value)}
                   className={`flex-1 p-4 rounded-2xl border-2 ${
                     serviceType === type.value
-                      ? "border-sky-500 bg-sky-500/20"
+                      ? "border-blue-500 bg-blue-500/20"
                       : "border-slate-700 bg-slate-800"
                   }`}
                 >
                   <Text
                     className={`text-center font-black uppercase text-sm mb-1 ${
                       serviceType === type.value
-                        ? "text-sky-500"
+                        ? "text-white"
                         : "text-slate-400"
                     }`}
                   >
@@ -572,7 +570,7 @@ export default function BookService() {
                   <Text
                     className={`text-center text-[8px] font-bold ${
                       serviceType === type.value
-                        ? "text-sky-400"
+                        ? "text-blue-200"
                         : "text-slate-500"
                     }`}
                   >
@@ -635,8 +633,8 @@ export default function BookService() {
                     {locationLoading ? (
                       <ActivityIndicator color="#0EA5E9" />
                     ) : (
-                      <Text className="text-sky-500 font-black uppercase text-sm">
-                        📍 Use Current Location
+                      <Text className="text-blue-500 font-black uppercase text-sm">
+                         Use Current Location
                       </Text>
                     )}
                   </TouchableOpacity>
