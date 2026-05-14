@@ -14,7 +14,7 @@ import {
   View,
 } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
-import { api } from "../../services/api";
+import { api, apiService } from "../../services/api";
 
 
 const CustomInput = ({ label, required, ...props }: any) => (
@@ -495,13 +495,13 @@ export default function AddBillingScreen() {
       };
 
       if (id) {
-        await api.put(`/billings/${id}`, payload);
+        await apiService.updateBilling(id, payload);
       } else {
-        await api.post("/billings", payload);
+        await apiService.createBilling(payload);
       }
 
       if (billingMode === "online") {
-        await api
+        await apiService.api
           .put(`/all-services/${selectedService.id}/status`, {
             serviceStatus: "Bill Completed",
           })

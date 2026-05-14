@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../../contexts/AuthContext";
-import { api } from "../../services/api";
+import { api, apiService } from "../../services/api";
 import { COLORS } from "../../theme/colors";
 
 const { width } = Dimensions.get("window");
@@ -167,9 +167,24 @@ export default function EmployeeBilling() {
   };
 
   const handleMarkAsPaid = async (billId: number | string) => {
+    const bill = bills.find((b) => b.id === billId);
     try {
-      await (api as any).updateBillingStatus(billId, "Paid");
-      Alert.alert("Success", "Bill marked as paid successfully!");
+      // 1. Update Billing Status
+      await apiService.updateBillingStatus(billId, {
+        paymentStatus: "Paid",
+        status: "Paid",
+      });
+
+      // 2. Update Linked Service Status if exists
+      if (bill && bill.serviceId) {
+        await apiService.api
+          .put(`/all-services/${bill.serviceId}/status`, {
+            serviceStatus: "Bill Completed",
+          })
+          .catch((err) => console.log("Service status update failed:", err));
+      }
+
+      Alert.alert("Success", "Bill marked as paid and service completed!");
       // Refresh the data to update the UI
       loadData(false);
     } catch (error) {

@@ -14,7 +14,7 @@ import {
   View,
 } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
-import { api } from "../../services/api";
+import { api, apiService } from "../../services/api";
 
 const CustomInput = ({ label, required, ...props }: any) => (
   <View className="mb-4">
@@ -563,20 +563,10 @@ export default function AddBillingScreen() {
         if (!billId) {
           throw new Error("Bill ID is missing — cannot update.");
         }
-        // Backend supports PATCH (not PUT) for billing updates
-        try {
-          await api.patch(`/billings/${billId}`, payload);
-        } catch (patchErr: any) {
-          // Fallback to PUT if PATCH returns 404/405
-          if (
-            patchErr?.response?.status === 404 ||
-            patchErr?.response?.status === 405
-          ) {
-            await api.put(`/billings/${billId}`, payload);
-          } else {
-            throw patchErr;
-          }
-        }
+        
+        // Use apiService for safe merged update
+        await apiService.updateBilling(billId, payload);
+        
         Alert.alert("Success", "Invoice updated successfully.", [
           {
             text: "OK",
@@ -585,10 +575,10 @@ export default function AddBillingScreen() {
         ]);
       } else {
         // Create new bill
-        await api.post("/billings", payload);
+        await apiService.createBilling(payload);
 
         if (billingMode === "online") {
-          await api
+          await apiService.api
             .put(`/all-services/${selectedService.id}/status`, {
               serviceStatus: "Bill Generated",
             })

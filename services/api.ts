@@ -328,29 +328,56 @@ export const apiService = {
     }
   },
 
-  updateBillingStatus: async (id: number | string, status: string): Promise<any> => {
+  updateBillingStatus: async (id: number | string, statusData: string | object): Promise<any> => {
     try {
-      const response = await api.patch(`/billings/${id}`, { paymentStatus: status });
+      // 1. Fetch current data to prevent loss of other fields
+      const existingRes = await api.get(`/billings/${id}`);
+      let existingData = existingRes.data;
+      
+      if (Array.isArray(existingData)) {
+        existingData = existingData[0] || {};
+      }
+
+      // 2. Prepare update payload
+      const updates = typeof statusData === 'string' ? { paymentStatus: statusData } : statusData;
+      const fullPayload = { 
+        ...existingData, 
+        ...updates,
+        updatedAt: new Date().toISOString() 
+      };
+
+      // 3. Use PATCH as PUT might not be supported (404)
+      const response = await api.patch(`/billings/${id}`, fullPayload);
       return response.data;
-    } catch (error) {
-      console.error('Error updating billing status:', error);
+    } catch (error: any) {
+      console.error('Error updating billing status:', error.message, 'URL:', error.config?.url);
       throw error;
     }
   },
 
   updateBilling: async (id: number | string, data: any): Promise<any> => {
     try {
-      // Try PATCH first (partial update — preferred)
-      const response = await api.patch(`/billings/${id}`, data);
-      return response.data;
-    } catch (patchErr: any) {
-      if (patchErr?.response?.status === 404 || patchErr?.response?.status === 405) {
-        // Fallback to PUT (full replace)
-        const response = await api.put(`/billings/${id}`, data);
-        return response.data;
+      // 1. Fetch current data
+      const existingRes = await api.get(`/billings/${id}`);
+      let existingData = existingRes.data;
+
+      if (Array.isArray(existingData)) {
+        existingData = existingData[0] || {};
       }
-      console.error('Error updating billing:', patchErr);
-      throw patchErr;
+
+      // 2. Merge updates
+      const fullPayload = { 
+        ...existingData, 
+        ...data,
+        updatedAt: new Date().toISOString()
+      };
+
+      // 3. Use PATCH
+      const response = await api.patch(`/billings/${id}`, fullPayload);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating billing:', error);
+      throw error;
     }
   },
 
