@@ -10,6 +10,7 @@ interface User {
   email: string;
   role: string;
   mobile: string;
+  active?: number | boolean;
 }
 
 interface AuthContextType {
@@ -55,6 +56,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       if (storedToken && storedUser) {
         const parsedUser = JSON.parse(storedUser);
+        
+        // Check if user account is still active
+        if (parsedUser?.active === 0 || parsedUser?.active === false) {
+          // Clear invalid auth data
+          await AsyncStorage.removeItem(TOKEN_KEY);
+          await AsyncStorage.removeItem(USER_KEY);
+          apiService.setAuthToken(null);
+          setIsLoading(false);
+          return;
+        }
+
         setToken(storedToken);
         setUser(parsedUser);
         // Set the token in axios headers for future requests
@@ -74,6 +86,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const response = await apiService.login(identifier, password);
 
       const { token: authToken, user: userData } = response;
+
+      // Check if user account is active
+      if (userData?.active === 0 || userData?.active === false) {
+        throw new Error('Your account has been deleted or deactivated. Please contact support.');
+      }
 
       // Store in state
       setToken(authToken);

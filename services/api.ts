@@ -704,6 +704,35 @@ export const apiService = {
     throw err;
   },
 
+  // Delete account (deactivate user)
+  deleteAccount: async (uid: string) => {
+    try {
+      const response = await api.put(`/auth/profile/${uid}/delete`, {});
+      console.log('Delete account response:', response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error('Error deleting account:', error);
+      console.error('Error details:', error.response?.data);
+      throw error;
+    }
+  },
+
+  // Update password
+  updatePassword: async (uid: string, currentPassword: string, newPassword: string) => {
+    try {
+      const response = await api.put(`/auth/profile/${uid}/password`, {
+        currentPassword,
+        newPassword,
+      });
+      console.log('Update password response:', response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error('Error updating password:', error);
+      console.error('Error details:', error.response?.data);
+      throw error;
+    }
+  },
+
   // Set authentication token for API requests
   setAuthToken: (token: string | null) => {
     if (token) {
