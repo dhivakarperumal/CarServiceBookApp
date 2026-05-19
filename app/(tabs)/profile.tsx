@@ -35,14 +35,14 @@ export default function ProfileScreen() {
 
   const handleDeleteAccount = () => {
     const performDelete = async () => {
-      if (!user?.uid) {
+      if (!user?.id) {
         Alert.alert("Error", "Unable to delete account. Please try again.");
         return;
       }
 
       try {
         setLoading(true);
-        await apiService.deleteAccount(user.uid);
+        await apiService.deleteAccount(user.id);
 
         Alert.alert(
           "Account Deleted",

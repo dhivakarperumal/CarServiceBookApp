@@ -705,9 +705,11 @@ export const apiService = {
   },
 
   // Delete account (deactivate user)
-  deleteAccount: async (uid: string) => {
+  deleteAccount: async (id: number) => {
     try {
-      const response = await api.put(`/auth/profile/${uid}/delete`, {});
+      const response = await api.put(`/auth/users/${id}/status`, {
+        active: false,
+      });
       console.log('Delete account response:', response.data);
       return response.data;
     } catch (error: any) {
