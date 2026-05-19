@@ -4,14 +4,15 @@ import React, { useState } from "react";
 import {
     ActivityIndicator,
     Alert,
+    Platform,
     ScrollView,
     Text,
     TouchableOpacity,
-    View,
+    View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../../contexts/AuthContext";
-import { api } from "../../services/api";
+import { apiService } from "../../services/api";
 
 export default function ProfileScreen() {
   const { user, logout } = useAuth();
@@ -21,71 +22,84 @@ export default function ProfileScreen() {
   const handleLogout = () => {
     Alert.alert("Logout", "Are you sure you want to log out?", [
       { text: "Cancel", style: "cancel" },
-      { text: "Logout", onPress: logout, style: "destructive" },
+      {
+        text: "Logout",
+        onPress: async () => {
+          await logout();
+          router.replace("/(auth)/login");
+        },
+        style: "destructive",
+      },
     ]);
   };
 
   const handleDeleteAccount = () => {
-    Alert.alert(
-      "Delete Account",
-      "Are you sure you want to permanently delete your account? This action cannot be undone.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: () => {
-            Alert.prompt(
-              "Confirm Deletion",
-              "Type your email to confirm account deletion:",
-              [
-                { text: "Cancel", style: "cancel" },
-                {
-                  text: "Confirm",
-                  onPress: async (email) => {
-                    if (email !== user?.email) {
-                      Alert.alert("Error", "Email does not match");
-                      return;
-                    }
+    const performDelete = async () => {
+      if (!user?.uid) {
+        Alert.alert("Error", "Unable to delete account. Please try again.");
+        return;
+      }
 
-                    try {
-                      setLoading(true);
+      try {
+        setLoading(true);
+        await apiService.deleteAccount(user.uid);
 
-                      // Call API to deactivate account using the correct endpoint
-                      await api.put(`/auth/users/${user?.id}/status`, {
-                        active: false,
-                      });
+        Alert.alert(
+          "Account Deleted",
+          "Your account has been successfully deleted. You will be logged out.",
+          [
+            {
+              text: "OK",
+              onPress: async () => {
+                await logout();
+                router.replace("/(auth)/login");
+              },
+            },
+          ]
+        );
+      } catch (err: any) {
+        Alert.alert(
+          "Error",
+          err?.response?.data?.message || "Failed to delete account"
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
 
-                      Alert.alert(
-                        "Account Deleted",
-                        "Your account has been successfully deleted. You will be logged out.",
-                        [
-                          {
-                            text: "OK",
-                            onPress: async () => {
-                              await logout();
-                              router.replace("/(auth)/login");
-                            },
-                          },
-                        ]
-                      );
-                    } catch (err: any) {
-                      Alert.alert(
-                        "Error",
-                        err?.response?.data?.message || "Failed to delete account"
-                      );
-                    } finally {
-                      setLoading(false);
-                    }
-                  },
-                },
-              ],
-              "secure-text"
-            );
+    if (Platform.OS === "ios") {
+      Alert.prompt(
+        "Confirm Deletion",
+        "Type your email to confirm account deletion:",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Confirm",
+            onPress: async (email) => {
+              if (email !== user?.email) {
+                Alert.alert("Error", "Email does not match");
+                return;
+              }
+              await performDelete();
+            },
           },
-        },
-      ]
-    );
+        ],
+        "plain-text"
+      );
+    } else {
+      Alert.alert(
+        "Delete Account",
+        "Are you sure you want to permanently delete your account? This action cannot be undone.",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Delete",
+            style: "destructive",
+            onPress: performDelete,
+          },
+        ]
+      );
+    }
   };
 
   const MenuItem = ({ title, icon, route }: any) => (
