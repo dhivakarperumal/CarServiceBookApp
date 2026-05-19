@@ -1,6 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
     ActivityIndicator,
@@ -18,8 +17,7 @@ import { apiService } from "../../services/api";
 import { COLORS, GRADIENT } from "../../theme/colors";
 
 export default function ChangePassword() {
-    const { user, logout } = useAuth();
-    const router = useRouter();
+    const { user } = useAuth();
 
     const [currentPwd, setCurrentPwd] = useState("");
     const [newPwd, setNewPwd] = useState("");
@@ -79,68 +77,6 @@ export default function ChangePassword() {
         } finally {
             setRefreshing(false);
         }
-    };
-
-    const handleDeleteAccount = () => {
-        Alert.alert(
-            "Delete Account",
-            "Are you sure you want to permanently delete your account? This action cannot be undone.",
-            [
-                { text: "Cancel", style: "cancel" },
-                {
-                    text: "Delete",
-                    style: "destructive",
-                    onPress: async () => {
-                        Alert.prompt(
-                            "Confirm Deletion",
-                            "Type your email to confirm account deletion:",
-                            [
-                                { text: "Cancel", style: "cancel" },
-                                {
-                                    text: "Confirm",
-                                    onPress: async (email) => {
-                                        if (email !== user?.email) {
-                                            Alert.alert("Error", "Email does not match");
-                                            return;
-                                        }
-
-                                        try {
-                                            setLoading(true);
-
-                                            // Call API to deactivate account
-                                            await apiService.deleteAccount(user?.uid || "");
-
-                                            Alert.alert(
-                                                "Account Deleted",
-                                                "Your account has been successfully deleted. You will be logged out.",
-                                                [
-                                                    {
-                                                        text: "OK",
-                                                        onPress: async () => {
-                                                            await logout();
-                                                            router.replace("/(auth)/login");
-                                                        },
-                                                    },
-                                                ]
-                                            );
-                                        } catch (err: any) {
-                                            Alert.alert(
-                                                "Error",
-                                                err?.response?.data?.message ||
-                                                "Failed to delete account"
-                                            );
-                                        } finally {
-                                            setLoading(false);
-                                        }
-                                    },
-                                },
-                            ],
-                            "secure-text"
-                        );
-                    },
-                },
-            ]
-        );
     };
 
     return (
@@ -270,19 +206,6 @@ export default function ChangePassword() {
                         </>
                     )}
                 </LinearGradient>
-            </TouchableOpacity>
-
-            {/* DELETE ACCOUNT BUTTON */}
-            <TouchableOpacity
-                onPress={handleDeleteAccount}
-                disabled={loading}
-                activeOpacity={0.8}
-                className="mt-4 py-4 rounded-xl flex-row justify-center items-center bg-error-light border border-error-border"
-            >
-                <Ionicons name="trash-outline" size={18} color="#EF4444" />
-                <Text className="ml-2 font-bold text-error">
-                    Delete Account
-                </Text>
             </TouchableOpacity>
 
             </ScrollView>
