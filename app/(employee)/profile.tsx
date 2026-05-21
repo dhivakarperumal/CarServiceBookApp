@@ -1,17 +1,22 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React from "react";
+import React, { useState } from "react";
 import {
-    SafeAreaView,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View
 } from "react-native";
 import { useAuth } from "../../contexts/AuthContext";
+import { apiService } from "../../services/api";
 
 export default function EmployeeProfile() {
   const { user, logout } = useAuth();
+  const [loading, setLoading] = useState(false);
 
   const joinedDate = user?.createdAt
     ? new Date(user.createdAt).toLocaleDateString("en-GB", {
@@ -24,6 +29,75 @@ export default function EmployeeProfile() {
   const handleLogout = async () => {
     await logout();
     router.replace("/(auth)/login");
+  };
+
+  const handleDeleteAccount = () => {
+    const performDelete = async () => {
+      if (!user?.id) {
+        Alert.alert("Error", "Unable to delete account. Please try again.");
+        return;
+      }
+
+      try {
+        setLoading(true);
+        await apiService.deleteAccount(user.id);
+
+        Alert.alert(
+          "Account Deleted",
+          "Your account has been successfully deleted. You will be logged out.",
+          [
+            {
+              text: "OK",
+              onPress: async () => {
+                await logout();
+                router.replace("/(auth)/login");
+              },
+            },
+          ]
+        );
+      } catch (err: any) {
+        Alert.alert(
+          "Error",
+          err?.response?.data?.message || "Failed to delete account"
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (Platform.OS === "ios") {
+      Alert.prompt(
+        "Confirm Deletion",
+        "Type your email to confirm account deletion:",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Confirm",
+            onPress: async (email) => {
+              if (email !== user?.email) {
+                Alert.alert("Error", "Email does not match");
+                return;
+              }
+              await performDelete();
+            },
+          },
+        ],
+        "plain-text"
+      );
+    } else {
+      Alert.alert(
+        "Delete Account",
+        "Are you sure you want to permanently delete your account? This action cannot be undone.",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Delete",
+            style: "destructive",
+            onPress: performDelete,
+          },
+        ]
+      );
+    }
   };
 
   return (
@@ -115,6 +189,25 @@ export default function EmployeeProfile() {
           >
             <Ionicons name="log-out-outline" size={20} color="#EF4444" />
             <Text className="text-error font-bold text-base">Logout</Text>
+          </TouchableOpacity>
+
+          {/* DELETE ACCOUNT */}
+          <TouchableOpacity
+            onPress={handleDeleteAccount}
+            disabled={loading}
+            className="mt-2 py-4 rounded-2xl flex-row justify-center items-center bg-red-900/30 border border-red-700"
+          >
+            {loading ? (
+              <>
+                <ActivityIndicator color="#DC2626" size="small" />
+                <Text className="text-red-500 font-bold ml-2">Deleting...</Text>
+              </>
+            ) : (
+              <>
+                <Ionicons name="trash-outline" size={20} color="#DC2626" />
+                <Text className="text-red-500 font-bold ml-2">Delete Account</Text>
+              </>
+            )}
           </TouchableOpacity>
         </View>
       </ScrollView>
