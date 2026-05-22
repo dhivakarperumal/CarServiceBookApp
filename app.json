@@ -21,7 +21,7 @@
       "edgeToEdgeEnabled": true,
       "useNextNotificationsApi": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.thenugar.carservicebookapp"
+      "package": "com.carservicebookapp"
     },
     "web": {
       "output": "static",

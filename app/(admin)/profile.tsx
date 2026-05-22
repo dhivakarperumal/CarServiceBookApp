@@ -1,10 +1,14 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, SafeAreaView, ScrollView, Alert } from 'react-native';
-import { useAuth } from '../../contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import { ActivityIndicator, Alert, Platform, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { useAuth } from '../../contexts/AuthContext';
+import { apiService } from '../../services/api';
 
 export default function AdminProfileScreen() {
   const { user, logout } = useAuth();
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
 
   const handleLogout = () => {
     Alert.alert(
@@ -19,6 +23,75 @@ export default function AdminProfileScreen() {
         }
       ]
     );
+  };
+
+  const handleDeleteAccount = () => {
+    const performDelete = async () => {
+      if (!user?.id) {
+        Alert.alert("Error", "Unable to delete account. Please try again.");
+        return;
+      }
+
+      try {
+        setLoading(true);
+        await apiService.deleteAccount(user.id);
+
+        Alert.alert(
+          "Account Deleted",
+          "Your account has been successfully deleted. You will be logged out.",
+          [
+            {
+              text: "OK",
+              onPress: async () => {
+                await logout();
+                router.replace("/(auth)/login");
+              },
+            },
+          ]
+        );
+      } catch (err: any) {
+        Alert.alert(
+          "Error",
+          err?.response?.data?.message || "Failed to delete account"
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (Platform.OS === "ios") {
+      Alert.prompt(
+        "Confirm Deletion",
+        "Type your email to confirm account deletion:",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Confirm",
+            onPress: async (email) => {
+              if (email !== user?.email) {
+                Alert.alert("Error", "Email does not match");
+                return;
+              }
+              await performDelete();
+            },
+          },
+        ],
+        "plain-text"
+      );
+    } else {
+      Alert.alert(
+        "Delete Account",
+        "Are you sure you want to permanently delete your account? This action cannot be undone.",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Delete",
+            style: "destructive",
+            onPress: performDelete,
+          },
+        ]
+      );
+    }
   };
 
   return (
@@ -68,7 +141,23 @@ export default function AdminProfileScreen() {
           </View>
 
           {/* Danger Zone */}
-          <View className="mt-2">
+          <View className="mt-2 gap-y-3">
+            <TouchableOpacity 
+              onPress={handleDeleteAccount}
+              disabled={loading}
+              className="flex-row items-center justify-center bg-red-900/30 p-5 rounded-3xl border border-red-500/20"
+              activeOpacity={0.7}
+            >
+              {loading ? (
+                <ActivityIndicator color="#f87171" />
+              ) : (
+                <>
+                  <Ionicons name="trash-outline" size={24} color="#f87171" />
+                  <Text className="text-red-400 font-black text-base ml-3">Delete Account</Text>
+                </>
+              )}
+            </TouchableOpacity>
+
             <TouchableOpacity 
               onPress={handleLogout}
               className="flex-row items-center justify-center bg-red-500/10 p-5 rounded-3xl border border-red-500/20"
