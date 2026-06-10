@@ -19,6 +19,9 @@ react {
     // works correctly with Expo projects.
     cliFile = new File(["node", "--print", "require.resolve('@expo/cli', { paths: [require.resolve('expo/package.json')] })"].execute(null, rootDir).text.trim())
     bundleCommand = "export:embed"
+    
+    // Disable new architecture to avoid C++ build issues
+    newArchEnabled = false
 
     /* Folders */
      //   The root of your project, i.e. where "package.json" lives. Default is '../..'
@@ -124,6 +127,11 @@ android {
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
             def enablePngCrunchInRelease = findProperty('android.enablePngCrunchInReleaseBuilds') ?: 'true'
             crunchPngs enablePngCrunchInRelease.toBoolean()
+        }
+    }
+    externalNativeBuild {
+        cmake {
+            version "3.22.1"
         }
     }
     packagingOptions {

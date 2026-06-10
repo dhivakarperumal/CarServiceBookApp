@@ -1,4 +1,4 @@
-package com.thenugar.carservicebookapp
+package com.carservicebookapp
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build
@@ -36,7 +36,7 @@ class MainActivity : ReactActivity() {
   override fun createReactActivityDelegate(): ReactActivityDelegate {
     return ReactActivityDelegateWrapper(
           this,
-          BuildConfig.IS_NEW_ARCHITECTURE_ENABLED,
+          false,
           object : DefaultReactActivityDelegate(
               this,
               mainComponentName,
