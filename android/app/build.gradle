@@ -87,9 +87,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.thenugar.carservicebookapp'
+    namespace 'com.carservicebookapp'
     defaultConfig {
-        applicationId 'com.thenugar.carservicebookapp'
+        applicationId 'com.carservicebookapp'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
